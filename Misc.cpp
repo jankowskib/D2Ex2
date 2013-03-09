@@ -1,7 +1,15 @@
 #include "stdafx.h"
 #include "Misc.h"
 
-
+wstring Misc::ConvertTickToTime(DWORD Tick)
+{
+	wostringstream ws;
+	int s = Tick / 1000;
+	int min = (s % 3600) / 60;
+	s = (s % 3600) % 60;
+	ws << min << ":" << s;
+	return ws.str();
+}
 
 int Misc::ClampInt( int min, int max, int value ) 
 {

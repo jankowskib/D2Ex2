@@ -42,6 +42,16 @@ struct List;
 struct Arena;
 
 
+struct BitBuffer
+{
+   unsigned char *pBuffer;			//0x00
+   unsigned int bitsInBuffer;		//0x04
+   unsigned int bufferPos;			//0x08
+   unsigned int bitsAtPos;			//0x0C num bits already read or written at cur pos
+   unsigned int unk;				//0x10 could be a bit bucket
+};
+
+
 struct COORDS
 {	
 	unsigned short x;

@@ -13,6 +13,7 @@ namespace Misc
 {
 void Debug(char *format,...);
 void Debug(wchar_t *format,...);
+wstring ConvertTickToTime(DWORD Tick);
 int ClampInt( int min, int max, int value);
 int TransColor(string str);
 int TransQuality(string str);

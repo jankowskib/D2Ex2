@@ -81,6 +81,7 @@ ItemArray.push_back(hConfig);
 
 unsigned __stdcall Thread(void * Args)
 {
+	DefineOffsets();
 //Load config...
 HANDLE hEvent = *((HANDLE*)Args);
 Misc::Log("Removing cache files...");
@@ -209,8 +210,8 @@ D2Vars::D2CLIENT_PacketHandler[0x5A].CallBack=&ExEvents::OnEvent;
 //D2Vars::D2CLIENT_PacketHandler[0x65].CallBack=&ExParty::GetKillCount;
 D2Vars::D2CLIENT_PacketHandler[0x66].CallBack=&ExParty::GetRoster;
 
-//D2Vars::D2CLIENT_PacketHandler[0xA8].CallBack=&ExBuffs::OnSetState;
-//D2Vars::D2CLIENT_PacketHandler[0xA9].CallBack=&ExBuffs::OnRemoveState;
+D2Vars::D2CLIENT_PacketHandler[0xA8].CallBack=&ExBuffs::OnSetState;
+D2Vars::D2CLIENT_PacketHandler[0xA9].CallBack=&ExBuffs::OnRemoveState;
 
 D2Vars::D2CLIENT_PacketHandler[0x8B].CallBack=&ExParty::OnPartyUpdate2;
 D2Vars::D2CLIENT_PacketHandler[0x8C].CallBack=&ExParty::OnPartyUpdate;
@@ -277,7 +278,7 @@ D2Vars::D2NET_SrvPacketLenTable[0x2C]=18;
 			if(AutoShowMap) {D2Funcs::D2CLIENT_SetUiVar(UI_AUTOMAP,0,1);  D2Vars::D2CLIENT_UIModes[UI_AUTOMAP] = 1;}
 			while(ExParty::GetPlayerArea())	
 			{
-				//ExBuffs::Check(); 
+			    ExBuff::Check(); 
 				Sleep(50);
 			}
 			if(lagometer) delete lagometer;
@@ -287,7 +288,7 @@ D2Vars::D2NET_SrvPacketLenTable[0x2C]=18;
 				GoldBox = 0;
 			}
 			if(ExDownload::isOpen()) ExDownload::ShowHide();
-			//ExBuffs::Clear();
+			ExBuff::Clear();
 //#ifdef _DEBUG
 //			SetEvent(hAimEvent);
 //#endif
@@ -314,11 +315,11 @@ DWORD WINAPI DllMain(HMODULE hModule, int dwReason, void* lpReserved)
 			if(!Handle) {
 				hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 				SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
-				DefineOffsets();
 				gModule = hModule;
 				InitializeCriticalSectionAndSpinCount(&EX_CRITSECT,1000);
 				InitializeCriticalSectionAndSpinCount(&MEM_CRITSECT,1000);
 				InitializeCriticalSectionAndSpinCount(&CON_CRITSECT,1000);
+				InitializeCriticalSectionAndSpinCount(&BUFF_CRITSECT,1000);
 //#ifdef _DEBUG
 //				InitializeCriticalSectionAndSpinCount(&TELE_CRITSECT,1000);
 //#endif
@@ -340,6 +341,7 @@ DWORD WINAPI DllMain(HMODULE hModule, int dwReason, void* lpReserved)
 			DeleteCriticalSection(&EX_CRITSECT);
 			DeleteCriticalSection(&MEM_CRITSECT);
 			DeleteCriticalSection(&CON_CRITSECT);
+			DeleteCriticalSection(&BUFF_CRITSECT);
 //#ifdef _DEBUG
 //			DeleteCriticalSection(&TELE_CRITSECT);
 //#endif

@@ -72,9 +72,9 @@ return D2Funcs::D2LANG_GetLocaleText(LocId);
 int GetSkillLvlByStat(short SkillNo, int nStat, int nValue)
 {
 UnitAny* pPlayer= D2Funcs::D2CLIENT_GetPlayer();
-ASSERT(pPlayer, "pPlayer == NULL")
+ASSERT(pPlayer)
 SkillsTxt *pTxt = &(*D2Vars::D2COMMON_sgptDataTables)->pSkillsTxt[SkillNo];
-ASSERT(pTxt, "pSkillsTxt == NULL")
+ASSERT(pTxt)
 DWORD CalcId = 0;
 
 if(pTxt->wAuraStat1 == nStat) CalcId = pTxt->dwAuraStatCalc1;
@@ -140,7 +140,7 @@ BOOL __fastcall ExBuffs::OnSetState(BYTE* aPacket)
 {
 	p0xa8 *pSetState = (p0xa8*)aPacket;
 	UnitAny* pPlayer= D2Funcs::D2CLIENT_GetPlayer();
-	ASSERT(pPlayer,"pPlayer == NULL");
+	ASSERT(pPlayer);
 
 	int UnitType = pSetState->UnitType;
 	int UnitID = pSetState->UnitId;

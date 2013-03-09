@@ -185,6 +185,9 @@ D2FUNCPTR(FOG, FreeServerMemory, void __fastcall, (void* pMemPool, void* Memory,
 D2FUNCPTR(FOG, Error, void __cdecl, (const char* File ,void* Addr ,int Line), -10024)
 D2FUNCPTR(FOG, GetErrorData, void* __cdecl, (), -10265)
 D2FUNCPTR(FOG, isExpansion, BOOL __cdecl, (), -10227)
+D2FUNCPTR(FOG, InitBitBuffer, void __stdcall, (BitBuffer* ptBitBuffer, void * ptBuffer, int nSize), -10126)
+D2FUNCPTR(FOG, ReadBitsSigned, signed int __stdcall, (BitBuffer* ptBitBuffer, int nBits), -10129)
+D2FUNCPTR(FOG, ReadBits, unsigned int __stdcall, (BitBuffer* ptBitBuffer, int nBits), -10130)
 
 //D2SOUND
 D2FUNCPTR(D2SOUND, PlaySound, void __fastcall, (const char * szFileName), -10029)
