@@ -1,7 +1,11 @@
 #include "stdafx.h"
 
 #define _DEFINE_PTRS
-#include "D2Ptrs.h"
+#ifdef VER_113D
+#include "D2Ptrs_113D.h"
+#elif defined VER_111B
+#include "D2Ptrs_111B.h"
+#endif
 
 #include "D2Ex2.h"
 
@@ -51,11 +55,11 @@ if(szConfig[0] == '\0') { Misc::Log("%d item configuration entries has been load
 string Config(szConfig);
 
 string::size_type i = Config.find(',');
-if(i== string::npos) {  Misc::Log("Blad w konfiguracji w pozycji %d",aNumber); continue; }
+if(i== string::npos) {  Misc::Log("Error in configuration at line: %d",aNumber); continue; }
 string ItemCode(Config.substr(0,i));
 
 string::size_type i2 = Config.find(',',i+1);
-if(i2== string::npos) {  Misc::Log("Blad w konfiguracji w pozycji %d",aNumber); continue; }
+if(i2== string::npos) {  Misc::Log("Error in configuration at line: %d",aNumber); continue; }
 string ItemQuality(Config.substr(i+1,i2-i-1));
 
 string ItemColor(Config.substr(i2+1));
@@ -110,86 +114,155 @@ FullVisibility = GetPrivateProfileInt("D2Ex","FullVisibility",0,ConfigIni.c_str(
 
 LoadItemConfig();
 
-//BEFORE START... [0xE8] CALL [0xE9] JUMP [0xC3] RET
+//BEFORE START...
+#define CALL 0xE8
+#define JUMP 0xE9
+#define RET 0xC3
+#define CUSTOM 0
+#ifdef VER_111B
 //PATCHES---TYPE-DEST_ADDRESS---------------WHAT_PATCH-------------------------SIZE---DESC-----
-Misc::Patch(0xE8,D2Ptrs::D2CLIENT_Screen_P,(DWORD)D2Stubs::D2CLIENT_ScreenHook,5,"Screen Hook");
-Misc::Patch(0xE8,D2Ptrs::D2CLIENT_EntryTxt_P,(DWORD)ExEntryText::Draw,5,"Entry Text Fix");
-Misc::Patch(0xE8,D2Ptrs::D2CLIENT_Transmute_P,(DWORD)ExPrecast::Do,5,"Trasmute button");
-Misc::Patch(0xE8,D2Ptrs::D2CLIENT_ChatInput_P,(DWORD)ExInput::GameInput_STUB,5,"Chat Input Wrapper");
-Misc::Patch(0xE8,D2Ptrs::D2CLIENT_RealmInput_P,(DWORD)ExInput::RealmInput,5,"Realm Input Wrapper");
-Misc::Patch(0xE8,GetDllOffset("D2Client.dll",0x76B66),(DWORD)D2Stubs::D2CLIENT_OnGetItemName,9,"Item Name Wrapper");
-Misc::Patch(0xE8,GetDllOffset("D2Client.dll",0x66C11),(DWORD)ExScreen::DrawLifeManaTxt,5,"Life Mana Txt");
-Misc::Patch(0xE9,GetDllOffset("D2Client.dll",0x2280C),(DWORD)D2Stubs::D2CLIENT_Properties,6,"New Properties");
-Misc::Patch(0xE8,GetDllOffset("D2Client.dll",0x35ED7),(DWORD)D2Stubs::D2CLIENT_Lighting_STUB,6,"Lighting Patch");
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x66D9C),(DWORD)D2Stubs::D2CLIENT_ScreenHook,5,"Screen Hook");
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x66AB1),(DWORD)ExEntryText::Draw,5,"Entry Text Fix");
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x7F709),(DWORD)ExPrecast::Do,5,"Trasmute button");
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x91CA5),(DWORD)ExInput::GameInput_STUB,5,"Chat Input Wrapper");
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x910F3),(DWORD)ExInput::RealmInput,5,"Realm Input Wrapper");
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x76B66),(DWORD)D2Stubs::D2CLIENT_OnGetItemName,9,"Item Name Wrapper");
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x66C11),(DWORD)ExScreen::DrawLifeManaTxt,5,"Life Mana Txt");
+Misc::Patch(JUMP,GetDllOffset("D2Client.dll",0x2280C),(DWORD)D2Stubs::D2CLIENT_Properties,6,"New Properties");
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x35ED7),(DWORD)D2Stubs::D2CLIENT_Lighting_STUB,6,"Lighting Patch");
 //!!!!!!!!!!!!!!!!!! CODE UNSAFE FOR WARDEN !!!!!!!!!!!!!!!!!!!!!!
-//Misc::Patch(0xE8,D2Ptrs::D2CLIENT_PacketInput_P,(DWORD)ExInput::PacketInput_STUB,5,"Realm Input Wrapper");
+//Misc::Patch(CALL,GetDllOffset("D2Client.dll",0xBDFB1),(DWORD)ExInput::PacketInput_STUB,5,"Realm Input Wrapper");
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-Misc::Patch(0,GetDllOffset("D2Gfx.dll",0x8571),0xCA,1,"Minimalize Box");
-Misc::Patch(0xE8,GetDllOffset("D2Client.dll",0xB6D1B),(DWORD)D2Stubs::D2CLIENT_FixHostilePic,5,"Move Hostile Button");
-Misc::Patch(0,GetDllOffset("D2Client.dll",0x4E0AC),0x26,1,"RandTrans.dat Fix");
-Misc::Patch(0x68,D2Ptrs::D2CLIENT_TCPIP_P,1,5,"TCP/IP Delay fix");
+Misc::Patch(CUSTOM,GetDllOffset("D2Gfx.dll",0x8571),0xCA,1,"Minimalize Box");
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0xB6D1B),(DWORD)D2Stubs::D2CLIENT_FixHostilePic,5,"Move Hostile Button");
+Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x4E0AC),0x26,1,"RandTrans.dat Fix");
+Misc::Patch(0x68,GetDllOffset("D2Client.dll",0x5E7CD),1,5,"TCP/IP Delay fix");
 //Misc::Patch(0x00,GetDllOffset("D2Client.dll",0x31EFE),0x03E8FE81,6,"Fail To Join Fix");
 
-Misc::Patch(0xE8,D2Ptrs::D2CLIENT_MenuDraw_P,(DWORD)ExOptions::DrawMenuRecon,5,"Menu Draw");
-Misc::Patch(0xE9,GetDllOffset("D2Client.dll",0x52B9E),(DWORD)ExScreen::DrawAutoMapInfo,5,"AutoMap Info Draw");
-Misc::Patch(0xE8,GetDllOffset("D2Client.dll",0x52B73),(DWORD)ExScreen::DrawAutoMapVer,5,"AutoMap Version Draw");
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x66A4F),(DWORD)ExOptions::DrawMenuRecon,5,"Menu Draw");
+Misc::Patch(JUMP,GetDllOffset("D2Client.dll",0x52B9E),(DWORD)ExScreen::DrawAutoMapInfo,5,"AutoMap Info Draw");
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x52B73),(DWORD)ExScreen::DrawAutoMapVer,5,"AutoMap Version Draw");
 
-//Misc::Patch(0xE9,GetDllOffset("D2Win.dll",-10111),(DWORD)ExScreen::GetTextWidth,6,"GetTextWidth Fix");
+//Misc::Patch(JUMP,GetDllOffset("D2Win.dll",-10111),(DWORD)ExScreen::GetTextWidth,6,"GetTextWidth Fix");
 
-Misc::Patch(0xE9,D2Ptrs::D2CLIENT_Blob_P,(DWORD)D2Stubs::D2CLIENT_BlobHook,6,"Blob Hook");
-Misc::Patch(0xE8,D2Ptrs::D2CLIENT_Blob2_P,(DWORD)D2Stubs::D2CLIENT_BlobHook2,59,"Blob Hook2");
+Misc::Patch(JUMP,GetDllOffset("D2Client.dll",0x4F620),(DWORD)D2Stubs::D2CLIENT_BlobHook,6,"Blob Hook");
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x50EA8),(DWORD)D2Stubs::D2CLIENT_BlobHook2,59,"Blob Hook2");
 
-Misc::Patch(0xE8,D2Ptrs::D2CLIENT_CharInfo_P,(DWORD)D2Stubs::D2CLIENT_CharInfoHook,5,"Dmg Info Hook");
-Misc::Patch(0xE9,GetDllOffset("D2Client.dll",0x8A0B6),(DWORD)D2Stubs::D2CLIENT_CharInfoTipHook,10,"Tooltip Char Info Hook");
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x89895),(DWORD)D2Stubs::D2CLIENT_CharInfoHook,5,"Dmg Info Hook");
+Misc::Patch(JUMP,GetDllOffset("D2Client.dll",0x8A0B6),(DWORD)D2Stubs::D2CLIENT_CharInfoTipHook,10,"Tooltip Char Info Hook");
 
 //6FB15BF5                 06             
-Misc::Patch(0xC3,D2Ptrs::D2CLIENT_PartScreenDraw_P,0,5,"Party Draw");
-Misc::Patch(0xE8,GetDllOffset("D2Client.dll",0x653F8),(DWORD)ExParty::ShowHide,5,"UI Party Fix On Destroy");
-Misc::Patch(0xE9,GetDllOffset("D2Client.dll",0x64E1B),(DWORD)ExParty::ShowHide,5,"UI Party Fix On Show"); 
-Misc::Patch(0xE8,GetDllOffset("D2Client.dll",0x8F98D),(DWORD)ExParty::ShowHide,5,"UI Minibar fix");
+Misc::Patch(0xC3,GetDllOffset("D2Client.dll",0xBC890),0,5,"Party Draw");
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x653F8),(DWORD)ExParty::ShowHide,5,"UI Party Fix On Destroy");
+Misc::Patch(JUMP,GetDllOffset("D2Client.dll",0x64E1B),(DWORD)ExParty::ShowHide,5,"UI Party Fix On Show"); 
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x8F98D),(DWORD)ExParty::ShowHide,5,"UI Minibar fix");
 Misc::Patch(0x5B,GetDllOffset("D2Client.dll",0x8F992),0x90909090,5,"UI Minibar fix");
 Misc::Patch(0xC3,GetDllOffset("D2Client.dll",0x8F997),0,1,"UI Minibar fix");
 
-Misc::Patch(0xE8,GetDllOffset("D2Client.dll",0xB95E1),(DWORD)ExScreen::DrawItem,5,"Colour Item Intercept I");
-Misc::Patch(0xE8,GetDllOffset("D2Client.dll",0x4845B),(DWORD)ExScreen::DrawItem,5,"Colour Item Intercept II");
-Misc::Patch(0xE8,GetDllOffset("D2Client.dll",0x4686D),(DWORD)ExScreen::DrawItem,5,"Colour Item Intercept III");
-Misc::Patch(0xE8,GetDllOffset("D2Common.dll",0x41B6D),(DWORD)ExScreen::DrawItem,5,"Colour Item Intercept IV");
-Misc::Patch(0xE8,GetDllOffset("D2Common.dll",0x418DC),(DWORD)ExScreen::DrawItem,5,"Colour Item Intercept V");
-Misc::Patch(0xE9,GetDllOffset("D2Client.dll",0x5D9FA),(DWORD)D2Stubs::D2CLIENT_HideItem_STUB,6,"ALT Draw Intercept");
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0xB95E1),(DWORD)ExScreen::DrawItem,5,"Colour Item Intercept I");
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x4845B),(DWORD)ExScreen::DrawItem,5,"Colour Item Intercept II");
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x4686D),(DWORD)ExScreen::DrawItem,5,"Colour Item Intercept III");
+Misc::Patch(CALL,GetDllOffset("D2Common.dll",0x41B6D),(DWORD)ExScreen::DrawItem,5,"Colour Item Intercept IV");
+Misc::Patch(CALL,GetDllOffset("D2Common.dll",0x418DC),(DWORD)ExScreen::DrawItem,5,"Colour Item Intercept V");
+Misc::Patch(JUMP,GetDllOffset("D2Client.dll",0x5D9FA),(DWORD)D2Stubs::D2CLIENT_HideItem_STUB,6,"ALT Draw Intercept");
 
-//Misc::Patch(0xE8,D2Ptrs::D2CLIENT_GetRoomByXY_P, (DWORD)D2Stubs::D2CLIENT_GetRoomByXY_STUB, 5, "Get Room XY Test");
-//Misc::Patch(0xE9,D2Ptrs::D2CLIENT_LoadingDraw_P,(DWORD)ExLoading::Draw,5,"Loading Draw Hook");
-Misc::Patch(0,GetDllOffset("D2Multi.dll",0x11C40),MaxPlayers+1,1,"Player Count Set I");
-Misc::Patch(0,GetDllOffset("D2Multi.dll",0x1310A),MaxPlayers,1,"Player Count Set II");
-Misc::Patch(0,GetDllOffset("D2Multi.dll",0x13A7D),MaxPlayers,1,"Player Count Set III");
-Misc::Patch(0,GetDllOffset("D2Multi.dll",0x13A8D),MaxPlayers,1,"Player Count Set IV");
-Misc::Patch(0,GetDllOffset("D2Multi.dll",0x13A91),MaxPlayers,1,"Player Count Set V");
+//Misc::Patch(CALL,GetDllOffset("D2Client.dll", 0x4D707), (DWORD)D2Stubs::D2CLIENT_GetRoomByXY_STUB, 5, "Get Room XY Test");
+//Misc::Patch(JUMP,GetDllOffset("D2Client.dll", 0x64510),(DWORD)ExLoading::Draw,5,"Loading Draw Hook");
+Misc::Patch(CUSTOM,GetDllOffset("D2Multi.dll",0x11C40),MaxPlayers+1,1,"Player Count Set I");
+Misc::Patch(CUSTOM,GetDllOffset("D2Multi.dll",0x1310A),MaxPlayers,1,"Player Count Set II");
+Misc::Patch(CUSTOM,GetDllOffset("D2Multi.dll",0x13A7D),MaxPlayers,1,"Player Count Set III");
+Misc::Patch(CUSTOM,GetDllOffset("D2Multi.dll",0x13A8D),MaxPlayers,1,"Player Count Set IV");
+Misc::Patch(CUSTOM,GetDllOffset("D2Multi.dll",0x13A91),MaxPlayers,1,"Player Count Set V");
 
-Misc::Patch(0,GetDllOffset("D2Client.dll",0x1D2CB),MaxPlayers,1,"Player Count Set VI");
-Misc::Patch(0,GetDllOffset("D2Client.dll",0xBC948),MaxPlayers,1,"Player Count Set VII");
+Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x1D2CB),MaxPlayers,1,"Player Count Set VI");
+Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0xBC948),MaxPlayers,1,"Player Count Set VII");
 
-Misc::Patch(0,GetDllOffset("D2Client.dll",0x254C0),0x135A,4,"Extend Sound.Txt I");
-Misc::Patch(0,GetDllOffset("D2Client.dll",0x532B2),0x135A,4,"Extend Sound.Txt II");
-Misc::Patch(0,GetDllOffset("D2Client.dll",0x6E63C),0x135A,4,"Extend Sound.Txt III");
+Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x254C0),0x135A,4,"Extend Sound.Txt I");
+Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x532B2),0x135A,4,"Extend Sound.Txt II");
+Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x6E63C),0x135A,4,"Extend Sound.Txt III");
 
-Misc::Patch(0,GetDllOffset("BNClient.dll",0xBFC9),Port,4,"Change default B.net port I");
-Misc::Patch(0,GetDllOffset("BNClient.dll",0xD55F),Port,4,"Change default B.net port II");
-Misc::Patch(0,GetDllOffset("BNClient.dll",0xD589),Port,4,"Change default B.net port III");
+Misc::Patch(CUSTOM,GetDllOffset("BNClient.dll",0xBFC9),Port,4,"Change default B.net port I");
+Misc::Patch(CUSTOM,GetDllOffset("BNClient.dll",0xD55F),Port,4,"Change default B.net port II");
+Misc::Patch(CUSTOM,GetDllOffset("BNClient.dll",0xD589),Port,4,"Change default B.net port III");
 
-Misc::Patch(0xE8,GetDllOffset("D2Client.dll",0x337B0),(DWORD)D2Stubs::D2CLIENT_SendJoinGame_STUB,5,"Join Game Override");
-//Misc::Patch(0xE9,GetDllOffset("BNClient.dll",0xB3A0),(DWORD)D2Stubs::BNCLIENT_OverrideVersion_STUB,6,"Override version");
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x337B0),(DWORD)D2Stubs::D2CLIENT_SendJoinGame_STUB,5,"Join Game Override");
+//Misc::Patch(JUMP,GetDllOffset("BNClient.dll",0xB3A0),(DWORD)D2Stubs::BNCLIENT_OverrideVersion_STUB,6,"Override version");
 
-//Misc::Patch(0xE9,GetDllOffset("D2Launch.dll",0x17999),(DWORD)D2Stubs::D2LAUNCH_OnMainMenuCreate,7,"Add Main Menu Controls");
+//Misc::Patch(JUMP,GetDllOffset("D2Launch.dll",0x17999),(DWORD)D2Stubs::D2LAUNCH_OnMainMenuCreate,7,"Add Main Menu Controls");
 //Memory managament
 //#ifndef _DEBUG
 //if(UseExMem)
 //{
-//Misc::Patch(0xE9,GetDllOffset("Fog.dll",0x1D380),(DWORD)ExMemory::Alloc_STUB,5,"Mem Alloc Override");
-//Misc::Patch(0xE9,GetDllOffset("Fog.dll",0x1CEE0),(DWORD)ExMemory::Free_STUB,5,"Mem Free Override");
-//Misc::Patch(0xE9,GetDllOffset("Fog.dll",0x1DBF0),(DWORD)ExMemory::Realloc,5,"Mem Realloc Override");
+//Misc::Patch(JUMP,GetDllOffset("Fog.dll",0x1D380),(DWORD)ExMemory::Alloc_STUB,5,"Mem Alloc Override");
+//Misc::Patch(JUMP,GetDllOffset("Fog.dll",0x1CEE0),(DWORD)ExMemory::Free_STUB,5,"Mem Free Override");
+//Misc::Patch(JUMP,GetDllOffset("Fog.dll",0x1DBF0),(DWORD)ExMemory::Realloc,5,"Mem Realloc Override");
 //}
 //#endif
+#elif defined VER_113D
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x1D78C),(DWORD)D2Stubs::D2CLIENT_ScreenHook,5,"Screen Hook"); // k
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x1D4A1),(DWORD)ExEntryText::Draw,5,"Entry Text Fix"); //k
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x9F5A9),(DWORD)ExPrecast::Do,5,"Trasmute button"); //k
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0xB293D),(DWORD)ExInput::GameInput_STUB,5,"Chat Input Wrapper"); // k
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0xB1283),(DWORD)ExInput::RealmInput,5,"Realm Input Wrapper"); // k
+
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x96736),(DWORD)D2Stubs::D2CLIENT_OnGetItemName,9,"Item Name Wrapper"); //k
+// <- Removed Life/Mana patch cause 1.13d supports it natively
+Misc::Patch(JUMP,GetDllOffset("D2Client.dll",0x2E3FC),(DWORD)D2Stubs::D2CLIENT_Properties,6,"New Properties");  //k
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x233A7),(DWORD)D2Stubs::D2CLIENT_Lighting_STUB,6,"Lighting Patch"); //k
+//!!!!!!!!!!!!!!!!!! CODE UNSAFE FOR WARDEN !!!!!!!!!!!!!!!!!!!!!!
+//Misc::Patch(CALL,GetDllOffset("D2Client.dll",0xBDFB1),(DWORD)ExInput::PacketInput_STUB,5,"Realm Input Wrapper"); // still 1.11b
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// <- Removed Minimalize button patch cause 1.13d supports it natively
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x6E91B),(DWORD)D2Stubs::D2CLIENT_FixHostilePic,5,"Move Hostile Button"); //k
+Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x6415C),0x26,1,"RandTrans.dat Fix"); //k
+Misc::Patch(0x68,GetDllOffset("D2Client.dll",0xB6B7D),1,5,"TCP/IP Delay fix");  //k
+
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x1D43F),(DWORD)ExOptions::DrawMenuRecon,5,"Menu Draw");  //k
+Misc::Patch(JUMP,GetDllOffset("D2Client.dll",0x7349E),(DWORD)ExScreen::DrawAutoMapInfo,5,"AutoMap Info Draw"); //k
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x73473),(DWORD)ExScreen::DrawAutoMapVer,5,"AutoMap Version Draw"); //k
+
+//Misc::Patch(JUMP,GetDllOffset("D2Win.dll",-10148),(DWORD)ExScreen::GetTextWidth,6,"GetTextWidth Fix");  //k
+
+Misc::Patch(JUMP,GetDllOffset("D2Client.dll",0x6FED0),(DWORD)D2Stubs::D2CLIENT_BlobHook,6,"Blob Hook"); //k
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x71758),(DWORD)D2Stubs::D2CLIENT_BlobHook2,59,"Blob Hook2"); //k
+
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0xBFB95),(DWORD)D2Stubs::D2CLIENT_CharInfoHook,5,"Dmg Info Hook"); //k
+Misc::Patch(JUMP,GetDllOffset("D2Client.dll",0xC03B6),(DWORD)D2Stubs::D2CLIENT_CharInfoTipHook,10,"Tooltip Char Info Hook"); //k
+
+Misc::Patch(0xC3,GetDllOffset("D2Client.dll",0x88900),0,5,"Party Draw"); // k
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x1BEF8),(DWORD)ExParty::ShowHide,5,"UI Party Fix On Destroy"); //k
+Misc::Patch(JUMP,GetDllOffset("D2Client.dll",0x1B91B),(DWORD)ExParty::ShowHide,5,"UI Party Fix On Show");  //k
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0xC444D),(DWORD)ExParty::ShowHide,5,"UI Minibar fix"); //k
+Misc::Patch(0x5B,GetDllOffset("D2Client.dll",0xC444D +5),0x90909090,5,"UI Minibar fix"); //k
+Misc::Patch(0xC3,GetDllOffset("D2Client.dll",0xC444D +10),0,1,"UI Minibar fix"); //k
+
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0xACA11),(DWORD)ExScreen::DrawItem,5,"Colour Item Intercept I"); //k
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x61011),(DWORD)ExScreen::DrawItem,5,"Colour Item Intercept II"); //k
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x5F54D),(DWORD)ExScreen::DrawItem,5,"Colour Item Intercept III"); //k
+Misc::Patch(CALL,GetDllOffset("D2Common.dll",0x3AC6C),(DWORD)ExScreen::DrawItem,5,"Colour Item Intercept IV"); //k
+Misc::Patch(CALL,GetDllOffset("D2Common.dll",0x3ADCD),(DWORD)ExScreen::DrawItem,5,"Colour Item Intercept V"); //k
+Misc::Patch(JUMP,GetDllOffset("D2Client.dll",0x4E61A),(DWORD)D2Stubs::D2CLIENT_HideItem_STUB,6,"ALT Draw Intercept"); // k
+
+Misc::Patch(CUSTOM,GetDllOffset("D2Multi.dll",0x83B0),MaxPlayers+1,1,"Player Count Set I"); //k
+Misc::Patch(CUSTOM,GetDllOffset("D2Multi.dll",0x8A7A),MaxPlayers,1,"Player Count Set II"); //k
+Misc::Patch(CUSTOM,GetDllOffset("D2Multi.dll",0xA14D),MaxPlayers,1,"Player Count Set III"); //k
+Misc::Patch(CUSTOM,GetDllOffset("D2Multi.dll",0xA15D),MaxPlayers,1,"Player Count Set IV"); //k
+Misc::Patch(CUSTOM,GetDllOffset("D2Multi.dll",0xA161),MaxPlayers,1,"Player Count Set V"); //k
+
+Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x286FB),MaxPlayers,1,"Player Count Set VI"); //k
+Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x889B8),MaxPlayers,1,"Player Count Set VII"); //k
+
+Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0xB40D0),0x135A,4,"Extend Sound.Txt I"); //k
+Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x25342),0x135A,4,"Extend Sound.Txt II"); //k
+Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x1F47C),0x135A,4,"Extend Sound.Txt III"); //k
+
+Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x460C0),(DWORD)D2Stubs::D2CLIENT_SendJoinGame_STUB,5,"Join Game Override"); //k
+#else
+ShowWindow(D2Funcs::D2GFX_GetHwnd(),SW_HIDE);
+MessageBoxA(0,"Version is not supported!","D2Ex",0); 
+exit(-1);
+#endif
+
 ExMpq::LoadMPQ();
 
 //END PATCHES-----------------------------------------------------------------------------------
@@ -288,7 +361,7 @@ D2Vars::D2NET_SrvPacketLenTable[0x2C]=18;
 				GoldBox = 0;
 			}
 			if(ExDownload::isOpen()) ExDownload::ShowHide();
-			ExBuff::Clear();
+			if(!D2Funcs::D2CLIENT_GetPlayer()) ExBuff::Clear();
 //#ifdef _DEBUG
 //			SetEvent(hAimEvent);
 //#endif

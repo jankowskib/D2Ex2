@@ -13,6 +13,7 @@ Features
 - Lagometer (ported from Q3 source :D)
 - Reworked ESC-menu, get rid of .dc6 files. Now creating your own menu is easy as pie (ExOptions.cpp)
 - Created a lot of custom controls, you can use them to create your GUI (ie new party screen)
+- Supports both 1.11b & 1.13d (set version in stdafx.h)
 
 Thanks to
 ----------
