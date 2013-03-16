@@ -1,14 +1,13 @@
 #include "stdafx.h"
 #include "Misc.h"
 
-wstring Misc::ConvertTickToTime(DWORD Tick)
+wstring Misc::ConvertTickToTime(DWORD nTick)
 {
-	wostringstream ws;
-	int s = Tick / 1000;
-	int min = (s % 3600) / 60;
-	s = (s % 3600) % 60;
-	ws << min << ":" << s;
-	return ws.str();
+if(nTick == 0 ) return L"00:00";
+nTick/=1000;
+wchar_t wTime[70] = {0};
+swprintf_s(wTime,70,L"%.2d:%.2d:%.2d", nTick/3600, (nTick/60)%60, nTick%60);
+return wTime;
 }
 
 int Misc::ClampInt( int min, int max, int value ) 
