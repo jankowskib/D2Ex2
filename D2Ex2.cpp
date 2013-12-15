@@ -85,7 +85,8 @@ ItemArray.push_back(hConfig);
 
 unsigned __stdcall Thread(void * Args)
 {
-	DefineOffsets();
+Misc::Log("Defining offsets...");
+DefineOffsets();
 //Load config...
 HANDLE hEvent = *((HANDLE*)Args);
 Misc::Log("Removing cache files...");

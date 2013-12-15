@@ -6,9 +6,9 @@
 
 void ExControl::SetMoveable(bool How)
 {
-EnterCriticalSection(&CON_CRITSECT);
+//EnterCriticalSection(&CON_CRITSECT);
 bMoveable=How;
-LeaveCriticalSection(&CON_CRITSECT);
+//LeaveCriticalSection(&CON_CRITSECT);
 }
 
 void ExControl::SetWidth(int cW)
@@ -41,9 +41,9 @@ cY = Y;
 
 void ExControl::SetState(States aState)
 {
-EnterCriticalSection(&CON_CRITSECT);
+//EnterCriticalSection(&CON_CRITSECT);
 cState = aState;
-LeaveCriticalSection(&CON_CRITSECT);
+//LeaveCriticalSection(&CON_CRITSECT);
 }
 
 void ExControl::SetAlign(Align xAlign, Align yAlign)

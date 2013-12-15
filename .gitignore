@@ -10,3 +10,13 @@
 *.lai
 *.la
 *.a
+*.pdb
+*.idb
+*.htm
+*.obj
+*.tlog
+*.log
+*.pch
+*.user
+*.opensdf
+*.ipch
