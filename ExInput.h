@@ -18,6 +18,11 @@ namespace ExInput
 void RegisterMsgs(sMsg* pMsgList, int nCount);
 void UnregisterMsgs(sMsg* pMsgList, int nCount);
 
+void DefineBindings();
+void UndefineBindings();
+WORD GetKeyBind(int nEntry, BOOL bPrimary);
+wchar_t* GetNameOfKey(WORD vKey);
+
 DWORD __fastcall GameInput(wchar_t* wMsg);
 void __stdcall RealmInput(wchar_t* Text, int Color);
 DWORD __fastcall PacketInput(BYTE* aPacket, int aLen);

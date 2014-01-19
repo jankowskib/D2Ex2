@@ -651,7 +651,7 @@ struct SkillInfo
 
 struct Skill
 {
-	SkillInfo* pSkillInfo;			//0x00
+	SkillsTxt* pSkillsTxt;			//0x00
 	Skill* pNextSkill;				//0x04
 	DWORD SkillMode;				//0x08
 	DWORD _1[7];					//0x0C

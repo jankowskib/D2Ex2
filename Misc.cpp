@@ -3,11 +3,11 @@
 
 wstring Misc::ConvertTickToTime(DWORD nTick)
 {
-if(nTick == 0 ) return L"00:00";
-nTick/=1000;
-wchar_t wTime[70] = {0};
-swprintf_s(wTime,70,L"%.2d:%.2d:%.2d", nTick/3600, (nTick/60)%60, nTick%60);
-return wTime;
+	if(nTick == 0 ) return L"00:00";
+	nTick/=1000;
+	wchar_t wTime[70] = {0};
+	swprintf_s(wTime,70,L"%.2d:%.2d:%.2d", nTick/3600, (nTick/60)%60, nTick%60);
+	return wTime;
 }
 
 int Misc::ClampInt( int min, int max, int value ) 
@@ -76,7 +76,7 @@ DWORD Misc::TransCode(const char* ptCode) // taken from afj666
    return ItemCode;
 }
 
-char* TransCode(DWORD dwCode)
+char* Misc::TransCode(DWORD dwCode)
 {
 	BYTE* aCode = (BYTE*)&dwCode;
 	static char ItemCode[5] = {0};

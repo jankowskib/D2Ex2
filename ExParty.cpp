@@ -245,17 +245,6 @@ void ExParty::Invite(ExControl* ptControl)
 	*D2Vars::D2CLIENT_SentPackets++;
 }
 
-int ExParty::GetPlayerArea()
-{
-	UnitAny * ptUnit = D2Funcs::D2CLIENT_GetPlayer();
-	if(ptUnit)
-	if(ptUnit->pPath)
-	if(ptUnit->pPath->pRoom1)
-	if(ptUnit->pPath->pRoom1->pRoom2)
-	if(ptUnit->pPath->pRoom1->pRoom2->pLevel) return ptUnit->pPath->pRoom1->pRoom2->pLevel->dwLevelNo;
-	return 0;
-}
-
 int ExParty::GetPlayerArea(UnitAny* ptUnit)
 {
 	if(ptUnit)
@@ -266,18 +255,9 @@ int ExParty::GetPlayerArea(UnitAny* ptUnit)
 	return 0;
 }
 
-bool ExParty::isTownLvl()
-{
-	UnitAny* ptUnit = D2Funcs::D2CLIENT_GetPlayer();
-	if(!ptUnit) return false;
-	if(ExParty::GetPlayerArea() == D2Funcs::D2COMMON_GetTownLevel(ptUnit->dwAct)) return true;
-	return false;
-}
-
 
 bool ExParty::isTownLvl(UnitAny* ptUnit)
 {	
-	if(!ptUnit)	ptUnit = D2Funcs::D2CLIENT_GetPlayer();
 	if(!ptUnit) return false;
 	if(ExParty::GetPlayerArea(ptUnit) == D2Funcs::D2COMMON_GetTownLevel(ptUnit->dwAct)) return true;
 	return false;
@@ -503,8 +483,14 @@ if(D2Funcs::D2CLIENT_GetPlayer())
 	if(szName == D2Funcs::D2CLIENT_GetPlayer()->pPlayerData->szName) return;
 
 string sReq = "/whois " + szName;
+#ifdef D2EX_CLOSED_BNET
+EnterCriticalSection(&EX_CRITSECT);
+if(BNQuene.size()<8) BNQuene.push_back(sReq);
+LeaveCriticalSection(&EX_CRITSECT);
+#else
 Request++;
 D2Funcs::BNCLIENT_SendBNMessage(sReq.c_str());
+#endif
 }
 
 string ExParty::FindAccount(string szName)
@@ -926,9 +912,8 @@ void ExParty::Fill(char *szSkip)
 //	if(i == 17) break;
 //	if(off<pOffset) {--i; continue;}
 	
-	PlayerTable Tbl;
-	::memset(&Tbl,0,sizeof(Tbl));
-	int TextFont = 0 ;
+	PlayerTable Tbl = {0};
+	int TextFont = 0;
 	D2Funcs::D2WIN_SetTextSize(TextFont);
     int yPos = 100+(i*25);
 	int TextPos = ((yPos*2)-20 + D2Funcs::D2WIN_GetFontHeight()) / 2;

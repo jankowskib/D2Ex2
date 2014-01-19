@@ -448,11 +448,14 @@ struct MonsterData {
 	WORD NameSeed;							//0x14
 	struct
 	{
-		BYTE fUnk:1;
-		BYTE fNormal:1;
-		BYTE fChamp:1;
-		BYTE fBoss:1;
-		BYTE fMinion:1;
+		BYTE fOther : 1;
+		BYTE fSuperUniq : 1;
+		BYTE fChampion : 1;
+		BYTE fUnique : 1;
+		BYTE fMinion : 1;
+		BYTE fPossesed : 1;
+		BYTE fGhostly : 1;
+		BYTE fMultishot : 1;
 	};				//0x16
 	BYTE dwLastMode;				//0x17
 	DWORD dwDuriel;					//0x18
@@ -617,16 +620,9 @@ struct UnitAny  // CLIENT SIDE
 	pMsg* pMsgLast;					//0xF0
 };
 
-struct SkillInfo
-{
-	WORD wSkillId;					//0x00
-	BYTE _1[2];						//0x02
-	DWORD SkillFlag;				//0x04
-};
-
 struct Skill
 {
-	SkillInfo* pSkillInfo;			//0x00
+	SkillsTxt* pSkillsTxt;			//0x00
 	Skill* pNextSkill;				//0x04
 	DWORD SkillMode;				//0x08
 	DWORD _1[7];					//0x0C

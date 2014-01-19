@@ -5,7 +5,8 @@
 
 void ExMpq::LoadMPQ()
 {
-	MPQHandle = D2Funcs::D2WIN_LoadMpq(5000,"D2Ex2.dll","D2Ex.MPQ","D2EX",0,0);
+	string MpqPath = D2ExDir + "D2Ex.MPQ";
+	MPQHandle = D2Funcs::D2WIN_LoadMpq(5000,"D2Ex2.dll",MpqPath.c_str(),"D2EX",0,0);
 	if(!MPQHandle) 
 	{
 		Misc::Log("Failed to load D2Ex.MPQ!");
@@ -13,7 +14,7 @@ void ExMpq::LoadMPQ()
 		ExitProcess(-1);
 	}
 #ifdef _DEBUG
-	
+Misc::Log("Loaded D2Ex.MPQ file...");
 #endif
 }
 

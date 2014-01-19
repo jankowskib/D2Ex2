@@ -19,10 +19,8 @@ namespace ExParty
 	void Host(ExControl* ptControl);
 	void Invite(ExControl* ptControl);
 	void OnScroll(ExControl* ptControl);
-	int GetPlayerArea();
-	int GetPlayerArea(UnitAny* ptUnit);
-	bool isTownLvl();
-	bool isTownLvl(UnitAny* ptUnit);
+	int GetPlayerArea(UnitAny* ptUnit = D2Funcs::D2CLIENT_GetPlayer());
+	bool isTownLvl(UnitAny* ptUnit = D2Funcs::D2CLIENT_GetPlayer());
 	wstring GetPingFps(ExTextBox* pTextBox);
 	wstring GetPartyCount(ExTextBox* pTextBox);
 	bool isOpen();

@@ -18,6 +18,7 @@ int ClampInt( int min, int max, int value);
 int TransColor(string str);
 int TransQuality(string str);
 DWORD TransCode(const char* ptCode);
+char* TransCode(DWORD dwCode);
 wchar_t* ConvertIntegers(int in, wchar_t* out);
 void xorcrypt(char e[], char key[]);
 void xordecrypt(char *ePtr, char key[]);

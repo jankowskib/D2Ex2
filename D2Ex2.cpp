@@ -34,10 +34,9 @@
 #include "ExScreen.h"
 #include "ExDownload.h"
 #include "ExLagometer.h"
-#include <boost/algorithm/string.hpp>
-#ifdef _DEBUG
 #include "ExAim.h"
-#endif
+
+#include <boost/algorithm/string.hpp>
 
 static HMODULE gModule;
 
@@ -50,7 +49,7 @@ ostringstream szNumber;
 szNumber<< aNumber;
 
 GetPrivateProfileString("Item Config",szNumber.str().c_str(),"",szConfig,200,ConfigIni.c_str());
-if(szConfig[0] == '\0') { Misc::Log("%d item configuration entries has been loaded", aNumber -1); break;}
+if(szConfig[0] == '\0') { Misc::Log("%d item configuration entries have been loaded", aNumber -1); break;}
 
 string Config(szConfig);
 
@@ -93,10 +92,11 @@ Misc::Log("Removing cache files...");
 //system("del bncache*.dat");
 Misc::Log("Loading config...");
 char filename[MAX_PATH];
-GetCurrentDirectory(MAX_PATH,filename);
-string path = filename;
-ConfigIni=(path + "\\D2Ex.ini");
-ClansIni=(path+ "\\Clans.ini");
+GetModuleFileName(gModule,filename,MAX_PATH);
+D2ExDir.assign(filename,strrchr(filename,'\\')+1);
+
+ConfigIni = (D2ExDir + "\\D2Ex.ini");
+ClansIni = (D2ExDir + "\\Clans.ini");
 
 bLagometer=GetPrivateProfileInt("D2Ex","Lagometer",0,ConfigIni.c_str());
 HideCrap=GetPrivateProfileInt("D2Ex","HideCrap",0,ConfigIni.c_str());
@@ -111,7 +111,11 @@ int UseExMem = GetPrivateProfileInt("D2Ex","ExMemory",0,ConfigIni.c_str());
 PermShowLife = GetPrivateProfileInt("D2Ex","PermShowLife",1,ConfigIni.c_str());
 PermShowMana = GetPrivateProfileInt("D2Ex","PermShowMana",1,ConfigIni.c_str());
 AutoShowMap = GetPrivateProfileInt("D2Ex","AutoShowMap",0,ConfigIni.c_str());
+PVMStuff = GetPrivateProfileInt("D2Ex","PVMStuff",0,ConfigIni.c_str());
 FullVisibility = GetPrivateProfileInt("D2Ex","FullVisibility",0,ConfigIni.c_str());
+#ifdef D2EX_SCRAP_HACKS
+StillSwitch = GetPrivateProfileInt("D2Ex","StillWSG",1,ConfigIni.c_str());
+#endif 
 
 LoadItemConfig();
 
@@ -276,10 +280,10 @@ D2Vars::D2CLIENT_UIModesCallTree[UICall::CLEARSCREEN]=(int)&ExParty::ClearScreen
 D2Vars::D2CLIENT_PacketHandler[0x26].CallBack=&ExChat::OnMessage;
 D2Vars::D2CLIENT_PacketHandler[0x5A].CallBack=&ExEvents::OnEvent;
 
-//#ifdef _DEBUG
-//D2Vars::D2CLIENT_PacketHandler[0x4D].CallBack2=&ExAim::OnUnitSpellCast;
-//D2Vars::D2CLIENT_PacketHandler[0x0A].CallBack=&ExAim::OnRemoveObject;
-//#endif
+#ifdef D2EX_EXAIM_ENABLED
+D2Vars::D2CLIENT_PacketHandler[0x4D].CallBack2=&ExAim::OnUnitSpellCast;
+D2Vars::D2CLIENT_PacketHandler[0x0A].CallBack=&ExAim::OnRemoveObject;
+#endif
 
 //D2Vars::D2CLIENT_PacketHandler[0x65].CallBack=&ExParty::GetKillCount;
 D2Vars::D2CLIENT_PacketHandler[0x66].CallBack=&ExParty::GetRoster;
@@ -326,10 +330,10 @@ D2Vars::D2NET_SrvPacketLenTable[0x2C]=18;
 
 //-----------------------
 //HERE WE GO
-//#ifdef _DEBUG
-//	HANDLE hAim = 0;
-//	HANDLE hAimEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-//#endif
+#ifdef D2EX_EXAIM_ENABLED
+	HANDLE hAim = 0;
+	HANDLE hAimEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+#endif
 	while (WaitForSingleObject(hEvent, 0) != WAIT_OBJECT_0) 
 	{
 		if(!OldWNDPROC)
@@ -342,14 +346,15 @@ D2Vars::D2NET_SrvPacketLenTable[0x2C]=18;
 		}
 		if(ExParty::GetPlayerArea())
 		{
-//#ifdef _DEBUG
-//			ResetEvent(hAimEvent);
-//		//	hAim = (HANDLE)_beginthreadex(0,0,&ExAim::WatchThread,&hAimEvent,0,0);
-//#endif
+#ifdef D2EX_EXAIM_ENABLED
+			ResetEvent(hAimEvent);
+			hAim = (HANDLE)_beginthreadex(0,0,&ExAim::WatchThread,&hAimEvent,0,0);
+#endif
 			if(!lagometer && bLagometer)	lagometer = new ExLagometer(273,571);
 			ExpAtJoin = D2Funcs::D2COMMON_GetStatSigned(D2Funcs::D2CLIENT_GetPlayer(),STAT_EXPERIENCE,0);
 			TickAtJoin = GetTickCount();
 			if(AutoShowMap) {D2Funcs::D2CLIENT_SetUiVar(UI_AUTOMAP,0,1);  D2Vars::D2CLIENT_UIModes[UI_AUTOMAP] = 1;}
+			ExInput::DefineBindings();
 			while(ExParty::GetPlayerArea())	
 			{
 			    ExBuff::Check(); 
@@ -363,9 +368,10 @@ D2Vars::D2NET_SrvPacketLenTable[0x2C]=18;
 			}
 			if(ExDownload::isOpen()) ExDownload::ShowHide();
 			if(!D2Funcs::D2CLIENT_GetPlayer()) ExBuff::Clear();
-//#ifdef _DEBUG
-//			SetEvent(hAimEvent);
-//#endif
+#ifdef D2EX_EXAIM_ENABLED
+			SetEvent(hAimEvent);
+#endif
+			ExInput::UndefineBindings();
 			ExParty::Clear();
 			ExParty::ClearRoster();
 		}
@@ -394,9 +400,9 @@ DWORD WINAPI DllMain(HMODULE hModule, int dwReason, void* lpReserved)
 				InitializeCriticalSectionAndSpinCount(&MEM_CRITSECT,1000);
 				InitializeCriticalSectionAndSpinCount(&CON_CRITSECT,1000);
 				InitializeCriticalSectionAndSpinCount(&BUFF_CRITSECT,1000);
-//#ifdef _DEBUG
-//				InitializeCriticalSectionAndSpinCount(&TELE_CRITSECT,1000);
-//#endif
+#ifdef D2EX_EXAIM_ENABLED
+				InitializeCriticalSectionAndSpinCount(&TELE_CRITSECT,1000);
+#endif
 				Handle = (HANDLE)_beginthreadex(0,0,&Thread,&hEvent,0,&Id);
 				ASSERT(Handle)
 			}
@@ -416,9 +422,9 @@ DWORD WINAPI DllMain(HMODULE hModule, int dwReason, void* lpReserved)
 			DeleteCriticalSection(&MEM_CRITSECT);
 			DeleteCriticalSection(&CON_CRITSECT);
 			DeleteCriticalSection(&BUFF_CRITSECT);
-//#ifdef _DEBUG
-//			DeleteCriticalSection(&TELE_CRITSECT);
-//#endif
+#ifdef D2EX_EXAIM_ENABLED
+			DeleteCriticalSection(&TELE_CRITSECT);
+#endif
 			SetEvent(hEvent);
 			WaitForSingleObject(Handle,5000);
 			CloseHandle(hEvent);

@@ -57,9 +57,11 @@ wostringstream wPort; wPort << Port;
 D2Funcs::D2WIN_SetEditBoxText(pPortBox,wPort.str().c_str());
 pPortBox->InputHandle = (BOOL (__stdcall *)(Control *,DWORD,char *))PortBoxCheck;
 
+#ifdef VER_111B
 Misc::Patch(0,GetDllOffset("BNClient.dll",0xBFC9),Port,4,"Change default B.net port I");
 Misc::Patch(0,GetDllOffset("BNClient.dll",0xD55F),Port,4,"Change default B.net port II");
 Misc::Patch(0,GetDllOffset("BNClient.dll",0xD589),Port,4,"Change default B.net port III");
+#endif
 
 D2Funcs::D2WIN_Fadeout(pPortPopup, 1);
 D2Funcs::D2WIN_SetControlFadeout(pPortText, 1);

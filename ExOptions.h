@@ -28,7 +28,9 @@ namespace ExOptions
 	BOOL __fastcall BuffECheck(D2MenuEntry* ptEntry, DWORD ItemNo);
 	BOOL __fastcall ChangeHandle(D2MenuEntry* ptEntry, StormMsg* pMsg);
 	BOOL __fastcall Buffs(D2MenuEntry* ptEntry, StormMsg* pMsg);
+	BOOL __fastcall KeyConfig(D2MenuEntry* ptEntry, StormMsg* pMsg);
 
+//Callbacks
 	BOOL __fastcall PermLifeOpt(D2MenuEntry* ptEntry, StormMsg* pMsg);
 	BOOL __fastcall PermManaOpt(D2MenuEntry* ptEntry, StormMsg* pMsg);
 	BOOL __fastcall VisOpt(D2MenuEntry* ptEntry, StormMsg* pMsg);

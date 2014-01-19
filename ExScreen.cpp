@@ -7,6 +7,7 @@
 #include <math.h>
 #include "ExEditBox.h"
 #include "ExMapReveal.h"
+#include "ExAim.h"
 #include "Build.h"
 
 void ExScreen::ScreenToAutomap(POINT* ptPos, int x, int y)  //BHHack, converts Real path XY to AutoMap
@@ -125,6 +126,7 @@ void __stdcall ExScreen::Display()
 	{
 	wStr << " UnitId: " << hex << D2Funcs::D2CLIENT_GetSelectedUnit()->dwUnitId;
 	wStr << " ClassId: " << hex << D2Funcs::D2CLIENT_GetSelectedUnit()->dwClassId;
+	wStr << " [" << dec << ExAim::GetUnitX(D2Funcs::D2CLIENT_GetSelectedUnit()) << "," << dec <<  ExAim::GetUnitY(D2Funcs::D2CLIENT_GetSelectedUnit()) << "]";
 	}
 	int aLen =ExScreen::GetTextWidth(wStr.str().c_str());
 	D2Funcs::D2WIN_DrawText(wStr.str().c_str(),800-aLen-10,590,11,0);
@@ -225,7 +227,12 @@ wchar_t szText[100] = L"";
 void ExScreen::DrawAutoMapVer()
 {
 	wostringstream wPatch; 
-	wPatch << L"Patch: " << GetColorCode(9) << L"1.11";
+	wPatch << L"Patch: " << GetColorCode(9) 
+#ifdef VER_111B
+		<< L"1.11B";
+#else
+		<< L"1.13D";
+#endif
 	static int cSize = ExScreen::GetTextWidth(wPatch.str().c_str());
 	D2Funcs::D2WIN_DrawText(wPatch.str().c_str(),800-cSize-16,*D2Vars::D2CLIENT_AutomapInfoY,4,0);
 	*D2Vars::D2CLIENT_AutomapInfoY+=16;
@@ -233,7 +240,6 @@ void ExScreen::DrawAutoMapVer()
 
 void OnMapDraw()
 {
-return;
 	UnitAny* Me = D2Funcs::D2CLIENT_GetPlayer();
 	if(!Me) return;
 
@@ -270,9 +276,33 @@ LeaveCriticalSection(&TELE_CRITSECT);
 
 void __fastcall ExScreen::DrawAutoMapInfo(int OldTextSize)
 {
-#ifdef _DEBUG
+#ifdef D2EX_EXAIM_ENABLED
 	OnMapDraw();
 #endif
+
+	if (PVMStuff)
+	{
+		int LocId = D2Funcs::D2LANG_GetLocaleId();
+		unsigned int CExp = D2Funcs::D2COMMON_GetStatSigned(D2Funcs::D2CLIENT_GetPlayer(), STAT_EXPERIENCE, 0);
+		wchar_t wExp[100] = { 0 };
+		int ExpGained = CExp - ExpAtJoin;
+		Misc::ConvertIntegers(ExpGained, wExp);
+		wchar_t wExp2[100] = { 0 };
+		swprintf_s(wExp2, 100, LocId == LOCALE_POL ? L"Doœwiadczenie: %s%s" : L"Experience: %s%s", GetColorCode(COL_YELLOW).c_str(), wExp);
+		int wSize = ExScreen::GetTextWidth(wExp2);
+		D2Funcs::D2WIN_DrawText(wExp2, 800 - wSize - 16, *D2Vars::D2CLIENT_AutomapInfoY, 4, 0);
+		*D2Vars::D2CLIENT_AutomapInfoY += 16;
+
+		int DExp = D2Funcs::D2COMMON_GetExpToAchiveLvl(0, D2Funcs::D2COMMON_GetStatSigned(D2Funcs::D2CLIENT_GetPlayer(), STAT_LEVEL, 0)) - ExpAtJoin;
+		int GExp = 0;
+		if (ExpGained) GExp = Misc::round(DExp / (float)ExpGained);
+		wchar_t wGames[70] = { 0 };
+		swprintf_s(wGames, 70, LocId == LOCALE_POL ? L"Gier do poziomu %s%d" : L"Games To Level: %s%d", GetColorCode(COL_YELLOW).c_str(), GExp);
+		int wSize2 = ExScreen::GetTextWidth(wGames);
+		D2Funcs::D2WIN_DrawText(wGames, 800 - wSize2 - 16, *D2Vars::D2CLIENT_AutomapInfoY, 4, 0);
+		*D2Vars::D2CLIENT_AutomapInfoY += 16;
+	}
+
 	int secs = TickAtJoin ? (GetTickCount() - TickAtJoin ) / 1000 : 0;
 	wostringstream wTime;
 	wTime << setfill(L'0') << setw(2) << secs/3600 << L':' << setfill(L'0') << setw(2) << (secs/60)%60 << L':'  << setfill(L'0') << setw(2) << secs%60;
@@ -430,7 +460,7 @@ void __stdcall ExScreen::DrawProperties(wchar_t *wTxt)
 	if(LocId==10)
 	swprintf_s(wTxt+aLen,1024-aLen,L"%sWypad³o z: %s\n",GetColorCode(COL_PURPLE).c_str(),GetMonsterName(aLvl));
 	else
-	swprintf_s(wTxt+aLen,1024-aLen,L"%sDropped from: %s\n",GetColorCode(COL_PURPLE).c_str(),GetMonsterName(aLvl));
+	swprintf_s(wTxt+aLen,1024-aLen,L"%Looted from: %s\n",GetColorCode(COL_PURPLE).c_str(),GetMonsterName(aLvl));
 	}
 	}
 
@@ -558,7 +588,7 @@ void ExScreen::DrawDmg()
 
 			Skill * ptSkill = D2Funcs::D2COMMON_GetLeftSkill(ptUnit);
 			ASSERT(ptSkill)
-				BYTE *	pSkillTxt = D2Funcs::D2CLIENT_GetSkillsTxt(ptSkill->pSkillInfo->wSkillId);
+				BYTE *	pSkillTxt = D2Funcs::D2CLIENT_GetSkillsTxt(ptSkill->pSkillsTxt->wSkillId);
 			ASSERT(pSkillTxt)
 
 				int sId		= D2Funcs::D2COMMON_GetSkillId(ptSkill,__FILE__,__LINE__);
@@ -602,7 +632,7 @@ void ExScreen::DrawDmg()
 			{	
 				Skill * ptSkill = D2Funcs::D2COMMON_GetRightSkill(ptUnit);
 				ASSERT(ptSkill)
-				BYTE *	pSkillTxt = D2Funcs::D2CLIENT_GetSkillsTxt(ptSkill->pSkillInfo->wSkillId);
+				BYTE *	pSkillTxt = D2Funcs::D2CLIENT_GetSkillsTxt(ptSkill->pSkillsTxt->wSkillId);
 				ASSERT(pSkillTxt)
 
 				int sId		= D2Funcs::D2COMMON_GetSkillId(ptSkill,__FILE__,__LINE__);

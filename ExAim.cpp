@@ -140,7 +140,7 @@ bool ExAim::DoPredictAttack(bool left)
 		Skill* pSkill = left ?  D2Funcs::D2COMMON_GetLeftSkill(pMe) :  D2Funcs::D2COMMON_GetRightSkill(pMe);
 		if(pSkill) {
 
-			bool ret = CastSpell(pMe,pSkill->pSkillInfo->wSkillId,left,TargetPos.x,TargetPos.y); //Cast the attack skill
+			bool ret = CastSpell(pMe,pSkill->pSkillsTxt->wSkillId,left,TargetPos.x,TargetPos.y); //Cast the attack skill
 			if(ret)
 				Sleep(200);
 			return ret;
@@ -172,7 +172,7 @@ bool ExAim::DoAttack(bool left)
 		Skill* pSkill = left ?  D2Funcs::D2COMMON_GetLeftSkill(pMe) :  D2Funcs::D2COMMON_GetRightSkill(pMe);
 		if(pSkill) {
 			DoQuickAttack(pTarget->dwUnitId,0x2F,0,left);
-		//	bool ret = CastSpell(pMe,pSkill->pSkillInfo->wSkillId,left,pTarget); //Cast the attack skill
+		//	bool ret = CastSpell(pMe,pSkill->pSkillsTxt->wSkillId,left,pTarget); //Cast the attack skill
 		//	return ret;
 		}
 	}
@@ -446,7 +446,7 @@ bool ExAim::GetSkill(WORD SkillId) // Taken from D2BS
 	UnitAny* pMe = D2Funcs::D2CLIENT_GetPlayer();
 	if(!pMe) return false;
 	for(Skill* pSkill = pMe->pInfo->pFirstSkill; pSkill; pSkill = pSkill->pNextSkill)
-		if(pSkill->pSkillInfo->wSkillId == SkillId)	return true;
+		if(pSkill->pSkillsTxt->wSkillId == SkillId)	return true;
 	return false;
 }
 
@@ -458,7 +458,7 @@ bool ExAim::SetSkill(WORD SkillId, bool left) // Taken from D2BS, but modified a
 		if(GetSkill(SkillId))	{
 			Skill* pSkill = (left ? pMe->pInfo->pLeftSkill : pMe->pInfo->pRightSkill);
 			if(pSkill)
-				if(pSkill->pSkillInfo->wSkillId == SkillId) return true; //If we already have set skill, why not skip remaining part?
+				if(pSkill->pSkillsTxt->wSkillId == SkillId) return true; //If we already have set skill, why not skip remaining part?
 
 			BYTE aPacket[9];
 			::memset(&aPacket, 0, 9);
@@ -474,7 +474,7 @@ bool ExAim::SetSkill(WORD SkillId, bool left) // Taken from D2BS, but modified a
 				for(int i = 0; (i<10 && ExParty::GetPlayerArea()); i++) {
 				Skill* pSkill = (left ? pMe->pInfo->pLeftSkill : pMe->pInfo->pRightSkill);
 				if(pSkill)
-					if(pSkill->pSkillInfo->wSkillId == SkillId) return true;
+					if(pSkill->pSkillsTxt->wSkillId == SkillId) return true;
 				Sleep(50);
 			}
 			return false;

@@ -17,6 +17,7 @@ static bool wasAutoMap;
 		D2Vars::D2CLIENT_UIModes[UI_MAINMENU] = 0;
 		sMsg* pMsgs = &D2Vars::D2CLIENT_MenuMsgs[0];
 		ExInput::UnregisterMsgs(pMsgs,7);
+		ExInput::DefineBindings();
 		*D2Vars::D2CLIENT_UI_Unk2 = 0;
 		if(wasAutoMap) D2Vars::D2CLIENT_UIModes[UI_AUTOMAP] = 1;
 	}
@@ -29,6 +30,7 @@ static bool wasAutoMap;
 		D2Funcs::D2CLIENT_ClearScreen();
 		if(D2Funcs::D2CLIENT_GetPlayer()->dwMode == PLAYER_MODE_DEAD || D2Funcs::D2CLIENT_GetPlayer()->dwMode == PLAYER_MODE_DEATH) return;
 		D2Vars::D2CLIENT_UIModes[UI_MAINMENU] = 1;
+		ExInput::UndefineBindings();
 		sMsg* pMsgs = &D2Vars::D2CLIENT_MenuMsgs[0];
 		ExInput::RegisterMsgs(pMsgs,7);
 		*D2Vars::D2CLIENT_UI_Unk2 = 1;
@@ -213,7 +215,19 @@ void ExOptions::DrawMenuRecon()
 	static DWORD LastTick = 0; 
 	static DWORD PentFrame = 0;
 	D2Funcs::D2WIN_SetTextSize(6);
-	ExScreen::DrawTextEx(2,10,5,0,5,"D2Ex2/Build PVP.%d.%s.%s,",__BUILDNO__,__DATE__,__TIME__);
+	ExScreen::DrawTextEx(2,10,5,0,5,"D2Ex2/Build %s.%d.%s.%s.%s,",
+#ifdef D2EX_CLOSED_BNET
+"PVP.BNET"
+#else
+"GENERIC"
+#endif
+,__BUILDNO__,__DATE__,__TIME__,
+#ifdef _DEBUG
+"Nightly"
+#else
+"Release"
+#endif
+);
 	
 	int MenuStartY = (*D2Vars::D2CLIENT_ScreenHeight - 80) /2 - (Menu->dwEntriesNo * Menu->dwInterline) / 2;
 
@@ -294,7 +308,7 @@ void ExOptions::DrawMenuRecon()
 					D2Funcs::D2WIN_SetTextSize(Entries[eNo].dwFontType ? Entries[eNo].dwFontType : 8);
 					D2Funcs::D2WIN_DrawTextEx(Entries[eNo].wItemName, 130, MenuTextY,COL_ORANGE,0,dwTrans);
 					if(Entries[eNo].Bind) {
-					wchar_t* szKey = L"didnt port"; // ExInput::GetNameOfKey((WORD)*Entries[eNo].Bind);
+					wchar_t* szKey = ExInput::GetNameOfKey((WORD)*Entries[eNo].Bind);
 					int Tw2 = D2Funcs::D2WIN_GetTextWidth(szKey);
 					D2Funcs::D2WIN_DrawTextEx(szKey,(*D2Vars::D2CLIENT_ScreenWidth - Tw2) /2 + 230, MenuTextY,MenuKeyClicked == eNo ? COL_RED : COL_WHITE ,0,dwTrans);
 					}
@@ -655,7 +669,37 @@ wcscpy_s((wchar_t*)&NewEntries[10].szCellFile,130,LocId == 10 ? L"POPRZEDNIE MEN
 return TRUE;
 }
 
+// Import from Scrap
+BOOL __fastcall ExOptions::KeyConfig(D2MenuEntry* ptEntry, StormMsg* pMsg)
+{
+	static int LocId = D2Funcs::D2LANG_GetLocaleId();
+	static D2Menu NewMenu = {6, 18, 20, 37, 0, 0};
+	static D2MenuEntry NewEntries[6] = {0};
 
+	if(!NewEntries[0].wItemName[0]) {
+		NewEntries[0].dwMenuType = D2MENU_STATIC;
+		NewEntries[1].dwMenuType = NewEntries[2].dwMenuType = NewEntries[3].dwMenuType = NewEntries[4].dwMenuType = NewEntries[5].dwMenuType = D2MENU_KEY;
+	//	NewEntries[1].Bind = (DWORD*)&VK_Aim;
+	//	NewEntries[2].Bind = (DWORD*)&VK_Blind;
+	//	NewEntries[3].Bind = (DWORD*)&VK_Tease;
+	//	NewEntries[4].Bind = (DWORD*)&VK_FastTP;
+	//	NewEntries[5].Bind = (DWORD*)&VK_AntiJoder;
+
+		wcscpy_s(NewEntries[0].wItemName,130,LocId == LOCALE_POL ? L"KONFIG. KLAWISZY" : L"CONFIGURE CONTROLS");
+		wcscpy_s(NewEntries[1].wItemName,130,LocId == LOCALE_POL ? L"BEZPOŒR. AA" : L"DIRECT AA");
+		wcscpy_s(NewEntries[2].wItemName,130,LocId == LOCALE_POL ? L"ŒLEPY PKT. AA" : L"BLINDSPOT AA");
+		wcscpy_s(NewEntries[3].wItemName,130,LocId == LOCALE_POL ? L"WKURZACZ" : L"TEASE ATTACK");
+		wcscpy_s(NewEntries[4].wItemName,130,LocId == LOCALE_POL ? L"SZYBKIE TP" : L"FAST TP");
+		wcscpy_s(NewEntries[5].wItemName,130,L"ANTI-JODER");
+
+	}
+
+	*D2Vars::D2CLIENT_SelectedMenu=0;
+	*D2Vars::D2CLIENT_D2Menu=&NewMenu;
+	*D2Vars::D2CLIENT_D2MenuEntries=&NewEntries[0];
+	return true;
+
+}
 
 BOOL __fastcall ExOptions::Options(D2MenuEntry* ptEntry, StormMsg* pMsg)
 {
