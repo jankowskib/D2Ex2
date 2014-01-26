@@ -5,6 +5,7 @@ using namespace std;
 
 namespace ExLoading
 {
+HANDLE __stdcall CreateCacheFile(LPCSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile);
 void __fastcall SendJoinGame(WORD SessionToken, DWORD SessionKey);
 void __stdcall Draw(int a1);
 Room1* __fastcall GetRoomByXY(unsigned int xPos, unsigned int yPos);

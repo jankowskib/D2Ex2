@@ -1,0 +1,204 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{E2C5AAFC-5631-4849-89B2-73FD4AAEF510}</ProjectGuid>
+    <RootNamespace>D2Ex2</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v100</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v100</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>12.0.21005.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>C:\boost_1_55_0;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)files\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>C:\boost_1_55_0;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;D2EX2_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>false</StringPooling>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <StructMemberAlignment>4Bytes</StructMemberAlignment>
+    </ClCompile>
+    <Link>
+      <Version>1</Version>
+      <ModuleDefinitionFile />
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+      <Profile />
+      <SectionAlignment>
+      </SectionAlignment>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy /y "$(TargetPath)" "D:\Gry\Diablo II\"</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>sed -i -r 's/^(.*) ([0-9]*)$/echo "\1" \%24((\2+1))/ge' $(MSBuildProjectDirectory)\Build.h</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Updating build number...</Message>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>false</OmitFramePointers>
+      <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;D2EX2_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat />
+    </ClCompile>
+    <Link>
+      <ModuleDefinitionFile />
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="D2Stubs.cpp" />
+    <ClCompile Include="Offset.cpp" />
+    <ClCompile Include="D2Ex2.cpp" />
+    <ClCompile Include="ExBuffs.cpp" />
+    <ClCompile Include="ExChat.cpp" />
+    <ClCompile Include="ExDownload.cpp" />
+    <ClCompile Include="ExEntryText.cpp" />
+    <ClCompile Include="ExEvents.cpp" />
+    <ClCompile Include="ExFriends.cpp" />
+    <ClCompile Include="ExInput.cpp" />
+    <ClCompile Include="ExLoading.cpp" />
+    <ClCompile Include="ExMapReveal.cpp" />
+    <ClCompile Include="ExOOG.cpp" />
+    <ClCompile Include="ExOptions.cpp" />
+    <ClCompile Include="ExParty.cpp" />
+    <ClCompile Include="ExPrecast.cpp" />
+    <ClCompile Include="ExScreen.cpp" />
+    <ClCompile Include="ExSpectator.cpp" />
+    <ClCompile Include="ExMPQ.cpp" />
+    <ClCompile Include="Misc.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <InlineFunctionExpansion Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</InlineFunctionExpansion>
+    </ClCompile>
+    <ClCompile Include="ExBox.cpp" />
+    <ClCompile Include="ExButton.cpp" />
+    <ClCompile Include="ExCellFile.cpp" />
+    <ClCompile Include="ExControl.cpp" />
+    <ClCompile Include="ExEditBox.cpp" />
+    <ClCompile Include="ExImage.cpp" />
+    <ClCompile Include="ExLagometer.cpp" />
+    <ClCompile Include="ExRectangle.cpp" />
+    <ClCompile Include="ExScrollBar.cpp" />
+    <ClCompile Include="ExTextBox.cpp" />
+    <ClCompile Include="ExWindow.cpp" />
+    <ClCompile Include="CollisionMap.cpp" />
+    <ClCompile Include="ExAim.cpp" />
+    <ClCompile Include="TeleportPath.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ArrayEx.h" />
+    <ClInclude Include="CollisionMap.h" />
+    <ClInclude Include="D2Ptrs_111B.h" />
+    <ClInclude Include="D2Ptrs_113D.h" />
+    <ClInclude Include="D2Structs_111B.h" />
+    <ClInclude Include="D2Structs_113D.h" />
+    <ClInclude Include="ExAim.h" />
+    <ClInclude Include="Matrix.h" />
+    <ClInclude Include="SyncObj.h" />
+    <ClInclude Include="TeleportPath.h" />
+    <ClInclude Include="Constants.h" />
+    <ClInclude Include="D2DataTables.h" />
+    <ClInclude Include="D2Stubs.h" />
+    <ClInclude Include="Offset.h" />
+    <ClInclude Include="D2Ex2.h" />
+    <ClInclude Include="ExBuffs.h" />
+    <ClInclude Include="ExChat.h" />
+    <ClInclude Include="ExDownload.h" />
+    <ClInclude Include="ExEntryText.h" />
+    <ClInclude Include="ExEvents.h" />
+    <ClInclude Include="ExFriends.h" />
+    <ClInclude Include="ExInput.h" />
+    <ClInclude Include="ExLoading.h" />
+    <ClInclude Include="ExMapReveal.h" />
+    <ClInclude Include="ExOOG.h" />
+    <ClInclude Include="ExOptions.h" />
+    <ClInclude Include="ExParty.h" />
+    <ClInclude Include="ExPrecast.h" />
+    <ClInclude Include="ExScreen.h" />
+    <ClInclude Include="ExSpectator.h" />
+    <ClInclude Include="ExMPQ.h" />
+    <ClInclude Include="Misc.h" />
+    <ClInclude Include="stdAfx.h" />
+    <ClInclude Include="Vars.h" />
+    <ClInclude Include="ExBox.h" />
+    <ClInclude Include="ExButton.h" />
+    <ClInclude Include="ExCellFile.h" />
+    <ClInclude Include="ExControl.h" />
+    <ClInclude Include="ExEditBox.h" />
+    <ClInclude Include="ExImage.h" />
+    <ClInclude Include="ExLagometer.h" />
+    <ClInclude Include="ExRectangle.h" />
+    <ClInclude Include="ExScrollBar.h" />
+    <ClInclude Include="ExTextBox.h" />
+    <ClInclude Include="ExWindow.h" />
+    <ClInclude Include="Build.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -22,7 +22,7 @@ States cState;
 
 ExControl(int X, int Y, int X2, int Y2, void (*fevent_onClick)(ExControl*));
 virtual ~ExControl(void);
-virtual void Draw() =0;
+virtual void Draw() = 0;
 virtual bool isPressed(unsigned int Sender,WPARAM wParam);
 virtual void SetAlign(Align xAlign, Align yAlign);
 virtual void Relocate();

@@ -27,6 +27,44 @@ struct Seed
 	DWORD High;
 };
 
+
+HANDLE __stdcall ExLoading::CreateCacheFile(LPCSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile)
+{
+	char szFile[MAX_PATH];
+	srand(time(0));
+	string path;
+	ostringstream out;
+	WIN32_FIND_DATA FindFileData;
+	HANDLE hFind;
+	HMODULE gClient = GetModuleHandle("D2Client.dll");
+
+	if (gClient)
+	{
+		Misc::Log("Removing cache files...");
+		GetModuleFileName(gClient, szFile, MAX_PATH);
+		path.assign(szFile, strrchr(szFile, '\\') + 1);
+		ostringstream cmd;
+		cmd << path << "bncache*.dat";
+		out << path;
+		hFind = FindFirstFile(cmd.str().c_str(), &FindFileData);
+		if (hFind != INVALID_HANDLE_VALUE)
+		{
+			do
+			{
+				string fcache(path.c_str());
+				fcache += FindFileData.cFileName;
+				DeleteFile(fcache.c_str());
+			} while (FindNextFile(hFind, &FindFileData));
+			FindClose(hFind);
+		}
+			out << "bncache" << (rand() % 8192) << ".dat";
+		return CreateFileA(out.str().c_str(), dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+	}
+	return CreateFileA(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+}
+
+
+
 //6FAFBF80
 //static ExTextBox * Loading = 0;
 
@@ -48,28 +86,46 @@ struct Seed
 
 void __fastcall ExLoading::SendJoinGame(WORD SessionToken, DWORD SessionKey) //Packet 0x68
 {
-BYTE Packet[37];
-::memset(&Packet,0,37);
-Packet[0] = 0x68;
-  *(DWORD *)&Packet[1] = SessionKey;
-  *(WORD  *)&Packet[5] = SessionToken;
- // if(D2Vars::BNCLIENT_BnSocket) // If connected to BN
-  *(DWORD *)&Packet[8] = 16; //  GetVersion zmien na 16
- // else
- // *(DWORD *)&Packet[8] = 11; // GetVersion
 
-  *(DWORD *)&Packet[12] = D2Funcs::FOG_isExpansion() != 0 ? 0xED5DCC50 : 0x2185EDD6;
-  *(DWORD *)&Packet[16] = 0x91A519B6;
-  Packet[20] = D2Funcs::D2LANG_GetLocaleId();
-  if (*D2Vars::D2CLIENT_ServerFlags & 1 )
-	 Packet[7] = *D2Vars::D2CLIENT_OpenCurrentClass;
-  else
-     Packet[7] = *D2Vars::D2CLIENT_BNCurrentClass;
-  memcpy(&Packet[21],(const void*)D2Vars::D2CLIENT_CurrentName, 16);
-  D2Funcs::D2NET_SendPacket(37, 0, Packet);
-  *D2Vars::D2CLIENT_SentBytes +=37;
-  *D2Vars::D2CLIENT_SentPackets++;
+#pragma pack(push, 1)
+	struct px68
+	{
+		BYTE Header;			// 0x00
+		DWORD ServerHash;		// 0x01 also SessionKey - to keep connection with BN
+		WORD ServerToken;		// 0x05 TicketNo - increases each join.
+		BYTE ClassId;			// 0x07
+		DWORD VerByte;			// 0x08 (11 for 1.11) etc
+		DWORD Unk1;				// 0x0C FOG_isExpansion_10227() != 0 ? 0xED5DCC50u : 0x2185EDD6u; (const)
+		DWORD Unk2;				// 0x10 0x91A519B6 (const)
+		BYTE LocaleId;			// 0x14 
+		char szCharName[16];	// 0x15
+	};
+#pragma pack(pop)
 
+
+	px68 Packet = { 0 };
+	Packet.Header = 0x68;
+	Packet.ServerHash = SessionKey;
+	Packet.ServerToken = SessionToken;
+	Packet.ClassId = (*D2Vars::D2CLIENT_ServerFlags & 1) ? *D2Vars::D2CLIENT_OpenCurrentClass : *D2Vars::D2CLIENT_BNCurrentClass;
+#ifdef D2EX_CLOSED_BNET
+#ifdef VER_111B
+	Packet.VerByte = 11;
+#elif defined VER_113D
+	Packet.VerByte = 13; 
+#endif
+#else
+	Packet.VerByte = 16; //  GetVersion change 11 -> 16
+#endif
+	Packet.Unk1 = (D2Funcs::FOG_isExpansion() != 0) ? 0xED5DCC50 : 0x2185EDD6;
+	Packet.Unk2 = 0x91A519B6;
+	Packet.LocaleId = D2Funcs::D2LANG_GetLocaleId();
+	strcpy_s(Packet.szCharName, 16, (const char*)D2Vars::D2CLIENT_CurrentName);
+
+	D2Funcs::D2NET_SendPacket(37, 0, (BYTE*)&Packet);
+
+	*D2Vars::D2CLIENT_SentBytes += 37;
+	*D2Vars::D2CLIENT_SentPackets++;
 
 }
 

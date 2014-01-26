@@ -88,7 +88,7 @@ Misc::Log("Defining offsets...");
 DefineOffsets();
 //Load config...
 HANDLE hEvent = *((HANDLE*)Args);
-Misc::Log("Removing cache files...");
+
 //system("del bncache*.dat");
 Misc::Log("Loading config...");
 char filename[MAX_PATH];
@@ -113,6 +113,14 @@ PermShowMana = GetPrivateProfileInt("D2Ex","PermShowMana",1,ConfigIni.c_str());
 AutoShowMap = GetPrivateProfileInt("D2Ex","AutoShowMap",0,ConfigIni.c_str());
 PVMStuff = GetPrivateProfileInt("D2Ex","PVMStuff",0,ConfigIni.c_str());
 FullVisibility = GetPrivateProfileInt("D2Ex","FullVisibility",0,ConfigIni.c_str());
+BuffsEnabled = GetPrivateProfileInt("D2Ex","BuffsEnabled",1,ConfigIni.c_str());
+BOLvl = GetPrivateProfileInt("D2Ex", "BOLvl", 42, ConfigIni.c_str());
+BCLvl = GetPrivateProfileInt("D2Ex", "BCLvl", 12, ConfigIni.c_str());
+ShoutLvl = GetPrivateProfileInt("D2Ex", "ShoutLvl", 34, ConfigIni.c_str());
+EnchLvl = GetPrivateProfileInt("D2Ex", "EnchLvl", 42, ConfigIni.c_str());
+AmpLvl = GetPrivateProfileInt("D2Ex", "AmpLvl", 40, ConfigIni.c_str());
+LRLvl = GetPrivateProfileInt("D2Ex", "LRLvl", 12, ConfigIni.c_str());
+SMLvl = GetPrivateProfileInt("D2Ex", "SMLvl", 12, ConfigIni.c_str());
 #ifdef D2EX_SCRAP_HACKS
 StillSwitch = GetPrivateProfileInt("D2Ex","StillWSG",1,ConfigIni.c_str());
 #endif 
@@ -262,6 +270,11 @@ Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x25342),0x135A,4,"Extend Sound.T
 Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x1F47C),0x135A,4,"Extend Sound.Txt III"); //k
 
 Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x460C0),(DWORD)D2Stubs::D2CLIENT_SendJoinGame_STUB,5,"Join Game Override"); //k
+
+Misc::Patch(CUSTOM, GetDllOffset("D2Gfx.dll", 0xB6B0),0x45EB, 2, "Allow mutli window");
+Misc::Patch(CALL, GetDllOffset("BNClient.dll",0xF494),(DWORD)ExLoading::CreateCacheFile, 6, "Cache file creation fix");
+Misc::Patch(CALL, GetDllOffset("BNClient.dll",0xF7E4),(DWORD)ExLoading::CreateCacheFile, 6, "Cache file creation fix");
+
 #else
 ShowWindow(D2Funcs::D2GFX_GetHwnd(),SW_HIDE);
 MessageBoxA(0,"Version is not supported!","D2Ex",0); 
@@ -357,7 +370,16 @@ D2Vars::D2NET_SrvPacketLenTable[0x2C]=18;
 			ExInput::DefineBindings();
 			while(ExParty::GetPlayerArea())	
 			{
-			    ExBuff::Check(); 
+#ifdef D2EX_CLOSED_BNET
+				if (BNQuene.size()>0) 
+				{
+					EnterCriticalSection(&EX_CRITSECT);
+					D2Funcs::BNCLIENT_SendBNMessage(BNQuene.front().c_str());
+					//	Misc::Log("Sending : %s, size %d",BNQuene.front().c_str(),BNQuene.size());
+					LeaveCriticalSection(&EX_CRITSECT);
+					Sleep(2 * 1000); //2 sec test
+				}
+#endif
 				Sleep(50);
 			}
 			if(lagometer) delete lagometer;

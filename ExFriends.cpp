@@ -42,7 +42,6 @@ EnterCriticalSection(&EX_CRITSECT);
 BNQuene.pop_front();
 LeaveCriticalSection(&EX_CRITSECT);
 ExParty::Update();
-
 #else
 if(Request<0) Request = 0;
 if(!Request) return true;
@@ -61,8 +60,8 @@ string szChar, szAcc;
 Misc::WideToChar(szAcc,Acc);
 Misc::WideToChar(szChar,Char);
 ExParty::AddAccount(szChar,szAcc);
-ExParty::Update();
 Request--;
+ExParty::Update();
 #endif
 
 return false;

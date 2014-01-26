@@ -39,6 +39,7 @@ namespace ExOptions
 	BOOL __fastcall GoldOpt(D2MenuEntry* ptEntry, StormMsg* pMsg);
 	BOOL __fastcall CrapOpt(D2MenuEntry* ptEntry, StormMsg* pMsg);
 	BOOL __fastcall LagOpt(D2MenuEntry* ptEntry, StormMsg* pMsg);
+	BOOL __fastcall BuffsOpt(D2MenuEntry* ptEntry, StormMsg* pMsg);
 
 	BOOL __fastcall Various(D2MenuEntry* ptEntry, StormMsg* pMsg);
 	BOOL __fastcall AutoMapOpt(D2MenuEntry* ptEntry, StormMsg* pMsg);

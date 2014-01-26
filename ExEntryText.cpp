@@ -4,6 +4,9 @@
 #include "ExMapReveal.h"
 #include "Vars.h"
 
+/* Credits goes to Nefarius
+	http://d2mods.info/forum/viewtopic.php?f=8&t=48775
+*/
 
 void ExEntryText::Draw()
 {

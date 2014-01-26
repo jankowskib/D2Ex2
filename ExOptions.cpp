@@ -335,12 +335,12 @@ void ExOptions::DrawMenuRecon()
 
 BOOL __fastcall ExOptions::GiveUpCheck(D2MenuEntry* ptEntry, DWORD ItemNo)
 {
-Room1* aRoom =D2Funcs::D2COMMON_GetUnitRoom(D2Funcs::D2CLIENT_GetPlayer());
-int aLvl = D2Funcs::D2COMMON_GetLevelNoByRoom(aRoom);
-int aAct = D2Funcs::D2COMMON_GetActNoByLevelNo(aLvl);
-if(aLvl!=D2Funcs::D2COMMON_GetTownLevel(aAct))
-return true;
-return false;
+	Room1* aRoom =D2Funcs::D2COMMON_GetUnitRoom(D2Funcs::D2CLIENT_GetPlayer());
+	int aLvl = D2Funcs::D2COMMON_GetLevelNoByRoom(aRoom);
+	int aAct = D2Funcs::D2COMMON_GetActNoByLevelNo(aLvl);
+	if(aLvl!=D2Funcs::D2COMMON_GetTownLevel(aAct))
+		return true;
+	return false;
 }
 
 BOOL __fastcall ExOptions::GiveUpCB(D2MenuEntry* ptEntry, StormMsg* pMsg)
@@ -357,128 +357,149 @@ D2Funcs::D2CLIENT_ClearScreen();
 return true;
 }
 
-//BOOL __fastcall ExOptions::ChangeHandle(D2MenuEntry* ptEntry)
-//{
-////wstring tmp = L"You set "+ boost::lexical_cast<wstring>(ptEntry->dwCurrentValue);
-////D2Funcs::D2CLIENT_PrintGameString(tmp.c_str(),1);
-//wcscpy_s((wchar_t*)ptEntry->szCellFile,130,boost::lexical_cast<wstring>(ptEntry->dwCurrentValue).c_str());
-//switch(*D2Vars::D2CLIENT_SelectedMenu)
-//{
-//case 0:
-//BOLvl=ptEntry->dwCurrentValue;
-//WritePrivateProfileString("D2Ex","BOLvl",boost::lexical_cast<string>(ptEntry->dwCurrentValue).c_str(),FileName.c_str());
-//break;
-//case 1:
-//BCLvl=ptEntry->dwCurrentValue;
-//WritePrivateProfileString("D2Ex","BCLvl",boost::lexical_cast<string>(ptEntry->dwCurrentValue).c_str(),FileName.c_str());
-//break;
-//case 2:
-//ShoutLvl=ptEntry->dwCurrentValue;
-//WritePrivateProfileString("D2Ex","ShoutLvl",boost::lexical_cast<string>(ptEntry->dwCurrentValue).c_str(),FileName.c_str());
-//break;
-//case 3:
-//EnchLvl=ptEntry->dwCurrentValue;
-//WritePrivateProfileString("D2Ex","EnchLvl",boost::lexical_cast<string>(ptEntry->dwCurrentValue).c_str(),FileName.c_str());
-//break;
-//case 4:
-//AmpLvl=ptEntry->dwCurrentValue;
-//WritePrivateProfileString("D2Ex","AmpLvl",boost::lexical_cast<string>(ptEntry->dwCurrentValue).c_str(),FileName.c_str());
-//break;
-//case 5:
-//LRLvl=ptEntry->dwCurrentValue;
-//WritePrivateProfileString("D2Ex","LRLvl",boost::lexical_cast<string>(ptEntry->dwCurrentValue).c_str(),FileName.c_str());
-//break;
-//case 6:
-//SMLvl=ptEntry->dwCurrentValue;
-//WritePrivateProfileString("D2Ex","SMLvl",boost::lexical_cast<string>(ptEntry->dwCurrentValue).c_str(),FileName.c_str());
-//break;
-//}
-//return false;
-//}
-//
-//
-//BOOL __fastcall ExOptions::BuffECheck(D2MenuEntry* ptEntry, DWORD ItemNo)
-//{
-//int SkillId = 1;
-//	switch(ItemNo)
-//	{
-//	case 0:
-//	SkillId=0x95;
-//	break;
-//	case 1:
-//	SkillId=0x9B;
-//	break;
-//	case 2:
-//	SkillId=0x8A;
-//	break;
-//	case 3:
-//	SkillId=0x34;
-//	break;
-//	case 4:
-//	SkillId=0x42;
-//	break;
-//	case 5:
-//	SkillId=0x5B;
-//	break;
-//	case 6:
-//	SkillId=0x11;
-//	break;
-//	}
-//	if(!*D2Vars::D2CLIENT_isMenuClick && *D2Vars::D2CLIENT_SelectedMenu==ItemNo) {
-//	wcscpy_s((wchar_t*)ptEntry->szCellFile,130,ExBuffs::GetSkillName(SkillId));
-//	}
-//
-//return true;
-//}
-//
-//BOOL __fastcall ExOptions::Buffs(D2MenuEntry* ptEntry)
-//{
-//static D2Menu NewMenu;
-//static D2MenuEntry NewEntries[8];
-//
-//if(!NewMenu.dwEntriesNo)
-//{
-//NewMenu.dwEntriesNo=8;
-//NewMenu.dwInterline=45;
-//NewMenu.dwTextHeight=35;
-//NewMenu.dwMenuOffset=51;
-//NewMenu.dwBarHeight=36;
-//}
-//
-//	wcscpy_s((wchar_t*)&NewEntries[0].szCellFile,130,ExBuffs::GetSkillName(0x95));
-//	wcscpy_s((wchar_t*)&NewEntries[1].szCellFile,130,ExBuffs::GetSkillName(0x9B));
-//	wcscpy_s((wchar_t*)&NewEntries[2].szCellFile,130,ExBuffs::GetSkillName(0x8A));
-//	wcscpy_s((wchar_t*)&NewEntries[3].szCellFile,130,ExBuffs::GetSkillName(0x34));
-//	wcscpy_s((wchar_t*)&NewEntries[4].szCellFile,130,ExBuffs::GetSkillName(0x42));
-//	wcscpy_s((wchar_t*)&NewEntries[5].szCellFile,130,ExBuffs::GetSkillName(0x5B));
-//	wcscpy_s((wchar_t*)&NewEntries[6].szCellFile,130,ExBuffs::GetSkillName(0x11));
-//	wcscpy_s((wchar_t*)&NewEntries[7].szCellFile,130,D2Funcs::D2LANG_GetLocaleText(3409));
-//
-//	NewEntries[7].OnPress=&ExOptions::Options;
-//	NewEntries[0].EnableCheck=NewEntries[1].EnableCheck=NewEntries[2].EnableCheck=NewEntries[3].EnableCheck=NewEntries[4].EnableCheck=NewEntries[5].EnableCheck=NewEntries[6].EnableCheck=&ExOptions::BuffECheck;
-//	NewEntries[0].dwMenuType=NewEntries[1].dwMenuType=NewEntries[2].dwMenuType=NewEntries[3].dwMenuType=NewEntries[4].dwMenuType=NewEntries[5].dwMenuType=NewEntries[6].dwMenuType=2;
-//	NewEntries[0].OnPress=NewEntries[1].OnPress=NewEntries[2].OnPress=NewEntries[3].OnPress=NewEntries[4].OnPress=NewEntries[5].OnPress=NewEntries[6].OnPress=&ExOptions::ChangeHandle;
-//	NewEntries[0].dwCurrentValue = BOLvl;
-//	NewEntries[0].dwMaxValue=55;
-//	NewEntries[1].dwCurrentValue = BCLvl;
-//	NewEntries[1].dwMaxValue=55;
-//	NewEntries[2].dwCurrentValue = ShoutLvl;
-//	NewEntries[2].dwMaxValue=55;
-//	NewEntries[3].dwCurrentValue = EnchLvl;
-//	NewEntries[3].dwMaxValue=55;
-//	NewEntries[4].dwCurrentValue = AmpLvl;
-//	NewEntries[4].dwMaxValue=55;
-//	NewEntries[5].dwCurrentValue = LRLvl;
-//	NewEntries[5].dwMaxValue=55;
-//	NewEntries[6].dwCurrentValue = SMLvl;
-//	NewEntries[6].dwMaxValue=55;
-//
-//
-//*D2Vars::D2CLIENT_SelectedMenu=0;
-//*D2Vars::D2CLIENT_D2Menu=&NewMenu;
-//*D2Vars::D2CLIENT_D2MenuEntries=&NewEntries[0];
-//return true;
-//}
+BOOL __fastcall ExOptions::ChangeHandle(D2MenuEntry* ptEntry, StormMsg* pMsg)
+{
+wstring tmp = L"You set "+ boost::lexical_cast<wstring>(ptEntry->dwCurrentValue);
+D2Funcs::D2CLIENT_PrintPartyString(tmp.c_str(),COL_WHITE);
+wcscpy_s((wchar_t*)ptEntry->szCellFile,130,boost::lexical_cast<wstring>(ptEntry->dwCurrentValue).c_str());
+switch(*D2Vars::D2CLIENT_SelectedMenu)
+{
+case 0:
+BOLvl=ptEntry->dwCurrentValue;
+WritePrivateProfileString("D2Ex", "BOLvl", boost::lexical_cast<string>(ptEntry->dwCurrentValue).c_str(), ConfigIni.c_str());
+break;
+case 1:
+BCLvl=ptEntry->dwCurrentValue;
+WritePrivateProfileString("D2Ex", "BCLvl", boost::lexical_cast<string>(ptEntry->dwCurrentValue).c_str(), ConfigIni.c_str());
+break;
+case 2:
+ShoutLvl=ptEntry->dwCurrentValue;
+WritePrivateProfileString("D2Ex", "ShoutLvl", boost::lexical_cast<string>(ptEntry->dwCurrentValue).c_str(), ConfigIni.c_str());
+break;
+case 3:
+EnchLvl=ptEntry->dwCurrentValue;
+WritePrivateProfileString("D2Ex", "EnchLvl", boost::lexical_cast<string>(ptEntry->dwCurrentValue).c_str(), ConfigIni.c_str());
+break;
+case 4:
+AmpLvl=ptEntry->dwCurrentValue;
+WritePrivateProfileString("D2Ex", "AmpLvl", boost::lexical_cast<string>(ptEntry->dwCurrentValue).c_str(), ConfigIni.c_str());
+break;
+case 5:
+LRLvl=ptEntry->dwCurrentValue;
+WritePrivateProfileString("D2Ex", "LRLvl", boost::lexical_cast<string>(ptEntry->dwCurrentValue).c_str(), ConfigIni.c_str());
+break;
+case 6:
+SMLvl=ptEntry->dwCurrentValue;
+WritePrivateProfileString("D2Ex", "SMLvl", boost::lexical_cast<string>(ptEntry->dwCurrentValue).c_str(), ConfigIni.c_str());
+break;
+}
+return false;
+}
+
+
+BOOL __fastcall ExOptions::BuffECheck(D2MenuEntry* ptEntry, DWORD ItemNo)
+{
+int SkillId = 1;
+	switch(ItemNo)
+	{
+	case 0:
+	SkillId=0x95;
+	break;
+	case 1:
+	SkillId=0x9B;
+	break;
+	case 2:
+	SkillId=0x8A;
+	break;
+	case 3:
+	SkillId=0x34;
+	break;
+	case 4:
+	SkillId=0x42;
+	break;
+	case 5:
+	SkillId=0x5B;
+	break;
+	case 6:
+	SkillId=0x11;
+	break;
+	}
+	if(!*D2Vars::D2CLIENT_isMenuClick && *D2Vars::D2CLIENT_SelectedMenu==ItemNo) {
+	wcscpy_s((wchar_t*)ptEntry->szCellFile,130,ExBuffs::GetSkillName(SkillId));
+	}
+
+return true;
+}
+
+BOOL __fastcall ExOptions::Buffs(D2MenuEntry* ptEntry, StormMsg *pMsg)
+{
+	static D2Menu NewMenu;
+	static D2MenuEntry NewEntries[9];
+
+	if(!NewMenu.dwEntriesNo)
+	{
+		NewMenu.dwEntriesNo=9;
+		NewMenu.dwInterline=45;
+		NewMenu.dwTextHeight=35;
+		NewMenu.dwMenuOffset=51;
+		NewMenu.dwBarHeight=36;
+	}
+	int LocId = D2Funcs::D2LANG_GetLocaleId();
+
+
+	wcscpy_s((wchar_t*)&NewEntries[0].szCellFile,130,ExBuffs::GetSkillName(0x95));
+	wcscpy_s((wchar_t*)&NewEntries[1].szCellFile,130,ExBuffs::GetSkillName(0x9B));
+	wcscpy_s((wchar_t*)&NewEntries[2].szCellFile,130,ExBuffs::GetSkillName(0x8A));
+	wcscpy_s((wchar_t*)&NewEntries[3].szCellFile,130,ExBuffs::GetSkillName(0x34));
+	wcscpy_s((wchar_t*)&NewEntries[4].szCellFile,130,ExBuffs::GetSkillName(0x42));
+	wcscpy_s((wchar_t*)&NewEntries[5].szCellFile,130,ExBuffs::GetSkillName(0x5B));
+	wcscpy_s((wchar_t*)&NewEntries[6].szCellFile,130,ExBuffs::GetSkillName(0x11));
+	wcscpy_s((wchar_t*)&NewEntries[7].szCellFile,130, LocId == 10 ? L"W£ACZ EFEKTY" : L"ENABLE BUFF DISPLAY");
+	wcscpy_s((wchar_t*)&NewEntries[7].szSwitchCellFiles[0], 130, LocId == 10 ? L"WY£." : L"OFF");
+	wcscpy_s((wchar_t*)&NewEntries[7].szSwitchCellFiles[1], 130, LocId == 10 ? L"W£." : L"ON");
+	wcscpy_s((wchar_t*)&NewEntries[8].szCellFile,130,D2Funcs::D2LANG_GetLocaleText(3409));
+
+	NewEntries[8].OnPress = &ExOptions::Options;
+	NewEntries[7].OnPress = &ExOptions::BuffsOpt;
+	NewEntries[7].dwMenuType = 1;
+	NewEntries[7].dwSwitchesNo = 2;
+	NewEntries[7].dwCurrentSwitch = BuffsEnabled;
+
+	NewEntries[0].EnableCheck=NewEntries[1].EnableCheck=NewEntries[2].EnableCheck=NewEntries[3].EnableCheck=NewEntries[4].EnableCheck=NewEntries[5].EnableCheck=NewEntries[6].EnableCheck=&ExOptions::BuffECheck;
+	NewEntries[0].dwMenuType=NewEntries[1].dwMenuType=NewEntries[2].dwMenuType=NewEntries[3].dwMenuType=NewEntries[4].dwMenuType=NewEntries[5].dwMenuType=NewEntries[6].dwMenuType=2;
+	NewEntries[0].OnPress=NewEntries[1].OnPress=NewEntries[2].OnPress=NewEntries[3].OnPress=NewEntries[4].OnPress=NewEntries[5].OnPress=NewEntries[6].OnPress=&ExOptions::ChangeHandle;
+	NewEntries[0].dwCurrentValue = BOLvl;
+	NewEntries[0].dwMaxValue=55;
+	NewEntries[1].dwCurrentValue = BCLvl;
+	NewEntries[1].dwMaxValue=55;
+	NewEntries[2].dwCurrentValue = ShoutLvl;
+	NewEntries[2].dwMaxValue=55;
+	NewEntries[3].dwCurrentValue = EnchLvl;
+	NewEntries[3].dwMaxValue=55;
+	NewEntries[4].dwCurrentValue = AmpLvl;
+	NewEntries[4].dwMaxValue=55;
+	NewEntries[5].dwCurrentValue = LRLvl;
+	NewEntries[5].dwMaxValue=55;
+	NewEntries[6].dwCurrentValue = SMLvl;
+	NewEntries[6].dwMaxValue=55;
+
+
+
+
+	*D2Vars::D2CLIENT_SelectedMenu=0;
+	*D2Vars::D2CLIENT_D2Menu=&NewMenu;
+	*D2Vars::D2CLIENT_D2MenuEntries=&NewEntries[0];
+	return true;
+}
+
+BOOL __fastcall ExOptions::BuffsOpt(D2MenuEntry* ptEntry, StormMsg* pMsg)
+{
+	BuffsEnabled = ptEntry->dwCurrentSwitch;
+	WritePrivateProfileString("D2Ex", "BuffsEnabled", boost::lexical_cast<string>(ptEntry->dwCurrentSwitch).c_str(), ConfigIni.c_str());
+	if (!BuffsEnabled)
+		ExBuff::Clear();
+	return TRUE;
+}
 
 BOOL __fastcall ExOptions::AutoMapOpt(D2MenuEntry* ptEntry, StormMsg* pMsg)
 {
@@ -704,7 +725,7 @@ BOOL __fastcall ExOptions::KeyConfig(D2MenuEntry* ptEntry, StormMsg* pMsg)
 BOOL __fastcall ExOptions::Options(D2MenuEntry* ptEntry, StormMsg* pMsg)
 {
 static D2Menu NewMenu;
-static D2MenuEntry NewEntries[6];
+static D2MenuEntry NewEntries[7];
 
 
 if(!NewMenu.dwEntriesNo)
@@ -712,7 +733,7 @@ if(!NewMenu.dwEntriesNo)
 	::memset(&NewMenu,0,sizeof(NewMenu));
 	::memset(&NewEntries,0,sizeof(NewEntries));
 
-NewMenu.dwEntriesNo=6;
+NewMenu.dwEntriesNo=7;
 NewMenu.dwInterline=48;
 NewMenu.dwTextHeight=45;
 NewMenu.dwMenuOffset=51;
@@ -725,20 +746,23 @@ D2Vars::D2CLIENT_MapOptionsMenu[6].OnPress=&ExOptions::Options;
 int LocId = D2Funcs::D2LANG_GetLocaleId();
 
 memcpy(NewEntries,(const void*)*&D2Vars::D2CLIENT_OptionsMenu,sizeof(D2MenuEntry)*4);
-memcpy(&NewEntries[5],(const void*)&D2Vars::D2CLIENT_OptionsMenu[4],sizeof(D2MenuEntry));
+memcpy(&NewEntries[6],(const void*)&D2Vars::D2CLIENT_OptionsMenu[4],sizeof(D2MenuEntry));
 
 wcscpy_s((wchar_t*)&NewEntries[0].szCellFile,130,LocId == 10 ? L"OPCJE DèWI KOWE" : L"SOUND OPTIONS");
 wcscpy_s((wchar_t*)&NewEntries[1].szCellFile,130,LocId == 10 ? L"OPCJE GRAFICZNE" : L"VIDEO OPTIONS");
 wcscpy_s((wchar_t*)&NewEntries[2].szCellFile,130,LocId == 10 ? L"OPCJE AUTOMAPY" : L"AUTOMAP OPTIONS");
 wcscpy_s((wchar_t*)&NewEntries[3].szCellFile,130,LocId == 10 ? L"KONFIGURACJA STEROWANIA" : L"CONFIGURE CONTROLS");
 wcscpy_s((wchar_t*)&NewEntries[4].szCellFile,130,LocId == 10 ? L"USTAWIENIA D2EX" : L"D2EX SETTINGS");
-wcscpy_s((wchar_t*)&NewEntries[5].szCellFile,130,LocId == 10 ? L"POPRZEDNIE MENU" : L"PREVIOUS MENU");
+wcscpy_s((wchar_t*)&NewEntries[5].szCellFile,130,LocId == 10 ? L"USTAWIENIA EFEKT”W" : L"BUFFS SETTINGS");
+wcscpy_s((wchar_t*)&NewEntries[6].szCellFile,130,LocId == 10 ? L"POPRZEDNIE MENU" : L"PREVIOUS MENU");
 
-NewEntries[0].ptCellFile=NewEntries[1].ptCellFile=NewEntries[2].ptCellFile=NewEntries[3].ptCellFile=NewEntries[4].ptCellFile=NewEntries[5].ptCellFile=0;
-NewEntries[5].OnPress=&ExOptions::MainMenu;
+NewEntries[0].ptCellFile=NewEntries[1].ptCellFile=NewEntries[2].ptCellFile=NewEntries[3].ptCellFile=NewEntries[4].ptCellFile=NewEntries[5].ptCellFile = NewEntries[6].ptCellFile=0;
+NewEntries[6].OnPress=&ExOptions::MainMenu;
 
 NewEntries[4].dwCurrentValue=COL_ORANGE;
 NewEntries[4].OnPress=&ExOptions::Various;
+NewEntries[5].dwCurrentValue = COL_ORANGE;
+NewEntries[5].OnPress = &ExOptions::Buffs;
 }
 
 *D2Vars::D2CLIENT_SelectedMenu=0;
@@ -757,26 +781,35 @@ if(!NewMenu.dwEntriesNo)
 {
 ::memset(&NewMenu,0,sizeof(NewMenu));
 ::memset(&NewEntries,0,sizeof(NewEntries));
-NewMenu.dwEntriesNo=4;
+#ifndef D2EX_CLOSED_BNET
+NewMenu.dwEntriesNo = 4;
+#else
+NewMenu.dwEntriesNo = 3;
+#endif
 NewMenu.dwInterline=50;
 NewMenu.dwTextHeight=45;
 NewMenu.dwMenuOffset=51;
 
 
 memcpy(NewEntries,(const void*)*&D2Vars::D2CLIENT_OldMenu,sizeof(D2MenuEntry));
+#ifndef D2EX_CLOSED_BNET
 memcpy(&NewEntries[2],(const void*)&D2Vars::D2CLIENT_OldMenu[1],sizeof(D2MenuEntry)*2);
-
+NewEntries[1].OnPress = &ExOptions::GiveUpCB;
+NewEntries[1].EnableCheck = &ExOptions::GiveUpCheck;
+#else
+memcpy(&NewEntries[1],(const void*)&D2Vars::D2CLIENT_OldMenu[1],sizeof(D2MenuEntry)*2);
+#endif
 NewEntries[0].OnPress=&ExOptions::Options;
-NewEntries[1].OnPress=&ExOptions::GiveUpCB;
-NewEntries[1].EnableCheck=&ExOptions::GiveUpCheck;
 NewEntries[0].ptCellFile=NewEntries[2].ptCellFile=NewEntries[3].ptCellFile=0;
 
 int LocId = D2Funcs::D2LANG_GetLocaleId();
-
-wcscpy_s((wchar_t*)&NewEntries[0].szCellFile,130,LocId == 10 ? L"OPCJE" : L"OPTIONS");
-wcscpy_s((wchar_t*)&NewEntries[1].szCellFile,130,LocId == 10 ? L"PODDAJ SI " : L"GIVE UP");
-wcscpy_s((wchar_t*)&NewEntries[2].szCellFile,130,LocId == 10 ? L"ZAPIS I WYJåCIE Z GRY" : L"SAVE AND EXIT GAME");
-wcscpy_s((wchar_t*)&NewEntries[3].szCellFile,130,LocId == 10 ? L"POWR”T DO GRY" : L"RETURN TO GAME");
+int i = 0;
+wcscpy_s((wchar_t*)&NewEntries[i].szCellFile,130,LocId == 10 ? L"OPCJE" : L"OPTIONS");
+#ifndef D2EX_CLOSED_BNET
+wcscpy_s((wchar_t*)&NewEntries[++i].szCellFile,130,LocId == 10 ? L"PODDAJ SI " : L"GIVE UP");
+#endif
+wcscpy_s((wchar_t*)&NewEntries[++i].szCellFile,130,LocId == 10 ? L"ZAPIS I WYJåCIE Z GRY" : L"SAVE AND EXIT GAME");
+wcscpy_s((wchar_t*)&NewEntries[++i].szCellFile,130,LocId == 10 ? L"POWR”T DO GRY" : L"RETURN TO GAME");
 }
 
 *D2Vars::D2CLIENT_SelectedMenu=1;

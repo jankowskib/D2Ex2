@@ -49,12 +49,13 @@ using namespace std;
 };		
 
 
-class ExBuff
+class ExBuff : public ExControl
 {
 public:
 
 	ExBuff(WORD SkillId, WORD StateNo, ExBuffsImgs ImageId, short DefaultLvl, BuffType aType, bool isTimed);
 	~ExBuff();
+	void Draw();
 
 	static void Check(void);
 	static void Clear(void);
@@ -63,6 +64,7 @@ public:
 	int SkillId;
 	DWORD SkillLen;
 	DWORD SkillExpire;
+private:
 	ExImage * Buff;
 	ExRectangle * BuffTime;
 	ExTextBox * BuffInfo;

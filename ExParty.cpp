@@ -248,10 +248,11 @@ void ExParty::Invite(ExControl* ptControl)
 int ExParty::GetPlayerArea(UnitAny* ptUnit)
 {
 	if(ptUnit)
-	if(ptUnit->pPath)
-	if(ptUnit->pPath->pRoom1)
-	if(ptUnit->pPath->pRoom1->pRoom2)
-	if(ptUnit->pPath->pRoom1->pRoom2->pLevel) return ptUnit->pPath->pRoom1->pRoom2->pLevel->dwLevelNo;
+		if(ptUnit->pPath)
+			if(ptUnit->pPath->pRoom1)
+				if(ptUnit->pPath->pRoom1->pRoom2)
+					if(ptUnit->pPath->pRoom1->pRoom2->pLevel) 
+						return ptUnit->pPath->pRoom1->pRoom2->pLevel->dwLevelNo;
 	return 0;
 }
 

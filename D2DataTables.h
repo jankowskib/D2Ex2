@@ -11,6 +11,48 @@ struct ArenaTxt
 };
 
 #pragma pack(push,1)
+
+struct AutomapTxt
+{
+   char szLevelName[16];            //0x00
+   char szTileName[8];               //0x10
+   BYTE nStyle;                  //0x18
+   BYTE nStartSequence;            //0x19
+   WORD wEndSequence;               //0x1A
+   DWORD dwCel1;                  //0x1C
+   DWORD dwCel2;                  //0x20
+   DWORD dwCel3;                  //0x24
+   DWORD dwCel4;                  //0x28
+};
+
+struct BodyLocsTxt
+{
+   union
+   {
+      DWORD dwCode;               //0x00
+      char szCode[4];               //0x00
+   };
+};
+
+struct ObjectTxt
+{
+	CHAR szName[0x40];				//0x00
+	WCHAR wszName[0x40];			//0x40
+	BYTE _1[4];						//0xC0
+	BYTE nSelectable0;				//0xC4
+	BYTE _2[0x87];					//0xC5
+	BYTE nOrientation;				//0x14C
+	BYTE _2b[0x19];					//0x14D
+	BYTE nSubClass;					//0x166
+	BYTE _3[0x11];					//0x167
+	BYTE nParm0;					//0x178
+	BYTE _4[0x39];					//0x179
+	BYTE nPopulateFn;				//0x1B2
+	BYTE nOperateFn;				//0x1B3
+	BYTE _5[8];						//0x1B4
+	DWORD nAutoMap;					//0x1BB
+}; 
+
 struct ItemStatCostTxt  //size 0x144
 {
 	WORD	wStat;				//0x00
@@ -76,27 +118,102 @@ struct ItemStatCostTxt  //size 0x144
 	WORD	wOpStat3;			//0x5C
 	BYTE 	_Stuff[230];		//0x5E
 };
-#pragma pack(pop)
 
-struct ObjectTxt
+struct MissilesTxt
 {
-	CHAR szName[0x40];				//0x00
-	WCHAR wszName[0x40];			//0x40
-	BYTE _1[4];						//0xC0
-	BYTE nSelectable0;				//0xC4
-	BYTE _2[0x87];					//0xC5
-	BYTE nOrientation;				//0x14C
-	BYTE _2b[0x19];					//0x14D
-	BYTE nSubClass;					//0x166
-	BYTE _3[0x11];					//0x167
-	BYTE nParm0;					//0x178
-	BYTE _4[0x39];					//0x179
-	BYTE nPopulateFn;				//0x1B2
-	BYTE nOperateFn;				//0x1B3
-	BYTE _5[8];						//0x1B4
-	DWORD nAutoMap;					//0x1BB
+   DWORD dwId;                     //0x00
+   DWORD dwMissileFlags;            //0x04
+   WORD wCltDoFunc;               //0x08
+   WORD wCltHitFunc;               //0x0A
+   WORD wSrvDoFunc;               //0x0C
+   WORD wSrvHitFunc;               //0x0E
+   WORD wSrvDmgFunc;               //0x10
+   WORD wTravelSound;               //0x12
+   WORD wHitSound;                  //0x14
+   WORD wExplosionMissile;            //0x16
+   WORD wSubMissile[3];            //0x18
+   WORD wCltSubMissile[3];            //0x1E
+   WORD wHitSubMissile[4];            //0x24
+   WORD wCltHitSubMissile[4];         //0x2C
+   WORD wProgSound;               //0x34
+   WORD wProgOverlay;               //0x36
+   DWORD dwParam[5];               //0x38
+   DWORD dwHitPar[3];               //0x4C
+   DWORD dwCltParam[5];            //0x58
+   DWORD dwCltHitPar[3];            //0x6C
+   DWORD dwDmgParam[2];            //0x78
+   DWORD dwSrvCalc;               //0x80
+   DWORD dwCltCalc;               //0x84
+   DWORD dwHitCalc;               //0x88
+   DWORD dwCltHitCalc;               //0x8C
+   DWORD dwDmgCalc;               //0x90
+   WORD wHitClass;                  //0x94
+   WORD wRange;                  //0x96
+   WORD wLevRange;                  //0x98
+   BYTE nVel;                     //0x9A
+   BYTE nVelLev;                  //0x9B
+   WORD wMaxVel;                  //0x9C
+   WORD wAccel;                  //0x9E
+   WORD wAnimRate;                  //0xA0
+   WORD wXoffset;                  //0xA2
+   WORD wYoffset;                  //0xA4
+   WORD wZoffset;                  //0xA6
+   DWORD dwHitFlags;               //0xA8
+   WORD wResultFlags;               //0xAC
+   WORD wKnockBack;               //0xAE
+   DWORD dwMinDamage;               //0xB0
+   DWORD dwMaxDamage;               //0xB4
+   DWORD dwMinLevDam[5];            //0xB8
+   DWORD dwMaxLevDam[5];            //0xCC
+   DWORD dwDmgSymPerCalc;            //0xE0
+   DWORD dwElemType;               //0xE4
+   DWORD dwElemMin;               //0xE8
+   DWORD dwElemMax;               //0xEC
+   DWORD dwMinElemLev[5];            //0xF0
+   DWORD dwMaxElemLev[5];            //0x104
+   DWORD dwElemDmgSymPerCalc;         //0x118
+   DWORD dwElemLen;               //0x11C
+   DWORD dwElemLevLen[3];            //0x120
+   BYTE unk0x12C;                  //0x12C
+   BYTE nSrcDamage;               //0x12D
+   BYTE nSrcMissDmg;               //0x12E
+   BYTE nHoly;                     //0x12F
+   BYTE nLight;                  //0x130
+   BYTE nFlicker;                  //0x131
+   BYTE nRGB[3];                  //0x132
+   BYTE nInitSteps;               //0x135
+   BYTE nActivate;                  //0x136
+   BYTE nLoopAnim;                  //0x137
+   char szCelFile[64];               //0x138
+   DWORD dwAnimLen;               //0x178
+   DWORD dwRandStart;               //0x17C
+   BYTE nSubLoop;                  //0x180
+   BYTE nSubStart;                  //0x181
+   BYTE nSubStop;                  //0x182
+   BYTE nCollideType;               //0x183
+   BYTE nCollision;               //0x184
+   BYTE nClientCol;               //0x185
+   BYTE nCollideKill;               //0x186
+   BYTE nCollideFriend;            //0x187
+   BYTE nNextHit;                  //0x188
+   BYTE nNextDelay;               //0x189
+   BYTE nSize;                     //0x18A
+   BYTE nToHit;                  //0x18B
+   BYTE nAlwaysExplode;            //0x18C
+   BYTE nTrans;                  //0x18D
+   WORD wQty;                     //0x18E
+   DWORD dwSpecialSetup;            //0x190
+   WORD wSkill;                  //0x194
+   BYTE nHitShift;                  //0x196
+   BYTE unk0x197[5];               //0x197
+   DWORD dwDamageRate;               //0x19C
+   BYTE nNumDirections;            //0x1A0
+   BYTE nAnimSpeed;               //0x1A1
+   BYTE nLocalBlood;               //0x1A2
+   BYTE unk;                     //0x1A3
 };
 
+#pragma pack(pop)
 
 struct DifficultyLevelsTxt //size 0x58
 {
@@ -182,19 +299,6 @@ WORD	bNuminputs;			//0x10
 WORD	wVersion;			//0x12
 CubeInputItem InputItem[7];	//0x14
 CubeOutputItem OutputItem[3];//0x4C
-};
-
-struct BooksTxt
-{
-WORD wStr;				//0x00
-WORD wSpellIcon;		//0x02
-DWORD pSpell;			//0x04
-DWORD dwScrollSkillId;	//0x08
-DWORD dwBookSkillId;	//0x0C
-DWORD dwBaseCost;		//0x10
-DWORD dwCostPerCharge;	//0x14
-DWORD dwScrollICode;	//0x18
-DWORD dwBookICode;		//0x1C
 };
 
 struct CharStatsTxt
@@ -1004,7 +1108,7 @@ WORD   _ALIGN;					//0x1A6
 struct sgptDataTable {
 	BYTE*	pPlayerClass;			//0x00
 	DWORD	dwPlayerClassRecords;	//0x04
-	BYTE*	pBodyLocs;				//0x08
+	BodyLocsTxt*	pBodyLocs;		//0x08
 	DWORD	dwBodyLocsRecords;		//0x0C
 	BYTE*	pStorePage;				//0x10
 	DWORD	dwStorePageRecords;		//0x14
@@ -1098,7 +1202,7 @@ struct sgptDataTable {
 	BYTE*	pSuperUniques;			//0xAD8
 	DWORD	dwSuperUniquesRecs;		//0xADC
 	WORD	SuperUniqeIdxList[66];	//0xAE0
-	BYTE*	pMissilesTxt;			//0xB64
+	MissilesTxt*	pMissilesTxt;	//0xB64
 	BYTE*	pMissiles;				//0xB68
 	DWORD	dwMissilesRecs;			//0xB6C
 	BYTE*	pMonLvl;				//0xB70

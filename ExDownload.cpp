@@ -116,10 +116,10 @@ if(Abort) {
 }
 	if(DownQuene.front().bExecute)
 	{
-	ExScreen::PrintTextEx(1,"Zamykam D2, w celu instalacji...");
-	Sleep(2000);
-	ShellExecuteW(0,L"open",DownQuene.front().szDestName.c_str(),0,0,0);
-	exit(0);
+		ExScreen::PrintTextEx(1,"Closing d2 to install a new update...");
+		Sleep(2000);
+		ShellExecuteW(0,L"open",DownQuene.front().szDestName.c_str(),0,0,0);
+		exit(0);
 	}
 	EnterCriticalSection(&EX_CRITSECT);
 	DownQuene.pop_front();
