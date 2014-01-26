@@ -48,6 +48,9 @@ D2FUNCPTR(D2CLIENT, D2DrawBar, void __fastcall, (int MenuPosY, int aNull, D2Menu
 D2FUNCPTR(D2CLIENT, GetCursorItem, UnitAny* __fastcall, (void), 0x27F30)
 D2FUNCPTR(D2CLIENT, GetItemEleDmg, BOOL __stdcall, (UnitAny *ptUnit, int *MinDmg, int *MaxDmg, int *aCol, Skill *ptSkill), 0x3EF90)
 
+D2FUNCPTR(D2CLIENT, UpdateAutoMap, void __fastcall, (BOOL bUpdate), 0x51710)
+D2FUNCPTR(D2CLIENT, ClearScreen4, void __fastcall, (), 0x65F90)
+
 //D2COMMON
 //Skill Funcs
 D2FUNCPTR(D2COMMON, GetSkillById, Skill* __fastcall, (UnitAny *ptUnit, int SkillId, int SkillFlags), -10704)
@@ -115,12 +118,17 @@ D2FUNCPTR(D2GFX, GetHwnd, HWND __stdcall, (void), -10022)//0x80D0)
 D2FUNCPTR(D2GFX, DrawCellContext, void __stdcall, (CellContext *context, int Xpos, int Ypos, int dwl, int nTransLvl, BYTE *Pal255), -10044)
 D2FUNCPTR(D2GFX, DrawCellContextEx, void __stdcall, (CellContext *context, int Xpos, int Ypos, int dwl, int nTransLvl, BYTE Color), -10068)
 
+D2FUNCPTR(D2GFX, GetResolutionMode, int __stdcall, (), -10063)
+D2FUNCPTR(D2GFX, SetResolutionMode, BOOL __stdcall, (int nMode, int bUpdate), -10029)
+D2FUNCPTR(D2GFX, SetScreenShift, void __fastcall, (int nShift), -10073)
+
+
 D2FUNCPTR(D2GFX, 10015, int __stdcall, (), -10015)
 D2FUNCPTR(D2GFX, 10030, void __stdcall, (long x1, long y1, int a96, long* x2, long* y2, BOOL a6), -10030)
 D2FUNCPTR(D2GFX, 10036, int __stdcall, (DWORD a1,DWORD a2,DWORD a3,DWORD a4), -10036)
 D2FUNCPTR(D2GFX, 10037, void __stdcall, (DWORD a1), -10037)
-D2FUNCPTR(D2GFX, 10073, void __stdcall, (), -10073)
 //D2WIN
+D2FUNCPTR(D2WIN, ResizeWindow, BOOL __stdcall, (int nMode), -10157)
 D2FUNCPTR(D2WIN, LoadCellFile, CellFile* __fastcall, (const char* szFile, int Type), -10004)
 D2FUNCPTR(D2WIN, DrawCellFile, void __fastcall, (CellFile * pCellFile,int xPos,int yPos,int div,int trans,int Color),-10140)
 //Text---
@@ -232,7 +240,6 @@ D2VARPTR(D2CLIENT, PetBarColorYellow, BYTE, 0x11BED9)
 D2VARPTR(D2CLIENT, PetBarColorRed, BYTE, 0x11BEDA)
 D2VARPTR(D2CLIENT, isExpansion, BOOL, 0x11A2F4)
 D2VARPTR(D2CLIENT, ServerDifficulty, int, 0x11C2A8)
-D2VARPTR(D2CLIENT, GameView, int, 0x11C2DC)
 //-----Paket things
 D2VARPTR(D2NET, PacketLenTable, int, 0xA900)
 D2VARPTR(D2NET, SrvPacketLenTable, int ,0xABD8)
@@ -253,8 +260,6 @@ D2VARPTR(D2CLIENT, SndOptionsMenu, D2MenuEntry, 0xE0698)
 D2VARPTR(D2CLIENT, VidOptionsMenu, D2MenuEntry, 0xE5678)
 D2VARPTR(D2CLIENT, MapOptionsMenu, D2MenuEntry, 0xEA108)
 D2VARPTR(D2CLIENT, SelectedMenu, int, 0x11BB44)
-D2VARPTR(D2CLIENT, ScreenHeight, int, 0xF4FC8)
-D2VARPTR(D2CLIENT, ScreenWidth, int, 0xF4FC4)
 D2VARPTR(D2CLIENT, PrevMouseX, int , 0x123414)
 D2VARPTR(D2CLIENT, PrevMouseY, int , 0x123410)
 D2VARPTR(D2CLIENT, isMenuClick, BOOL, 0x11BB54)
@@ -265,14 +270,26 @@ D2VARPTR(D2CLIENT, MenuBarSlider, CellFile*,0x11BB64)
 D2VARPTR(D2CLIENT, WidestMenu, int , 0x11BB68)
 
 D2VARPTR(D2CLIENT, MenuMsgs, sMsg, 0xD1258) //k
-D2VARPTR(D2CLIENT, UI_Unk1, DWORD, 0x11C2F4)
-D2VARPTR(D2CLIENT, UI_Unk2, DWORD, 0x11C2F8)
-D2VARPTR(D2CLIENT, UI_Unk3, DWORD, 0x11C310)
-D2VARPTR(D2CLIENT, UI_Unk4, DWORD, 0x11C314)
 D2VARPTR(D2CLIENT, UI_Unk5, DWORD, 0x11C2F4)//k
 D2VARPTR(D2CLIENT, UI_Unk6, DWORD, 0x11C2F8)//k
 D2VARPTR(D2CLIENT, UI_Unk7, DWORD, 0xF1DC4) //k
 D2VARPTR(D2CLIENT, UI_Unk8, DWORD, 0xF1DC8) //k
+
+// MultiRes stuff
+D2VARPTR(D2CLIENT, ScreenHeight, int, 0xF4FC8)
+D2VARPTR(D2CLIENT, ScreenWidth, int, 0xF4FC4)
+D2VARPTR(D2CLIENT, ScreenMode, int, 0x11C3D0)
+D2VARPTR(D2CLIENT, ScreenViewHeight, int, 0x123390)
+D2VARPTR(D2CLIENT, ScreenViewWidth, int, 0x123394)
+D2VARPTR(D2CLIENT, ScreenWidthUnk, int, 0xF4FCC)
+D2VARPTR(D2CLIENT, GameView, GameView*, 0x11C2DC)
+D2VARPTR(D2CLIENT, UiCover, int, 0x11C3E4)
+D2VARPTR(D2CLIENT, UiUnk1, int, 0x11C2F4)
+D2VARPTR(D2CLIENT, UiUnk2, int, 0x11C2F8)
+D2VARPTR(D2CLIENT, UiUnk3, int, 0x11C310)
+D2VARPTR(D2CLIENT, UiUnk4, int, 0x11C314)
+D2VARPTR(D2GFX, GfxMode, int, 0x1488C)
+D2VARPTR(D2GFX, WindowMode, BOOL, 0x14888) // didn't check
 
 // OOG Controls
 D2VARPTR(D2WIN, FirstControl, Control* , 0x20488)  //0x6F900488
@@ -351,10 +368,6 @@ D2ASMPTR(D2CLIENT, InitAutomapLayer_I, 0x52BB0) // IT MUST BE ON THE END
 }
 
 #define _D2PTRS_END	D2Ptrs::D2CLIENT_InitAutomapLayer_I
-
-#define ASSERT(e) if (e == 0) { ShowWindow(D2Funcs::D2GFX_GetHwnd(),SW_HIDE);Misc::Log("Error at line %d in file '%s' , function: '%s'",__LINE__,__FILE__,__FUNCTION__); MessageBoxA(0,"An error occured. Check D2Ex.log, and send error\ncode to *LOLET!","D2Ex",0); exit(-1); }
-#define INFO(e) { Misc::Log("Info: '%s' at line %d in file '%s' , function: '%s'",e,__LINE__,__FILE__,__FUNCTION__);}
-
 
 #undef D2FUNCPTR
 #undef D2ASMPTR

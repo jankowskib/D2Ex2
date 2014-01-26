@@ -45,6 +45,9 @@ D2FUNCPTR(D2CLIENT, D2DrawBar, void __fastcall, (int MenuPosY, int aNull, D2Menu
 D2FUNCPTR(D2CLIENT, GetCursorItem, UnitAny* __fastcall, (void), 0x144A0) //ns
 D2FUNCPTR(D2CLIENT, GetItemEleDmg, BOOL __stdcall, (UnitAny *ptUnit, int *MinDmg, int *MaxDmg, int *aCol, Skill *ptSkill), 0x35E10) //k
 
+D2FUNCPTR(D2CLIENT, UpdateAutoMap, void __fastcall, (BOOL bUpdate), 0x71FC0)
+D2FUNCPTR(D2CLIENT, ClearScreen4, void __fastcall, (), 0x1CA90)
+
 //D2COMMON
 //Skill Funcs
 D2FUNCPTR(D2COMMON, GetSkillById, Skill* __fastcall, (UnitAny *ptUnit, int SkillId, int SkillFlags), -10984) //k
@@ -110,8 +113,13 @@ D2FUNCPTR(D2GFX, DrawLine, void __stdcall, (int X1, int Y1, int X2, int Y2, BYTE
 D2FUNCPTR(D2GFX, GetHwnd, HWND __stdcall, (void), -10007) // k
 D2FUNCPTR(D2GFX, DrawCellContext, void __stdcall, (CellContext *context, int Xpos, int Ypos, int dwl, int nTransLvl, BYTE *Pal255), -10042) // k
 D2FUNCPTR(D2GFX, DrawCellContextEx, void __stdcall, (CellContext *context, int Xpos, int Ypos, int dwl, int nTransLvl, BYTE Color), -10067) //k
+D2FUNCPTR(D2GFX, GetResolutionMode, int __stdcall, (), -10012)
+D2FUNCPTR(D2GFX, SetResolutionMode, BOOL __stdcall, (int nMode, BOOL bUpdate), -10069)
+D2FUNCPTR(D2GFX, SetScreenShift, void __fastcall, (int nShift), -10047)
 
 //D2WIN
+D2FUNCPTR(D2WIN, ResizeWindow, BOOL __stdcall, (int nMode), -10037)
+
 D2FUNCPTR(D2WIN, LoadCellFile, CellFile* __fastcall, (const char* szFile, int Type), -10023) //k
 D2FUNCPTR(D2WIN, DrawCellFile, void __fastcall, (CellFile * pCellFile,int xPos,int yPos,int div,int trans,int Color),-10172) //k
 //Text---
@@ -228,8 +236,6 @@ D2VARPTR(D2CLIENT, SndOptionsMenu, D2MenuEntry, 0xDF8F0) //k
 D2VARPTR(D2CLIENT, VidOptionsMenu, D2MenuEntry, 0xE48D0) //k
 D2VARPTR(D2CLIENT, MapOptionsMenu, D2MenuEntry, 0xE9360) //k
 D2VARPTR(D2CLIENT, SelectedMenu, int, 0x11C9E8) //k
-D2VARPTR(D2CLIENT, ScreenHeight, int, 0xF7038) //k
-D2VARPTR(D2CLIENT, ScreenWidth, int, 0xF7034) // k
 D2VARPTR(D2CLIENT, PrevMouseX, int , 0x124468)//k
 D2VARPTR(D2CLIENT, PrevMouseY, int , 0x124464) //k
 D2VARPTR(D2CLIENT, isMenuClick, BOOL, 0x11C9F8) //k
@@ -241,12 +247,25 @@ D2VARPTR(D2CLIENT, MenuBarSlider, CellFile*,0x11CA08) //k
 D2VARPTR(D2CLIENT, MenuMsgs, sMsg, 0xD3D20)
 D2VARPTR(D2CLIENT, UI_Unk1, DWORD, 0x11D578)
 D2VARPTR(D2CLIENT, UI_Unk2, DWORD, 0x11D57C)
-D2VARPTR(D2CLIENT, UI_Unk3, DWORD, 0x11D240)
-D2VARPTR(D2CLIENT, UI_Unk4, DWORD, 0x11D244)
-D2VARPTR(D2CLIENT, UI_Unk5, DWORD, 0x11D224)
-D2VARPTR(D2CLIENT, UI_Unk6, DWORD, 0x11D228)
 D2VARPTR(D2CLIENT, UI_Unk7, DWORD, 0xF624C)
 D2VARPTR(D2CLIENT, UI_Unk8, DWORD, 0xF6250)
+
+//D2MultiRes stuff
+D2VARPTR(D2CLIENT, ScreenHeight, int, 0xF7038) //k
+D2VARPTR(D2CLIENT, ScreenWidth, int, 0xF7034) // k
+D2VARPTR(D2CLIENT, ScreenMode, int, 0x11D2B4)
+D2VARPTR(D2CLIENT, ScreenViewHeight, int, 0x123D60)
+D2VARPTR(D2CLIENT, ScreenViewWidth, int, 0x123D64)
+D2VARPTR(D2CLIENT, ScreenWidthUnk, int, 0x123D64) // This var seems be unused, mby it is by other module didn't check deeply
+D2VARPTR(D2CLIENT, GameView, GameView*, 0x11D20C)
+D2VARPTR(D2CLIENT, UiCover, int, 0x11D070)
+D2VARPTR(D2CLIENT, UiUnk1, int, 0x11D224)
+D2VARPTR(D2CLIENT, UiUnk2, int, 0x11D228)
+D2VARPTR(D2CLIENT, UiUnk3, int, 0x11D240)
+D2VARPTR(D2CLIENT, UiUnk4, int, 0x11D244)
+D2VARPTR(D2GFX, pfnDriverCallback, fnDriverCallbacks*, 0x14A48)
+D2VARPTR(D2GFX, GfxMode, int, 0x14A40)
+D2VARPTR(D2GFX, WindowMode, BOOL, 0x14A3C)
 
 //Key Config
 D2VARPTR(D2CLIENT, KeyBindings, KeyBinding, 0x108D90) // ArraySize = 114
@@ -316,10 +335,6 @@ D2ASMPTR(D2WIN, Font13, 0x12CE0) //k
 D2ASMPTR(D2CLIENT, InitAutomapLayer_I, 0x733D0) // kk IT MUST BE ON THE END
 }
 #define _D2PTRS_END	D2Ptrs::D2CLIENT_InitAutomapLayer_I
-
-#define ASSERT(e) if (e == 0) { ShowWindow(D2Funcs::D2GFX_GetHwnd(),SW_HIDE);Misc::Log("Error at line %d in file '%s' , function: '%s'",__LINE__,__FILE__,__FUNCTION__); MessageBoxA(0,"An error occured. Check D2Ex.log, and send error\ncode to *LOLET!","D2Ex",0); exit(-1); }
-#define INFO(e) { Misc::Log("Info: '%s' at line %d in file '%s' , function: '%s'",e,__LINE__,__FILE__,__FUNCTION__);}
-
 
 #undef D2FUNCPTR
 #undef D2ASMPTR

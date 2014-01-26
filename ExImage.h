@@ -18,7 +18,7 @@ bool isPressed(unsigned int Sender, WPARAM wParam);
 	wstring Hoover;
 	bool MultiFrame;
 protected:
-	ExCellFile aCellFile;
+	ExCellFile* aCellFile;
 private:
 };
 

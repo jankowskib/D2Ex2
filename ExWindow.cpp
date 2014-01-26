@@ -94,14 +94,14 @@ cWidth = NewWidth;
 
 void ExWindow::AddChild(ExControl* ptChild)
 {
-if(!ptChild) {Misc::Debug("Attempted to remove NULL Child"); return;}
+if(!ptChild) {DEBUGMSG("Attempted to remove NULL Child"); return;}
 Child.push_back(ptChild);
 ptChild->ptParent = this;
 }
 
 void ExWindow::DeleteChild(ExControl* ptChild)
 {
-	if(!ptChild) {Misc::Debug("Attempted to remove NULL Child"); return;}
+	if(!ptChild) {DEBUGMSG("Attempted to remove NULL Child"); return;}
 	for(deque<ExControl*>::size_type i=0 ; i<Child.size(); ++i) 
 	{
 		if(Child.at(i) == ptChild) {Child.at(i) = 0; ptChild->ptParent = 0; break;}
@@ -182,6 +182,6 @@ ExWindow::~ExWindow(void)
 {
 EnterCriticalSection(&CON_CRITSECT);
 *D2Vars::D2CLIENT_BlockScreen=false;
-Misc::Debug(L"-->Zniszczylem ExWindow '%s'",Label.c_str());
+DEBUGMSG(L"-->Zniszczylem ExWindow '%s'",Label.c_str());
 
 } 

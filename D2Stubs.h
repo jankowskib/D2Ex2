@@ -5,7 +5,7 @@
 namespace D2Funcs
 {
 int __fastcall D2CLIENT_DiffuseStat(int nStat);
-void __fastcall D2CLIENT_SetView(int xLeft, int xRight, int yTop, int yBottom, void *pGameView);
+void __fastcall D2CLIENT_SetView(int xLeft, int xRight, int yTop, int yBottom, GameView *pGameView);
 BOOL __fastcall D2CLIENT_IsSquelched(RosterUnit* pRoster);
 BOOL __fastcall D2CLIENT_IsMuted(RosterUnit* pRoster);
 AutoMapLayer* __fastcall D2CLIENT_InitAutomapLayer(DWORD dwLayer);
@@ -39,6 +39,10 @@ void __fastcall D2CLIENT_BlobHook();
 void __fastcall D2CLIENT_BlobHook2();
 DWORD __fastcall D2WIN_LoadMPQ_STUB();
 void __fastcall D2WIN_UnloadMPQ_STUB();
+void D2CLIENT_SetResolution_STUB();
+void D2CLIENT_ResizeView_STUB();
+BOOL D2GFX_SetResolutionMode_STUB();
+void D2GFX_GetModeParams_STUB();
 }
 
 #endif

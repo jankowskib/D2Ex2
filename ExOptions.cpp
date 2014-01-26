@@ -117,10 +117,10 @@ void __stdcall  ExOptions::m_LBUTTONUP(StormMsg * Msg)
 	//CBA to check what exacly those vars are, but they were in the original code...
 	*D2Vars::D2CLIENT_UI_Unk1 = 0;
 	*D2Vars::D2CLIENT_UI_Unk2 = 0;
-	*D2Vars::D2CLIENT_UI_Unk3 = 0;
-	*D2Vars::D2CLIENT_UI_Unk4 = 0;
-	*D2Vars::D2CLIENT_UI_Unk5 = 0;
-	*D2Vars::D2CLIENT_UI_Unk6 = 0;
+	*D2Vars::D2CLIENT_UiUnk1 = 0;
+	*D2Vars::D2CLIENT_UiUnk2 = 0;
+	*D2Vars::D2CLIENT_UiUnk3 = 0;
+	*D2Vars::D2CLIENT_UiUnk4 = 0;
 	*D2Vars::D2CLIENT_UI_Unk7 = 16;
 	*D2Vars::D2CLIENT_UI_Unk8 = 16;
 

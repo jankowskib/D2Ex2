@@ -16,7 +16,7 @@ void SetChangeEvent(void (*event_Change)(ExEditBox*));
 	wstring Text;
 
 protected:
-	ExCellFile aCellFile;
+	ExCellFile* aCellFile;
 	ExTextBox* aTextBox;
 private:
 	void (*event_onChange)(ExEditBox*);

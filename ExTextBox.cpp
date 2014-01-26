@@ -247,5 +247,5 @@ return false;
 ExTextBox::~ExTextBox()
 {
 EnterCriticalSection(&CON_CRITSECT);
-//Misc::Debug(L"-->Zniszczylem obiekt ExTextBox '%s'",Label.c_str());
+//DEBUGMSG(L"-->Zniszczylem obiekt ExTextBox '%s'",Label.c_str());
 }

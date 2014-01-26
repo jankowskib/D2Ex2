@@ -291,6 +291,21 @@ int Misc::ConvertHexStringToBytes(const char* string, void* data, int length)
 	return count;
 }
 
+void Misc::ShowMsgBox(char * Msg, ...)
+{
+	va_list arguments;
+	va_start(arguments, Msg);
+
+	int len = _vscprintf(Msg, arguments) + 1;
+	char * text = new char[len];
+	vsprintf_s(text, len, Msg, arguments);
+	va_end(arguments);
+
+	MessageBoxA(0, text, "D2Ex", 0);
+
+	delete[] text;
+}
+
 void Misc::Log(char* Msg...)
 {
 	va_list arguments;
@@ -313,7 +328,7 @@ fclose(plik);
 delete[] text;
 }
 
-void Misc::Log(wchar_t* Msg...)
+void Misc::Log(wchar_t* Msg, ...)
 {
 	va_list arguments;
 	va_start(arguments, Msg);
@@ -339,7 +354,6 @@ delete[] text;
 
 void Misc::Debug(char *format,...)
 {
-#ifdef _DEBUG
 	va_list arguments;
 	va_start(arguments, format);
 	int len = _vscprintf(format, arguments ) + 1;
@@ -347,17 +361,21 @@ void Misc::Debug(char *format,...)
 	vsprintf_s(text, len, format, arguments);
 	va_end(arguments);
 
-	OutputDebugString(text);
-	OutputDebugString("\n");
+	SYSTEMTIME t = { 0 };
+	GetLocalTime(&t);
 
+	char* out = new char[strlen(text) + 24];
+	sprintf_s(out, strlen(text) + 24, "[%04d-%02d-%02d %02d:%02d:%02d] %s\n", t.wYear, t.wMonth, t.wDay, t.wHour, t.wMinute, t.wSecond, text);
+
+	OutputDebugString(out);
+
+	delete[] out;
 	delete[] text;
-#endif
 };
 
 
 void Misc::Debug(wchar_t *format,...)
 {
-#ifdef _DEBUG
 	va_list arguments;
 	va_start(arguments, format);
 
@@ -365,12 +383,16 @@ void Misc::Debug(wchar_t *format,...)
 	wchar_t * text = new wchar_t[len];
 	vswprintf_s(text,len,format,arguments);
 	va_end(arguments);
+	SYSTEMTIME t = { 0 };
+	GetLocalTime(&t);
 
-	OutputDebugStringW(text);
-	OutputDebugStringW(L"\n");
+	wchar_t* out = new wchar_t[wcslen(text) + 24];
+	wprintf_s(out, wcslen(text)+24, "[%04d-%02d-%02d %02d:%02d:%02d] %s\n", t.wYear, t.wMonth, t.wDay, t.wHour, t.wMinute, t.wSecond, text);
+
+	OutputDebugStringW(out);
 
 	delete[] text;
-#endif
+	delete[] out;
 };
 
 

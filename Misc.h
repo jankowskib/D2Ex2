@@ -28,6 +28,7 @@ void Patch(BYTE bInst, DWORD pAddr, DWORD pFunc, DWORD dwLen, char* Type);
 int GetHexSpan(const char* string);
 int GetHexValue(char c);
 int ConvertHexStringToBytes(const char* string, void* data, int length); //netstuff source.
+void ShowMsgBox(char * Msg, ...);
 void Log(char* Msg...);
 void Log(wchar_t* Msg...);
 int round(double a);

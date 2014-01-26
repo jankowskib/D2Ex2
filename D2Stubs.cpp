@@ -2,7 +2,7 @@
 #include "ExScreen.h"
 #include "ExLoading.h"
 #include "ExOOG.h"
-#include "Vars.h"
+#include "ExMultiRes.h"
 
 
 __declspec(naked) int __fastcall D2Funcs::D2CLIENT_DiffuseStat(int nStat)
@@ -14,7 +14,7 @@ __declspec(naked) int __fastcall D2Funcs::D2CLIENT_DiffuseStat(int nStat)
 	}
 }
 
-__declspec(naked) void __fastcall D2Funcs::D2CLIENT_SetView(int xLeft, int xRight, int yTop, int yBottom, void *pGameView) 
+__declspec(naked) void __fastcall D2Funcs::D2CLIENT_SetView(int xLeft, int xRight, int yTop, int yBottom, GameView *pGameView) 
 //(int xLeft, int xRight<ecx>, int yTop<edx>, int yBottom<eax>, GameView *pGameView<esi>)
 {
 	__asm 
@@ -281,6 +281,42 @@ __declspec(naked) void D2Stubs::D2CLIENT_CharInfoTipHook()
 }
 
 
+__declspec(naked) void D2Stubs::D2CLIENT_SetResolution_STUB()
+{
+	__asm
+	{
+		mov ecx, esi
+		jmp ExMultiRes::SetResolution
+	}
+}
+
+__declspec(naked) void D2Stubs::D2CLIENT_ResizeView_STUB()
+{
+	__asm
+	{
+		mov ecx, eax
+		jmp ExMultiRes::ResizeView;
+	}
+}
+
+__declspec(naked) BOOL D2Stubs::D2GFX_SetResolutionMode_STUB()
+{
+	__asm
+	{
+		jmp ExMultiRes::SetResolutionMode
+	}
+}
+
+__declspec(naked) void D2Stubs::D2GFX_GetModeParams_STUB()
+{
+	__asm
+	{
+		jmp ExMultiRes::GetModeParams
+	}
+}
+// -- Funcs
+
+
 __declspec(naked) BYTE* __fastcall D2Funcs::D2CLIENT_GetSkillsTxt(int SkillId)
 {
 	__asm
@@ -396,3 +432,5 @@ __declspec(naked) AutoMapLayer* __fastcall D2Funcs::D2CLIENT_InitAutomapLayer(DW
 		ret;
 	}
 }
+
+

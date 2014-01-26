@@ -6,6 +6,8 @@
 
 using namespace std; 
 
+struct CellLoadError{};
+
 class ExCellFile
 {
 public:

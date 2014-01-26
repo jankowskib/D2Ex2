@@ -35,6 +35,7 @@
 #include "ExDownload.h"
 #include "ExLagometer.h"
 #include "ExAim.h"
+#include "ExMultiRes.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -121,11 +122,29 @@ EnchLvl = GetPrivateProfileInt("D2Ex", "EnchLvl", 42, ConfigIni.c_str());
 AmpLvl = GetPrivateProfileInt("D2Ex", "AmpLvl", 40, ConfigIni.c_str());
 LRLvl = GetPrivateProfileInt("D2Ex", "LRLvl", 12, ConfigIni.c_str());
 SMLvl = GetPrivateProfileInt("D2Ex", "SMLvl", 12, ConfigIni.c_str());
+char sRes[50];
+string strRes;
+GetPrivateProfileString("D2Ex", "Resolution", "800x600", sRes, 50, ConfigIni.c_str());
+strRes = sRes;
+
+int x = strRes.find("x");
+if (x == string::npos)
+{
+	cResModeX = 800;
+	cResModeY = 600;
+}
+else
+{
+	cResModeX = boost::lexical_cast<short>(strRes.substr(0, x));
+	cResModeY = boost::lexical_cast<short>(strRes.substr(++x));
+}
+
 #ifdef D2EX_SCRAP_HACKS
 StillSwitch = GetPrivateProfileInt("D2Ex","StillWSG",1,ConfigIni.c_str());
 #endif 
 
 LoadItemConfig();
+ExMultiRes::EnumDisplayModes();
 
 //BEFORE START...
 #define CALL 0xE8
@@ -211,6 +230,9 @@ Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x337B0),(DWORD)D2Stubs::D2CLIENT_S
 //Misc::Patch(JUMP,GetDllOffset("Fog.dll",0x1DBF0),(DWORD)ExMemory::Realloc,5,"Mem Realloc Override");
 //}
 //#endif
+Misc::Patch(JUMP, GetDllOffset("D2Client.dll", 0x36FE0), (DWORD)ExMultiRes::SetResolution, 5, "Set Resolution Mode");
+Misc::Patch(JUMP, GetDllOffset("D2Client.dll", 0x1C4B0), (DWORD)D2Stubs::D2CLIENT_ResizeView_STUB, 6, "Resize View");
+Misc::Patch(JUMP, GetDllOffset("D2Gfx.dll", -10029), (DWORD)D2Stubs::D2GFX_SetResolutionMode_STUB, 5, "D2GFX_SetResolutionMode");
 #elif defined VER_113D
 Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x1D78C),(DWORD)D2Stubs::D2CLIENT_ScreenHook,5,"Screen Hook"); // k
 Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x1D4A1),(DWORD)ExEntryText::Draw,5,"Entry Text Fix"); //k
@@ -275,6 +297,11 @@ Misc::Patch(CUSTOM, GetDllOffset("D2Gfx.dll", 0xB6B0),0x45EB, 2, "Allow mutli wi
 Misc::Patch(CALL, GetDllOffset("BNClient.dll",0xF494),(DWORD)ExLoading::CreateCacheFile, 6, "Cache file creation fix");
 Misc::Patch(CALL, GetDllOffset("BNClient.dll",0xF7E4),(DWORD)ExLoading::CreateCacheFile, 6, "Cache file creation fix");
 
+//Res stuff
+Misc::Patch(JUMP, GetDllOffset("D2Client.dll", 0x2C220), (DWORD)D2Stubs::D2CLIENT_SetResolution_STUB, 5, "Set Resolution Mode");
+Misc::Patch(JUMP, GetDllOffset("D2Client.dll", 0x5C4F0), (DWORD)D2Stubs::D2CLIENT_ResizeView_STUB, 6, "Resize View");
+Misc::Patch(JUMP, GetDllOffset("D2Gfx.dll", -10069), (DWORD)D2Stubs::D2GFX_SetResolutionMode_STUB, 5, "D2GFX_SetResolutionMode");
+Misc::Patch(JUMP, GetDllOffset("D2Gfx.dll", -10064), (DWORD)D2Stubs::D2GFX_GetModeParams_STUB, 7, "D2GFX_GetModeParams");
 #else
 ShowWindow(D2Funcs::D2GFX_GetHwnd(),SW_HIDE);
 MessageBoxA(0,"Version is not supported!","D2Ex",0); 
@@ -282,6 +309,11 @@ exit(-1);
 #endif
 
 ExMpq::LoadMPQ();
+Misc::Log("Loading MultiRes resources...");
+if (!ExMultiRes::InitImages())
+{
+	D2EXERROR("One or more D2Ex resources weren't loaded. Check if your D2Ex2.MPQ is valid!");
+}
 
 //END PATCHES-----------------------------------------------------------------------------------
 //KEYBOARD CALL TREE
@@ -419,7 +451,7 @@ DWORD WINAPI DllMain(HMODULE hModule, int dwReason, void* lpReserved)
 				SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
 				gModule = hModule;
 				InitializeCriticalSectionAndSpinCount(&EX_CRITSECT,1000);
-				InitializeCriticalSectionAndSpinCount(&MEM_CRITSECT,1000);
+//				InitializeCriticalSectionAndSpinCount(&MEM_CRITSECT,1000);
 				InitializeCriticalSectionAndSpinCount(&CON_CRITSECT,1000);
 				InitializeCriticalSectionAndSpinCount(&BUFF_CRITSECT,1000);
 #ifdef D2EX_EXAIM_ENABLED
@@ -432,16 +464,17 @@ DWORD WINAPI DllMain(HMODULE hModule, int dwReason, void* lpReserved)
 		break;
 	case DLL_PROCESS_DETACH:
 		{
-			try {
-			for(vector<ExControl*>::size_type i = 0; i< Controls.size(); ++i) delete Controls.at(i); 
-			} catch (exception& e) {Misc::Debug("ExControl release exception: %s",e.what());}
+			for(auto i = 0; i < Controls.size(); ++i) delete Controls.at(i); 
+
+			ExMultiRes::FreeImages();
 			ExMpq::UnloadMPQ();
+
 			if(CellBox) delete CellBox;
 			if(CellButton) delete CellButton;
 			//	ExMemory::LogLeaks();
 			//	ExMemory::Release();
 			DeleteCriticalSection(&EX_CRITSECT);
-			DeleteCriticalSection(&MEM_CRITSECT);
+			// DeleteCriticalSection(&MEM_CRITSECT);
 			DeleteCriticalSection(&CON_CRITSECT);
 			DeleteCriticalSection(&BUFF_CRITSECT);
 #ifdef D2EX_EXAIM_ENABLED

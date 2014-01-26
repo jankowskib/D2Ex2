@@ -129,7 +129,7 @@ void __stdcall ExScreen::Display()
 	wStr << " [" << dec << ExAim::GetUnitX(D2Funcs::D2CLIENT_GetSelectedUnit()) << "," << dec <<  ExAim::GetUnitY(D2Funcs::D2CLIENT_GetSelectedUnit()) << "]";
 	}
 	int aLen =ExScreen::GetTextWidth(wStr.str().c_str());
-	D2Funcs::D2WIN_DrawText(wStr.str().c_str(),800-aLen-10,590,11,0);
+	D2Funcs::D2WIN_DrawText(wStr.str().c_str(), *D2Vars::D2CLIENT_ScreenWidth - aLen - 10, *D2Vars::D2CLIENT_ScreenHeight - 10, 11, 0);
 	
 	/*wstring wPool = L"Pools: " + boost::lexical_cast<wstring>(ExMemory::GetPoolsCount());
 	wPool+=L" Mem taken:" + boost::lexical_cast<wstring>(ExMemory::GetMemUsage() /1024 / 1024);
@@ -234,7 +234,7 @@ void ExScreen::DrawAutoMapVer()
 		<< L"1.13D";
 #endif
 	static int cSize = ExScreen::GetTextWidth(wPatch.str().c_str());
-	D2Funcs::D2WIN_DrawText(wPatch.str().c_str(),800-cSize-16,*D2Vars::D2CLIENT_AutomapInfoY,4,0);
+	D2Funcs::D2WIN_DrawText(wPatch.str().c_str(), *D2Vars::D2CLIENT_ScreenWidth - cSize - 16, *D2Vars::D2CLIENT_AutomapInfoY, 4, 0);
 	*D2Vars::D2CLIENT_AutomapInfoY+=16;
 }
 
@@ -290,7 +290,7 @@ void __fastcall ExScreen::DrawAutoMapInfo(int OldTextSize)
 		wchar_t wExp2[100] = { 0 };
 		swprintf_s(wExp2, 100, LocId == LOCALE_POL ? L"Doœwiadczenie: %s%s" : L"Experience: %s%s", GetColorCode(COL_YELLOW).c_str(), wExp);
 		int wSize = ExScreen::GetTextWidth(wExp2);
-		D2Funcs::D2WIN_DrawText(wExp2, 800 - wSize - 16, *D2Vars::D2CLIENT_AutomapInfoY, 4, 0);
+		D2Funcs::D2WIN_DrawText(wExp2, *D2Vars::D2CLIENT_ScreenWidth - wSize - 16, *D2Vars::D2CLIENT_AutomapInfoY, 4, 0);
 		*D2Vars::D2CLIENT_AutomapInfoY += 16;
 
 		int DExp = D2Funcs::D2COMMON_GetExpToAchiveLvl(0, D2Funcs::D2COMMON_GetStatSigned(D2Funcs::D2CLIENT_GetPlayer(), STAT_LEVEL, 0)) - ExpAtJoin;
@@ -299,7 +299,7 @@ void __fastcall ExScreen::DrawAutoMapInfo(int OldTextSize)
 		wchar_t wGames[70] = { 0 };
 		swprintf_s(wGames, 70, LocId == LOCALE_POL ? L"Gier do poziomu %s%d" : L"Games To Level: %s%d", GetColorCode(COL_YELLOW).c_str(), GExp);
 		int wSize2 = ExScreen::GetTextWidth(wGames);
-		D2Funcs::D2WIN_DrawText(wGames, 800 - wSize2 - 16, *D2Vars::D2CLIENT_AutomapInfoY, 4, 0);
+		D2Funcs::D2WIN_DrawText(wGames, *D2Vars::D2CLIENT_ScreenWidth - wSize2 - 16, *D2Vars::D2CLIENT_AutomapInfoY, 4, 0);
 		*D2Vars::D2CLIENT_AutomapInfoY += 16;
 	}
 
@@ -307,7 +307,7 @@ void __fastcall ExScreen::DrawAutoMapInfo(int OldTextSize)
 	wostringstream wTime;
 	wTime << setfill(L'0') << setw(2) << secs/3600 << L':' << setfill(L'0') << setw(2) << (secs/60)%60 << L':'  << setfill(L'0') << setw(2) << secs%60;
 	int wSize3 = ExScreen::GetTextWidth(wTime.str().c_str());
-	D2Funcs::D2WIN_DrawText(wTime.str().c_str(),800-wSize3-16,*D2Vars::D2CLIENT_AutomapInfoY,4,0);
+	D2Funcs::D2WIN_DrawText(wTime.str().c_str(), *D2Vars::D2CLIENT_ScreenWidth - wSize3 - 16, *D2Vars::D2CLIENT_AutomapInfoY, 4, 0);
 	*D2Vars::D2CLIENT_AutomapInfoY+=16;
 	D2Funcs::D2WIN_SetTextSize(OldTextSize);
 }
@@ -539,10 +539,10 @@ void ExScreen::DrawBreakpoints()
 	UnitAny * ptUnit = D2Funcs::D2CLIENT_GetPlayer();
 	ASSERT(ptUnit)
 	D2Funcs::D2WIN_SetTextSize(6);
-	ExScreen::DrawTextEx(116,406,COL_WHITE,0,5,L"FCR");
-	ExScreen::DrawTextEx(116,431,COL_WHITE,0,5,L"FHR");
-	ExScreen::DrawTextEx(115,455,COL_WHITE,0,5,L"FRW");
-	ExScreen::DrawTextEx(118,479,COL_WHITE,0,5,L"IAS");
+	ExScreen::DrawTextEx(116, *D2Vars::D2CLIENT_ScreenHeight - 193, COL_WHITE, 0, 5, L"FCR");
+	ExScreen::DrawTextEx(116, *D2Vars::D2CLIENT_ScreenHeight - 169, COL_WHITE, 0, 5, L"FHR");
+	ExScreen::DrawTextEx(115, *D2Vars::D2CLIENT_ScreenHeight - 145, COL_WHITE, 0, 5, L"FRW");
+	ExScreen::DrawTextEx(118, *D2Vars::D2CLIENT_ScreenHeight - 121, COL_WHITE, 0, 5, L"IAS");
 
 	int nFCR = D2Funcs::D2COMMON_GetStatSigned(ptUnit,STAT_ITEM_FASTERCASTRATE,0);
 	int nFHR = D2Funcs::D2COMMON_GetStatSigned(ptUnit,STAT_ITEM_FASTERGETHITRATE,0);
@@ -555,22 +555,22 @@ void ExScreen::DrawBreakpoints()
 	wTxt << nFCR;
 	int nLen = ExScreen::GetTextWidth(wTxt.str().c_str());
 	int xPos = 177 - (nLen /2);
-	D2Funcs::D2WIN_DrawText(wTxt.str().c_str(),xPos,408,COL_DARK_GOLD,0);
+	D2Funcs::D2WIN_DrawText(wTxt.str().c_str(), xPos, *D2Vars::D2CLIENT_ScreenHeight - 192, COL_DARK_GOLD, 0);
 	wTxt.str(L"");
 	wTxt << nFHR;
 	nLen = ExScreen::GetTextWidth(wTxt.str().c_str());
 	xPos = 177 - (nLen /2);
-	D2Funcs::D2WIN_DrawText(wTxt.str().c_str(),xPos,432,COL_DARK_GOLD,0);
+	D2Funcs::D2WIN_DrawText(wTxt.str().c_str(), xPos, *D2Vars::D2CLIENT_ScreenHeight - 168, COL_DARK_GOLD, 0);
 	wTxt.str(L"");
 	wTxt << nFRW;
 	nLen = ExScreen::GetTextWidth(wTxt.str().c_str());
 	xPos = 177 - (nLen /2);
-	D2Funcs::D2WIN_DrawText(wTxt.str().c_str(),xPos,456,COL_DARK_GOLD,0);
+	D2Funcs::D2WIN_DrawText(wTxt.str().c_str(), xPos, *D2Vars::D2CLIENT_ScreenHeight - 144, COL_DARK_GOLD, 0);
 	wTxt.str(L"");
 	wTxt << nIAS;
 	nLen = ExScreen::GetTextWidth(wTxt.str().c_str());
 	xPos = 177 - (nLen /2);
-	D2Funcs::D2WIN_DrawText(wTxt.str().c_str(),xPos,480,COL_DARK_GOLD,0);
+	D2Funcs::D2WIN_DrawText(wTxt.str().c_str(), xPos, *D2Vars::D2CLIENT_ScreenHeight - 120, COL_DARK_GOLD, 0);
 	D2Funcs::D2WIN_SetTextSize(0);
 
 
@@ -583,7 +583,7 @@ void ExScreen::DrawDmg()
 	UnitAny * ptUnit = D2Funcs::D2CLIENT_GetPlayer();
 	ASSERT(ptUnit)
 	static int LocId = D2Funcs::D2LANG_GetLocaleId();
-		if(mX>240 && mX<394 && mY>145 && mY<165) 
+	if (mX > 240 && mX < 394 && mY > (*D2Vars::D2CLIENT_ScreenHeight - 455) && mY < (*D2Vars::D2CLIENT_ScreenHeight - 435))
 		{ 
 
 			Skill * ptSkill = D2Funcs::D2COMMON_GetLeftSkill(ptUnit);
@@ -591,7 +591,7 @@ void ExScreen::DrawDmg()
 				BYTE *	pSkillTxt = D2Funcs::D2CLIENT_GetSkillsTxt(ptSkill->pSkillsTxt->wSkillId);
 			ASSERT(pSkillTxt)
 
-				int sId		= D2Funcs::D2COMMON_GetSkillId(ptSkill,__FILE__,__LINE__);
+			int sId		= D2Funcs::D2COMMON_GetSkillId(ptSkill,__FILE__,__LINE__);
 			int sLvl	= D2Funcs::D2COMMON_GetSkillLevel(ptUnit,ptSkill,1);
 			int sBonus	= D2Funcs::D2COMMON_GetSkillDmgBonus(ptUnit,*((DWORD*)pSkillTxt+6),sId,sLvl);
 			int sBonusMax = 0;
@@ -625,10 +625,10 @@ void ExScreen::DrawDmg()
 				wostringstream wInfo;
 				wInfo <<  (LocId == 10? L"Œrednie Obra¿enia: " :L"Average Damage: ") << GetColorCode(COL_YELLOW) << AvgDmg; 
 				D2Funcs::D2WIN_SetTextSize(0);
-				D2Funcs::D2WIN_DrawRectangledText(wInfo.str().c_str(),242,142,0,2,COL_WHITE);
+				D2Funcs::D2WIN_DrawRectangledText(wInfo.str().c_str(), 242, *D2Vars::D2CLIENT_ScreenHeight - 458, 0, 2, COL_WHITE);
 			}
 		}
-		else if(mX>240 && mX<394 && mY>170 && mY<190) 
+	else if (mX>240 && mX<394 && mY>(*D2Vars::D2CLIENT_ScreenHeight - 430) && mY<(*D2Vars::D2CLIENT_ScreenHeight - 410))
 			{	
 				Skill * ptSkill = D2Funcs::D2COMMON_GetRightSkill(ptUnit);
 				ASSERT(ptSkill)
@@ -669,7 +669,7 @@ void ExScreen::DrawDmg()
 					wostringstream wInfo;
 					wInfo <<  (LocId == 10? L"Œrednie Obra¿enia: " :L"Average Damage: ") << GetColorCode(COL_YELLOW) << AvgDmg; 
 					D2Funcs::D2WIN_SetTextSize(0);
-					D2Funcs::D2WIN_DrawRectangledText(wInfo.str().c_str(),242,163,0,2,COL_WHITE);
+					D2Funcs::D2WIN_DrawRectangledText(wInfo.str().c_str(), 242, *D2Vars::D2CLIENT_ScreenHeight - 437, 0, 2, COL_WHITE);
 				}
 			}
 }

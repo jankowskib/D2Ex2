@@ -19,10 +19,10 @@ public:
 	void SetHoover(wstring wText);
 	void SetColor(D2Colors nColor);
 protected:
-	ExCellFile aCellFile;
+	ExCellFile * aCellFile;
 	ExTextBox * aTextBox;
 private:
-	void _FixText(); // internal use only
+	void FixText(); // internal use only
 	bool bLongButton;
 	wstring Hoover;
 	int Color;

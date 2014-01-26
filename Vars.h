@@ -69,5 +69,8 @@ GLOBAL(int, BlobType)
 GLOBAL(int, EnteringFont)
 GLOBAL(deque<string>, BNQuene)
 
+GLOBAL(short, cResModeX)
+GLOBAL(short, cResModeY)
+
 #undef GLOBAL
 #undef __DEFINE_VARS

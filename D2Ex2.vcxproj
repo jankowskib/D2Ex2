@@ -62,7 +62,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <StructMemberAlignment>4Bytes</StructMemberAlignment>
     </ClCompile>
     <Link>
@@ -112,6 +112,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="D2Stubs.cpp" />
+    <ClCompile Include="ExMultiRes.cpp" />
     <ClCompile Include="Offset.cpp" />
     <ClCompile Include="D2Ex2.cpp" />
     <ClCompile Include="ExBuffs.cpp" />
@@ -158,6 +159,7 @@
     <ClInclude Include="D2Structs_111B.h" />
     <ClInclude Include="D2Structs_113D.h" />
     <ClInclude Include="ExAim.h" />
+    <ClInclude Include="ExMultiRes.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="SyncObj.h" />
     <ClInclude Include="TeleportPath.h" />

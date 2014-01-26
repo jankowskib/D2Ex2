@@ -143,6 +143,9 @@
     <ClCompile Include="TeleportPath.cpp">
       <Filter>Source Files\Temp</Filter>
     </ClCompile>
+    <ClCompile Include="ExMultiRes.cpp">
+      <Filter>Source Files\Main</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArrayEx.h">
@@ -282,6 +285,9 @@
     </ClInclude>
     <ClInclude Include="D2Structs_111B.h">
       <Filter>Header Files\D2 Internals</Filter>
+    </ClInclude>
+    <ClInclude Include="ExMultiRes.h">
+      <Filter>Header Files\Main</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

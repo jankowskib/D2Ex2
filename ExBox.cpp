@@ -16,8 +16,8 @@ void ExBox::Draw()
 {
 	if(cState!=INVISIBLE) 
 	{
-	D2Funcs::D2GFX_DrawRectangle(cX,cY,cX+cWidth,cY+cHeight,aColor,aTransLvl);
-	D2Funcs::D2CLIENT_DrawGZBox(cX,cY,cX+cWidth,cY+cHeight);
+		D2Funcs::D2GFX_DrawRectangle(cX,cY,cX+cWidth,cY+cHeight,aColor,aTransLvl);
+		D2Funcs::D2CLIENT_DrawGZBox(cX,cY,cX+cWidth,cY+cHeight);
 	}
 }
 

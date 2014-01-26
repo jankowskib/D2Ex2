@@ -140,7 +140,7 @@ bool ExAim::DoPredictAttack(bool left)
 		Skill* pSkill = left ?  D2Funcs::D2COMMON_GetLeftSkill(pMe) :  D2Funcs::D2COMMON_GetRightSkill(pMe);
 		if(pSkill) {
 
-			bool ret = CastSpell(pMe,pSkill->pSkillsTxt->wSkillId,left,TargetPos.x,TargetPos.y); //Cast the attack skill
+			bool ret = CastSpell(pMe,(WORD)pSkill->pSkillsTxt->wSkillId,left,TargetPos.x,TargetPos.y); //Cast the attack skill
 			if(ret)
 				Sleep(200);
 			return ret;

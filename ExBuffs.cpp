@@ -6,7 +6,7 @@ typedef boost::shared_ptr<ExBuff> pExBuff;
 
 static map<int, pExBuff> Buffs;
 
-ExBuff::ExBuff(WORD SkillNo, WORD StateNo, ExBuffsImgs ImageId, short DefaultLvl, BuffType aType, bool isTimed) : ExControl((24*Buffs.size()) + 115, 550, 24, 24, 0)
+ExBuff::ExBuff(WORD SkillNo, WORD StateNo, ExBuffsImgs ImageId, short DefaultLvl, BuffType aType, bool isTimed) : ExControl((24*Buffs.size()) + 115, *D2Vars::D2CLIENT_ScreenViewHeight-10, 24, 24, 0)
 {
 	UnitAny* pPlayer = D2Funcs::D2CLIENT_GetPlayer();
 	Skill* pSkill = 0;
