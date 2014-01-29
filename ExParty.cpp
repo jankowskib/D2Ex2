@@ -534,11 +534,11 @@ return 0;
 
 void ExParty::ClearRoster()
 {
-for(list<AccountBase>::iterator i = AccBase.begin() ; i != AccBase.end() ; i++)
-{
-i->Deaths=0;
-i->Kills=0;
-}
+	for(list<AccountBase>::iterator i = AccBase.begin() ; i != AccBase.end() ; ++i)
+	{
+		i->Deaths=0;
+		i->Kills=0;
+	}
 }
 
 
@@ -547,20 +547,20 @@ void ExParty::Clear()
 //	EnterCriticalSection(&EX_CRITSECT);
 	for(list<PlayerTable>::iterator i = PlayerList.begin() ; i != PlayerList.end() ; ++i)
 	{
-	delete i->Frame;
-	delete i->Level;
-	delete i->Name;
-	delete i->Acc;
-	delete i->Class;
-	delete i->Clan;
-	//delete i->Location;
-	delete i->Kills;
-	delete i->Assists;
-	delete i->Deaths;
-	delete i->Invite;
-	delete i->Host;
-	delete i->Loot;
-	delete i->Squelch;
+		delete i->Frame;
+		delete i->Level;
+		delete i->Name;
+		delete i->Acc;
+		delete i->Class;
+		delete i->Clan;
+		//delete i->Location;
+		delete i->Kills;
+		delete i->Assists;
+		delete i->Deaths;
+		delete i->Invite;
+		delete i->Host;
+		delete i->Loot;
+		delete i->Squelch;
 	}
 	for(vector<ExTextBox*>::iterator i = Group.begin(); i!= Group.end(); ++i) delete (*i);
 	Group.clear();
@@ -857,7 +857,7 @@ void ExParty::Resort(char *szSkip)
 	wchar_t tt = (int)(64 + (TeamOffset/20));
 	if(LastTeamId!=0xFFFF) {TeamId= D2Funcs::D2LANG_GetLocaleText(4016); TeamId.erase(TeamId.length()-1); TeamId+=tt;}
 	else TeamId = D2Funcs::D2LANG_GetLocaleText(4015);
-	ExTextBox * ptGrp = new ExTextBox(165,80+(z*25)+TeamOffset,0,0,TeamId,0,0);
+	ExTextBox * ptGrp = new ExTextBox(i->Frame->GetX() + 5, 80 + (z * 25) + TeamOffset, 0, 0, TeamId, 0, 0);
 	PartyScreen->AddChild(ptGrp);
 	Group.push_back(ptGrp);
 	}

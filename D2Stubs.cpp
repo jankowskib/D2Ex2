@@ -36,6 +36,7 @@ __declspec(naked) void __fastcall D2Funcs::D2CLIENT_SetView(int xLeft, int xRigh
 	}
 }
 
+
 __declspec(naked) BOOL __fastcall D2Funcs::D2CLIENT_IsSquelched(RosterUnit* pRoster)
 {
 	__asm
@@ -311,11 +312,78 @@ __declspec(naked) void D2Stubs::D2GFX_GetModeParams_STUB()
 {
 	__asm
 	{
+#ifdef VER_113D
 		jmp ExMultiRes::GetModeParams
+#else
+#error("STILL TODO")
+#endif
+	}
+}
+
+
+__declspec(naked) void D2Stubs::D2GFX_LookUpFix_I_STUB()
+{
+	__asm
+	{
+		mov  ecx, (ExMultiRes::gBufferXLookUpTable + 0x80)[eax * 4]
+			retn
+	}
+}
+
+__declspec(naked) void D2Stubs::D2GFX_LookUpFix_II_STUB()
+{
+	__asm
+	{
+		mov  ecx, (ExMultiRes::gBufferXLookUpTable + 0x80)[edi * 4]
+			retn
+	}
+}
+
+__declspec(naked) void D2Stubs::D2GFX_LookUpFix_III_STUB()
+{
+	__asm
+	{
+		mov  ebx, (ExMultiRes::gBufferXLookUpTable + 0x80)[eax * 4]
+			retn
+	}
+}
+
+__declspec(naked) void D2Stubs::D2GFX_LookUpFix_IV_STUB()
+{
+	__asm
+	{
+		mov  ebx, (ExMultiRes::gBufferXLookUpTable + 0x80)[esi * 4]
+			retn
+	}
+}
+
+__declspec(naked) void D2Stubs::D2GFX_LookUpFix_V_STUB()
+{
+	__asm
+	{
+		mov  esi, (ExMultiRes::gBufferXLookUpTable + 0x80)[eax * 4]
+			retn
+	}
+}
+
+__declspec(naked) void D2Stubs::D2GFX_LookUpFix_VI_STUB()
+{
+	__asm
+	{
+		cmp     ebp, ExMultiRes::gBufferXLookUpTable + 0x1900
+		retn
 	}
 }
 // -- Funcs
 
+__declspec(naked) void __fastcall D2Funcs::D2GFX_UpdateResizeVars(int nWidth, int nHeight)
+{
+	__asm
+	{
+		mov eax, ecx
+		jmp D2Ptrs::D2GFX_Resize
+	}
+}
 
 __declspec(naked) BYTE* __fastcall D2Funcs::D2CLIENT_GetSkillsTxt(int SkillId)
 {

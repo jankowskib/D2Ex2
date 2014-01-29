@@ -2,7 +2,7 @@
 #include "Misc.h"
 
 #ifdef _DEFINE_PTRS
-enum {DLLNO_D2CLIENT, DLLNO_D2COMMON, DLLNO_D2GFX, DLLNO_D2LANG, DLLNO_D2WIN, DLLNO_D2NET, DLLNO_D2GAME, DLLNO_D2LAUNCH, DLLNO_FOG, DLLNO_BNCLIENT, DLLNO_STORM, DLLNO_D2CMP, DLLNO_D2MULTI, DLLNO_D2SOUND};
+enum {DLLNO_D2CLIENT, DLLNO_D2COMMON, DLLNO_D2GFX, DLLNO_D2LANG, DLLNO_D2WIN, DLLNO_D2NET, DLLNO_D2GAME, DLLNO_D2LAUNCH, DLLNO_FOG, DLLNO_BNCLIENT, DLLNO_STORM, DLLNO_D2CMP, DLLNO_D2MULTI, DLLNO_D2SOUND, DLLNO_D2GDI, DLLNO_D2DDRAW, DLLNO_D2DIRECT3D, DLLNO_D2GLIDE};
 
 #define DLLOFFSET(a1,b1) ((DLLNO_##a1)|((b1)<<8))
 #define D2FUNCPTR(d1,v1,t1,t2,o1) typedef t1 d1##_##v1##_t t2; d1##_##v1##_t *d1##_##v1 = (d1##_##v1##_t *)DLLOFFSET(d1,o1);
@@ -116,6 +116,9 @@ D2FUNCPTR(D2GFX, DrawCellContextEx, void __stdcall, (CellContext *context, int X
 D2FUNCPTR(D2GFX, GetResolutionMode, int __stdcall, (), -10012)
 D2FUNCPTR(D2GFX, SetResolutionMode, BOOL __stdcall, (int nMode, BOOL bUpdate), -10069)
 D2FUNCPTR(D2GFX, SetScreenShift, void __fastcall, (int nShift), -10047)
+
+//D2GDI
+D2FUNCPTR(D2GDI, GetCallbacks, fnDriverCallbacks* __fastcall, (), -10000) // Same oridinal for every patch and GFX driver (GDI, D2D, D3D, GLIDE). Unused but left just in case.
 
 //D2WIN
 D2FUNCPTR(D2WIN, ResizeWindow, BOOL __stdcall, (int nMode), -10037)
@@ -256,7 +259,7 @@ D2VARPTR(D2CLIENT, ScreenWidth, int, 0xF7034) // k
 D2VARPTR(D2CLIENT, ScreenMode, int, 0x11D2B4)
 D2VARPTR(D2CLIENT, ScreenViewHeight, int, 0x123D60)
 D2VARPTR(D2CLIENT, ScreenViewWidth, int, 0x123D64)
-D2VARPTR(D2CLIENT, ScreenWidthUnk, int, 0x123D64) // This var seems be unused, mby it is by other module didn't check deeply
+D2VARPTR(D2CLIENT, ScreenWidthUnk, int, 0xF703C) // This var seems be unused, mby it is by other module didn't check deeply
 D2VARPTR(D2CLIENT, GameView, GameView*, 0x11D20C)
 D2VARPTR(D2CLIENT, UiCover, int, 0x11D070)
 D2VARPTR(D2CLIENT, UiUnk1, int, 0x11D224)
@@ -266,6 +269,23 @@ D2VARPTR(D2CLIENT, UiUnk4, int, 0x11D244)
 D2VARPTR(D2GFX, pfnDriverCallback, fnDriverCallbacks*, 0x14A48)
 D2VARPTR(D2GFX, GfxMode, int, 0x14A40)
 D2VARPTR(D2GFX, WindowMode, BOOL, 0x14A3C)
+D2VARPTR(D2GFX, DriverType, int, 0x14A38)
+D2VARPTR(D2GFX, gpbBuffer, void*, 0x14320)
+D2VARPTR(D2GFX, Width, int, 0x14324)
+D2VARPTR(D2GFX, Height, int, 0x14328)
+D2VARPTR(D2GFX, ScreenShift, int, 0x14A50)
+D2VARPTR(D2GFX, Helpers, DWORD*, 0x10BFC) // table of 7 functions
+
+D2VARPTR(D2GDI, WindowWidth, int, 0xCA98)
+D2VARPTR(D2GDI, BitmapHeight, int, 0xC980)
+D2VARPTR(D2GDI, BitmapWidth, int, 0xC970)
+D2VARPTR(D2GDI, gpbBuffer, void*, 0xCA9C)
+D2VARPTR(D2GDI, DIB, HBITMAP, 0xC97C)
+D2VARPTR(D2GDI, hWnd, HANDLE, 0xC568)
+D2VARPTR(D2GDI, PaletteEntries, PALETTEENTRY*, 0xC570)
+D2VARPTR(D2GDI, Palette, HPALETTE, 0xC974)
+D2VARPTR(D2GDI, hFont, HFONT, 0xC988)
+D2VARPTR(D2GDI, Unk, int, 0xCA94)
 
 //Key Config
 D2VARPTR(D2CLIENT, KeyBindings, KeyBinding, 0x108D90) // ArraySize = 114
@@ -331,6 +351,9 @@ D2ASMPTR(D2CLIENT, DifuseStat_I, 0x6CC10) // k
 D2ASMPTR(D2CLIENT, SetView_I,0xB5330) // k
 D2ASMPTR(D2WIN, FontNon13, 0x12D60) //k
 D2ASMPTR(D2WIN, Font13, 0x12CE0) //k
+
+//D2MultiRes
+D2ASMPTR(D2GFX, Resize, 0x8300) // k
 
 D2ASMPTR(D2CLIENT, InitAutomapLayer_I, 0x733D0) // kk IT MUST BE ON THE END
 }

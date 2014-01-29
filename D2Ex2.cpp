@@ -85,11 +85,11 @@ ItemArray.push_back(hConfig);
 
 unsigned __stdcall Thread(void * Args)
 {
-Misc::Log("Defining offsets...");
-DefineOffsets();
+
 //Load config...
 HANDLE hEvent = *((HANDLE*)Args);
-
+Misc::Log("Defining offsets...");
+DefineOffsets();
 //system("del bncache*.dat");
 Misc::Log("Loading config...");
 char filename[MAX_PATH];
@@ -302,6 +302,12 @@ Misc::Patch(JUMP, GetDllOffset("D2Client.dll", 0x2C220), (DWORD)D2Stubs::D2CLIEN
 Misc::Patch(JUMP, GetDllOffset("D2Client.dll", 0x5C4F0), (DWORD)D2Stubs::D2CLIENT_ResizeView_STUB, 6, "Resize View");
 Misc::Patch(JUMP, GetDllOffset("D2Gfx.dll", -10069), (DWORD)D2Stubs::D2GFX_SetResolutionMode_STUB, 5, "D2GFX_SetResolutionMode");
 Misc::Patch(JUMP, GetDllOffset("D2Gfx.dll", -10064), (DWORD)D2Stubs::D2GFX_GetModeParams_STUB, 7, "D2GFX_GetModeParams");
+Misc::Patch(CALL, GetDllOffset("D2Gfx.dll", 0x95EA), (DWORD)D2Stubs::D2GFX_LookUpFix_I_STUB, 7, "LookUpYFix_I");
+Misc::Patch(CALL, GetDllOffset("D2Gfx.dll", 0xA257), (DWORD)D2Stubs::D2GFX_LookUpFix_II_STUB, 7, "LookUpYFix_II");
+Misc::Patch(CALL, GetDllOffset("D2Gfx.dll", 0x90BC), (DWORD)D2Stubs::D2GFX_LookUpFix_III_STUB, 7, "LookUpYFix_III");
+Misc::Patch(CALL, GetDllOffset("D2Gfx.dll", 0x93E9), (DWORD)D2Stubs::D2GFX_LookUpFix_IV_STUB, 7, "LookUpYFix_IV");
+Misc::Patch(CALL, GetDllOffset("D2Gfx.dll", 0xA680), (DWORD)D2Stubs::D2GFX_LookUpFix_V_STUB, 7, "LookUpYFix_V");
+Misc::Patch(CALL, GetDllOffset("D2Gfx.dll", 0xA4F7), (DWORD)D2Stubs::D2GFX_LookUpFix_VI_STUB, 6, "LookUpYFix_VI");
 #else
 ShowWindow(D2Funcs::D2GFX_GetHwnd(),SW_HIDE);
 MessageBoxA(0,"Version is not supported!","D2Ex",0); 
@@ -314,6 +320,7 @@ if (!ExMultiRes::InitImages())
 {
 	D2EXERROR("One or more D2Ex resources weren't loaded. Check if your D2Ex2.MPQ is valid!");
 }
+Misc::WriteDword(*(DWORD**)&D2Vars::D2GFX_Helpers, (DWORD)&ExMultiRes::FillYBufferTable);
 
 //END PATCHES-----------------------------------------------------------------------------------
 //KEYBOARD CALL TREE
@@ -457,6 +464,21 @@ DWORD WINAPI DllMain(HMODULE hModule, int dwReason, void* lpReserved)
 #ifdef D2EX_EXAIM_ENABLED
 				InitializeCriticalSectionAndSpinCount(&TELE_CRITSECT,1000);
 #endif
+
+			/*	switch (*D2Vars::D2GFX_DriverType)
+				{
+				case VIDEO_MODE_GDI:
+				{*/
+				typedef fnDriverCallbacks* (__fastcall * GetCallbacks_t)();
+				GetCallbacks_t GetCallbacks = (GetCallbacks_t)GetDllOffset("D2Gdi.dll", -10000);
+				fnDriverCallbacks * fns = GetCallbacks();
+
+				Misc::WriteDword((DWORD*)&(fns->Init), (DWORD)&ExMultiRes::GDI_Init);
+				Misc::WriteDword((DWORD*)&(fns->ResizeWin), (DWORD)&ExMultiRes::GDI_ResizeWindow);
+				//}
+				//	break;
+				//}
+
 				Handle = (HANDLE)_beginthreadex(0,0,&Thread,&hEvent,0,&Id);
 				ASSERT(Handle)
 			}
@@ -464,9 +486,10 @@ DWORD WINAPI DllMain(HMODULE hModule, int dwReason, void* lpReserved)
 		break;
 	case DLL_PROCESS_DETACH:
 		{
+			ExBuff::Clear();
 			for(auto i = 0; i < Controls.size(); ++i) delete Controls.at(i); 
 
-			ExMultiRes::FreeImages();
+			//ExMultiRes::FreeImages();
 			ExMpq::UnloadMPQ();
 
 			if(CellBox) delete CellBox;
@@ -475,8 +498,8 @@ DWORD WINAPI DllMain(HMODULE hModule, int dwReason, void* lpReserved)
 			//	ExMemory::Release();
 			DeleteCriticalSection(&EX_CRITSECT);
 			// DeleteCriticalSection(&MEM_CRITSECT);
-			DeleteCriticalSection(&CON_CRITSECT);
 			DeleteCriticalSection(&BUFF_CRITSECT);
+			DeleteCriticalSection(&CON_CRITSECT);
 #ifdef D2EX_EXAIM_ENABLED
 			DeleteCriticalSection(&TELE_CRITSECT);
 #endif

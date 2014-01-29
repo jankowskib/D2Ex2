@@ -44,60 +44,60 @@ struct CellContext;
 
 struct fnDriverCallbacks
 {
-	BOOL(__fastcall *INITWINDOW)(HINSTANCE); // 0
-	void(__fastcall *INITPERSPECTIVE)(int * fPerspective, int * _1); // 1
-	void(__fastcall *RELEASE)(); // 2
-	BOOL(__fastcall *INIT)(HANDLE hWnd, int nResolution); // 3
-	void(__fastcall *SHUTDOWN)(); // 4
-	void(__fastcall *ENDCUTSCENE)(HANDLE hWnd, int nResolution, int); // 5
-	void(__fastcall *BEGINSCENE)(BOOL bClear, BYTE nRed, BYTE nGreen, BYTE nBlue); // 6
-	void(__fastcall *ENDSCENE1)(); // 7
-	void(__fastcall *ENDSCENE2)(); // 8
-	BOOL(__fastcall *RESIZEWIN)(HANDLE HWND, int nResolution); // 9
-	void(__fastcall *GETBACKBUFFER)(BYTE* pBuffer); // 10
-	void(__fastcall *ACTIVATEWINDOW)(int Unk, int Contrast); // 11
-	void(__fastcall *SETOPTION)(int nOption, int nValue); // 12
-	void(__fastcall *BEGINCUTSCENE)(); // 13
-	void(__fastcall *PLAYCUTSCENE)(const char* szFile, int nResolution, void *pfFrame); // 14
-	void(__fastcall *CHECKCUTSCENE)(); // 15
-	void(__fastcall *DECODESCMACKER)(const char *szSmacker, BYTE *pBuffer, int nVersion); // 16
-	void(__fastcall *PLAYSMACKER)(void *pContext); // 17
-	void(__fastcall *CLOSESMACKER)(void *pContext); // 18
-	int (__fastcall *GETRENDERSTATS)(); // 19
-	void(__fastcall *GETSCREENSIZE)(int *pWidth, int *pHeight); // 20
-	void(__fastcall *SETSCALEFACTOR)(); // 21
-	void(__fastcall *SETGAMMA)(int nGamma); // 22
-	void(__fastcall *CHECKGAMMA)(); // 23
-	void(__fastcall *SETPERSPECTIVESCALE)(); // 24
-	void(__fastcall *ADJUSTPERSPECTIVE)(int nXpos, int nYpos, int nBais, int *pXAdjust, int *pYAdjust); // 25
-	void(__fastcall *SCALEPERSPECTIVEPOS)(int nXpos, int nYpos, int nAngle, int *pXpos, int *pYpos, BOOL bOrder); // 26
-	void(__fastcall *SETDEFPERSPECTIVEFACTOR)(); // 27
-	void(__fastcall *SETPALETTE)(BYTE* pPalette); // 28
-	void(__fastcall *SETPALETTETABLE)(BYTE** pPalette); // 29
-	void(__fastcall *SETGLOBALLIGHT)(BYTE nRed, BYTE nGreen, BYTE nBlue); // 30
-	void(__fastcall *DRAWGROUNDTILE)(void* pTile, DWORD** pLight, int nXpos, int nYpos, int nWorldXpos, int nWorldYpos, BYTE nAlpha, int nScreenPanels, void* pTileData); // 31
-	void(__fastcall *DRAWPERSPECTIVEIMG)(CellContext* pData, int nXpos, int nYpos, DWORD dwGamma, int nDrawMode, int nScreenMode, BYTE* pPalette); // 32
-	void(__fastcall *DRAWIMAGE)(CellContext* pData, int nXpos, int nYpos, DWORD dwGamma, int nDrawMode, BYTE* pPalette); // 33
-	void(__fastcall *DRAWSHIFTEDIMG)(CellContext* pData, int nXpos, int nYpos, DWORD dwGamma, int nDrawMode, int nGlobalPaletteShift); // 34
-	void(__fastcall *DRAWVERTICALCROPIMG)(CellContext* pData, int nXpos, int nYpos, int nSkipLines, int nDrawLines, int nDrawMode); // 35
-	void(__fastcall *DRAWSHADOWS)(CellContext* pData, int nXpos, int nYpos); // 36
-	void(__fastcall *DRAWIMAGEFAST)(CellContext* pData, int nXpos, int nYpos, BYTE nPaletteIndex); // 37
-	void(__fastcall *DRAWCLIPPEDIMG)(CellContext* pData, int nXpos, int nYpos, void* pCropRect, int nDrawMode); // 38
-	void(__fastcall *DRAWWALLTILE)(void* pTile, int nXpos, int nYpos, DWORD** pLight, int nScreenPanels, BYTE nAlpha); // 39
-	void(__fastcall *DRAWROOFTILE)(void* pTile, int nXpos, int nYpos, DWORD** pLight, int nScreenPanels, BYTE nAlpha); // 40
-	void(__fastcall *DRAWVISTILE)(void* pTile, int nXpos, int nYpos, int nDrawMode, int nScreenPanels); // 41
-	void(__fastcall *DRAWRECT)(RECT *pRect, BYTE nPaletteIndex); // 42
-	void(__fastcall *DRAWRECTEX)(RECT *pRect, BYTE nPaletteIndex); // 43
-	void(__fastcall *DRAWSOLIDRECT)(RECT *pRect, BYTE nPaletteIndex); // 44
-	void(__fastcall *DRAWSOLIDSQUARE)(RECT *pRect, BYTE nPaletteIndex, int nSize); // 45
-	void(__fastcall *DRAWSOLIDRECTEX)(int nXStart, int nYStart, int nXEnd, int nYEnd, DWORD dwColor, int nDrawMode); // 46
-	void(__fastcall *DRAWSOLIDRECTALPHA)(int nXStart, int nYStart, int nXEnd, int nYEnd, DWORD dwColor, BYTE nAlpha); // 47
-	void(__fastcall *DRAWLINE)(int nXStart, int nYStart, int nXEnd, int nYEnd, BYTE nColor, BYTE nAlpha); // 48
-	void(__fastcall *CLEARSCREEN)(BOOL bPartial); // 49
-	void(__fastcall *DRAWSTRING)(int nXpos, int nYpos, const char *szFormat, ...); // 50
-	void(__fastcall *DRAWLIGHT)(DWORD *pLight, DWORD *pPlayerLight, int nXpos, int nYpos); // 51
-	void(__fastcall *DEBUGFILLBACKBUFFER)(int xPos, int yPos); // 52
-	void(__fastcall *CLEARCACHES)(); // 53
+	BOOL(__fastcall *InitWindow)(HINSTANCE); // 0
+	BOOL(__fastcall *InitPerspective)(int * fPerspective, int * _1); // 1
+	BOOL(__fastcall *Release)(); // 2
+	BOOL(__fastcall *Init)(HANDLE hWnd, int nResolution); // 3
+	BOOL(__fastcall *Shutdown)(); // 4
+	BOOL(__fastcall *EndCutscene)(HANDLE hWnd, int nResolution, int); // 5
+	BOOL(__fastcall *BeginScene)(BOOL bClear, BYTE nRed, BYTE nGreen, BYTE nBlue); // 6
+	BOOL(__fastcall *EndScene1)(); // 7
+	BOOL(__fastcall *EndScene2)(); // 8
+	BOOL(__fastcall *ResizeWin)(HANDLE HWND, int bResolution); // 9
+	BOOL(__fastcall *GetBackBuffer)(BYTE* pBuffer); // 10
+	BOOL(__fastcall *ActivateWindow)(int Unk, int Contrast); // 11
+	BOOL(__fastcall *SetOption)(int nOption, int nValue); // 12
+	BOOL(__fastcall *BeginCutscene)(); // 13
+	BOOL(__fastcall *PlayCutscene)(const char* szFile, int nResolution, void *pfframe); // 14
+	BOOL(__fastcall *CheckCutscene)(); // 15
+	BOOL(__fastcall *DecodeSmacker)(const char *szsmacker, BYTE *pbuffer, int nVersion); // 16
+	BOOL(__fastcall *PlaySmacker)(void *pcontext); // 17
+	BOOL(__fastcall *CloseSmacker)(void *pcontext); // 18
+	int(__fastcall *GetRenderStats)(); // 19
+	void(__fastcall *GetScreenSize)(int *pwidth, int *pheight); // 20
+	BOOL(__fastcall *SetScaleFactor)(); // 21
+	BOOL(__fastcall *SetGamma)(int nGamma); // 22
+	BOOL(__fastcall *CheckGamma)(); // 23
+	BOOL(__fastcall *SetPerspectiveScale)(); // 24
+	BOOL(__fastcall *AdjustPerspective)(int nXpos, int nYpos, int nBais, int *pxadjust, int *pyadjust); // 25
+	BOOL(__fastcall *ScalePerspectivepos)(int nXpos, int nYpos, int nAngle, int *pxpos, int *pypos, BOOL bOrder); // 26
+	BOOL(__fastcall *SetDefperspectivefactor)(); // 27
+	BOOL(__fastcall *SetPalette)(BYTE* pPalette); // 28
+	BOOL(__fastcall *SetPalettetable)(BYTE** pPalette); // 29
+	BOOL(__fastcall *SetGlobalLight)(BYTE nRed, BYTE nGreen, BYTE nBlue); // 30
+	BOOL(__fastcall *DrawGroundTile)(void* pTile, DWORD** pLight, int nXpos, int nYpos, int nWorldXpos, int nWorldYpos, BYTE nAlpha, int nScreenPanels, void* pTileData); // 31
+	BOOL(__fastcall *DrawPerspectiveImage)(CellContext* pData, int nXpos, int nYpos, DWORD dwGamma, int nDrawMode, int nScreenMode, BYTE* pPalette); // 32
+	BOOL(__fastcall *DrawImage)(CellContext* pData, int nXpos, int nYpos, DWORD dwGamma, int nDrawMode, BYTE* pPalette); // 33
+	BOOL(__fastcall *DrawShiftedImage)(CellContext* pData, int nXpos, int nYpos, DWORD dwGamma, int nDrawMode, int nGlobalPaletteShift); // 34
+	BOOL(__fastcall *DrawVerticalCropImage)(CellContext* pData, int nXpos, int nYpos, int nSkipLines, int nDrawLines, int nDrawMode); // 35
+	BOOL(__fastcall *DrawShadows)(CellContext* pData, int nXpos, int nYpos); // 36
+	BOOL(__fastcall *DrawImageFast)(CellContext* pData, int nXpos, int nYpos, BYTE nPaletteIndex); // 37
+	BOOL(__fastcall *DrawClippedImage)(CellContext* pData, int nXpos, int nYpos, void* pCropRect, int nDrawMode); // 38
+	BOOL(__fastcall *DrawWallTile)(void* pTile, int nXpos, int nYpos, DWORD** pLight, int nScreenPanels, BYTE nAlpha); // 39
+	BOOL(__fastcall *DrawRoofTile)(void* pTile, int nXpos, int nYpos, DWORD** pLight, int nScreenPanels, BYTE nAlpha); // 40
+	BOOL(__fastcall *DrawVisTile)(void* pTile, int nXpos, int nYpos, int nDrawMode, int nScreenPanels); // 41
+	BOOL(__fastcall *DrawRect)(RECT *Prect, BYTE nPaletteIndex); // 42
+	BOOL(__fastcall *DrawRectEx)(RECT *Prect, BYTE nPaletteIndex); // 43
+	BOOL(__fastcall *DrawSolidRect)(RECT *Prect, BYTE nPaletteIndex); // 44
+	BOOL(__fastcall *DrawSolidSquare)(RECT *Prect, BYTE nPaletteIndex, int nSize); // 45
+	BOOL(__fastcall *DrawSolidRectEx)(int nXStart, int nYStart, int nXEnd, int nYEnd, DWORD dwColor, int nDrawMode); // 46
+	BOOL(__fastcall *DrawSolidRectAlpha)(int nXStart, int nYStart, int nXEnd, int nYEnd, DWORD dwColor, BYTE nAlpha); // 47
+	BOOL(__fastcall *DrawLine)(int nXStart, int nYStart, int nXEnd, int nYEnd, BYTE nColor, BYTE nAlpha); // 48
+	BOOL(__fastcall *ClearScreen)(BOOL bPartial); // 49
+	BOOL(__fastcall *DrawString)(int nXpos, int nYpos, const char *Szformat, ...); // 50
+	BOOL(__fastcall *DrawLight)(DWORD *plight, DWORD *pplayerlight, int nXpos, int nYpos); // 51
+	BOOL(__fastcall *DebugFillBackBuffer)(int xPos, int yPos); // 52
+	BOOL(__fastcall *ClearCaches)(); // 53
 };
 
 struct D2RECT
