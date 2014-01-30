@@ -308,6 +308,10 @@ Misc::Patch(CALL, GetDllOffset("D2Gfx.dll", 0x90BC), (DWORD)D2Stubs::D2GFX_LookU
 Misc::Patch(CALL, GetDllOffset("D2Gfx.dll", 0x93E9), (DWORD)D2Stubs::D2GFX_LookUpFix_IV_STUB, 7, "LookUpYFix_IV");
 Misc::Patch(CALL, GetDllOffset("D2Gfx.dll", 0xA680), (DWORD)D2Stubs::D2GFX_LookUpFix_V_STUB, 7, "LookUpYFix_V");
 Misc::Patch(CALL, GetDllOffset("D2Gfx.dll", 0xA4F7), (DWORD)D2Stubs::D2GFX_LookUpFix_VI_STUB, 6, "LookUpYFix_VI");
+
+//Res UI fixups
+Misc::Patch(JUMP, GetDllOffset("D2Common.dll", -10689), (DWORD)ExMultiRes::GetBeltPos, 7, "D2COMMON_GetBeltPos");
+Misc::Patch(JUMP, GetDllOffset("D2Common.dll", -10370), (DWORD)ExMultiRes::GetBeltsTxtRecord, 10, "D2COMMON_GetBeltsTxtRecord");
 #else
 ShowWindow(D2Funcs::D2GFX_GetHwnd(),SW_HIDE);
 MessageBoxA(0,"Version is not supported!","D2Ex",0); 
@@ -321,6 +325,7 @@ if (!ExMultiRes::InitImages())
 	D2EXERROR("One or more D2Ex resources weren't loaded. Check if your D2Ex2.MPQ is valid!");
 }
 Misc::WriteDword(*(DWORD**)&D2Vars::D2GFX_Helpers, (DWORD)&ExMultiRes::FillYBufferTable);
+
 
 //END PATCHES-----------------------------------------------------------------------------------
 //KEYBOARD CALL TREE
@@ -380,6 +385,7 @@ D2Vars::D2NET_SrvPacketLenTable[0x2C]=18;
 	Misc::WriteDword((DWORD*)&D2Vars::D2CLIENT_MenuMsgs[1].fnCallBack,(DWORD)ExOptions::m_LBUTTONUP); 
 	Misc::WriteDword((DWORD*)&D2Vars::D2CLIENT_MenuMsgs[6].fnCallBack,(DWORD)ExOptions::m_OnEnter); 
 
+
 //-----------------------
 //HERE WE GO
 #ifdef D2EX_EXAIM_ENABLED
@@ -398,6 +404,12 @@ D2Vars::D2NET_SrvPacketLenTable[0x2C]=18;
 		}
 		if(ExParty::GetPlayerArea())
 		{
+			int mDesiredMode = ExMultiRes::FindDisplayMode(cResModeX, cResModeX);
+			if (!mDesiredMode)
+				ExMultiRes::SetResolution(mDesiredMode);
+			else
+				D2EXERROR("Cannot set resolution %dx%d. Please correct your setting in D2Ex.ini", cResModeX, cResModeY);
+
 #ifdef D2EX_EXAIM_ENABLED
 			ResetEvent(hAimEvent);
 			hAim = (HANDLE)_beginthreadex(0,0,&ExAim::WatchThread,&hAimEvent,0,0);

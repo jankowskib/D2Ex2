@@ -8,6 +8,8 @@
 #include "ExEditBox.h"
 #include "ExMapReveal.h"
 #include "ExAim.h"
+#include "ExMultiRes.h"
+
 #include "Build.h"
 
 void ExScreen::ScreenToAutomap(POINT* ptPos, int x, int y)  //BHHack, converts Real path XY to AutoMap
@@ -140,7 +142,7 @@ void __stdcall ExScreen::Display()
 //	D2Funcs::D2WIN_DrawText(D2Vars::D2CLIENT_TempMessage,0,40,0,0);
 
 	EnterCriticalSection(&CON_CRITSECT);
-	for(vector<ExControl*>::const_iterator i = Controls.begin(); i!=Controls.end(); ++i) (*i)->Draw();
+	for(auto i = Controls.cbegin(); i!=Controls.cend(); ++i) (*i)->Draw();
 	LeaveCriticalSection(&CON_CRITSECT);
 
 	D2Funcs::D2WIN_SetTextSize(1);
@@ -226,16 +228,28 @@ wchar_t szText[100] = L"";
 
 void ExScreen::DrawAutoMapVer()
 {
-	wostringstream wPatch; 
-	wPatch << L"Patch: " << GetColorCode(9) 
+	wostringstream wPatch, wRes; 
+	int x, y;
+	int LocId = D2Funcs::D2LANG_GetLocaleId();
+
+	wPatch << L"Patch: " << GetColorCode(COL_YELLOW) 
 #ifdef VER_111B
-		<< L"1.11B";
+		<< L"1.11D";
 #else
 		<< L"1.13D";
 #endif
 	static int cSize = ExScreen::GetTextWidth(wPatch.str().c_str());
 	D2Funcs::D2WIN_DrawText(wPatch.str().c_str(), *D2Vars::D2CLIENT_ScreenWidth - cSize - 16, *D2Vars::D2CLIENT_AutomapInfoY, 4, 0);
 	*D2Vars::D2CLIENT_AutomapInfoY+=16;
+
+	ExMultiRes::GetModeParams(*D2Vars::D2GFX_GfxMode, &x, &y);
+	if (x > 800 && y > 600)
+	{
+		wRes << (LocId == LOCALE_ENG ? L"Resolution: " : L"Rozdzielczoœæ: ") << GetColorCode(COL_YELLOW) << x << L"x" << y;
+		int cSize2 = ExScreen::GetTextWidth(wRes.str().c_str());
+		D2Funcs::D2WIN_DrawText(wRes.str().c_str(), *D2Vars::D2CLIENT_ScreenWidth - cSize2 - 16, *D2Vars::D2CLIENT_AutomapInfoY, 4, 0);
+		*D2Vars::D2CLIENT_AutomapInfoY += 16;
+	}
 }
 
 void OnMapDraw()

@@ -59,7 +59,7 @@ public:
 
 	static void Check(void);
 	static void Clear(void);
-
+	static void UpdateYPos(void);
 	int	StateId;
 	int SkillId;
 	DWORD SkillLen;

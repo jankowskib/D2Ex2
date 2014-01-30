@@ -324,8 +324,9 @@ __declspec(naked) void D2Stubs::D2GFX_GetModeParams_STUB()
 __declspec(naked) void D2Stubs::D2GFX_LookUpFix_I_STUB()
 {
 	__asm
-	{
-		mov  ecx, (ExMultiRes::gBufferXLookUpTable + 0x80)[eax * 4]
+	{	
+		mov ecx, [ExMultiRes::gptBufferXLookUpTable]
+			mov  ecx, dword ptr ds : [eax * 4 + ecx + 0x80]
 			retn
 	}
 }
@@ -334,7 +335,8 @@ __declspec(naked) void D2Stubs::D2GFX_LookUpFix_II_STUB()
 {
 	__asm
 	{
-		mov  ecx, (ExMultiRes::gBufferXLookUpTable + 0x80)[edi * 4]
+		mov ecx, [ExMultiRes::gptBufferXLookUpTable]
+		mov  ecx, dword ptr ds: [edi * 4 +  ecx + 0x80]
 			retn
 	}
 }
@@ -343,8 +345,9 @@ __declspec(naked) void D2Stubs::D2GFX_LookUpFix_III_STUB()
 {
 	__asm
 	{
-		mov  ebx, (ExMultiRes::gBufferXLookUpTable + 0x80)[eax * 4]
-			retn
+		mov ebx, [ExMultiRes::gptBufferXLookUpTable]
+		mov  ebx, dword ptr ds :[eax * 4 + ebx + 0x80]
+		retn
 	}
 }
 
@@ -352,7 +355,8 @@ __declspec(naked) void D2Stubs::D2GFX_LookUpFix_IV_STUB()
 {
 	__asm
 	{
-		mov  ebx, (ExMultiRes::gBufferXLookUpTable + 0x80)[esi * 4]
+		mov ebx, [ExMultiRes::gptBufferXLookUpTable]
+		mov ebx, dword ptr ds: [esi * 4 + ebx + 0x80]
 			retn
 	}
 }
@@ -361,8 +365,9 @@ __declspec(naked) void D2Stubs::D2GFX_LookUpFix_V_STUB()
 {
 	__asm
 	{
-		mov  esi, (ExMultiRes::gBufferXLookUpTable + 0x80)[eax * 4]
-			retn
+		mov esi, [ExMultiRes::gptBufferXLookUpTable]
+		mov esi, dword ptr ds:[eax * 4 + esi + 0x80]
+		retn
 	}
 }
 
@@ -370,7 +375,16 @@ __declspec(naked) void D2Stubs::D2GFX_LookUpFix_VI_STUB()
 {
 	__asm
 	{
-		cmp     ebp, ExMultiRes::gBufferXLookUpTable + 0x1900
+		push eax
+		push ecx
+		mov eax, [D2Vars::D2GFX_Height]
+		mov eax, [eax]
+
+		mov ecx, [ExMultiRes::gptBufferXLookUpTable]
+
+		cmp ebp, dword ptr ds : [eax * 4 + ecx]
+		pop ecx
+		pop eax
 		retn
 	}
 }

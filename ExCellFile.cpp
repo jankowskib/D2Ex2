@@ -63,7 +63,7 @@ bool ExCellFile::SetFrame(int No)
 
 ExCellFile::~ExCellFile(void)
 {
-	DEBUGMSG("Trying to free cell file %s", FileName.c_str());
+	//DEBUGMSG("Trying to free cell file %s", FileName.c_str());
 	if (!ptCellFile) return;
 	D2Funcs::D2CMP_DeleteCellFile(ptCellFile);
 	D2Funcs::FOG_FreeMemory(ptCellFile, __FILE__, __LINE__, 0);

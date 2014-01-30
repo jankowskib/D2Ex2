@@ -12,6 +12,21 @@ struct ArenaTxt
 
 #pragma pack(push,1)
 
+struct D2BeltBox
+{
+	DWORD dwBoxLeft;			//0x00
+	DWORD dwBoxRight;			//0x04
+	DWORD dwBoxTop;				//0x08
+	DWORD dwBoxBottom;			//0x0C
+};
+
+struct BeltsTxt //sizeof 0x108
+{
+	DWORD _unusedName;			    //0x00 placeholder for name field
+	DWORD dwNumBoxes;               //0x04
+	D2BeltBox hBox[16];				//0x08
+};
+
 struct AutomapTxt
 {
    char szLevelName[16];            //0x00

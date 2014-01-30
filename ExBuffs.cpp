@@ -321,6 +321,19 @@ BOOL __fastcall ExBuffs::OnRemoveState(BYTE* aPacket)
 }
 
 
+void ExBuff::UpdateYPos()
+{
+	EnterCriticalSection(&BUFF_CRITSECT);
+	for (auto it = Buffs.begin(); it != Buffs.end(); ++it)
+	{
+		it->second->SetY(*D2Vars::D2CLIENT_ScreenViewHeight - 10);
+		if (it->second->Buff) it->second->Buff->SetY(it->second->GetY());
+		if (it->second->BuffTime) it->second->BuffTime->SetY(it->second->GetY() - it->second->GetHeight());
+		if (it->second->BuffInfo) it->second->BuffInfo->SetY(it->second->GetY());
+	}
+	LeaveCriticalSection(&BUFF_CRITSECT);
+}
+
 void ExBuff::Check()
 {
 	static int LocId = D2Funcs::D2LANG_GetLocaleId();

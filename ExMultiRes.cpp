@@ -4,15 +4,14 @@
 #include "ExBuffs.h"
 
 /*
-	Partially reveresed D2MultiRes ported to 1.13d
+	Partially reversed D2MultiRes ported to 1.11b/1.13d
 	Credits goes to Sluggy
+	Thx for most ugly code I've ever reversed.
 	http://d2mods.info/forum/viewtopic.php?t=51560
 */
 
 namespace ExMultiRes
 {
-
-	static vector<ResMode> lResModes;
 	struct sResList
 	{
 		ExCellFile* cD2MRChooseResolutionBack;
@@ -35,7 +34,10 @@ namespace ExMultiRes
 		ExCellFile* cD2MRVerticalBorder;
 	};
 	sResList static ResFiles;
-	int gBufferXLookUpTable[1601] = { 0 }; // I think that's will be OK
+
+	vector<ResMode> lResModes;
+	int *gptBufferXLookUpTable;
+	int gBufferXLookUpTable[GDI_MAXY + 1] = { 0 };
 
 	void __fastcall SetResolution(int nMode) // Wrapper on D2CLIENT.0x2C220
 	{
@@ -44,7 +46,6 @@ namespace ExMultiRes
 		if (D2Funcs::D2GFX_GetResolutionMode() == nMode)
 			return;
 		//nMode = 3;
-		ExBuff::Clear();
 
 		GetModeParams(nMode, D2Vars::D2CLIENT_ScreenWidth, D2Vars::D2CLIENT_ScreenHeight);
 		*D2Vars::D2CLIENT_ScreenMode = (nMode == 2 ? 1 : nMode);
@@ -57,11 +58,13 @@ namespace ExMultiRes
 		ResizeView(*D2Vars::D2CLIENT_UiCover);
 		D2Funcs::D2CLIENT_UpdateAutoMap(TRUE);
 		D2Funcs::D2CLIENT_ClearScreen4();
+		ExBuff::UpdateYPos();
 	}
 
+	// Only function for screen width to rule them all!
 	void __stdcall GetModeParams(int nMode, int* pWidth, int* pHeight) // Wrapper on D2Gfx.10064, 1.11b is int __usercall sub_6FA880F0<eax>(int pHeight<eax>, int nMode<edx>, int pWidth<ecx>)
 	{
-		nMode = 3;
+		//nMode = 3;
 		switch (nMode)
 		{
 			case 0:
@@ -77,15 +80,15 @@ namespace ExMultiRes
 				if (pHeight) *pHeight = 600;
 			}
 			break;
-			case 3:
-			{
-				if (pWidth) *pWidth = 1920;
-				if (pHeight) *pHeight = 1200;
-			}
-			break;
 			default:
 			{
-				D2EXERROR("Unsupported resolution mode %d", nMode);
+				if (lResModes.at(nMode - 3).nWidth == 0 || lResModes.at(nMode - 3).nHeight == 0)
+				{
+					DEBUGMSG("ERROR. Desired resolution is invalid (%dx%d)", lResModes.at(nMode - 3).nWidth, lResModes.at(nMode - 3).nHeight)
+					break;
+				}
+				if (pWidth) *pWidth = lResModes.at(nMode - 3).nWidth;
+				if (pHeight) *pHeight = lResModes.at(nMode - 3).nHeight;
 			}
 			break;
 		}
@@ -149,7 +152,7 @@ namespace ExMultiRes
 		
 	}
 
-	void __fastcall FillYBufferTable(void *ppvBits, int nWidth, int nHeight, int aZero) // Wrapper on D2GFX.6FA893B0
+	void __fastcall FillYBufferTable_OLD(void *ppvBits, int nWidth, int nHeight, int aZero) // Wrapper on D2GFX.6FA893B0
 	{
 		static int LastWidth;
 		DEBUGMSG("FillYBuffer(), %dx%d, %d", nWidth, nHeight, aZero)
@@ -161,16 +164,75 @@ namespace ExMultiRes
 		if (nWidth != LastWidth)
 		{
 			LastWidth = nWidth;
-			int YStartOffset =-32 * nWidth;
-			for (int* pEntry = (int*)&gBufferXLookUpTable; pEntry < &gBufferXLookUpTable[1600]; ++pEntry, YStartOffset += nWidth)
+			int YStartOffset = -32 * nWidth;
+			for (int* pEntry = (int*)&gBufferXLookUpTable; pEntry < &gBufferXLookUpTable[nHeight]; ++pEntry, YStartOffset += nWidth)
 			{
-				*pEntry = YStartOffset;	
+				*pEntry = YStartOffset;
 			}
 		}
 		if (*D2Vars::D2GFX_ScreenShift != -1)
 		{
 			D2Funcs::D2GFX_UpdateResizeVars(nWidth, nHeight);
-			gBufferXLookUpTable[1600] = *D2Vars::D2GFX_ScreenShift == 2 ? (nWidth / 2) : 0;
+			gBufferXLookUpTable[nHeight] = *D2Vars::D2GFX_ScreenShift == 2 ? (nWidth / 2) : 0;
+		}
+	}
+
+
+	void __fastcall FillYBufferTable(void *ppvBits, int nWidth, int nHeight, int aZero) // Wrapper on D2GFX.6FA893B0
+	{
+		static int LastWidth, LastHeight;
+		DEBUGMSG("FillYBuffer(), %dx%d, %d", nWidth, nHeight, aZero)
+
+		*D2Vars::D2GFX_gpbBuffer = ppvBits;
+		*D2Vars::D2GFX_Width = nWidth;
+		*D2Vars::D2GFX_Height = nHeight;
+
+		if (gptBufferXLookUpTable && (nHeight == 0 || nHeight != LastHeight))
+		{
+			DEBUGMSG("<< Deleting gptXLookTbl, %dx%d, LastH = %d", nWidth, nHeight, LastHeight);
+			LastHeight = nHeight;
+			LastWidth = nWidth;
+			delete[] gptBufferXLookUpTable;
+			gptBufferXLookUpTable = 0;
+		}
+		else
+		{
+			if (!gptBufferXLookUpTable)
+			{
+				DEBUGMSG(">> Allocating gptXLookTbl, %dx%d", nWidth, nHeight);
+				gptBufferXLookUpTable = new signed int[nHeight + 33];
+				
+				for (int i = 0, YStartOffset = (-32 * nWidth); i < nHeight + 32; YStartOffset += nWidth)
+				{
+					gptBufferXLookUpTable[i++] = YStartOffset;
+
+				}
+			}
+			else if (gptBufferXLookUpTable && nHeight == LastHeight)
+			{
+				DEBUGMSG(">! Skipping allocate because buffer is exist!");
+				if (nWidth != LastWidth)
+				{
+					DEBUGMSG(">! Screen width has changed, recalculating...");
+					int YStartOffset = -32 * nWidth;
+					for (int i = 0; i <= nHeight; ++i, YStartOffset += nWidth)
+					{
+						gptBufferXLookUpTable[i] = YStartOffset;
+					}
+				}
+			}
+			else
+			{
+				DEBUGMSG(">! gptBufferXLookUpTable exists!");
+			}
+			LastHeight = nHeight;
+			LastWidth = nWidth;
+
+			if (*D2Vars::D2GFX_ScreenShift != -1 && gptBufferXLookUpTable)
+			{
+				D2Funcs::D2GFX_UpdateResizeVars(nWidth, nHeight);
+				gptBufferXLookUpTable[nHeight + 32] = *D2Vars::D2GFX_ScreenShift == 2 ? (nWidth / 2) : 0;
+			}
 		}
 	}
 
@@ -238,6 +300,7 @@ namespace ExMultiRes
 	BOOL __fastcall GDI_ResizeWindow(HANDLE HWND, int nMode) // Wrapper on D2GDI.6F877E60, pfnDriverCallback->ResizeWin
 	{
 		DeleteObject(*D2Vars::D2GDI_DIB);
+		*D2Vars::D2GDI_DIB = 0;
 		*D2Vars::D2GDI_gpbBuffer = 0;
 		FillYBufferTable(0, 0, 0, 0);
 
@@ -247,6 +310,47 @@ namespace ExMultiRes
 		GetModeParams(nMode, D2Vars::D2GDI_WindowWidth, 0);
 
 		return TRUE;
+	}
+
+	void __stdcall GetBeltPos(int nIndex, int nMode, D2BeltBox *out, int nBox) // Wrapper on D2Common.Ordinal10689
+	{
+		int x, y, panelsize, xpos;
+
+		GetModeParams(nMode, &x, &y);
+
+
+		if (nMode < 2)
+		{
+			xpos = 178;
+			panelsize = 310;
+		}
+		else
+		{
+			xpos = 258;
+			panelsize = 470;
+		}
+		/*[         Width        ]
+		         [   310  ]
+		  ( ) *  =====....=  * ( )
+		      xpos + panelsize / 2
+		*/
+		out->dwBoxLeft = ((x / 2) - (panelsize / 2) + xpos) + (31 * (nBox % 4));
+		out->dwBoxRight = out->dwBoxLeft + 29;
+		out->dwBoxBottom = (y - 9) - (33 * (nBox / 4));
+		out->dwBoxTop = out->dwBoxBottom - 29;
+	}
+
+	void __stdcall GetBeltsTxtRecord(int nIndex, int nMode, BeltsTxt *out) // Wrapper on D2Common.Ordinal10370
+	{
+		const int nBeltBoxesTbl[] = { 12, 8, 4, 16, 8, 12, 16 };
+
+		out->dwNumBoxes = nBeltBoxesTbl[nIndex % 7];
+		
+		for (int i = 0; i < out->dwNumBoxes; ++i)
+		{
+			GetBeltPos(nIndex, nMode, &out->hBox[i], i);
+		}
+
 	}
 
 	bool InitImages()
@@ -321,6 +425,18 @@ namespace ExMultiRes
 
 	}
 
+	int FindDisplayMode(int Width, int Height)
+	{
+		for (auto m = 0;  m != lResModes.size(); ++m)
+		{
+			if (lResModes.at(m).nHeight == Height && lResModes.at(m).nWidth == Width)
+			{
+				return m;
+			}
+		}
+		return 0;
+	}
+
 	bool EnumDisplayModes()
 	{
 		DEVMODE d = { 0 };
@@ -337,6 +453,10 @@ namespace ExMultiRes
 					break;
 				}
 			}
+			if (d.dmPelsWidth <= 800 || d.dmPelsHeight <= 600)
+				continue;
+			if (d.dmPelsWidth == 1366 || d.dmPelsHeight <= 768) // messes up screen
+				continue;
 
 			if (bAdd)
 			{

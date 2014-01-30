@@ -2,7 +2,7 @@
 #include "ExInput.h"
 #include "ExEvents.h"
 #include "ExAim.h"
-
+#include "ExMultiRes.h"
 
 // IMPORT FROM SCRAP Project
 void ExInput::DefineBindings()
@@ -133,8 +133,7 @@ return -1;
 }
 if(_stricmp(str,"#icon2")==0)
 {
-ExEvent pEvent;
-		::memset(&pEvent,0,sizeof(ExEvent));
+		ExEvent pEvent = { 0 };
 		pEvent.P_A6=0xA6;
 		pEvent.MsgType=3;
 		pEvent.Argument=0;
@@ -278,67 +277,91 @@ OldCode:
 
 LONG WINAPI ExInput::GameWindowEvent(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-switch (uMsg)
-{
-case WM_KEYDOWN:
-case WM_KEYUP:
-case WM_LBUTTONDOWN:
-case WM_LBUTTONUP:
-case WM_MOUSEWHEEL:
-case WM_MOUSEMOVE:
+	switch (uMsg)
 	{
-	bool a = false;
-	EnterCriticalSection(&CON_CRITSECT);
-	//for(vector<ExControl*>::const_iterator i = Controls.begin(); i!=Controls.end(); ++i)
-	//{
-	//if((*i)->isPressed(uMsg,wParam)) a=true;
-	//}
-	for(vector<ExControl*>::size_type i = 0; i<Controls.size(); ++i)
+	case WM_KEYDOWN:
+	case WM_KEYUP:
+	case WM_LBUTTONDOWN:
+	case WM_LBUTTONUP:
+	case WM_MOUSEWHEEL:
+	case WM_MOUSEMOVE:
+		{
+		bool a = false;
+		EnterCriticalSection(&CON_CRITSECT);
+		for(vector<ExControl*>::size_type i = 0; i<Controls.size(); ++i)
+		{
+			if(Controls.at(i)->isPressed(uMsg,wParam)) a=true;
+		}
+		LeaveCriticalSection(&CON_CRITSECT);
+		if(a) return 0;
+		}
+	break;
+	//CASE 'NEXTMSG'
+	};
+	if (uMsg == WM_MOUSEWHEEL && (GET_KEYSTATE_WPARAM(wParam) & MK_CONTROL))
 	{
-	if(Controls.at(i)->isPressed(uMsg,wParam)) a=true;
-	}
-	LeaveCriticalSection(&CON_CRITSECT);
-	if(a) return 0;
-	}
-break;
-//CASE 'NEXTMSG'
-};
-
-if(uMsg == WM_KEYDOWN) {
-	if(wParam == 'V') 	{
-		if(GetKeyState(VK_CONTROL)<0){
-			if((D2Vars::D2CLIENT_UIModes[UI_CHAT]) && OpenClipboard(0))
+		if (GET_WHEEL_DELTA_WPARAM(wParam) < 0)
+		{
+			if (*D2Vars::D2GFX_GfxMode > 0)
 			{
-				INPUT inp[2];
-				memset(inp,0,sizeof(INPUT));
-				inp[0].type = INPUT_KEYBOARD;
-				inp[0].ki.dwFlags = KEYEVENTF_UNICODE;
-				inp[1] = inp[0];
-				inp[1].ki.dwFlags |= KEYEVENTF_KEYUP;
-				if(!GetClipboardData(CF_UNICODETEXT)) return 0;
-				for (wchar_t* p=(wchar_t*)GetClipboardData(CF_UNICODETEXT); *p; p++)  {
-					if(*p==VK_RETURN) continue;
-					inp[0].ki.wScan = inp[1].ki.wScan = *p;
-					SendInput(2, inp, sizeof(INPUT));
-				}
-				CloseClipboard();
-				return 0;
-			}}
-	} 
-//	if(wParam == VK_INSERT && D2Vars::D2CLIENT_UIModes[UI_CHAT] ==0 ) {ExAim::DoAttack(); return 0; }
-#ifdef D2EX_SCRAP_HACKS
-	if(StillSwitch) {
-		if(D2Funcs::D2CLIENT_GetPlayer() && !D2Vars::D2CLIENT_UIModes[UI_CHAT]) {
-			WORD vKey = GetKeyBind(44,false); // Fast Switch
-			WORD vKey2 = GetKeyBind(44, true); //Alternative HotKey
-			if(wParam == vKey || wParam == vKey2) {
-				lParam =0x00110001;
+				EnterCriticalSection(&CON_CRITSECT);
+				int x, y;
+				ExMultiRes::GetModeParams(*D2Vars::D2GFX_GfxMode - 1, &x, &y);
+				DEBUGMSG("Changing resolution to %dx%d", x, y);
+				ExMultiRes::SetResolution((*D2Vars::D2GFX_GfxMode) - 1);
+				LeaveCriticalSection(&CON_CRITSECT);
 			}
 		}
+		else if (GET_WHEEL_DELTA_WPARAM(wParam) > 0)
+		{
+			if (*D2Vars::D2GFX_GfxMode < ExMultiRes::lResModes.size() + 2)
+			{
+				EnterCriticalSection(&CON_CRITSECT);
+				int x, y;
+				ExMultiRes::GetModeParams(*D2Vars::D2GFX_GfxMode + 1, &x, &y);
+				DEBUGMSG("Changing resolution to %dx%d", x, y);
+				ExMultiRes::SetResolution((*D2Vars::D2GFX_GfxMode) + 1);
+				LeaveCriticalSection(&CON_CRITSECT);
+			}
+		}
+		return 0;
 	}
-#endif
-}
-return (LONG)CallWindowProcA(OldWNDPROC, hWnd, uMsg, wParam, lParam);
+
+	if(uMsg == WM_KEYDOWN) {
+		if(wParam == 'V') 	{
+			if(GetKeyState(VK_CONTROL)<0){
+				if((D2Vars::D2CLIENT_UIModes[UI_CHAT]) && OpenClipboard(0))
+				{
+					INPUT inp[2];
+					memset(inp,0,sizeof(INPUT));
+					inp[0].type = INPUT_KEYBOARD;
+					inp[0].ki.dwFlags = KEYEVENTF_UNICODE;
+					inp[1] = inp[0];
+					inp[1].ki.dwFlags |= KEYEVENTF_KEYUP;
+					if(!GetClipboardData(CF_UNICODETEXT)) return 0;
+					for (wchar_t* p=(wchar_t*)GetClipboardData(CF_UNICODETEXT); *p; p++)  {
+						if(*p==VK_RETURN) continue;
+						inp[0].ki.wScan = inp[1].ki.wScan = *p;
+						SendInput(2, inp, sizeof(INPUT));
+					}
+					CloseClipboard();
+					return 0;
+				}}
+		} 
+	//	if(wParam == VK_INSERT && D2Vars::D2CLIENT_UIModes[UI_CHAT] ==0 ) {ExAim::DoAttack(); return 0; }
+	#ifdef D2EX_SCRAP_HACKS
+		if(StillSwitch) {
+			if(D2Funcs::D2CLIENT_GetPlayer() && !D2Vars::D2CLIENT_UIModes[UI_CHAT]) {
+				WORD vKey = GetKeyBind(44,false); // Fast Switch
+				WORD vKey2 = GetKeyBind(44, true); //Alternative HotKey
+				if(wParam == vKey || wParam == vKey2) {
+					lParam =0x00110001;
+				}
+			}
+		}
+	#endif
+	}
+	return (LONG)CallWindowProcA(OldWNDPROC, hWnd, uMsg, wParam, lParam);
 }
 
 
