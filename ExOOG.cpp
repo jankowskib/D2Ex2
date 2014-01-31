@@ -95,11 +95,11 @@ DWORD WINAPI ExOOG::Rejoin(void * Argz)
 	if(Argz) szName = (char*)Argz;
 
 	wstring GN;
-	Misc::CharToWide(GN,(*D2Vars::D2LAUNCH_BnData)->GameName);
+	Misc::CharToWide(GN,(*D2Vars::D2LAUNCH_BnData)->szGameName);
 	wstring GP;
-	Misc::CharToWide(GP,(*D2Vars::D2LAUNCH_BnData)->GamePass);
+	Misc::CharToWide(GP,(*D2Vars::D2LAUNCH_BnData)->szGamePass);
 
-	if(!szName.empty()) strcpy_s((*D2Vars::D2LAUNCH_BnData)->PlayerName,16,szName.c_str());
+	if(!szName.empty()) strcpy_s((*D2Vars::D2LAUNCH_BnData)->szPlayerName,16,szName.c_str());
 
 	ExOOG::LeaveGame();
 	

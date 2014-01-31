@@ -44,7 +44,9 @@
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\boost_1_55_0;$(IncludePath)</IncludePath>
+    <IncludePath>C:\boost_1_55_0;C:\glfw-3.0.4.bin.WIN32\include;$(IncludePath)</IncludePath>
+    <ReferencePath>$(ReferencePath)</ReferencePath>
+    <LibraryPath>C:\glfw-3.0.4.bin.WIN32\lib-msvc120;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)files\</OutDir>
@@ -154,6 +156,7 @@
   <ItemGroup>
     <ClInclude Include="ArrayEx.h" />
     <ClInclude Include="CollisionMap.h" />
+    <ClInclude Include="CommonStructs.h" />
     <ClInclude Include="D2Ptrs_111B.h" />
     <ClInclude Include="D2Ptrs_113D.h" />
     <ClInclude Include="D2Structs_111B.h" />

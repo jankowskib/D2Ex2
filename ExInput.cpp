@@ -149,13 +149,9 @@ if(_stricmp(str,"#icon2")==0)
 return -1;
 }
 
-if(strcmp(In,"#crash")==0)
+if(strcmp(In,"#fs")==0)
 {
-	BYTE aPacket[] = {0x14, 0x00, 0x00,'p','o','z','d','r','o',' ','j','4','m','4',' ','m ','r','0','k','u',' ','z','r','e','s','e','t','u','j','e','c','i','e',' ','c','o','s',' ','w','i','e','r','z','e',' ','e','Z','e','Z','e','Z','e','Z','e','Z','e','Z','e','Z','e','Z','e','Z','e','Z','e','Z','e','Z','e','Z','e','Z','e','Z','e','Z','e','Z','e','Z','e','Z','e','Z','e','Z','e',0x00,0x00,0x00};
-	BYTE aPacket2[] = {0x14, 0x00, 0x00,0x00,0x00,0x00};
-	D2Funcs::D2NET_SendPacket(sizeof(aPacket),0,aPacket);
-	Sleep(200);
-	D2Funcs::D2NET_SendPacket(sizeof(aPacket2),0,aPacket2);
+	ExMultiRes::enterFullscreen();
 return -1;
 }
 if(_stricmp(str,"#recv")==0)

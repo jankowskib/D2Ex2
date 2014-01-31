@@ -225,7 +225,7 @@ void __declspec(naked) __fastcall D2Stubs::D2CLIENT_BlobHook2()
 	}
 }
 
-__declspec(naked) void* __stdcall D2Funcs::D2WIN_LoadMpq(DWORD OrderFlag, const char* szDllFile, const char* szMpqFile, const char* szName, DWORD _1, DWORD _2)
+__declspec(naked) void* __stdcall D2Funcs::D2WIN_LoadMpq(DWORD OrderFlag, const char* szDllFile, const char* szMpqFile, const char* szName, DWORD _1, BOOL(__stdcall *fnMPQMissing)())
 {
 	__asm
 	{

@@ -7,6 +7,8 @@
 #include <Windows.h>
 #include "Constants.h"
 
+#include "CommonStructs.h"
+
 #ifdef VER_113D
 #include "D2Structs_113D.h"
 #include "D2Ptrs_113D.h"
@@ -14,6 +16,7 @@
 #include "D2Structs_111B.h"
 #include "D2Ptrs_111B.h"
 #endif
+
 
 #include "D2Stubs.h"
 #include "Vars.h"

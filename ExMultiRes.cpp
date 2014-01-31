@@ -2,7 +2,10 @@
 #include "ExMultiRes.h"
 #include "ExCellFile.h"
 #include "ExBuffs.h"
+#include "Offset.h"
+//#include <GLFW\glfw3.h>
 
+//#pragma comment(lib, "lib-msvc110\\glfw3.lib")
 /*
 	Partially reversed D2MultiRes ported to 1.11b/1.13d
 	Credits goes to Sluggy
@@ -12,6 +15,7 @@
 
 namespace ExMultiRes
 {
+
 	struct sResList
 	{
 		ExCellFile* cD2MRChooseResolutionBack;
@@ -37,7 +41,7 @@ namespace ExMultiRes
 
 	vector<ResMode> lResModes;
 	int *gptBufferXLookUpTable;
-	int gBufferXLookUpTable[GDI_MAXY + 1] = { 0 };
+//	int gBufferXLookUpTable[GDI_MAXY + 1] = { 0 };
 
 	void __fastcall SetResolution(int nMode) // Wrapper on D2CLIENT.0x2C220
 	{
@@ -61,10 +65,93 @@ namespace ExMultiRes
 		ExBuff::UpdateYPos();
 	}
 
+	BOOL __stdcall InitWindow(HINSTANCE hInstance, LRESULT(__stdcall *pWndProc)(HWND, UINT, WPARAM, LPARAM), int nDriver, int bWindowed) // Wrapper on D2Gfx.10073
+	{
+		WNDCLASSEX WndClass;
+		const char * szDriverDLLs[] = { "", "D2Gdi.dll", "D2Rave.dll", "D2DDraw.dll", "D2Glide.dll", "D2OpenGL.dll", "D2Direct3D.dll" };
+		typedef fnDriverCallbacks* (__stdcall * GetCallbacks_t)();
+
+
+		DEBUGMSG("D2GFX->InitWindow()");
+		*D2Vars::D2GFX_hInstance = hInstance;
+
+		WndClass.cbSize = sizeof(WNDCLASSEX);
+		WndClass.lpfnWndProc = pWndProc;
+		WndClass.style = ((nDriver != VIDEO_MODE_OPENGL) - 1) & CS_OWNDC;
+		WndClass.cbClsExtra = 0;
+		WndClass.cbWndExtra = 0;
+		WndClass.hInstance = hInstance;
+		WndClass.hIcon = (HICON)LoadImage(hInstance, (LPCSTR)(D2Funcs::FOG_isExpansion() ? 103 : 102), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
+		WndClass.hCursor = LoadCursor(0, (LPCSTR)0x7F00);
+		WndClass.hbrBackground = (HBRUSH)GetStockObject(COLOR_WINDOW);
+		WndClass.lpszMenuName = NULL;
+		WndClass.hIconSm = NULL;
+		WndClass.lpszClassName = "Diablo II";
+		if (!RegisterClassEx(&WndClass))
+		{
+			int err  = GetLastError();
+			//GFX_Error_6FA87AA0((char *)v5);
+			return FALSE;
+		}
+		// TODO:sub_6FA89750();
+		*D2Vars::D2GFX_gpbBuffer = 0;
+		// TODO: atexit(sub_6FA8AB60);
+		*D2Vars::D2GFX_DriverType = nDriver;
+		*D2Vars::D2GFX_WindowMode = bWindowed;
+		*D2Vars::D2GFX_hDriverModHandle = LoadLibrary(szDriverDLLs[nDriver]);
+		if (!*D2Vars::D2GFX_hDriverModHandle)
+		{
+			D2EXERROR("Cannot load library: %s", szDriverDLLs[nDriver])
+		}
+		
+		GetCallbacks_t GetCallbacks = (GetCallbacks_t)GetDllOffset(szDriverDLLs[nDriver], -10000);
+		ASSERT(GetCallbacks)
+		fnDriverCallbacks * fns = GetCallbacks();
+		ASSERT(fns)
+		*D2Vars::D2GFX_pfnDriverCallback = fns;
+		fns->SetOption(8, bWindowed == 1);
+
+		if (!fns->InitWindow(hInstance))
+		{
+			D2EXERROR("Cannot initialize GFX driver. Please run D2VidTest and try again");
+		}
+		if (nDriver < VIDEO_MODE_GLIDE)
+			*D2Vars::D2GFX_bPerspective = FALSE;
+
+
+		return fns->InitPerspective((GFXSettings*)&(*D2Vars::D2GFX_Settings), (int*)&(*D2Vars::D2GFX_fnHelpers));
+	}
+
+	bool enterFullscreen() 
+	{
+		DEVMODE fs;
+		bool isChangeSuccessful;
+		RECT windowBoundary;
+
+		EnumDisplaySettings(NULL, 0, &fs);
+		fs.dmPelsWidth = *D2Vars::D2GFX_Width;
+		fs.dmPelsHeight = *D2Vars::D2GFX_Height;
+		fs.dmBitsPerPel = 8;
+		fs.dmSize = sizeof(DEVMODE);
+		fs.dmFields = DM_PELSWIDTH |
+			DM_PELSHEIGHT |
+			DM_BITSPERPEL;
+
+		SetWindowLongPtr(D2Funcs::D2GFX_GetHwnd(), GWL_EXSTYLE, WS_EX_APPWINDOW | WS_EX_TOPMOST);
+		SetWindowLongPtr(D2Funcs::D2GFX_GetHwnd(), GWL_STYLE, WS_POPUP | WS_VISIBLE);
+		SetWindowPos(D2Funcs::D2GFX_GetHwnd(), HWND_TOPMOST, 0, 0, *D2Vars::D2GFX_Width, *D2Vars::D2GFX_Height, SWP_SHOWWINDOW);
+		isChangeSuccessful = ChangeDisplaySettings(&fs, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL;
+		ShowWindow(D2Funcs::D2GFX_GetHwnd(), SW_MAXIMIZE);
+
+		(*D2Vars::D2LAUNCH_BnData)->bWindowMode = 0;
+		*D2Vars::D2GFX_WindowMode = 0;
+
+		return isChangeSuccessful;
+	}
+
 	// Only function for screen width to rule them all!
 	void __stdcall GetModeParams(int nMode, int* pWidth, int* pHeight) // Wrapper on D2Gfx.10064, 1.11b is int __usercall sub_6FA880F0<eax>(int pHeight<eax>, int nMode<edx>, int pWidth<ecx>)
 	{
-		//nMode = 3;
 		switch (nMode)
 		{
 			case 0:
@@ -152,30 +239,30 @@ namespace ExMultiRes
 		
 	}
 
-	void __fastcall FillYBufferTable_OLD(void *ppvBits, int nWidth, int nHeight, int aZero) // Wrapper on D2GFX.6FA893B0
-	{
-		static int LastWidth;
-		DEBUGMSG("FillYBuffer(), %dx%d, %d", nWidth, nHeight, aZero)
+	//void __fastcall FillYBufferTable_OLD(void *ppvBits, int nWidth, int nHeight, int aZero) // Wrapper on D2GFX.6FA893B0
+	//{
+	//	static int LastWidth;
+	//	DEBUGMSG("FillYBuffer(), %dx%d, %d", nWidth, nHeight, aZero)
 
-		*D2Vars::D2GFX_gpbBuffer = ppvBits;
-		//dword_6FA9432C = aZero;
-		*D2Vars::D2GFX_Width = nWidth;
-		*D2Vars::D2GFX_Height = nHeight;
-		if (nWidth != LastWidth)
-		{
-			LastWidth = nWidth;
-			int YStartOffset = -32 * nWidth;
-			for (int* pEntry = (int*)&gBufferXLookUpTable; pEntry < &gBufferXLookUpTable[nHeight]; ++pEntry, YStartOffset += nWidth)
-			{
-				*pEntry = YStartOffset;
-			}
-		}
-		if (*D2Vars::D2GFX_ScreenShift != -1)
-		{
-			D2Funcs::D2GFX_UpdateResizeVars(nWidth, nHeight);
-			gBufferXLookUpTable[nHeight] = *D2Vars::D2GFX_ScreenShift == 2 ? (nWidth / 2) : 0;
-		}
-	}
+	//	*D2Vars::D2GFX_gpbBuffer = ppvBits;
+	//	//dword_6FA9432C = aZero;
+	//	*D2Vars::D2GFX_Width = nWidth;
+	//	*D2Vars::D2GFX_Height = nHeight;
+	//	if (nWidth != LastWidth)
+	//	{
+	//		LastWidth = nWidth;
+	//		int YStartOffset = -32 * nWidth;
+	//		for (int* pEntry = (int*)&gBufferXLookUpTable; pEntry < &gBufferXLookUpTable[nHeight]; ++pEntry, YStartOffset += nWidth)
+	//		{
+	//			*pEntry = YStartOffset;
+	//		}
+	//	}
+	//	if (*D2Vars::D2GFX_ScreenShift != -1)
+	//	{
+	//		D2Funcs::D2GFX_UpdateResizeVars(nWidth, nHeight);
+	//		gBufferXLookUpTable[nHeight] = *D2Vars::D2GFX_ScreenShift == 2 ? (nWidth / 2) : 0;
+	//	}
+	//}
 
 
 	void __fastcall FillYBufferTable(void *ppvBits, int nWidth, int nHeight, int aZero) // Wrapper on D2GFX.6FA893B0
@@ -261,6 +348,7 @@ namespace ExMultiRes
 		bm.bmiHeader.biClrUsed = 256;
 		HDC hdc = GetDC(NULL);
 		DEBUGMSG("Initing %dx%d bitmap buffer...", *D2Vars::D2GDI_BitmapWidth, *D2Vars::D2GDI_BitmapHeight)
+
 		*D2Vars::D2GDI_DIB = CreateDIBSection(hdc, (BITMAPINFO*)&bm, DIB_RGB_COLORS, D2Vars::D2GDI_gpbBuffer, NULL, NULL);
 		ReleaseDC(NULL, hdc);
 
@@ -404,10 +492,19 @@ namespace ExMultiRes
 		HKEY hKey = {0};
 		DWORD nRenderMode = 0;
 
+		//HWND hWnd = GetForegroundWindow();
+		//if (hWnd != GetDesktopWindow() && hWnd != GetShellWindow())
+		//{
+		//	RECT dim;
+		//	GetWindowRect(hWnd, &dim);
+		//	
+		//	return VIDEO_MODE_GDI;
+		//}
+
 		if (RegOpenKeyEx(HKEY_CURRENT_USER, "SOFTWARE\\Blizzard Entertainment\\Diablo II\\VideoConfig", 0, KEY_QUERY_VALUE, &hKey) == ERROR_SUCCESS ||
 			RegOpenKeyEx(HKEY_LOCAL_MACHINE, "SOFTWARE\\Blizzard Entertainment\\Diablo II\\VideoConfig", 0, KEY_QUERY_VALUE, &hKey) == ERROR_SUCCESS)
 			{
-				DWORD nSize;
+				DWORD nSize = 4;
 				if (RegQueryValueEx(hKey, "Render", NULL, NULL, (BYTE*)&nRenderMode, &nSize) == ERROR_SUCCESS)
 				{
 					switch (nRenderMode)
@@ -416,8 +513,12 @@ namespace ExMultiRes
 						return VIDEO_MODE_DDRAW;
 					case 1:
 						return VIDEO_MODE_D3D;
+					case 2:
+						return VIDEO_MODE_OPENGL;
 					case 3:
 						return VIDEO_MODE_GLIDE;
+					case 4:
+						return VIDEO_MODE_GDI;
 					}
 				}
 			}

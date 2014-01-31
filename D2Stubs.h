@@ -10,7 +10,7 @@ namespace D2Funcs
 	BOOL __fastcall D2CLIENT_IsSquelched(RosterUnit* pRoster);
 	BOOL __fastcall D2CLIENT_IsMuted(RosterUnit* pRoster);
 	AutoMapLayer* __fastcall D2CLIENT_InitAutomapLayer(DWORD dwLayer);
-	void* __stdcall D2WIN_LoadMpq(DWORD OrderFlag, const char* szDllFile, const char* szMpqFile, const char* szName, DWORD _1, DWORD _2);
+	void* __stdcall D2WIN_LoadMpq(DWORD OrderFlag, const char* szDllFile, const char* szMpqFile, const char* szName, DWORD _1, BOOL (__stdcall *fnMPQMissing)());
 	DWORD __fastcall D2CLIENT_TestPvpFlag(DWORD dwUnitId1, DWORD dwUnitId2, DWORD dwFlagMask);
 	void __fastcall D2CLIENT_PlaySound(int SoundNo);
 	void __stdcall D2CLIENT_DrawGZBox(int X1, int Y1, int X2, int Y2);

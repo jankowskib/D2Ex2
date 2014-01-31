@@ -274,7 +274,11 @@ D2VARPTR(D2GFX, gpbBuffer, void*, 0x14320)
 D2VARPTR(D2GFX, Width, int, 0x14324)
 D2VARPTR(D2GFX, Height, int, 0x14328)
 D2VARPTR(D2GFX, ScreenShift, int, 0x14A50)
-D2VARPTR(D2GFX, Helpers, DWORD*, 0x10BFC) // table of 7 functions
+D2VARPTR(D2GFX, fnHelpers, GFXHelpers, 0x10BFC) // table of 7 functions
+D2VARPTR(D2GFX, Settings, GFXSettings, 0x10BE4)
+D2VARPTR(D2GFX, hInstance, HINSTANCE, 0x14A30)
+D2VARPTR(D2GFX, hDriverModHandle, HMODULE, 0x14A4C)
+D2VARPTR(D2GFX, bPerspective, BOOL, 0x10BE8)
 
 D2VARPTR(D2GDI, WindowWidth, int, 0xCA98)
 D2VARPTR(D2GDI, BitmapHeight, int, 0xC980)

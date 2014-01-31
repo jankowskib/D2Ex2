@@ -2,7 +2,6 @@
 #define D2STRUCTS_H__
 
 #include "D2DataTables.h"
-
 struct UnitAny;
 struct ClientInfo;
 struct PlayerData;
@@ -40,206 +39,10 @@ struct List;
 struct Arena;
 struct pMsg;
 struct QuestFlags;
+struct CollMap;
 struct CellContext;
 
 
-struct fnDriverCallbacks
-{
-	BOOL(__fastcall *InitWindow)(HINSTANCE); // 0
-	BOOL(__fastcall *InitPerspective)(int * fPerspective, int * _1); // 1
-	BOOL(__fastcall *Release)(); // 2
-	BOOL(__fastcall *Init)(HANDLE hWnd, int nResolution); // 3
-	BOOL(__fastcall *Shutdown)(); // 4
-	BOOL(__fastcall *EndCutscene)(HANDLE hWnd, int nResolution, int); // 5
-	BOOL(__fastcall *BeginScene)(BOOL bClear, BYTE nRed, BYTE nGreen, BYTE nBlue); // 6
-	BOOL(__fastcall *EndScene1)(); // 7
-	BOOL(__fastcall *EndScene2)(); // 8
-	BOOL(__fastcall *ResizeWin)(HANDLE HWND, int bResolution); // 9
-	BOOL(__fastcall *GetBackBuffer)(BYTE* pBuffer); // 10
-	BOOL(__fastcall *ActivateWindow)(int Unk, int Contrast); // 11
-	BOOL(__fastcall *SetOption)(int nOption, int nValue); // 12
-	BOOL(__fastcall *BeginCutscene)(); // 13
-	BOOL(__fastcall *PlayCutscene)(const char* szFile, int nResolution, void *pfframe); // 14
-	BOOL(__fastcall *CheckCutscene)(); // 15
-	BOOL(__fastcall *DecodeSmacker)(const char *szsmacker, BYTE *pbuffer, int nVersion); // 16
-	BOOL(__fastcall *PlaySmacker)(void *pcontext); // 17
-	BOOL(__fastcall *CloseSmacker)(void *pcontext); // 18
-	int(__fastcall *GetRenderStats)(); // 19
-	void(__fastcall *GetScreenSize)(int *pwidth, int *pheight); // 20
-	BOOL(__fastcall *SetScaleFactor)(); // 21
-	BOOL(__fastcall *SetGamma)(int nGamma); // 22
-	BOOL(__fastcall *CheckGamma)(); // 23
-	BOOL(__fastcall *SetPerspectiveScale)(); // 24
-	BOOL(__fastcall *AdjustPerspective)(int nXpos, int nYpos, int nBais, int *pxadjust, int *pyadjust); // 25
-	BOOL(__fastcall *ScalePerspectivepos)(int nXpos, int nYpos, int nAngle, int *pxpos, int *pypos, BOOL bOrder); // 26
-	BOOL(__fastcall *SetDefperspectivefactor)(); // 27
-	BOOL(__fastcall *SetPalette)(BYTE* pPalette); // 28
-	BOOL(__fastcall *SetPalettetable)(BYTE** pPalette); // 29
-	BOOL(__fastcall *SetGlobalLight)(BYTE nRed, BYTE nGreen, BYTE nBlue); // 30
-	BOOL(__fastcall *DrawGroundTile)(void* pTile, DWORD** pLight, int nXpos, int nYpos, int nWorldXpos, int nWorldYpos, BYTE nAlpha, int nScreenPanels, void* pTileData); // 31
-	BOOL(__fastcall *DrawPerspectiveImage)(CellContext* pData, int nXpos, int nYpos, DWORD dwGamma, int nDrawMode, int nScreenMode, BYTE* pPalette); // 32
-	BOOL(__fastcall *DrawImage)(CellContext* pData, int nXpos, int nYpos, DWORD dwGamma, int nDrawMode, BYTE* pPalette); // 33
-	BOOL(__fastcall *DrawShiftedImage)(CellContext* pData, int nXpos, int nYpos, DWORD dwGamma, int nDrawMode, int nGlobalPaletteShift); // 34
-	BOOL(__fastcall *DrawVerticalCropImage)(CellContext* pData, int nXpos, int nYpos, int nSkipLines, int nDrawLines, int nDrawMode); // 35
-	BOOL(__fastcall *DrawShadows)(CellContext* pData, int nXpos, int nYpos); // 36
-	BOOL(__fastcall *DrawImageFast)(CellContext* pData, int nXpos, int nYpos, BYTE nPaletteIndex); // 37
-	BOOL(__fastcall *DrawClippedImage)(CellContext* pData, int nXpos, int nYpos, void* pCropRect, int nDrawMode); // 38
-	BOOL(__fastcall *DrawWallTile)(void* pTile, int nXpos, int nYpos, DWORD** pLight, int nScreenPanels, BYTE nAlpha); // 39
-	BOOL(__fastcall *DrawRoofTile)(void* pTile, int nXpos, int nYpos, DWORD** pLight, int nScreenPanels, BYTE nAlpha); // 40
-	BOOL(__fastcall *DrawVisTile)(void* pTile, int nXpos, int nYpos, int nDrawMode, int nScreenPanels); // 41
-	BOOL(__fastcall *DrawRect)(RECT *Prect, BYTE nPaletteIndex); // 42
-	BOOL(__fastcall *DrawRectEx)(RECT *Prect, BYTE nPaletteIndex); // 43
-	BOOL(__fastcall *DrawSolidRect)(RECT *Prect, BYTE nPaletteIndex); // 44
-	BOOL(__fastcall *DrawSolidSquare)(RECT *Prect, BYTE nPaletteIndex, int nSize); // 45
-	BOOL(__fastcall *DrawSolidRectEx)(int nXStart, int nYStart, int nXEnd, int nYEnd, DWORD dwColor, int nDrawMode); // 46
-	BOOL(__fastcall *DrawSolidRectAlpha)(int nXStart, int nYStart, int nXEnd, int nYEnd, DWORD dwColor, BYTE nAlpha); // 47
-	BOOL(__fastcall *DrawLine)(int nXStart, int nYStart, int nXEnd, int nYEnd, BYTE nColor, BYTE nAlpha); // 48
-	BOOL(__fastcall *ClearScreen)(BOOL bPartial); // 49
-	BOOL(__fastcall *DrawString)(int nXpos, int nYpos, const char *Szformat, ...); // 50
-	BOOL(__fastcall *DrawLight)(DWORD *plight, DWORD *pplayerlight, int nXpos, int nYpos); // 51
-	BOOL(__fastcall *DebugFillBackBuffer)(int xPos, int yPos); // 52
-	BOOL(__fastcall *ClearCaches)(); // 53
-};
-
-struct ItemConfig
-{
-	int Code;
-	int	Quality;
-	int Color;
-	int Type;
-};
-
-struct PacketData
-{
- DWORD ClientID;
- BYTE aPacket[510];
-};
-
-struct COORDS
-{	
-	unsigned short x;
-	unsigned short y;
-};
-
-#pragma pack(push, 1)
-
-struct KeyBinding //size 0xA
-{
-  DWORD nHotkey; // 0x00
-  WORD wKey;	 // 0x04
-  BOOL bPrimary;// 0x06
-};
-
-struct KeyConfigEntry //size 0xA
-{
- DWORD dwEntryNo; //0x00
-  WORD wLocaleNo; //0x04
-  wchar_t* wText; //0x06
-};
-
-struct StormMsg
-{
-  HWND hWnd;
-  UINT Msg;
-  WPARAM wParam;
-  LPARAM lParam;
-  DWORD hiWParam16; // wParam shifted by 16
-  BOOL _1;
-  BOOL _2;
-  BOOL _3;
-};
-
-
-struct sMsg	//size 0x0C
-{
-  DWORD MsgType;	//0x00   ,0 = WM_MSG , 1 = COMMAND(?), 2 = KEY_UP, 3 = KEY_DOWN
-  union {
-  WPARAM wParam;	//0x04
-  DWORD	wKey;		//0x04
-  };
-  void (__stdcall *fnCallBack)(StormMsg *);	//0x08
-};
-
-#pragma pack(pop)
-
-
-struct UiCallArray
-{
-  void (__cdecl *OnKeyDown)();
-  void (__cdecl *OnKeyUp)();
-  BOOL bOverride;
-};
-
-
-struct SpellStrc	//size 0x1C  // Valid for 22 -> on target & 21 -> on xy
-{
-  DWORD SkillId;	//0x00
-  DWORD UnitId;		//0x04
-  DWORD xPos;		//0x08 //Also TargetType
-  DWORD yPos;		//0x0C //Also TargetId
-  DWORD _1;			//0x10
-  DWORD _2;			//0x14
-  DWORD _3;			//0x18
-};
-
-struct D2RECT
-{
-	DWORD left;
-	DWORD top;
-	DWORD right;
-	DWORD bottom;
-};
-
-#pragma pack(push, 1)
-struct GameView // size 0xEABC
-{
-	DWORD dwFlags; // 0x00
-	D2RECT ViewRadius; // 0x04
-	D2RECT ToCheck; // 0x14
-	DWORD _1; // 0x24
-	DWORD _2; // 0x28
-	DWORD* pGouraudTblX; // 0x2C
-	DWORD* pGouraudTblY; // 0x30
-	DWORD* pGouraudTblXVal; // 0x34
-	DWORD _6; // 0x38
-	BYTE _7[60000]; // 0x3C
-	DWORD _8;
-	BYTE _9[8];
-	DWORD* pWall; // pointer to 36 byte structure pWall structure * nWalls
-	DWORD* nWalls;
-	DWORD _12;
-	DWORD _13[2];
-};
-#pragma pack(pop)
-
-struct BitBuffer // Taken from Nefarius @PhrozenKeep, thx
-{
-   BYTE *pBuffer;			//0x00
-   DWORD bitsInBuffer;		//0x04
-   DWORD bufferPos;			//0x08
-   DWORD bitsAtPos;			//0x0C num bits already read or written at cur pos
-   DWORD unk;				//0x10 could be a bit bucket
-};
-
-struct D2PacketTable //(0x6FB8BC30 + (4 *(0xPacket*3)))
-{
-	BOOL  (__fastcall *CallBack)(BYTE* aPacket);
-	int PacketLen;
-	BOOL (__fastcall *CallBack2)(UnitAny * ptUnit, BYTE* aPacket);
-};
-
-struct CollMap {
-	DWORD dwPosGameX;				//0x00
-	DWORD dwPosGameY;				//0x04
-	DWORD dwSizeGameX;				//0x08
-	DWORD dwSizeGameY;				//0x0C
-	DWORD dwPosRoomX;				//0x10
-	DWORD dwPosRoomY;				//0x14
-	DWORD dwSizeRoomX;				//0x18
-	DWORD dwSizeRoomY;				//0x1C
-	WORD *pMapStart;				//0x20
-	WORD *pMapEnd;					//0x22
-};
 
 struct HoverText	//size 0x110
 {
@@ -730,18 +533,141 @@ struct Info
 };
 
 #pragma pack(push, 1)
-struct BnetData
+struct BnetData // sizeof 0x3C8 name of this structure is a big mistake, but I won't change it at this stage...it's more like clientside version of ClientData
 {
-	BYTE _1[0x1B];					//0x00
-	char GameName[0x18];			//0x1B
-	char GameIP[0x56];				//0x33
-	char szAccountName[0x30];		//0x89
-	char PlayerName[0x18];			//0xB9
-	char szRealmName[0x18];			//0xD1
-	BYTE _2[258];					//0xE9
+	DWORD bExpansion;				//0x00
+	BYTE bWindowMode;				//0x04
+	BYTE bFixAspectRatio;			//0x05
+	BYTE b3DFXMode;					//0x06
+	BYTE bOpenGLMode;				//0x07
+	BYTE bRaveMode;					//0x08
+	BYTE bDirect3DMode;				//0x09
+	BYTE bUsePerspective;			//0x0A
+	BYTE bLowQuality;				//0x0B 
+	DWORD dwGamma;					//0x0C
+	BYTE bVSync;					//0x10
+	DWORD dwFrameRate;				//0x11
+	DWORD dwGameType;				//0x15 Values 1, 2 , 3 , 6 , 7
+	WORD wJoinId;					//0x19 Overflows on GameName (parameter is an int)
+	char szGameName[24];			//0x1B Overflows on GameIP (every string here should've 27 length)
+	char szGameIP[24];				//0x33 Overflows -||-
+	char szBattleNetIp[24];			//0x4B -||-
+	char szMCPIp[24];				//0x63 
+	BYTE _8a[4];					//0x7B
+	BYTE bNoPK;						//0x7F
+	BYTE bOpenC;					//0x80 -openc
+	BYTE bAmazon;					//0x81 default is true
+	BYTE bPaladin;					//0x82
+	BYTE bSorceress;				//0x83
+	BYTE bNecormancer;				//0x84
+	BYTE bBarbarian;				//0x85
+	BYTE _8b;						//0x86
+	BYTE _8c;						//0x87
+	BYTE bInvincible;				//0x88
+	char szAccountName[48];			//0x89
+	char szPlayerName[24];			//0xB9
+	char szRealmName[27];			//0xD1
+	DWORD _11;						//0xEC  <- splited out these bytes to figure out rest of stuff
+	DWORD _12;						//0xF0
+	DWORD _13;						//0xF4
+	DWORD _14;						//0xF8
+	DWORD _15;						//0xFC
+	DWORD _16;						//0x100
+	DWORD _17;						//0x104
+	DWORD _18;						//0x108
+	DWORD _19;						//0x10C
+	DWORD _20;						//0x110
+	DWORD _21;						//0x114
+	DWORD _22;						//0x118
+	DWORD _23;						//0x11C
+	DWORD _24;						//0x120
+	DWORD _25;						//0x124
+	DWORD _26;						//0x128
+	DWORD _27;						//0x12C
+	DWORD _28;						//0x130
+	DWORD _29;						//0x134
+	DWORD _30;						//0x138
+	DWORD _31;						//0x13C
+	DWORD _32;						//0x140
+	DWORD _33;						//0x144
+	DWORD _34;						//0x148
+	DWORD _35;						//0x14C
+	DWORD _36;						//0x150
+	DWORD _37;						//0x154
+	DWORD _38;						//0x158
+	DWORD _39;						//0x15C
+	DWORD _40;						//0x160
+	DWORD _41;						//0x164
+	DWORD _42;						//0x168
+	DWORD _43;						//0x16C
+	DWORD _44;						//0x170
+	DWORD _45;						//0x174
+	DWORD _46;						//0x178
+	DWORD _47;						//0x17C
+	DWORD _48;						//0x180
+	DWORD _49;						//0x184
+	DWORD _50;						//0x188
+	DWORD _51;						//0x18C
+	DWORD _52;						//0x190
+	DWORD _53;						//0x194
+	DWORD _54;						//0x198
+	DWORD _55;						//0x19C
+	DWORD _56;						//0x1A0
+	DWORD _57;						//0x1A4
+	DWORD _58;						//0x1A8
+	DWORD _59;						//0x1AC
+	DWORD _60;						//0x1B0
+	DWORD _61;						//0x1B4
+	DWORD _62;						//0x1B8
+	DWORD _63;						//0x1BC
+	DWORD _64;						//0x1C0
+	DWORD _65;						//0x1C4
+	DWORD _66;						//0x1C8
+	DWORD _67;						//0x1CC
+	DWORD _68;						//0x1D0
+	DWORD _69;						//0x1D4
+	DWORD _70;						//0x1D8
+	DWORD _71;						//0x1DC
+	DWORD _72;						//0x1E0
+	DWORD _73;						//0x1E4
+	BYTE _74;						//0x1E8
+	WORD wCTemp;					//0x1E9	
 	WORD CharFlags;					//0x1EB
-	BYTE _3[84];					//0x1ED					
-	char GamePass[0x18];			//0x241
+	BYTE bNoMonsters;				//0x1ED
+	DWORD dwMonsterClass;			//0x1EE
+	BYTE bMonsterInfo;				//0x1F2
+	DWORD dwMonsterDebug;			//0x1F3
+	BYTE bItemRare;					//0x1F7
+	BYTE bItemUnique;				//0x1F8
+	BYTE _76[2];					//0x1F9
+	DWORD dwAct;					//0x1FB -act default = 1
+	BYTE bNoPreload;				//0x1FF -npl
+	BYTE bDirect;					//0x200 -direct
+	BYTE bLowEnd;					//0x201 -lem
+	BYTE bNoGFXCompression;			//0x202 -nocompress
+	DWORD dwArena;					//0x203 -> points to Arena* ?
+	BYTE _76c[6];					//0x207
+	BOOL(__stdcall *pfn77)();		//0x20D Called when MPQs are loaded	(Win.10172), pointed func always returns 1, mby used in older version
+	BYTE bTxt;						//0x211 -txt
+	BYTE bLog;						//0x212
+	BYTE bMsgLog;					//0x213
+	BYTE bSafeMode;					//0x214
+	BYTE bNoSave;					//0x215
+	DWORD dwSeed;					//0x216
+	BYTE bCheats;					//0x21A
+	BYTE bTeen;						//0x21B
+	BYTE bNoSound;					//0x21C -ns
+	BYTE bQuests;					//0x21D -questall
+	BYTE _80;						//0x21E
+	BYTE bBuild;					//0x21F -build
+	BYTE bSoundBackground;			//0x220 -sndbkg
+	DWORD *pfnBnetCallbacks;		//0x221 -comint
+	BYTE _81[28];					//0x225
+	char szGamePass[24];			//0x241
+	DWORD _83[64];					//0x259
+	BYTE bSkipToBnet;				//0x359 -skiptobnet
+	DWORD _84[27];					//0x35A
+	BYTE _85[2];					//0x3C6
 };
 #pragma pack(pop)
 
@@ -845,212 +771,6 @@ struct RosterUnit {
 	WORD _8;						//0x76
 	DWORD _9[2];					//0x78
 	RosterUnit * pNext;				//0x80
-};
-
-struct cStylePrefs
-{
-	DWORD dwFontType;	//0x00
-	DWORD dwColor;		//0x04
-};
-
-struct cTextPrefs
-{
-	DWORD dwPosX;		//0x00
-	DWORD dwPosY;		//0x04
-	DWORD dwSizeY;		//0x08
-};
-
-
-struct ControlText // size = 0x20
- {
-	wchar_t* wText[5]; 	//0x00 for each field
-	DWORD dwColor;		//0x14
-	DWORD dwAlign;		//0x18
-	ControlText* pNext;	//0x1C
-};
-
-struct ControlMsg {
-Control *pControl;
-UINT uMsg;
-WPARAM wParam;
-};
-
-struct Control {
-     DWORD dwType;                                                          //0x00
-     CellFile *pCellFile;                                                   //0x04
-     DWORD dwState;                                                         //0x08 0x05 - enabled, 0x04 - disabled, 0x03-0x00 - not visible
-     DWORD dwPosX;                                                          //0x0C
-     DWORD dwPosY;                                                          //0x10
-     DWORD dwSizeX;                                                         //0x14
-     DWORD dwSizeY;                                                         //0x18
-     BOOL  (__fastcall *Draw)(Control*);								    //0x1C
-     BOOL  (__fastcall *DrawEx)(Control*);						  	        //0x20 used by timer/popup
-     BOOL  (__stdcall *Push)(ControlMsg*);							        //0x24 
-     BOOL  (__stdcall *Mouse)(ControlMsg*);				            		//0x28 
-     BOOL  (__stdcall *ListCheck)(ControlMsg*);                          	//0x2C used only by list
-     BOOL  (__stdcall *Key)(ControlMsg*);							 	    //0x30 WM_CHAR MSG
-     BOOL  (__stdcall *OnPress)(Control*);		                            //0x34 User Defined
-     BOOL  (__fastcall*DrawAnim)(Control*);                          		//0x38 used by animimage
-     Control* pNext;                                                        //0x3C
-};
-
-struct EditBox : Control //(size 0x284)
-{
-//	 Control Header;														//0x00
-	 DWORD dwLeftOffset;												    //0x40 
-	 DWORD dwTopOffset;													    //0x44
-	 DWORD dwMaxLength;                                   	                //0x48 
-     DWORD dwTextOffset;	                              		            //0x4C 
-     DWORD dwTextLen;														//0x50 (strlen -1)
-     DWORD dwSelectEnd;                                                     //0x54
-     DWORD dwSelectStart;                                                   //0x58
-     wchar_t wText[256];													//0x5C
-     DWORD dwCursorPos;										  			    //0x25C
-     DWORD dwEditFlags;														//0x260 0x08 allows multiline
-     BOOL (__stdcall *OnAccept)(char*);										//0x264
-	 BOOL (__stdcall *InputHandle)(Control*,DWORD len, char* Key);			//0x268
-	 BOOL (__stdcall *LengthHandle)(int aNull);								//0x26C hmm weird arg =  always 0
-	 cStylePrefs Style;														//0x270 
-	 Control * pTabNext;													//0x278
-     Control * pTabPrev;													//0x27C
-	 BOOL  bLeftButtonPressed;												//0x280
-};
-
-struct TextBox : Control // (size 0xAC)
-{
-//	 Control Header;									//0x00
-	 DWORD dwLeftOffset;								//0x40 
-	 DWORD dwTopOffset;								    //0x44
-     ControlText* pFirstText;                           //0x48
-     ControlText* pLastText;                            //0x4C
-     ControlText* pSelectedText;                        //0x50
-	 DWORD dwMaxLines;									//0x54
-	 DWORD dwCurrentLine;								//0x58
-	 DWORD dwTextFlags;									//0x5C 0x00 - left align 0x01 - SelectBox 0x2 - center 0x4 Create ScrollBar 0x40 - scrolling from right 0x80 - scrolling from bottom
-	 DWORD dwSelectedItem;								//0x60
-	 DWORD dwFields;									//0x64
-	 DWORD dwFieldXSize[5];								//0x68 for each field
-	 DWORD dwFieldAlign[5];								//0x7C
-	 ScrollBar* ptScrollBar;							//0x90
-	 cStylePrefs Style;									//0x94
-	 DWORD dwMaxTextWidth;								//0x9C
-	 DWORD dwMaxTextHeight;								//0xA0
-	 DWORD dwInterline;									//0xA4
-	 DWORD dwInterline2;								//0xA8
-};
-
-struct Image : Control // (size 0x4C)
-{
-//	Control Header;										//0x00
-	DWORD CellFrame;									//0x40
-	DWORD TransLvl;										//0x44
-	void* _1;											//0x48 image struct?
-};
-
-struct AnimImage : Control // 0x60
-{
-//	Control Header;										//0x00
-	void* AnimStruct;									//0x40 pointer to struct which holds all cellfile frames
-	DWORD dwAnimSpeed;									//0x44
-	DWORD dwTickCount;									//0x48 creation time
-	DWORD dwCurrentFrame;								//0x4C
-	BOOL bisHovered;									//0x50
-	DWORD dwTransLvl;									//0x54
-	void (__stdcall *OnHover)(AnimImage*);				//0x58
-	BOOL bisAnimation;									//0x5C
-};
-
-struct Button : Control // (size 0x274)
-{
-//	 Control Header;									//0x00
-   	 DWORD dwButtonFlags;								//0x40 0x00 - normal 0x01 - radio 0x02 - switch 0x04 - play sound 0x20 - sth with disabled/enabled 0x40 - multi line 
-	 DWORD dwIsPushed;									//0x44
-     BOOL  dwIsSwitched;                                //0x48
-     BOOL _1;			                                //0x4C
-     DWORD dwHotKey;                             	    //0x50
-     DWORD dwButtonType;                           		//0x54 0x00 - Normal Button, 0x01 - Switch Button 0x02 - Long Button
-     DWORD _2;	                                        //0x58
-	 DWORD dwCellFrame;                                 //0x5C
-     DWORD dwFont;										//0x60  hardcoded
-     wchar_t wText[256];                              	//0x64
-     DWORD dwColor;										//0x264 hardcoded
-	 BOOL (__stdcall *OnHover)(Button*);				//0x268
-	 BOOL bisHovered;									//0x26C
-	 DWORD dwStrTbl2ndLine;								//0x270
-};
-
-struct ScrollBar : Control // (size 0x60)
-{
-//	 Control Header;									//0x00
-     BOOL bMovedUp;	                                    //0x40 
-     BOOL bMovedDown;	                                //0x44
-     DWORD dwScrollEntries;								//0x48
-     DWORD dwScrollPosition;                            //0x4C
-     DWORD dwClickStep;                                 //0x50
-	 TextBox * ptParent;								//0x54
-	 BOOL  bLeftButtonPressed;							//0x58
-	 BOOL  (__stdcall *Unk)(ControlMsg*);				//0x5C
-};
-
-struct List : Control // (size 0x6C)
-{
-//	Control Header;										//0x00
-	DWORD dwFont;										//0x40
-	DWORD _2;											//0x44
-	DWORD _3;											//0x48
-	DWORD _4;											//0x4C
-	DWORD _5;											//0x50
-	DWORD _6;											//0x54
-	DWORD _7;											//0x58
-	DWORD _8;											//0x5C
-	DWORD _9;											//0x60
-	DWORD*_10;											//0x64
-	DWORD _11;											//0x68	
-};
-
-struct D2Menu // size 0x18
-{
-DWORD dwEntriesNo;		//0x00
-DWORD dwInterline;		//0x04
-DWORD dwTextHeight;		//0x08
-DWORD dwMenuOffset;		//0x0C
-DWORD dwBarHeight;		//0x10
-DWORD _1;				//0x14 unused?
-};
-
-struct D2MenuEntry //size 0x550
-{
-	DWORD dwMenuType;									 //0x00  //-1 - static text, 0 -selectable, 1- switchbar , 2- with bar, 3 - key config (added)
-	DWORD dwExpansion;									 //0x04  //if set, shows only in d2exp
-	DWORD dwYOffset;									 //0x08  //generated dynamicaly
-	union {
-		char szCellFile[260];								 //0x0C  DATA\\LOCAL\\UI\\LANG\\%s used only in LoadMenu Func
-		wchar_t wItemName[130];								 //my addition
-	};
-	BOOL (__fastcall* EnableCheck)(D2MenuEntry*, DWORD ItemNo); //0x110 if return false, its disabled
-	BOOL (__fastcall* OnPress)(D2MenuEntry*, StormMsg*);		 //0x114 28.12.11 - added StormMsg*
-	BOOL (__fastcall* OptionHandle)(D2MenuEntry*);			 //0x118 called when option value is changed
-	BOOL (__fastcall* ChangeHandle)(D2MenuEntry*);			 //0x11C if return true OnPress is called, and option gfx is switched
-	union {
-		DWORD dwMaxValue;									 //0x120
-		DWORD dwSwitchesNo;									 //0x120  (max 4)
-		DWORD* Bind;										 //0x120 -> KeyConfig (my add)
-	};
-	union {
-		DWORD dwCurrentValue;								 //0x124
-		DWORD dwCurrentSwitch;
-		DWORD dwColor;										 //my addition ONLY for MenuType = -1, 1, 3(?)
-	};
-	union {
-		DWORD dwBarType;									 //0x128
-		DWORD dwFontType;									 //my add valid for all
-	};
-	union {
-		char szSwitchCellFiles[4][260];						 //0x12C DATA\\LOCAL\\UI\\LANG\\%s used only in LoadMenu Func
-		wchar_t wSwitchItemName[4][130];					 //my addition
-	};												
-	CellFile* ptCellFile;								 //0x53C
-	CellFile* ptSwitchCellFile[4];						 //0x540
 };
 
 

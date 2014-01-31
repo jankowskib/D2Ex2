@@ -324,7 +324,6 @@ if (!ExMultiRes::InitImages())
 {
 	D2EXERROR("One or more D2Ex resources weren't loaded. Check if your D2Ex2.MPQ is valid!");
 }
-Misc::WriteDword(*(DWORD**)&D2Vars::D2GFX_Helpers, (DWORD)&ExMultiRes::FillYBufferTable);
 
 
 //END PATCHES-----------------------------------------------------------------------------------
@@ -476,20 +475,32 @@ DWORD WINAPI DllMain(HMODULE hModule, int dwReason, void* lpReserved)
 #ifdef D2EX_EXAIM_ENABLED
 				InitializeCriticalSectionAndSpinCount(&TELE_CRITSECT,1000);
 #endif
-
-			/*	switch (*D2Vars::D2GFX_DriverType)
+				Misc::Patch(JUMP, GetDllOffset("D2Gfx.dll", -10073), (DWORD)ExMultiRes::InitWindow, 7, "D2GFX_InitWindow");
+				;
+				Misc::WriteDword((DWORD*)&((GFXHelpers*)GetDllOffset("D2Gfx.dll", 0x10BFC))->FillYBufferTable, (DWORD)&ExMultiRes::FillYBufferTable);
+				switch (ExMultiRes::GetRenderMode())
 				{
-				case VIDEO_MODE_GDI:
-				{*/
-				typedef fnDriverCallbacks* (__fastcall * GetCallbacks_t)();
-				GetCallbacks_t GetCallbacks = (GetCallbacks_t)GetDllOffset("D2Gdi.dll", -10000);
-				fnDriverCallbacks * fns = GetCallbacks();
+					case VIDEO_MODE_GDI:
+					{
+						DEBUGMSG("Using GDI video mode")
+						typedef fnDriverCallbacks* (__stdcall * GetCallbacks_t)();
+						GetCallbacks_t GetCallbacks = (GetCallbacks_t)GetDllOffset("D2Gdi.dll", -10000);
+						fnDriverCallbacks * fns = GetCallbacks();
 
-				Misc::WriteDword((DWORD*)&(fns->Init), (DWORD)&ExMultiRes::GDI_Init);
-				Misc::WriteDword((DWORD*)&(fns->ResizeWin), (DWORD)&ExMultiRes::GDI_ResizeWindow);
-				//}
-				//	break;
-				//}
+						Misc::WriteDword((DWORD*)&(fns->Init), (DWORD)&ExMultiRes::GDI_Init);
+						Misc::WriteDword((DWORD*)&(fns->ResizeWin), (DWORD)&ExMultiRes::GDI_ResizeWindow);
+					}
+					break;
+					case VIDEO_MODE_GLIDE:
+					{
+						DEBUGMSG("Using GLIDE video mode!")
+					}
+					default:
+					{
+						DEBUGMSG("Video mode : %d", ExMultiRes::GetRenderMode())
+					}
+					break;
+				}
 
 				Handle = (HANDLE)_beginthreadex(0,0,&Thread,&hEvent,0,&Id);
 				ASSERT(Handle)

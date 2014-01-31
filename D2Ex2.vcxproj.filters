@@ -289,5 +289,8 @@
     <ClInclude Include="ExMultiRes.h">
       <Filter>Header Files\Main</Filter>
     </ClInclude>
+    <ClInclude Include="CommonStructs.h">
+      <Filter>Header Files\D2 Internals</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

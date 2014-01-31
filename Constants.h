@@ -5,10 +5,26 @@
 enum D2VideoModes
 {
 	VIDEO_MODE_GDI = 1,
+	VIDEO_MODE_RAVE = 2, // UNUSED
 	VIDEO_MODE_DDRAW = 3,
 	VIDEO_MODE_GLIDE = 4,
 	VIDEO_MODE_OPENGL = 5, // UNUSED
 	VIDEO_MODE_D3D = 6
+};
+
+
+/*
+	Game modes set by cmdline parameter -client, -server etc...
+	Causes game loads specific dll instead of default D2Launch.dll
+*/
+enum D2GameModes
+{
+	GAME_MODE_MODSTATE0 = 0,	// "none.dll"
+	GAME_MODE_CLIENT = 1,		// "D2Client.dll"
+	GAME_MODE_SERVER = 2,		// "D2Server.dll"
+	GAME_MODE_MULTIPLAYER = 3,	// "D2Multi.dll"
+	GAME_MODE_LAUNCHER = 4,		// "D2Launch.dll"
+	GAME_MODE_EXPAND = 5		// "D2EClient.dll"
 };
 
 enum UICover

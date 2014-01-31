@@ -11,16 +11,20 @@ namespace ExMultiRes
 	};
 
 
-	#define GDI_MAXY 2000 // I think that's will be OK
-	extern int gBufferXLookUpTable[GDI_MAXY + 1];
+	//#define GDI_MAXY 2000 // I think that's will be OK
+	//extern int gBufferXLookUpTable[GDI_MAXY + 1];
 	extern int *gptBufferXLookUpTable;
 	extern vector<ResMode> lResModes;
+
 	bool EnumDisplayModes();
+	int GetRenderMode();
+
 	int FindDisplayMode(int Width, int Height);
 	bool InitImages();
 	void FreeImages();
 	void __fastcall SetResolution(int nMode);
 	void __fastcall ResizeView(int UiCover);
+	BOOL __stdcall InitWindow(HINSTANCE hInstance, LRESULT(__stdcall *pWndProc)(HWND, UINT, WPARAM, LPARAM), int nDriver, int bWindowed);
 
 	void __stdcall GetModeParams(int nMode, int* pWidth, int* pHeight);
 	BOOL __stdcall SetResolutionMode(int nMode, BOOL bUpdate);
@@ -32,6 +36,8 @@ namespace ExMultiRes
 	//Driver handlers
 	BOOL __fastcall GDI_ResizeWindow(HANDLE HWND, int nMode);
 	BOOL __fastcall GDI_Init(HANDLE HWND, int nResolution);
+
+	bool enterFullscreen();
 
 }
 
