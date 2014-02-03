@@ -302,9 +302,9 @@ LONG WINAPI ExInput::GameWindowEvent(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM
 			{
 				EnterCriticalSection(&CON_CRITSECT);
 				int x, y;
-				ExMultiRes::GetModeParams(*D2Vars::D2GFX_GfxMode - 1, &x, &y);
+				ExMultiRes::D2GFX_GetModeParams(*D2Vars::D2GFX_GfxMode - 1, &x, &y);
 				DEBUGMSG("Changing resolution to %dx%d", x, y);
-				ExMultiRes::SetResolution((*D2Vars::D2GFX_GfxMode) - 1);
+				ExMultiRes::D2CLIENT_SetResolution((*D2Vars::D2GFX_GfxMode) - 1);
 				LeaveCriticalSection(&CON_CRITSECT);
 			}
 		}
@@ -314,9 +314,9 @@ LONG WINAPI ExInput::GameWindowEvent(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM
 			{
 				EnterCriticalSection(&CON_CRITSECT);
 				int x, y;
-				ExMultiRes::GetModeParams(*D2Vars::D2GFX_GfxMode + 1, &x, &y);
+				ExMultiRes::D2GFX_GetModeParams(*D2Vars::D2GFX_GfxMode + 1, &x, &y);
 				DEBUGMSG("Changing resolution to %dx%d", x, y);
-				ExMultiRes::SetResolution((*D2Vars::D2GFX_GfxMode) + 1);
+				ExMultiRes::D2CLIENT_SetResolution((*D2Vars::D2GFX_GfxMode) + 1);
 				LeaveCriticalSection(&CON_CRITSECT);
 			}
 		}

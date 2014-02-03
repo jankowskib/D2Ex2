@@ -12,7 +12,7 @@ ExEditBox::ExEditBox(int X, int Y, int TextXOffset, int TextYOffset, int TextLen
 	{
 		aCellFile = new ExCellFile(szFile);
 	}
-	catch (CellLoadError e)
+	catch (const CellLoadError&)
 	{
 		LeaveCriticalSection(&CON_CRITSECT);
 		delete aCellFile;

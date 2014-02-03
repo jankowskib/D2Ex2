@@ -2,7 +2,7 @@
 #ifndef CONSTS_H__
 #define CONSTS_H__
 
-enum D2VideoModes
+enum D2RenderModes
 {
 	VIDEO_MODE_GDI = 1,
 	VIDEO_MODE_RAVE = 2, // UNUSED

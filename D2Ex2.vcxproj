@@ -44,15 +44,16 @@
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\boost_1_55_0;C:\glfw-3.0.4.bin.WIN32\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\boost_1_55_0;$(ProjectDir)\glide3x;$(IncludePath)</IncludePath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
-    <LibraryPath>C:\glfw-3.0.4.bin.WIN32\lib-msvc120;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(LibraryPath);$(ProjectDir)\glide3x</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)files\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\boost_1_55_0;$(IncludePath)</IncludePath>
+    <IncludePath>C:\boost_1_55_0;$(ProjectDir)\glide3x;$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath);$(ProjectDir)\glide3x</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -76,6 +77,7 @@
       <Profile />
       <SectionAlignment>
       </SectionAlignment>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;;oleaut32.lib;uuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy /y "$(TargetPath)" "D:\Gry\Diablo II\"</Command>
@@ -93,7 +95,7 @@
       <IntrinsicFunctions>false</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>false</OmitFramePointers>
-      <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;D2EX2_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -105,11 +107,12 @@
     </ClCompile>
     <Link>
       <ModuleDefinitionFile />
-      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
+      <GenerateMapFile>false</GenerateMapFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

@@ -18,6 +18,7 @@ using namespace std;
 #define GLOBAL(type, name) extern type name;
 
 #endif
+GLOBAL(HANDLE, hPointersReadyEvent)
 GLOBAL(BOOL, g_FastTP)
 GLOBAL(DWORD, AimTarget)
 GLOBAL(deque<COORDS>, HistoryPos) // Last 2 Coords
@@ -71,6 +72,7 @@ GLOBAL(deque<string>, BNQuene)
 
 GLOBAL(short, cResModeX)
 GLOBAL(short, cResModeY)
+GLOBAL(int, gRenderer)
 
 #undef GLOBAL
 #undef __DEFINE_VARS

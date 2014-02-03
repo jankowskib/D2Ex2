@@ -1,5 +1,6 @@
 #pragma optimize ( "", off )
 #include "Misc.h"
+#include <glide.h>
 
 #ifdef _DEFINE_PTRS
 enum {DLLNO_D2CLIENT, DLLNO_D2COMMON, DLLNO_D2GFX, DLLNO_D2LANG, DLLNO_D2WIN, DLLNO_D2NET, DLLNO_D2GAME, DLLNO_D2LAUNCH, DLLNO_FOG, DLLNO_BNCLIENT, DLLNO_STORM, DLLNO_D2CMP, DLLNO_D2MULTI, DLLNO_D2SOUND, DLLNO_D2GDI, DLLNO_D2DDRAW, DLLNO_D2DIRECT3D, DLLNO_D2GLIDE};
@@ -118,7 +119,11 @@ D2FUNCPTR(D2GFX, SetResolutionMode, BOOL __stdcall, (int nMode, BOOL bUpdate), -
 D2FUNCPTR(D2GFX, SetScreenShift, void __fastcall, (int nShift), -10047)
 
 //D2GDI
-D2FUNCPTR(D2GDI, GetCallbacks, fnDriverCallbacks* __fastcall, (), -10000) // Same oridinal for every patch and GFX driver (GDI, D2D, D3D, GLIDE). Unused but left just in case.
+D2FUNCPTR(D2GDI, GetCallbacks, fnRendererCallbacks* __fastcall, (), -10000) // Same oridinal for every patch and GFX driver (GDI, D2D, D3D, GLIDE). Used directly but left just in case.
+
+//D2GLIDE
+
+D2FUNCPTR(D2GLIDE, AllocCache, BOOL __stdcall, (), 0xD180)
 
 //D2WIN
 D2FUNCPTR(D2WIN, ResizeWindow, BOOL __stdcall, (int nMode), -10037)
@@ -266,7 +271,8 @@ D2VARPTR(D2CLIENT, UiUnk1, int, 0x11D224)
 D2VARPTR(D2CLIENT, UiUnk2, int, 0x11D228)
 D2VARPTR(D2CLIENT, UiUnk3, int, 0x11D240)
 D2VARPTR(D2CLIENT, UiUnk4, int, 0x11D244)
-D2VARPTR(D2GFX, pfnDriverCallback, fnDriverCallbacks*, 0x14A48)
+
+D2VARPTR(D2GFX, pfnDriverCallback, fnRendererCallbacks*, 0x14A48)
 D2VARPTR(D2GFX, GfxMode, int, 0x14A40)
 D2VARPTR(D2GFX, WindowMode, BOOL, 0x14A3C)
 D2VARPTR(D2GFX, DriverType, int, 0x14A38)
@@ -279,6 +285,7 @@ D2VARPTR(D2GFX, Settings, GFXSettings, 0x10BE4)
 D2VARPTR(D2GFX, hInstance, HINSTANCE, 0x14A30)
 D2VARPTR(D2GFX, hDriverModHandle, HMODULE, 0x14A4C)
 D2VARPTR(D2GFX, bPerspective, BOOL, 0x10BE8)
+D2VARPTR(D2GFX, GammaValue, int, 0x10BF0)
 
 D2VARPTR(D2GDI, WindowWidth, int, 0xCA98)
 D2VARPTR(D2GDI, BitmapHeight, int, 0xC980)
@@ -290,6 +297,16 @@ D2VARPTR(D2GDI, PaletteEntries, PALETTEENTRY*, 0xC570)
 D2VARPTR(D2GDI, Palette, HPALETTE, 0xC974)
 D2VARPTR(D2GDI, hFont, HFONT, 0xC988)
 D2VARPTR(D2GDI, Unk, int, 0xCA94)
+D2VARPTR(D2GDI, csPause, CRITICAL_SECTION*, 0xCAA4)
+
+D2VARPTR(D2GLIDE, bIsWindowOpen, BOOL, 0x17B2C)
+D2VARPTR(D2GLIDE, Width, int, 0x15A78)
+D2VARPTR(D2GLIDE, Height, int, 0x15B14)
+D2VARPTR(D2GLIDE, Context, GrContext_t, 0x15AA0)
+D2VARPTR(D2GLIDE, TMUCount, FxI32, 0x17B18)
+D2VARPTR(D2GLIDE, TextureAlign, FxI32, 0x17B20)
+D2VARPTR(D2GLIDE, bUMAAvailable, BOOL, 0x17B1C)
+D2VARPTR(D2GLIDE, hWnd, HANDLE, 0x15A74)
 
 //Key Config
 D2VARPTR(D2CLIENT, KeyBindings, KeyBinding, 0x108D90) // ArraySize = 114

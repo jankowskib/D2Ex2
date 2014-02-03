@@ -13,7 +13,7 @@ ExImage::ExImage(int X, int Y, int Transp, unsigned int Frame, string szFile) : 
 	{
 		aCellFile = new ExCellFile(szFile);
 	}
-	catch (CellLoadError e)
+	catch (const CellLoadError&)
 	{
 		delete aCellFile;
 		LeaveCriticalSection(&CON_CRITSECT);

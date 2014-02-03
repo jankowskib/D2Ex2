@@ -119,7 +119,7 @@ D2FUNCPTR(D2GFX, DrawCellContext, void __stdcall, (CellContext *context, int Xpo
 D2FUNCPTR(D2GFX, DrawCellContextEx, void __stdcall, (CellContext *context, int Xpos, int Ypos, int dwl, int nTransLvl, BYTE Color), -10068)
 
 D2FUNCPTR(D2GFX, GetResolutionMode, int __stdcall, (), -10063)
-D2FUNCPTR(D2GFX, SetResolutionMode, BOOL __stdcall, (int nMode, int bUpdate), -10029)
+D2FUNCPTR(D2GFX, D2GFX_SetResolutionMode, BOOL __stdcall, (int nMode, int bUpdate), -10029)
 D2FUNCPTR(D2GFX, SetScreenShift, void __fastcall, (int nShift), -10073)
 
 

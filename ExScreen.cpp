@@ -242,7 +242,7 @@ void ExScreen::DrawAutoMapVer()
 	D2Funcs::D2WIN_DrawText(wPatch.str().c_str(), *D2Vars::D2CLIENT_ScreenWidth - cSize - 16, *D2Vars::D2CLIENT_AutomapInfoY, 4, 0);
 	*D2Vars::D2CLIENT_AutomapInfoY+=16;
 
-	ExMultiRes::GetModeParams(*D2Vars::D2GFX_GfxMode, &x, &y);
+	ExMultiRes::D2GFX_GetModeParams(*D2Vars::D2GFX_GfxMode, &x, &y);
 	if (x > 800 && y > 600)
 	{
 		wRes << (LocId == LOCALE_ENG ? L"Resolution: " : L"Rozdzielczoœæ: ") << GetColorCode(COL_YELLOW) << x << L"x" << y;

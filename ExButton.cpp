@@ -11,7 +11,7 @@ ExButton::ExButton(int bX, int bY, int TextColor, unsigned int Frame, wstring sz
 	{
 		aCellFile = new ExCellFile(szFile);
 	}
-	catch (CellLoadError e)
+	catch (const CellLoadError&)
 	{
 		delete aCellFile;
 		LeaveCriticalSection(&CON_CRITSECT);

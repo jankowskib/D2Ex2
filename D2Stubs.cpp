@@ -9,8 +9,8 @@ __declspec(naked) int __fastcall D2Funcs::D2CLIENT_DiffuseStat(int nStat)
 {
 	__asm
 	{
-	mov eax, ecx
-	jmp D2Ptrs::D2CLIENT_DifuseStat_I
+		mov eax, ecx
+		jmp D2Ptrs::D2CLIENT_DifuseStat_I
 	}
 }
 
@@ -287,7 +287,7 @@ __declspec(naked) void D2Stubs::D2CLIENT_SetResolution_STUB()
 	__asm
 	{
 		mov ecx, esi
-		jmp ExMultiRes::SetResolution
+		jmp ExMultiRes::D2CLIENT_SetResolution
 	}
 }
 
@@ -296,7 +296,7 @@ __declspec(naked) void D2Stubs::D2CLIENT_ResizeView_STUB()
 	__asm
 	{
 		mov ecx, eax
-		jmp ExMultiRes::ResizeView;
+		jmp ExMultiRes::D2CLIENT_ResizeView;
 	}
 }
 
@@ -304,7 +304,7 @@ __declspec(naked) BOOL D2Stubs::D2GFX_SetResolutionMode_STUB()
 {
 	__asm
 	{
-		jmp ExMultiRes::SetResolutionMode
+		jmp ExMultiRes::D2GFX_SetResolutionMode
 	}
 }
 
@@ -313,9 +313,9 @@ __declspec(naked) void D2Stubs::D2GFX_GetModeParams_STUB()
 	__asm
 	{
 #ifdef VER_113D
-		jmp ExMultiRes::GetModeParams
+		jmp ExMultiRes::D2GFX_GetModeParams
 #else
-#error("STILL TODO")
+#error "STILL TODO"
 #endif
 	}
 }

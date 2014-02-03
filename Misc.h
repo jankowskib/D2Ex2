@@ -11,6 +11,7 @@ using namespace std;
 
 namespace Misc
 {
+int RegReadDword(const char * key, const char* value, const int default);
 void Debug(char *format,...);
 void Debug(wchar_t *format,...);
 wstring ConvertTickToTime(DWORD Tick);

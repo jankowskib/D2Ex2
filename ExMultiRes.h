@@ -22,13 +22,14 @@ namespace ExMultiRes
 	int FindDisplayMode(int Width, int Height);
 	bool InitImages();
 	void FreeImages();
-	void __fastcall SetResolution(int nMode);
-	void __fastcall ResizeView(int UiCover);
-	BOOL __stdcall InitWindow(HINSTANCE hInstance, LRESULT(__stdcall *pWndProc)(HWND, UINT, WPARAM, LPARAM), int nDriver, int bWindowed);
+	void __fastcall D2CLIENT_SetResolution(int nMode);
+	void __fastcall D2CLIENT_ResizeView(int UiCover);
+	BOOL __stdcall D2GFX_InitWindow(HINSTANCE hInstance, LRESULT(__stdcall *pWndProc)(HWND, UINT, WPARAM, LPARAM), int nRenderMode, BOOL bWindowed);
 
-	void __stdcall GetModeParams(int nMode, int* pWidth, int* pHeight);
-	BOOL __stdcall SetResolutionMode(int nMode, BOOL bUpdate);
-	void __fastcall FillYBufferTable(void *ppvBits, int nWidth, int nHeight, int aZero);
+	void __stdcall  D2GFX_GetModeParams(int nMode, int* pWidth, int* pHeight);
+	BOOL __stdcall  D2GFX_SetResolutionMode(int nMode, BOOL bUpdate);
+	void __stdcall  D2GFX_SetStoredGammaAndContrast();
+	void __fastcall D2GFX_FillYBufferTable(void *ppvBits, int nWidth, int nHeight, int aZero);
 
 	void __stdcall GetBeltPos(int nIndex, int nMode, D2BeltBox *out, int nBox);
 	void __stdcall GetBeltsTxtRecord(int nIndex, int nMode, BeltsTxt *out);
@@ -36,7 +37,11 @@ namespace ExMultiRes
 	//Driver handlers
 	BOOL __fastcall GDI_ResizeWindow(HANDLE HWND, int nMode);
 	BOOL __fastcall GDI_Init(HANDLE HWND, int nResolution);
+	BOOL __fastcall GDI_Release();
 
+	BOOL __fastcall GLIDE_Init(HANDLE hWND, int nMode);
+	BOOL __fastcall GLIDE_ResizeWindow(HANDLE HWND, int nMode);
+	BOOL __fastcall GLIDE_SetRes(HANDLE hWND, int nMode);
 	bool enterFullscreen();
 
 }

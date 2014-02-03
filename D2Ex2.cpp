@@ -85,7 +85,6 @@ ItemArray.push_back(hConfig);
 
 unsigned __stdcall Thread(void * Args)
 {
-
 //Load config...
 HANDLE hEvent = *((HANDLE*)Args);
 Misc::Log("Defining offsets...");
@@ -144,7 +143,10 @@ StillSwitch = GetPrivateProfileInt("D2Ex","StillWSG",1,ConfigIni.c_str());
 #endif 
 
 LoadItemConfig();
+
+#ifdef D2EX_MULTIRES
 ExMultiRes::EnumDisplayModes();
+#endif
 
 //BEFORE START...
 #define CALL 0xE8
@@ -230,9 +232,9 @@ Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x337B0),(DWORD)D2Stubs::D2CLIENT_S
 //Misc::Patch(JUMP,GetDllOffset("Fog.dll",0x1DBF0),(DWORD)ExMemory::Realloc,5,"Mem Realloc Override");
 //}
 //#endif
-Misc::Patch(JUMP, GetDllOffset("D2Client.dll", 0x36FE0), (DWORD)ExMultiRes::SetResolution, 5, "Set Resolution Mode");
-Misc::Patch(JUMP, GetDllOffset("D2Client.dll", 0x1C4B0), (DWORD)D2Stubs::D2CLIENT_ResizeView_STUB, 6, "Resize View");
-Misc::Patch(JUMP, GetDllOffset("D2Gfx.dll", -10029), (DWORD)D2Stubs::D2GFX_SetResolutionMode_STUB, 5, "D2GFX_SetResolutionMode");
+Misc::Patch(JUMP, GetDllOffset("D2Client.dll", 0x36FE0), (DWORD)ExMultiRes::D2CLIENT_SetResolution, 5, "Set Resolution Mode");
+Misc::Patch(JUMP, GetDllOffset("D2Client.dll", 0x1C4B0), (DWORD)D2Stubs::D2CLIENT_D2CLIENT_ResizeView_STUB, 6, "Resize View");
+Misc::Patch(JUMP, GetDllOffset("D2Gfx.dll", -10029), (DWORD)D2Stubs::D2GFX_D2GFX_SetResolutionMode_STUB, 5, "D2GFX_D2GFX_SetResolutionMode");
 #elif defined VER_113D
 Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x1D78C),(DWORD)D2Stubs::D2CLIENT_ScreenHook,5,"Screen Hook"); // k
 Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x1D4A1),(DWORD)ExEntryText::Draw,5,"Entry Text Fix"); //k
@@ -297,6 +299,7 @@ Misc::Patch(CUSTOM, GetDllOffset("D2Gfx.dll", 0xB6B0),0x45EB, 2, "Allow mutli wi
 Misc::Patch(CALL, GetDllOffset("BNClient.dll",0xF494),(DWORD)ExLoading::CreateCacheFile, 6, "Cache file creation fix");
 Misc::Patch(CALL, GetDllOffset("BNClient.dll",0xF7E4),(DWORD)ExLoading::CreateCacheFile, 6, "Cache file creation fix");
 
+#ifdef D2EX_MULTIRES
 //Res stuff
 Misc::Patch(JUMP, GetDllOffset("D2Client.dll", 0x2C220), (DWORD)D2Stubs::D2CLIENT_SetResolution_STUB, 5, "Set Resolution Mode");
 Misc::Patch(JUMP, GetDllOffset("D2Client.dll", 0x5C4F0), (DWORD)D2Stubs::D2CLIENT_ResizeView_STUB, 6, "Resize View");
@@ -312,6 +315,9 @@ Misc::Patch(CALL, GetDllOffset("D2Gfx.dll", 0xA4F7), (DWORD)D2Stubs::D2GFX_LookU
 //Res UI fixups
 Misc::Patch(JUMP, GetDllOffset("D2Common.dll", -10689), (DWORD)ExMultiRes::GetBeltPos, 7, "D2COMMON_GetBeltPos");
 Misc::Patch(JUMP, GetDllOffset("D2Common.dll", -10370), (DWORD)ExMultiRes::GetBeltsTxtRecord, 10, "D2COMMON_GetBeltsTxtRecord");
+Misc::WriteDword((DWORD*)&((GFXHelpers*)GetDllOffset("D2Gfx.dll", 0x10BFC))->D2GFX_FillYBufferTable, (DWORD)&ExMultiRes::D2GFX_FillYBufferTable);
+#endif
+
 #else
 ShowWindow(D2Funcs::D2GFX_GetHwnd(),SW_HIDE);
 MessageBoxA(0,"Version is not supported!","D2Ex",0); 
@@ -319,50 +325,75 @@ exit(-1);
 #endif
 
 ExMpq::LoadMPQ();
+
+#ifdef D2EX_MULTIRES
 Misc::Log("Loading MultiRes resources...");
 if (!ExMultiRes::InitImages())
 {
 	D2EXERROR("One or more D2Ex resources weren't loaded. Check if your D2Ex2.MPQ is valid!");
 }
-
+#endif 
 
 //END PATCHES-----------------------------------------------------------------------------------
 //KEYBOARD CALL TREE
-D2Vars::D2CLIENT_UIModesCallTree[UICall::PARTYSCREEN]=(int)&ExParty::ShowHide;
-D2Vars::D2CLIENT_UIModesCallTree[UICall::ESCMENU]=(int)&ExOptions::ShowHide;
-D2Vars::D2CLIENT_UIModesCallTree[UICall::CLEARSCREEN]=(int)&ExParty::ClearScreenHandle;
+//D2Vars::D2CLIENT_UIModesCallTree[UICall::PARTYSCREEN]=(int)&ExParty::ShowHide;
+//D2Vars::D2CLIENT_UIModesCallTree[UICall::ESCMENU]=(int)&ExOptions::ShowHide;
+//D2Vars::D2CLIENT_UIModesCallTree[UICall::CLEARSCREEN]=(int)&ExParty::ClearScreenHandle;
+
+Misc::WriteDword((DWORD*)&D2Vars::D2CLIENT_UIModesCallTree[UICall::PARTYSCREEN], (DWORD)&ExParty::ShowHide);
+Misc::WriteDword((DWORD*)&D2Vars::D2CLIENT_UIModesCallTree[UICall::ESCMENU], (DWORD)&ExOptions::ShowHide);
+Misc::WriteDword((DWORD*)&D2Vars::D2CLIENT_UIModesCallTree[UICall::CLEARSCREEN], (DWORD)&ExParty::ClearScreenHandle);
+
 
 //PACKET HANDLERS
-D2Vars::D2CLIENT_PacketHandler[0x26].CallBack=&ExChat::OnMessage;
-D2Vars::D2CLIENT_PacketHandler[0x5A].CallBack=&ExEvents::OnEvent;
+//D2Vars::D2CLIENT_PacketHandler[0x26].CallBack=&ExChat::OnMessage;
+//D2Vars::D2CLIENT_PacketHandler[0x5A].CallBack=&ExEvents::OnEvent;
+Misc::WriteDword((DWORD*)&D2Vars::D2CLIENT_PacketHandler[0x26].CallBack, (DWORD)&ExChat::OnMessage);
+Misc::WriteDword((DWORD*)&D2Vars::D2CLIENT_PacketHandler[0x5A].CallBack, (DWORD)&ExEvents::OnEvent);
 
 #ifdef D2EX_EXAIM_ENABLED
 D2Vars::D2CLIENT_PacketHandler[0x4D].CallBack2=&ExAim::OnUnitSpellCast;
 D2Vars::D2CLIENT_PacketHandler[0x0A].CallBack=&ExAim::OnRemoveObject;
+
+Misc::WriteDword((DWORD*)&D2Vars::D2CLIENT_PacketHandler[0x4D].CallBack2, (DWORD)&ExAim::OnUnitSpellCast);
+Misc::WriteDword((DWORD*)&D2Vars::D2CLIENT_PacketHandler[0x0A].CallBack, (DWORD)&ExAim::OnRemoveObject);
 #endif
 
 //D2Vars::D2CLIENT_PacketHandler[0x65].CallBack=&ExParty::GetKillCount;
-D2Vars::D2CLIENT_PacketHandler[0x66].CallBack=&ExParty::GetRoster;
+//D2Vars::D2CLIENT_PacketHandler[0x66].CallBack=&ExParty::GetRoster;
+Misc::WriteDword((DWORD*)&D2Vars::D2CLIENT_PacketHandler[0x66].CallBack, (DWORD)&ExParty::GetRoster);
 
-D2Vars::D2CLIENT_PacketHandler[0xA8].CallBack=&ExBuffs::OnSetState;
-D2Vars::D2CLIENT_PacketHandler[0xA9].CallBack=&ExBuffs::OnRemoveState;
+//D2Vars::D2CLIENT_PacketHandler[0xA8].CallBack=&ExBuffs::OnSetState;
+//D2Vars::D2CLIENT_PacketHandler[0xA9].CallBack=&ExBuffs::OnRemoveState;
+Misc::WriteDword((DWORD*)&D2Vars::D2CLIENT_PacketHandler[0xA8].CallBack, (DWORD)&ExBuffs::OnSetState);
+Misc::WriteDword((DWORD*)&D2Vars::D2CLIENT_PacketHandler[0xA9].CallBack, (DWORD)&ExBuffs::OnRemoveState);
 
-D2Vars::D2CLIENT_PacketHandler[0x8B].CallBack=&ExParty::OnPartyUpdate2;
-D2Vars::D2CLIENT_PacketHandler[0x8C].CallBack=&ExParty::OnPartyUpdate;
-D2Vars::D2CLIENT_PacketHandler[0x8D].CallBack=&ExParty::OnPartyUpdate3;
+//D2Vars::D2CLIENT_PacketHandler[0x8B].CallBack=&ExParty::OnPartyUpdate2;
+//D2Vars::D2CLIENT_PacketHandler[0x8C].CallBack=&ExParty::OnPartyUpdate;
+//D2Vars::D2CLIENT_PacketHandler[0x8D].CallBack=&ExParty::OnPartyUpdate3;
+Misc::WriteDword((DWORD*)&D2Vars::D2CLIENT_PacketHandler[0x8B].CallBack, (DWORD)&ExParty::OnPartyUpdate2);
+Misc::WriteDword((DWORD*)&D2Vars::D2CLIENT_PacketHandler[0x8C].CallBack, (DWORD)&ExParty::OnPartyUpdate);
+Misc::WriteDword((DWORD*)&D2Vars::D2CLIENT_PacketHandler[0x8D].CallBack, (DWORD)&ExParty::OnPartyUpdate3);
 
+// for location on party screeen -unused-
 //D2Vars::D2CLIENT_PacketHandler[0x7F].CallBack=&ExParty::OnLocationUpdate;
 
-D2Vars::D2CLIENT_PacketHandler[0x77].CallBack=&ExScreen::OnTradeButton;
-D2Vars::D2CLIENT_PacketHandler[0x78].CallBack=&ExScreen::OnTradeData;
+//D2Vars::D2CLIENT_PacketHandler[0x77].CallBack=&ExScreen::OnTradeButton;
+//D2Vars::D2CLIENT_PacketHandler[0x78].CallBack=&ExScreen::OnTradeData;
+Misc::WriteDword((DWORD*)&D2Vars::D2CLIENT_PacketHandler[0x77].CallBack, (DWORD)&ExScreen::OnTradeButton);
+Misc::WriteDword((DWORD*)&D2Vars::D2CLIENT_PacketHandler[0x78].CallBack, (DWORD)&ExScreen::OnTradeData);
 
 //ExEvents
-D2Vars::D2CLIENT_PacketHandler[0xA6].CallBack = &ExEvents::OnTextEvent;
+//D2Vars::D2CLIENT_PacketHandler[0xA6].CallBack = &ExEvents::OnTextEvent;
+Misc::WriteDword((DWORD*)&D2Vars::D2CLIENT_PacketHandler[0xA6].CallBack, (DWORD)&ExEvents::OnTextEvent);
 //ExSpectator
-D2Vars::D2CLIENT_PacketHandler[0x7E].CallBack = &ExSpec::OnMousePacket;
-D2Vars::D2CLIENT_PacketHandler[0x8F].CallBack=&ExLagometer::OnPong;
+//D2Vars::D2CLIENT_PacketHandler[0x7E].CallBack = &ExSpec::OnMousePacket;
+//D2Vars::D2CLIENT_PacketHandler[0x8F].CallBack = &ExLagometer::OnPong;
+Misc::WriteDword((DWORD*)&D2Vars::D2CLIENT_PacketHandler[0x7E].CallBack, (DWORD)&ExSpec::OnMousePacket);
+Misc::WriteDword((DWORD*)&D2Vars::D2CLIENT_PacketHandler[0x8F].CallBack, (DWORD)&ExLagometer::OnPong);
 
-D2Vars::D2NET_SrvPacketLenTable[0x2C]=18;
+//D2Vars::D2NET_SrvPacketLenTable[0x2C]=18;
+Misc::WriteDword((DWORD*)&D2Vars::D2NET_SrvPacketLenTable[0x2C], 18);
 
 	for(int i = 1; i<38; ++i) {
 		if(i == UI_PARTY) continue;
@@ -383,8 +414,10 @@ D2Vars::D2NET_SrvPacketLenTable[0x2C]=18;
 	Misc::WriteDword((DWORD*)&D2Vars::D2CLIENT_MenuMsgs[0].fnCallBack,(DWORD)ExOptions::m_LBUTTONDOWN); 
 	Misc::WriteDword((DWORD*)&D2Vars::D2CLIENT_MenuMsgs[1].fnCallBack,(DWORD)ExOptions::m_LBUTTONUP); 
 	Misc::WriteDword((DWORD*)&D2Vars::D2CLIENT_MenuMsgs[6].fnCallBack,(DWORD)ExOptions::m_OnEnter); 
-
-
+#ifdef D2EX_MULTIRES
+	DEBUGMSG("Game has been patched, sending event!");
+	SetEvent(hPointersReadyEvent);
+#endif
 //-----------------------
 //HERE WE GO
 #ifdef D2EX_EXAIM_ENABLED
@@ -403,11 +436,13 @@ D2Vars::D2NET_SrvPacketLenTable[0x2C]=18;
 		}
 		if(ExParty::GetPlayerArea())
 		{
+#ifdef D2EX_MULTIRES
 			int mDesiredMode = ExMultiRes::FindDisplayMode(cResModeX, cResModeX);
 			if (!mDesiredMode)
-				ExMultiRes::SetResolution(mDesiredMode);
+				ExMultiRes::D2CLIENT_SetResolution(mDesiredMode);
 			else
 				D2EXERROR("Cannot set resolution %dx%d. Please correct your setting in D2Ex.ini", cResModeX, cResModeY);
+#endif
 
 #ifdef D2EX_EXAIM_ENABLED
 			ResetEvent(hAimEvent);
@@ -466,6 +501,7 @@ DWORD WINAPI DllMain(HMODULE hModule, int dwReason, void* lpReserved)
 		{
 			if(!Handle) {
 				hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+				ASSERT(hEvent);
 				SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
 				gModule = hModule;
 				InitializeCriticalSectionAndSpinCount(&EX_CRITSECT,1000);
@@ -475,33 +511,11 @@ DWORD WINAPI DllMain(HMODULE hModule, int dwReason, void* lpReserved)
 #ifdef D2EX_EXAIM_ENABLED
 				InitializeCriticalSectionAndSpinCount(&TELE_CRITSECT,1000);
 #endif
-				Misc::Patch(JUMP, GetDllOffset("D2Gfx.dll", -10073), (DWORD)ExMultiRes::InitWindow, 7, "D2GFX_InitWindow");
-				;
-				Misc::WriteDword((DWORD*)&((GFXHelpers*)GetDllOffset("D2Gfx.dll", 0x10BFC))->FillYBufferTable, (DWORD)&ExMultiRes::FillYBufferTable);
-				switch (ExMultiRes::GetRenderMode())
-				{
-					case VIDEO_MODE_GDI:
-					{
-						DEBUGMSG("Using GDI video mode")
-						typedef fnDriverCallbacks* (__stdcall * GetCallbacks_t)();
-						GetCallbacks_t GetCallbacks = (GetCallbacks_t)GetDllOffset("D2Gdi.dll", -10000);
-						fnDriverCallbacks * fns = GetCallbacks();
-
-						Misc::WriteDword((DWORD*)&(fns->Init), (DWORD)&ExMultiRes::GDI_Init);
-						Misc::WriteDword((DWORD*)&(fns->ResizeWin), (DWORD)&ExMultiRes::GDI_ResizeWindow);
-					}
-					break;
-					case VIDEO_MODE_GLIDE:
-					{
-						DEBUGMSG("Using GLIDE video mode!")
-					}
-					default:
-					{
-						DEBUGMSG("Video mode : %d", ExMultiRes::GetRenderMode())
-					}
-					break;
-				}
-
+#ifdef D2EX_MULTIRES
+				hPointersReadyEvent = CreateEvent(NULL, TRUE, FALSE, "D2EX_READY");
+				ASSERT(hPointersReadyEvent);
+				Misc::Patch(JUMP, GetDllOffset("D2Gfx.dll", -10073), (DWORD)ExMultiRes::D2GFX_InitWindow, 7, "D2GFX_InitWindow");
+#endif
 				Handle = (HANDLE)_beginthreadex(0,0,&Thread,&hEvent,0,&Id);
 				ASSERT(Handle)
 			}

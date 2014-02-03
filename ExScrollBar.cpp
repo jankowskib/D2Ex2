@@ -29,7 +29,7 @@ ExScrollBar::ExScrollBar(int X, int Y, int Min, int Max, int Height, int * Var, 
 	{
 		aCellFile = new ExCellFile(CellFiles::SCROLLBAR);
 	}
-	catch (CellLoadError e)
+	catch (const CellLoadError&)
 	{
 		delete aCellFile;
 		LeaveCriticalSection(&CON_CRITSECT);

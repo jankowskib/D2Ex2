@@ -13,10 +13,10 @@ struct D2Config // sizeof 0x5C
 {
 	char szSection[27];		// 0x00
 	char szKeyName[27];		// 0x1B
-	char szParamter[27];	// 0x36
+	char szParameter[27];	// 0x36
 	BYTE bType; 			// 0x51 - specify if config entry is byte (0) int(1) or char(2)
-	BYTE _1;				// 0x52
-	BYTE _2;				// 0x53
+	BYTE _1;				// 0x52 - filler
+	BYTE _2;				// 0x53 - filler
 	DWORD dwStructOffset;	// 0x54 Offset on BnetData * struct
 	DWORD dwDefaultValue;	// 0x58
 };
@@ -139,7 +139,7 @@ struct GFXSettings // size 0x18
 
 struct GFXHelpers
 {
-	void(__fastcall *FillYBufferTable)(void *ppvBits, int nWidth, int nHeight, int aZero);
+	void(__fastcall *D2GFX_FillYBufferTable)(void *ppvBits, int nWidth, int nHeight, int aZero);
 	void(__fastcall *f2)(int a1, int a2, int a3);
 	void(__fastcall *f3)(int a1, int a2, int a3, int a4);
 	void(__fastcall *f4)(int a1, int a2, int a3, int a4);
@@ -149,10 +149,10 @@ struct GFXHelpers
 };
 
 
-struct fnDriverCallbacks
+struct fnRendererCallbacks
 {
-	BOOL(__fastcall *InitWindow)(HINSTANCE); // 0
-	BOOL(__fastcall *InitPerspective)(GFXSettings * pgfxSettings, int * pfnHelpers); // 1
+	BOOL(__fastcall *D2GFX_InitWindow)(HINSTANCE); // 0
+	BOOL(__fastcall *InitPerspective)(GFXSettings* pgfxSettings, GFXHelpers* pfnHelpers); // 1
 	BOOL(__fastcall *Release)(); // 2
 	BOOL(__fastcall *Init)(HANDLE hWnd, int nResolution); // 3
 	BOOL(__fastcall *Shutdown)(); // 4

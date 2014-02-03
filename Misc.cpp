@@ -1,6 +1,25 @@
 #include "stdafx.h"
 #include "Misc.h"
 
+
+
+int Misc::RegReadDword(const char * key, const char* value, const int default)
+{
+	HKEY hKey = { 0 };
+	int result;
+
+	if (RegOpenKeyEx(HKEY_CURRENT_USER, key, 0, KEY_QUERY_VALUE, &hKey) == ERROR_SUCCESS ||
+			RegOpenKeyEx(HKEY_LOCAL_MACHINE,key, 0, KEY_QUERY_VALUE, &hKey) == ERROR_SUCCESS)
+			{
+				DWORD nSize = 4;
+				if (RegQueryValueEx(hKey, key, NULL, NULL, (BYTE*)&result, &nSize) == ERROR_SUCCESS)
+				{
+					return result;
+				}
+			}
+			return default;
+}
+
 wstring Misc::ConvertTickToTime(DWORD nTick)
 {
 	if(nTick == 0 ) return L"00:00";
@@ -167,14 +186,16 @@ BOOL Misc::WriteBytes(LPVOID lpAddr, LPVOID lpBuffer, DWORD dwLen)
 BOOL Misc::WriteDword(DWORD* lpAddr, DWORD lpBuffer)
 {
 	DWORD dwOldProtect;
-	if(!VirtualProtect(lpAddr, 4, PAGE_READWRITE, &dwOldProtect))
-		return FALSE;
-
+	if (!VirtualProtect(lpAddr, 4, PAGE_READWRITE, &dwOldProtect))
+	{
+		D2EXERROR("Failed to patch %d with %d", lpAddr, lpBuffer)
+	}
 	*lpAddr = lpBuffer;
 
-	if(!VirtualProtect(lpAddr, 4, dwOldProtect, &dwOldProtect))
-		return FALSE;
-
+	if (!VirtualProtect(lpAddr, 4, dwOldProtect, &dwOldProtect))
+	{
+		D2EXERROR("Failed to patch %d with %d", lpAddr, lpBuffer)
+	}
 	return TRUE;
 }
 
@@ -225,7 +246,7 @@ void Misc::Patch(BYTE bInst, DWORD pAddr, DWORD pFunc, DWORD dwLen, char* Type)
 
 	if(!Misc::WriteBytes((void*)pAddr, bCode, dwLen))
 	{
-		Misc::Log("Error while patching game's %s with %d byte(s)",Type,dwLen);
+		D2EXERROR("Error while patching game's %s with %d byte(s)",Type, dwLen);
 	}
 	delete[] bCode;
 }
