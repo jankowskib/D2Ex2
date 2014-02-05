@@ -14,13 +14,16 @@ Features
 - Created a lot of custom controls, you can use them to create your GUI (ie new party screen)
 - Supports both 1.11b & 1.13d (set version in stdafx.h)
 - ExBuffs module let see you states, auras and remaining time
-- High resolution support for GDI / GLIDE video modes.
+- [WIP] High resolution support for GDI / GLIDE video modes.
 
-Installations
+Installation
 -------------
-Compile Release build using Visual Studio 2008+, (2012 is supported if you select xp vcl libs in project setup)
-Visual Studio 2013 is not supported because it's messing with function order and pointers are not defined correctly even without optimizations.
-Copy everything to Diablo II directory, D2Win.dll is a loader for D2Ex2.dll
+Compile Release build (select configuration for your version) using Visual Studio 2008+, ~~(2012 is supported if you select xp vcl libs in project setup)~~
+~~Visual Studio 2013 is not supported because it's messing with function order and pointers are not defined correctly even without optimizations.~~ <- Now compiles correctly on VS 2013 too :)
+
+or
+
+Copy everything from files directory to your Diablo II directory, D2Win.dll is a loader for D2Ex2.dll. If you use prebuild D2Ex2.dll, then you need to install this: http://www.microsoft.com/en-us/download/details.aspx?id=40784
 
 Thanks to
 ----------

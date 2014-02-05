@@ -16,21 +16,21 @@ if(bisTopBar) bMoveable=true;
 if(!Label.empty()) {
 	for (int i = 0;i<10; i++)
 		{
-		D2Funcs::D2WIN_SetTextSize(FontTable[i]); 
+		D2Funcs.D2WIN_SetTextSize(FontTable[i]); 
 		TextWidth = ExScreen::GetTextWidth(Label.c_str());
 		aFont = FontTable[i];
-		if(aFont==3) TextHeight = 35; else if(aFont==6) TextHeight = 12; else TextHeight = D2Funcs::D2WIN_GetFontHeight();
+		if(aFont==3) TextHeight = 35; else if(aFont==6) TextHeight = 12; else TextHeight = D2Funcs.D2WIN_GetFontHeight();
 		if(cX+TextWidth < (cX+cWidth) && (cY+TextHeight) < (isTopBar ? cY+15 : (cY+cHeight)) )  break;
 		if(i==9){ bDrawText=false; break;}
 	}
 }
 else bDrawText=false; 
 
-D2Vars::D2CLIENT_BlockedRect->left=cX;
-D2Vars::D2CLIENT_BlockedRect->top=cY;
-D2Vars::D2CLIENT_BlockedRect->right=cX+cWidth;
-D2Vars::D2CLIENT_BlockedRect->bottom=cY+cHeight;
-*D2Vars::D2CLIENT_BlockScreen=true;
+D2Vars.D2CLIENT_BlockedRect->left=cX;
+D2Vars.D2CLIENT_BlockedRect->top=cY;
+D2Vars.D2CLIENT_BlockedRect->right=cX+cWidth;
+D2Vars.D2CLIENT_BlockedRect->bottom=cY+cHeight;
+*D2Vars.D2CLIENT_BlockScreen=true;
 //#ifdef _DEBUG
 //Misc::Log(L"-->Stworzylem nowa klase ExWindow '%s'",Label.c_str());
 //#endif
@@ -43,19 +43,19 @@ if(cState==VISIBLE || cState==DISABLED)
 {
 	int aColor = cState==1 ? bBeingPressed ? 0x11 : wBarColor : 4;
 	int aColorText = cState==1 ? bBeingPressed ? bisTopBar ? 9 : wTextColor : wTextColor : 15;
-	D2Funcs::D2GFX_DrawRectangle(cX,cY,cX+cWidth,cY+cHeight,0xF,1);
-	D2Funcs::D2CLIENT_DrawGZBox(cX,cY,cX+cWidth,cY+cHeight);
+	D2Funcs.D2GFX_DrawRectangle(cX,cY,cX+cWidth,cY+cHeight,0xF,1);
+	D2ASMFuncs::D2CLIENT_DrawGZBox(cX,cY,cX+cWidth,cY+cHeight);
 if(bisTopBar)
 {
-D2Funcs::D2GFX_DrawRectangle(cX,cY,cX+cWidth,cY+15,aColor,2);
-D2Funcs::D2CLIENT_DrawGZBox(cX,cY,cX+cWidth,cY+15);
+D2Funcs.D2GFX_DrawRectangle(cX,cY,cX+cWidth,cY+15,aColor,2);
+D2ASMFuncs::D2CLIENT_DrawGZBox(cX,cY,cX+cWidth,cY+15);
 }
 if(bDrawText)
 {
 	int TextX=((cX+cX+cWidth)-TextWidth)/2;
 	int TextY=bisTopBar ? ((cY+cY+15)+TextHeight)/2 : cY+TextHeight;
-	D2Funcs::D2WIN_SetTextSize(aFont);
-	if(!Label.empty())	D2Funcs::D2WIN_DrawText(Label.c_str(),TextX,TextY,aColorText,0);
+	D2Funcs.D2WIN_SetTextSize(aFont);
+	if(!Label.empty())	D2Funcs.D2WIN_DrawText(Label.c_str(),TextX,TextY,aColorText,0);
 }
 }
 }
@@ -72,22 +72,22 @@ void ExWindow::SetAlign(Align xAlign, Align yAlign)
 
 void ExWindow::Relocate() //- Set control align
 {
-	if(wAlign == CENTER) cX=(*D2Vars::D2CLIENT_ScreenWidth-cWidth)/2;
-	else if(wAlign == RIGHT) cX=(*D2Vars::D2CLIENT_ScreenWidth-cWidth);
-	if(hAlign == CENTER) cY=(*D2Vars::D2CLIENT_ScreenHeight-cHeight)/2;
-	else if(hAlign == RIGHT) cY=*D2Vars::D2CLIENT_ScreenHeight-cHeight;
+	if(wAlign == CENTER) cX=(*D2Vars.D2CLIENT_ScreenWidth-cWidth)/2;
+	else if(wAlign == RIGHT) cX=(*D2Vars.D2CLIENT_ScreenWidth-cWidth);
+	if(hAlign == CENTER) cY=(*D2Vars.D2CLIENT_ScreenHeight-cHeight)/2;
+	else if(hAlign == RIGHT) cY=*D2Vars.D2CLIENT_ScreenHeight-cHeight;
 
-D2Vars::D2CLIENT_BlockedRect->left=cX;
-D2Vars::D2CLIENT_BlockedRect->top=cY;
-D2Vars::D2CLIENT_BlockedRect->right=cX+cWidth;
-D2Vars::D2CLIENT_BlockedRect->bottom=cY+cHeight;
+D2Vars.D2CLIENT_BlockedRect->left=cX;
+D2Vars.D2CLIENT_BlockedRect->top=cY;
+D2Vars.D2CLIENT_BlockedRect->right=cX+cWidth;
+D2Vars.D2CLIENT_BlockedRect->bottom=cY+cHeight;
 
 }
 
 void ExWindow::Resize(int NewWidth, int NewHeight)
 {
-D2Vars::D2CLIENT_BlockedRect->right=cX+NewWidth;
-D2Vars::D2CLIENT_BlockedRect->bottom=cY+NewHeight;
+D2Vars.D2CLIENT_BlockedRect->right=cX+NewWidth;
+D2Vars.D2CLIENT_BlockedRect->bottom=cY+NewHeight;
 cHeight = NewHeight;
 cWidth = NewWidth;
 }
@@ -115,14 +115,14 @@ if(cState==INVISIBLE) return false;
 switch(Sender)
 {
 case WM_LBUTTONDOWN:
-if(*D2Vars::D2CLIENT_MouseX>=cX && *D2Vars::D2CLIENT_MouseX<=cX+cWidth && *D2Vars::D2CLIENT_MouseY>=cY && *D2Vars::D2CLIENT_MouseY<=cY+cHeight) 
+if(*D2Vars.D2CLIENT_MouseX>=cX && *D2Vars.D2CLIENT_MouseX<=cX+cWidth && *D2Vars.D2CLIENT_MouseY>=cY && *D2Vars.D2CLIENT_MouseY<=cY+cHeight) 
 {
 bBeingPressed=true;
-if(*D2Vars::D2CLIENT_MouseY<=cY+15) 
+if(*D2Vars.D2CLIENT_MouseY<=cY+15) 
 {
 if(!bMoveable) return true;
- DragX=*D2Vars::D2CLIENT_MouseX;
- DragY=*D2Vars::D2CLIENT_MouseY;
+ DragX=*D2Vars.D2CLIENT_MouseX;
+ DragY=*D2Vars.D2CLIENT_MouseY;
  OldX=cX;
  OldY=cY;
 	for(vector<ExControl*>::size_type i=0 ; i<Child.size(); ++i) 
@@ -136,27 +136,27 @@ if(!bMoveable) return true;
 }
 break;
 case WM_LBUTTONUP:
-if(*D2Vars::D2CLIENT_MouseX>=cX && *D2Vars::D2CLIENT_MouseX<=cX+cWidth && *D2Vars::D2CLIENT_MouseY>=cY && *D2Vars::D2CLIENT_MouseY<=cY+cHeight) 
+if(*D2Vars.D2CLIENT_MouseX>=cX && *D2Vars.D2CLIENT_MouseX<=cX+cWidth && *D2Vars.D2CLIENT_MouseY>=cY && *D2Vars.D2CLIENT_MouseY<=cY+cHeight) 
 {
 //if(cX<0 || cWidth>800) {cX=OldX;cWidth=OldX2;}
 //if(cY<0 || cHeight>600) {cY=OldY;cHeight=OldY2;}
-D2Vars::D2CLIENT_BlockedRect->left=cX;
-D2Vars::D2CLIENT_BlockedRect->top=cY;
-D2Vars::D2CLIENT_BlockedRect->right=cX+cWidth;
-D2Vars::D2CLIENT_BlockedRect->bottom=cY+cHeight;
+D2Vars.D2CLIENT_BlockedRect->left=cX;
+D2Vars.D2CLIENT_BlockedRect->top=cY;
+D2Vars.D2CLIENT_BlockedRect->right=cX+cWidth;
+D2Vars.D2CLIENT_BlockedRect->bottom=cY+cHeight;
 bBeingPressed=false;
 return true;
 }
 break;
 case WM_MOUSEMOVE:
 if(!(wParam & (MK_LBUTTON | MK_CONTROL))) break;
-if(*D2Vars::D2CLIENT_MouseX>=cX && *D2Vars::D2CLIENT_MouseX<=cX+cWidth && *D2Vars::D2CLIENT_MouseY>=cY && *D2Vars::D2CLIENT_MouseY<=cY+cHeight) 
+if(*D2Vars.D2CLIENT_MouseX>=cX && *D2Vars.D2CLIENT_MouseX<=cX+cWidth && *D2Vars.D2CLIENT_MouseY>=cY && *D2Vars.D2CLIENT_MouseY<=cY+cHeight) 
 {
 if(wParam & MK_LBUTTON) bBeingPressed=true;
-if(bBeingPressed && *D2Vars::D2CLIENT_MouseY<=cY+15 && (wParam & MK_CONTROL) && bMoveable && DragX)
+if(bBeingPressed && *D2Vars.D2CLIENT_MouseY<=cY+15 && (wParam & MK_CONTROL) && bMoveable && DragX)
 {
-signed int xOffset = (*D2Vars::D2CLIENT_MouseX - DragX);
-signed int yOffset = (*D2Vars::D2CLIENT_MouseY - DragY);
+signed int xOffset = (*D2Vars.D2CLIENT_MouseX - DragX);
+signed int yOffset = (*D2Vars.D2CLIENT_MouseY - DragY);
 cX=OldX+xOffset;
 cY=OldY+yOffset;
 //cWidth=OldX2+xOffset;
@@ -181,7 +181,7 @@ return false;
 ExWindow::~ExWindow(void) 
 {
 EnterCriticalSection(&CON_CRITSECT);
-*D2Vars::D2CLIENT_BlockScreen=false;
+*D2Vars.D2CLIENT_BlockScreen=false;
 DEBUGMSG(L"-->Zniszczylem ExWindow '%s'",Label.c_str());
 
 } 

@@ -70,16 +70,16 @@ void ExButton::Draw()
 		aCellFile->Get()->nCellNo = aFrame;
 		if (aTextBox) FixText();
 	}
-	D2Funcs::D2GFX_DrawCellContextEx(aCellFile->Get(), cX, cY, -1, 5, cState == VISIBLE ? Color : COL_RED);
+	D2Funcs.D2GFX_DrawCellContextEx(aCellFile->Get(), cX, cY, -1, 5, cState == VISIBLE ? Color : COL_RED);
 	if (bLongButton)
 	{
 		int aWid = aCellFile->Get()->pCellFile->cells[aFrame]->width;
 		aCellFile->Get()->nCellNo++;
-		D2Funcs::D2GFX_DrawCellContextEx(aCellFile->Get(), cX + aWid, cY, -1, 5, cState == VISIBLE ? Color : COL_RED);
+		D2Funcs.D2GFX_DrawCellContextEx(aCellFile->Get(), cX + aWid, cY, -1, 5, cState == VISIBLE ? Color : COL_RED);
 	}
 	if (Hoover.empty()) return;
 	if (!bBeingSelected) return;
-	D2Funcs::D2WIN_DrawFramedText(Hoover.c_str(), cX, cY - cHeight - 10, 0, 0);
+	D2Funcs.D2WIN_DrawFramedText(Hoover.c_str(), cX, cY - cHeight - 10, 0, 0);
 }
 
 void ExButton::SetColor(D2Colors nColor)
@@ -114,7 +114,7 @@ bool ExButton::isPressed(unsigned int Sender, WPARAM wParam)
 	{
 	case WM_LBUTTONDOWN:
 		if (cState == DISABLED) return false;
-		if (*D2Vars::D2CLIENT_MouseX >= cX && *D2Vars::D2CLIENT_MouseX <= cX + cWidth && *D2Vars::D2CLIENT_MouseY <= cY && *D2Vars::D2CLIENT_MouseY >= cY - cHeight)
+		if (*D2Vars.D2CLIENT_MouseX >= cX && *D2Vars.D2CLIENT_MouseX <= cX + cWidth && *D2Vars.D2CLIENT_MouseY <= cY && *D2Vars.D2CLIENT_MouseY >= cY - cHeight)
 		{
 			bBeingPressed = true;
 			return true;
@@ -122,21 +122,21 @@ bool ExButton::isPressed(unsigned int Sender, WPARAM wParam)
 		break;
 	case WM_LBUTTONUP:
 		if (cState == DISABLED) return false;
-		if (*D2Vars::D2CLIENT_MouseX >= cX && *D2Vars::D2CLIENT_MouseX <= cX + cWidth && *D2Vars::D2CLIENT_MouseY <= cY && *D2Vars::D2CLIENT_MouseY >= cY - cHeight)
+		if (*D2Vars.D2CLIENT_MouseX >= cX && *D2Vars.D2CLIENT_MouseX <= cX + cWidth && *D2Vars.D2CLIENT_MouseY <= cY && *D2Vars.D2CLIENT_MouseY >= cY - cHeight)
 		{
-			if (cState == VISIBLE && event_onClick) { D2Funcs::D2CLIENT_PlaySound(ExSounds::STAND_CLICK); event_onClick(this); }
+			if (cState == VISIBLE && event_onClick) { D2ASMFuncs::D2CLIENT_PlaySound(ExSounds::STAND_CLICK); event_onClick(this); }
 			bBeingPressed = false;
 			return true;
 		}
 		break;
 	case WM_MOUSEMOVE:
-		if (*D2Vars::D2CLIENT_MouseX >= cX && *D2Vars::D2CLIENT_MouseX <= cX + cWidth && *D2Vars::D2CLIENT_MouseY >= cY - cHeight && *D2Vars::D2CLIENT_MouseY <= cY)
+		if (*D2Vars.D2CLIENT_MouseX >= cX && *D2Vars.D2CLIENT_MouseX <= cX + cWidth && *D2Vars.D2CLIENT_MouseY >= cY - cHeight && *D2Vars.D2CLIENT_MouseY <= cY)
 			bBeingSelected = true;
 		else
 			bBeingSelected = false;
 		if (cState == DISABLED) return false;
 		if (!(Sender == WM_MOUSEMOVE && wParam & (MK_LBUTTON))) break;
-		if (*D2Vars::D2CLIENT_MouseX >= cX && *D2Vars::D2CLIENT_MouseX <= cX + cWidth && *D2Vars::D2CLIENT_MouseY <= cY - cHeight && *D2Vars::D2CLIENT_MouseY >= cY)
+		if (*D2Vars.D2CLIENT_MouseX >= cX && *D2Vars.D2CLIENT_MouseX <= cX + cWidth && *D2Vars.D2CLIENT_MouseY <= cY - cHeight && *D2Vars.D2CLIENT_MouseY >= cY)
 			bBeingPressed = true;
 		else
 			bBeingPressed = false;

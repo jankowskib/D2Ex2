@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 2012 for Windows Desktop
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30110.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "D2Ex2", "D2Ex2.vcxproj", "{E2C5AAFC-5631-4849-89B2-73FD4AAEF510}"
 EndProject
 Global
@@ -9,10 +11,10 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E2C5AAFC-5631-4849-89B2-73FD4AAEF510}.Debug|Win32.ActiveCfg = Debug|Win32
-		{E2C5AAFC-5631-4849-89B2-73FD4AAEF510}.Debug|Win32.Build.0 = Debug|Win32
-		{E2C5AAFC-5631-4849-89B2-73FD4AAEF510}.Release|Win32.ActiveCfg = Release|Win32
-		{E2C5AAFC-5631-4849-89B2-73FD4AAEF510}.Release|Win32.Build.0 = Release|Win32
+		{E2C5AAFC-5631-4849-89B2-73FD4AAEF510}.Debug|Win32.ActiveCfg = Debug 1.11b|Win32
+		{E2C5AAFC-5631-4849-89B2-73FD4AAEF510}.Debug|Win32.Build.0 = Debug 1.11b|Win32
+		{E2C5AAFC-5631-4849-89B2-73FD4AAEF510}.Release|Win32.ActiveCfg = Release 1.13d|Win32
+		{E2C5AAFC-5631-4849-89B2-73FD4AAEF510}.Release|Win32.Build.0 = Release 1.13d|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

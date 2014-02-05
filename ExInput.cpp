@@ -7,34 +7,34 @@
 // IMPORT FROM SCRAP Project
 void ExInput::DefineBindings()
 {
-//D2Funcs::STORM_RegisterKeyDown(D2Funcs::D2GFX_GetHwnd(),VK_Aim,&ExAim::b_Aim);
-//D2Funcs::STORM_RegisterKeyDown(D2Funcs::D2GFX_GetHwnd(),VK_FastTP,&ExChicken::b_FastTP);
+//D2Funcs.STORM_RegisterKeyDown(D2Funcs.D2GFX_GetHwnd(),VK_Aim,&ExAim::b_Aim);
+//D2Funcs.STORM_RegisterKeyDown(D2Funcs.D2GFX_GetHwnd(),VK_FastTP,&ExChicken::b_FastTP);
 }
 
 void ExInput::UndefineBindings()
 {
-//D2Funcs::STORM_UnregisterKeyDown(D2Funcs::D2GFX_GetHwnd(),VK_Aim,&ExAim::b_Aim);
-//D2Funcs::STORM_UnregisterKeyDown(D2Funcs::D2GFX_GetHwnd(),VK_FastTP,&ExChicken::b_FastTP);
+//D2Funcs.STORM_UnregisterKeyDown(D2Funcs.D2GFX_GetHwnd(),VK_Aim,&ExAim::b_Aim);
+//D2Funcs.STORM_UnregisterKeyDown(D2Funcs.D2GFX_GetHwnd(),VK_FastTP,&ExChicken::b_FastTP);
 }
 
 void ExInput::RegisterMsgs(sMsg* pMsgList, int nCount)
 {
-	HWND hWnd = D2Funcs::D2GFX_GetHwnd();
+	HWND hWnd = D2Funcs.D2GFX_GetHwnd();
 	ASSERT(hWnd)
 	for(int i = 0; i<nCount; i++)
 	{
 		switch(pMsgList[i].MsgType) {
 		case 0:
-			D2Funcs::STORM_RegisterMsg(hWnd,pMsgList[i].wParam,pMsgList[i].fnCallBack);
+			D2Funcs.STORM_RegisterMsg(hWnd,pMsgList[i].wParam,pMsgList[i].fnCallBack);
 			break;
 		case 1:
-			D2Funcs::STORM_RegisterCommand(hWnd,pMsgList[i].wParam,pMsgList[i].fnCallBack);
+			D2Funcs.STORM_RegisterCommand(hWnd,pMsgList[i].wParam,pMsgList[i].fnCallBack);
 			break;
 		case 2:
-			D2Funcs::STORM_RegisterKeyUp(hWnd,pMsgList[i].wKey,pMsgList[i].fnCallBack);
+			D2Funcs.STORM_RegisterKeyUp(hWnd,pMsgList[i].wKey,pMsgList[i].fnCallBack);
 			break;
 		case 3:
-			D2Funcs::STORM_RegisterKeyDown(hWnd,pMsgList[i].wKey,pMsgList[i].fnCallBack);
+			D2Funcs.STORM_RegisterKeyDown(hWnd,pMsgList[i].wKey,pMsgList[i].fnCallBack);
 			break;
 		}
 	}
@@ -42,22 +42,22 @@ void ExInput::RegisterMsgs(sMsg* pMsgList, int nCount)
 
 void ExInput::UnregisterMsgs(sMsg* pMsgList, int nCount)
 {
-	HWND hWnd = D2Funcs::D2GFX_GetHwnd();
+	HWND hWnd = D2Funcs.D2GFX_GetHwnd();
 	ASSERT(hWnd);
 	for(int i = 0; i<nCount; i++)
 	{
 		switch(pMsgList[i].MsgType) {
 		case 0:
-			D2Funcs::STORM_UnregisterMsg(hWnd,pMsgList[i].wParam,pMsgList[i].fnCallBack);
+			D2Funcs.STORM_UnregisterMsg(hWnd,pMsgList[i].wParam,pMsgList[i].fnCallBack);
 			break;
 		case 1:
-			D2Funcs::STORM_UnregisterCommand(hWnd,pMsgList[i].wParam,pMsgList[i].fnCallBack);
+			D2Funcs.STORM_UnregisterCommand(hWnd,pMsgList[i].wParam,pMsgList[i].fnCallBack);
 			break;
 		case 2:
-			D2Funcs::STORM_UnregisterKeyUp(hWnd,pMsgList[i].wKey,pMsgList[i].fnCallBack);
+			D2Funcs.STORM_UnregisterKeyUp(hWnd,pMsgList[i].wKey,pMsgList[i].fnCallBack);
 			break;
 		case 3:
-			D2Funcs::STORM_UnregisterKeyDown(hWnd,pMsgList[i].wKey,pMsgList[i].fnCallBack);
+			D2Funcs.STORM_UnregisterKeyDown(hWnd,pMsgList[i].wKey,pMsgList[i].fnCallBack);
 			break;
 		}
 	}
@@ -96,7 +96,7 @@ if(Msg.find(L"Nie mozna bylo odnalezc uzytkownika")!= wstring::npos ||
    Pass = ExFriends::OnWhoisRequest(Msg);
 } 
 
-if(Pass) D2Funcs::D2CLIENT_PrintGameString(Text,Color);
+if(Pass) D2Funcs.D2CLIENT_PrintGameString(Text,Color);
 }
 
 DWORD __fastcall ExInput::GameInput(wchar_t* wMsg)
@@ -127,7 +127,7 @@ if(_stricmp(str,"#icon")==0)
 	hEvent.PacketLen = 0xE + strlen(hEvent.szMsg)+1;
 	
 	static int eLen =  0;
-	D2Funcs::D2NET_ReceivePacket(&eLen, (BYTE*)&hEvent,hEvent.PacketLen);
+	D2Funcs.D2NET_ReceivePacket(&eLen, (BYTE*)&hEvent,hEvent.PacketLen);
 
 return -1;
 }
@@ -144,30 +144,32 @@ if(_stricmp(str,"#icon2")==0)
 		pEvent.PacketLen=15;
 
 	static int eLen =  0;
-		D2Funcs::D2NET_ReceivePacket(&eLen, (BYTE*)&pEvent,pEvent.PacketLen);
+		D2Funcs.D2NET_ReceivePacket(&eLen, (BYTE*)&pEvent,pEvent.PacketLen);
 
 return -1;
 }
 
+#ifdef D2EX_MULTIRES
 if(strcmp(In,"#fs")==0)
 {
 	ExMultiRes::enterFullscreen();
-return -1;
+	return -1;
 }
+#endif
 if(_stricmp(str,"#recv")==0)
 {
 	str = strtok_s(NULL," ",&tok);
 	BYTE data[512];
 	static int eLen =  0;
 	int length = Misc::ConvertHexStringToBytes(str, data, 512);
-	D2Funcs::D2NET_ReceivePacket(&eLen, data,length);
+	D2Funcs.D2NET_ReceivePacket(&eLen, data,length);
 /*	wchar_t a[2000] = {9};
 	static char astr[3*512];
 	Misc::ConvertBytesToHexString(data,length,astr,3*512,',');
 	static wchar_t wdata[3*512];*/
 	//Misc::CharToWide(astr,strlen(astr)+1,wdata,strlen(astr)+1);
 //	swprintf(a,L"[%d,%d] : %s",eLen,length, wdata);
-	//D2Funcs::D2CLIENT_PrintGameString(a,1);
+	//D2Funcs.D2CLIENT_PrintGameString(a,1);
 	return -1;
 }
 if(_stricmp(str,"#send")==0)
@@ -181,19 +183,19 @@ if(_stricmp(str,"#send")==0)
 	int length = Misc::ConvertHexStringToBytes(str, data, sizeof(data));
 	for(int z = 0; z<i; z++)
 	{
-	D2Funcs::D2NET_SendPacket(length,0,data);
-	*D2Vars::D2CLIENT_SentBytes+=length;
-	*D2Vars::D2CLIENT_SentPackets++;
+	D2Funcs.D2NET_SendPacket(length,0,data);
+	*D2Vars.D2CLIENT_SentBytes+=length;
+	*D2Vars.D2CLIENT_SentPackets++;
 	Sleep(100);
 	}
 	char astr[2048];
 	Misc::ConvertBytesToHexString(data,length,astr,2047,',');
 	wostringstream wdata;
 	wdata << "Sent "<< astr;
-	D2Funcs::D2CLIENT_PrintGameString(wdata.str().c_str(),1);
+	D2Funcs.D2CLIENT_PrintGameString(wdata.str().c_str(),1);
 	wostringstream n;
 	n << i << " times";
-	D2Funcs::D2CLIENT_PrintGameString(n.str().c_str(),1);
+	D2Funcs.D2CLIENT_PrintGameString(n.str().c_str(),1);
 	return -1;
 }
 #endif
@@ -220,7 +222,7 @@ __declspec(naked) void ExInput::GameInput_STUB()
 		cmp eax, -1
 		popad
 		je BlockIt
-		call  D2Ptrs::D2CLIENT_ChatInput_I;
+		call  D2Ptrs.D2CLIENT_ChatInput_I;
 		ret
 
 		BlockIt:
@@ -232,14 +234,14 @@ __declspec(naked) void ExInput::GameInput_STUB()
 		cmp eax, -1
 		popad
 		je BlockIt
-		jmp D2Ptrs::D2CLIENT_ChatInput_I;
+		jmp D2Ptrs.D2CLIENT_ChatInput_I;
 	ret
 
 	BlockIt :
 		mov     ecx, 5; UIMode
 		mov     edx, 1; HowSet
 	    push    0; bClearScreen
-		call    D2Funcs::D2CLIENT_SetUiVar
+		call    D2Funcs.D2CLIENT_SetUiVar
 
 		xor eax, eax
 		ret 4
@@ -264,7 +266,7 @@ __declspec(naked) void ExInput::PacketInput_STUB() //CODE UNSAFE FOR WARDEN
 		mov edx, 0;
 
 OldCode:
-		call D2Ptrs::D2NET_ReceivePacket_I;
+		call D2Ptrs.D2NET_ReceivePacket_I;
 
 		push ebp;
 		ret;
@@ -294,39 +296,40 @@ LONG WINAPI ExInput::GameWindowEvent(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM
 	break;
 	//CASE 'NEXTMSG'
 	};
+#ifdef D2EX_MULTIRES
 	if (uMsg == WM_MOUSEWHEEL && (GET_KEYSTATE_WPARAM(wParam) & MK_CONTROL))
 	{
 		if (GET_WHEEL_DELTA_WPARAM(wParam) < 0)
 		{
-			if (*D2Vars::D2GFX_GfxMode > 0)
+			if (*D2Vars.D2GFX_GfxMode > 0)
 			{
 				EnterCriticalSection(&CON_CRITSECT);
 				int x, y;
-				ExMultiRes::D2GFX_GetModeParams(*D2Vars::D2GFX_GfxMode - 1, &x, &y);
+				ExMultiRes::D2GFX_GetModeParams(*D2Vars.D2GFX_GfxMode - 1, &x, &y);
 				DEBUGMSG("Changing resolution to %dx%d", x, y);
-				ExMultiRes::D2CLIENT_SetResolution((*D2Vars::D2GFX_GfxMode) - 1);
+				ExMultiRes::D2CLIENT_SetResolution((*D2Vars.D2GFX_GfxMode) - 1);
 				LeaveCriticalSection(&CON_CRITSECT);
 			}
 		}
 		else if (GET_WHEEL_DELTA_WPARAM(wParam) > 0)
 		{
-			if (*D2Vars::D2GFX_GfxMode < ExMultiRes::lResModes.size() + 2)
+			if (*D2Vars.D2GFX_GfxMode (unsigned int)<  ExMultiRes::lResModes.size() + 2)
 			{
 				EnterCriticalSection(&CON_CRITSECT);
 				int x, y;
-				ExMultiRes::D2GFX_GetModeParams(*D2Vars::D2GFX_GfxMode + 1, &x, &y);
+				ExMultiRes::D2GFX_GetModeParams(*D2Vars.D2GFX_GfxMode + 1, &x, &y);
 				DEBUGMSG("Changing resolution to %dx%d", x, y);
-				ExMultiRes::D2CLIENT_SetResolution((*D2Vars::D2GFX_GfxMode) + 1);
+				ExMultiRes::D2CLIENT_SetResolution((*D2Vars.D2GFX_GfxMode) + 1);
 				LeaveCriticalSection(&CON_CRITSECT);
 			}
 		}
 		return 0;
 	}
-
+#endif
 	if(uMsg == WM_KEYDOWN) {
 		if(wParam == 'V') 	{
 			if(GetKeyState(VK_CONTROL)<0){
-				if((D2Vars::D2CLIENT_UIModes[UI_CHAT]) && OpenClipboard(0))
+				if((D2Vars.D2CLIENT_UIModes[UI_CHAT]) && OpenClipboard(0))
 				{
 					INPUT inp[2];
 					memset(inp,0,sizeof(INPUT));
@@ -344,10 +347,10 @@ LONG WINAPI ExInput::GameWindowEvent(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM
 					return 0;
 				}}
 		} 
-	//	if(wParam == VK_INSERT && D2Vars::D2CLIENT_UIModes[UI_CHAT] ==0 ) {ExAim::DoAttack(); return 0; }
+	//	if(wParam == VK_INSERT && D2Vars.D2CLIENT_UIModes[UI_CHAT] ==0 ) {ExAim::DoAttack(); return 0; }
 	#ifdef D2EX_SCRAP_HACKS
 		if(StillSwitch) {
-			if(D2Funcs::D2CLIENT_GetPlayer() && !D2Vars::D2CLIENT_UIModes[UI_CHAT]) {
+			if(D2Funcs.D2CLIENT_GetPlayer() && !D2Vars.D2CLIENT_UIModes[UI_CHAT]) {
 				WORD vKey = GetKeyBind(44,false); // Fast Switch
 				WORD vKey2 = GetKeyBind(44, true); //Alternative HotKey
 				if(wParam == vKey || wParam == vKey2) {
@@ -377,7 +380,7 @@ void ExInput::Say(const char* Msg,...)
 	*(WORD*)&aPacket[1] = 0x01;
 
 	memcpy(aPacket + 3, text, strlen(text));
-	D2Funcs::D2NET_SendPacket(strlen(text) + 6, 1, aPacket);
+	D2Funcs.D2NET_SendPacket(strlen(text) + 6, 1, aPacket);
 
 	delete[] text;
 	delete[] aPacket;
@@ -386,7 +389,7 @@ void ExInput::Say(const char* Msg,...)
 WORD ExInput::GetKeyBind(int nEntry, BOOL bPrimary)
 {
 	int i = 0;
-	for(KeyBinding* k = D2Vars::D2CLIENT_KeyBindings; i<114; ++k, ++i) {
+	for(KeyBinding* k = D2Vars.D2CLIENT_KeyBindings; i<114; ++k, ++i) {
 		if(k->bPrimary == bPrimary && k->nHotkey == nEntry) return k->wKey;
 	}
 
@@ -401,193 +404,193 @@ wchar_t* ExInput::GetNameOfKey(WORD vKey) // pure copy&pasta
 	switch(vKey)
 	{
 	case 1u:
-		return D2Funcs::D2LANG_GetLocaleText(3763);
+		return D2Funcs.D2LANG_GetLocaleText(3763);
 	case 2u:
-		return D2Funcs::D2LANG_GetLocaleText(3764);
+		return D2Funcs.D2LANG_GetLocaleText(3764);
 	case 3u:
-		return D2Funcs::D2LANG_GetLocaleText(3765);
+		return D2Funcs.D2LANG_GetLocaleText(3765);
 	case 4u:
-		return D2Funcs::D2LANG_GetLocaleText(3766);
+		return D2Funcs.D2LANG_GetLocaleText(3766);
 	case 0x15u:
-		return D2Funcs::D2LANG_GetLocaleText(3771);
+		return D2Funcs.D2LANG_GetLocaleText(3771);
 	case 0x17u:
-		return D2Funcs::D2LANG_GetLocaleText(3772);
+		return D2Funcs.D2LANG_GetLocaleText(3772);
 	case 0x18u:
-		return D2Funcs::D2LANG_GetLocaleText(3773);
+		return D2Funcs.D2LANG_GetLocaleText(3773);
 	case 0x19u:
-		return D2Funcs::D2LANG_GetLocaleText(3774);
+		return D2Funcs.D2LANG_GetLocaleText(3774);
 	case 0x1Bu:
-		return D2Funcs::D2LANG_GetLocaleText(3775);
+		return D2Funcs.D2LANG_GetLocaleText(3775);
 	case 0x1Cu:
-		return D2Funcs::D2LANG_GetLocaleText(3776);
+		return D2Funcs.D2LANG_GetLocaleText(3776);
 	case 0x1Du:
-		return D2Funcs::D2LANG_GetLocaleText(3777);
+		return D2Funcs.D2LANG_GetLocaleText(3777);
 	case 0x1Eu:
-		return D2Funcs::D2LANG_GetLocaleText(3778);
+		return D2Funcs.D2LANG_GetLocaleText(3778);
 	case 0x1Fu:
-		return D2Funcs::D2LANG_GetLocaleText(3779);
+		return D2Funcs.D2LANG_GetLocaleText(3779);
 	case 0x25u:
-		return D2Funcs::D2LANG_GetLocaleText(3780);
+		return D2Funcs.D2LANG_GetLocaleText(3780);
 	case 0x26u:
-		return D2Funcs::D2LANG_GetLocaleText(3781);
+		return D2Funcs.D2LANG_GetLocaleText(3781);
 	case 0x27u:
-		return D2Funcs::D2LANG_GetLocaleText(3782);
+		return D2Funcs.D2LANG_GetLocaleText(3782);
 	case 0x28u:
-		return D2Funcs::D2LANG_GetLocaleText(3783);
+		return D2Funcs.D2LANG_GetLocaleText(3783);
 	case 0x29u:
-		return D2Funcs::D2LANG_GetLocaleText(3784);
+		return D2Funcs.D2LANG_GetLocaleText(3784);
 	case 0x2Bu:
-		return D2Funcs::D2LANG_GetLocaleText(3785);
+		return D2Funcs.D2LANG_GetLocaleText(3785);
 	case 0x5Bu:
-		return D2Funcs::D2LANG_GetLocaleText(3786);
+		return D2Funcs.D2LANG_GetLocaleText(3786);
 	case 0x5Cu:
-		return D2Funcs::D2LANG_GetLocaleText(3787);
+		return D2Funcs.D2LANG_GetLocaleText(3787);
 	case 0x5Du:
-		return D2Funcs::D2LANG_GetLocaleText(3788);
+		return D2Funcs.D2LANG_GetLocaleText(3788);
 	case 0x90u:
-		return D2Funcs::D2LANG_GetLocaleText(3789);
+		return D2Funcs.D2LANG_GetLocaleText(3789);
 	case 8u:
-		return D2Funcs::D2LANG_GetLocaleText(3790);
+		return D2Funcs.D2LANG_GetLocaleText(3790);
 	case 9u:
-		return D2Funcs::D2LANG_GetLocaleText(3791);
+		return D2Funcs.D2LANG_GetLocaleText(3791);
 	case 0xCu:
-		return D2Funcs::D2LANG_GetLocaleText(3792);
+		return D2Funcs.D2LANG_GetLocaleText(3792);
 	case 0xDu:
-		return D2Funcs::D2LANG_GetLocaleText(3793);
+		return D2Funcs.D2LANG_GetLocaleText(3793);
 	case 0x10u:
-		return D2Funcs::D2LANG_GetLocaleText(3794);
+		return D2Funcs.D2LANG_GetLocaleText(3794);
 	case 0x11u:
-		return D2Funcs::D2LANG_GetLocaleText(3795);
+		return D2Funcs.D2LANG_GetLocaleText(3795);
 	case 0x12u:
-		return D2Funcs::D2LANG_GetLocaleText(3796);
+		return D2Funcs.D2LANG_GetLocaleText(3796);
 	case 0x13u:
-		return D2Funcs::D2LANG_GetLocaleText(3797);
+		return D2Funcs.D2LANG_GetLocaleText(3797);
 	case 0x14u:
-		return D2Funcs::D2LANG_GetLocaleText(3798);
+		return D2Funcs.D2LANG_GetLocaleText(3798);
 	case 0x20u:
-		return D2Funcs::D2LANG_GetLocaleText(3799);
+		return D2Funcs.D2LANG_GetLocaleText(3799);
 	case 0x21u:
-		return D2Funcs::D2LANG_GetLocaleText(3800);
+		return D2Funcs.D2LANG_GetLocaleText(3800);
 	case 0x22u:
-		return D2Funcs::D2LANG_GetLocaleText(3801);
+		return D2Funcs.D2LANG_GetLocaleText(3801);
 	case 0x23u:
-		return D2Funcs::D2LANG_GetLocaleText(3802);
+		return D2Funcs.D2LANG_GetLocaleText(3802);
 	case 0x24u:
-		return D2Funcs::D2LANG_GetLocaleText(3803);
+		return D2Funcs.D2LANG_GetLocaleText(3803);
 	case 0x2Au:
-		return D2Funcs::D2LANG_GetLocaleText(3804);
+		return D2Funcs.D2LANG_GetLocaleText(3804);
 	case 0x2Cu:
-		return D2Funcs::D2LANG_GetLocaleText(3805);
+		return D2Funcs.D2LANG_GetLocaleText(3805);
 	case 0x2Du:
-		return D2Funcs::D2LANG_GetLocaleText(3806);
+		return D2Funcs.D2LANG_GetLocaleText(3806);
 	case 0x2Eu:
-		return D2Funcs::D2LANG_GetLocaleText(3807);
+		return D2Funcs.D2LANG_GetLocaleText(3807);
 	case 0x2Fu:
-		return D2Funcs::D2LANG_GetLocaleText(3808);
+		return D2Funcs.D2LANG_GetLocaleText(3808);
 	case 0x60u:
-		return D2Funcs::D2LANG_GetLocaleText(3809);
+		return D2Funcs.D2LANG_GetLocaleText(3809);
 	case 0x61u:
-		return D2Funcs::D2LANG_GetLocaleText(3810);
+		return D2Funcs.D2LANG_GetLocaleText(3810);
 	case 0x62u:
-		return D2Funcs::D2LANG_GetLocaleText(3811);
+		return D2Funcs.D2LANG_GetLocaleText(3811);
 	case 0x63u:
-		return D2Funcs::D2LANG_GetLocaleText(3812);
+		return D2Funcs.D2LANG_GetLocaleText(3812);
 	case 0x64u:
-		return D2Funcs::D2LANG_GetLocaleText(3813);
+		return D2Funcs.D2LANG_GetLocaleText(3813);
 	case 0x65u:
-		return D2Funcs::D2LANG_GetLocaleText(3814);
+		return D2Funcs.D2LANG_GetLocaleText(3814);
 	case 0x66u:
-		return D2Funcs::D2LANG_GetLocaleText(3815);
+		return D2Funcs.D2LANG_GetLocaleText(3815);
 	case 0x67u:
-		return D2Funcs::D2LANG_GetLocaleText(3816);
+		return D2Funcs.D2LANG_GetLocaleText(3816);
 	case 0x68u:
-		return D2Funcs::D2LANG_GetLocaleText(3817);
+		return D2Funcs.D2LANG_GetLocaleText(3817);
 	case 0x69u:
-		return D2Funcs::D2LANG_GetLocaleText(3818);
+		return D2Funcs.D2LANG_GetLocaleText(3818);
 	case 0x6Au:
-		return D2Funcs::D2LANG_GetLocaleText(3819);
+		return D2Funcs.D2LANG_GetLocaleText(3819);
 	case 0x6Bu:
-		return D2Funcs::D2LANG_GetLocaleText(3820);
+		return D2Funcs.D2LANG_GetLocaleText(3820);
 	case 0x6Cu:
-		return D2Funcs::D2LANG_GetLocaleText(3821);
+		return D2Funcs.D2LANG_GetLocaleText(3821);
 	case 0x6Du:
-		return D2Funcs::D2LANG_GetLocaleText(3822);
+		return D2Funcs.D2LANG_GetLocaleText(3822);
 	case 0x6Eu:
-		return D2Funcs::D2LANG_GetLocaleText(3823);
+		return D2Funcs.D2LANG_GetLocaleText(3823);
 	case 0x6Fu:
-		return D2Funcs::D2LANG_GetLocaleText(3824);
+		return D2Funcs.D2LANG_GetLocaleText(3824);
 	case 0x70u:
-		return D2Funcs::D2LANG_GetLocaleText(3825);
+		return D2Funcs.D2LANG_GetLocaleText(3825);
 	case 0x71u:
-		return D2Funcs::D2LANG_GetLocaleText(3826);
+		return D2Funcs.D2LANG_GetLocaleText(3826);
 	case 0x72u:
-		return D2Funcs::D2LANG_GetLocaleText(3827);
+		return D2Funcs.D2LANG_GetLocaleText(3827);
 	case 0x73u:
-		return D2Funcs::D2LANG_GetLocaleText(3828);
+		return D2Funcs.D2LANG_GetLocaleText(3828);
 	case 0x74u:
-		return D2Funcs::D2LANG_GetLocaleText(3829);
+		return D2Funcs.D2LANG_GetLocaleText(3829);
 	case 0x75u:
-		return D2Funcs::D2LANG_GetLocaleText(3830);
+		return D2Funcs.D2LANG_GetLocaleText(3830);
 	case 0x76u:
-		return D2Funcs::D2LANG_GetLocaleText(3831);
+		return D2Funcs.D2LANG_GetLocaleText(3831);
 	case 0x77u:
-		return D2Funcs::D2LANG_GetLocaleText(3832);
+		return D2Funcs.D2LANG_GetLocaleText(3832);
 	case 0x78u:
-		return D2Funcs::D2LANG_GetLocaleText(3833);
+		return D2Funcs.D2LANG_GetLocaleText(3833);
 	case 0x79u:
-		return D2Funcs::D2LANG_GetLocaleText(3834);
+		return D2Funcs.D2LANG_GetLocaleText(3834);
 	case 0x7Au:
-		return D2Funcs::D2LANG_GetLocaleText(3835);
+		return D2Funcs.D2LANG_GetLocaleText(3835);
 	case 0x7Bu:
-		return D2Funcs::D2LANG_GetLocaleText(3836);
+		return D2Funcs.D2LANG_GetLocaleText(3836);
 	case 0x7Cu:
-		return D2Funcs::D2LANG_GetLocaleText(3837);
+		return D2Funcs.D2LANG_GetLocaleText(3837);
 	case 0x7Du:
-		return D2Funcs::D2LANG_GetLocaleText(3838);
+		return D2Funcs.D2LANG_GetLocaleText(3838);
 	case 0x7Eu:
-		return D2Funcs::D2LANG_GetLocaleText(3839);
+		return D2Funcs.D2LANG_GetLocaleText(3839);
 	case 0x7Fu:
-		return D2Funcs::D2LANG_GetLocaleText(3840);
+		return D2Funcs.D2LANG_GetLocaleText(3840);
 	case 0x80u:
-		return D2Funcs::D2LANG_GetLocaleText(3841);
+		return D2Funcs.D2LANG_GetLocaleText(3841);
 	case 0x81u:
-		return D2Funcs::D2LANG_GetLocaleText(3842);
+		return D2Funcs.D2LANG_GetLocaleText(3842);
 	case 0x82u:
-		return D2Funcs::D2LANG_GetLocaleText(3843);
+		return D2Funcs.D2LANG_GetLocaleText(3843);
 	case 0x83u:
-		return D2Funcs::D2LANG_GetLocaleText(3844);
+		return D2Funcs.D2LANG_GetLocaleText(3844);
 	case 0x84u:
-		return D2Funcs::D2LANG_GetLocaleText(3845);
+		return D2Funcs.D2LANG_GetLocaleText(3845);
 	case 0x85u:
-		return D2Funcs::D2LANG_GetLocaleText(3846);
+		return D2Funcs.D2LANG_GetLocaleText(3846);
 	case 0x86u:
-		return D2Funcs::D2LANG_GetLocaleText(3847);
+		return D2Funcs.D2LANG_GetLocaleText(3847);
 	case 0x87u:
-		return D2Funcs::D2LANG_GetLocaleText(3848);
+		return D2Funcs.D2LANG_GetLocaleText(3848);
 	case 0x91u:
-		return D2Funcs::D2LANG_GetLocaleText(3849);
+		return D2Funcs.D2LANG_GetLocaleText(3849);
 	case 0xBAu:
-		return D2Funcs::D2LANG_GetLocaleText(3850);
+		return D2Funcs.D2LANG_GetLocaleText(3850);
 	case 0xBBu:
-		return D2Funcs::D2LANG_GetLocaleText(3851);
+		return D2Funcs.D2LANG_GetLocaleText(3851);
 	case 0xBCu:
-		return D2Funcs::D2LANG_GetLocaleText(3852);
+		return D2Funcs.D2LANG_GetLocaleText(3852);
 	case 0xBDu:
-		return D2Funcs::D2LANG_GetLocaleText(3853);
+		return D2Funcs.D2LANG_GetLocaleText(3853);
 	case 0xBEu:
-		return D2Funcs::D2LANG_GetLocaleText(3854);
+		return D2Funcs.D2LANG_GetLocaleText(3854);
 	case 0xBFu:
-		return D2Funcs::D2LANG_GetLocaleText(3855);
+		return D2Funcs.D2LANG_GetLocaleText(3855);
 	case 0xC0u:
-		return D2Funcs::D2LANG_GetLocaleText(3856);
+		return D2Funcs.D2LANG_GetLocaleText(3856);
 	case 0xDBu:
-		return D2Funcs::D2LANG_GetLocaleText(3857);
+		return D2Funcs.D2LANG_GetLocaleText(3857);
 	case 0xDCu:
-		return D2Funcs::D2LANG_GetLocaleText(3858);
+		return D2Funcs.D2LANG_GetLocaleText(3858);
 	case 0xDDu:
-		return D2Funcs::D2LANG_GetLocaleText(3859);
+		return D2Funcs.D2LANG_GetLocaleText(3859);
 	case 0xDEu:
-		return D2Funcs::D2LANG_GetLocaleText(3860);
+		return D2Funcs.D2LANG_GetLocaleText(3860);
 	}
 
 }
@@ -596,15 +599,15 @@ else
 	switch(vKey)
 	{
 	case 0x100u:
-		return D2Funcs::D2LANG_GetLocaleText(3766);
+		return D2Funcs.D2LANG_GetLocaleText(3766);
 	case 0x101u:
-		return D2Funcs::D2LANG_GetLocaleText(3767);
+		return D2Funcs.D2LANG_GetLocaleText(3767);
 	case 0x102u:
-		return D2Funcs::D2LANG_GetLocaleText(3768);
+		return D2Funcs.D2LANG_GetLocaleText(3768);
 	case 0x103u:
-		return D2Funcs::D2LANG_GetLocaleText(3769);
+		return D2Funcs.D2LANG_GetLocaleText(3769);
 	case 0x104u:
-		return D2Funcs::D2LANG_GetLocaleText(3770);
+		return D2Funcs.D2LANG_GetLocaleText(3770);
 	}
 }
 static wchar_t tmp;

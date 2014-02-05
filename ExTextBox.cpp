@@ -94,23 +94,23 @@ EnterCriticalSection(&CON_CRITSECT);
 
 bool erased = false;
 wstring szLabel = sLabel;
-int OldFont = *D2Vars::D2WIN_CurrentFont;
-D2Funcs::D2WIN_SetTextSize(aFont);
+int OldFont = *D2Vars.D2WIN_CurrentFont;
+D2Funcs.D2WIN_SetTextSize(aFont);
 
 for(wstring::iterator temp = szLabel.end(); temp!=szLabel.begin(); --temp)
 {
 cWidth = ExScreen::GetTextWidth(szLabel.c_str());
-if(cWidth<=(ptParent ? ptParent->GetWidth() : *D2Vars::D2CLIENT_ScreenWidth)) break;
+if(cWidth<=(ptParent ? ptParent->GetWidth() : *D2Vars.D2CLIENT_ScreenWidth)) break;
 szLabel.erase(temp);
 erased = true;
 }
 if(erased) {szLabel.erase(szLabel.length()-3); szLabel+=L"..."; cWidth = ExScreen::GetTextWidth(szLabel.c_str());}
-cHeight = D2Funcs::D2WIN_GetFontHeight();
+cHeight = D2Funcs.D2WIN_GetFontHeight();
 Relocate();
 
 Label = szLabel;
 
-D2Funcs::D2WIN_SetTextSize(OldFont);
+D2Funcs.D2WIN_SetTextSize(OldFont);
 LeaveCriticalSection(&CON_CRITSECT);
 }
 
@@ -146,10 +146,10 @@ void ExTextBox::Relocate() //- Set control align
 		else if(hAlign == RIGHT) cY=ptParent->GetY()+ptParent->GetHeight();
 	}
 	else {
-		if(wAlign == CENTER) cX=(*D2Vars::D2CLIENT_ScreenWidth-cWidth)/2;
-		else if(wAlign == RIGHT) cX=(*D2Vars::D2CLIENT_ScreenWidth-cWidth);
-		if(hAlign == CENTER) cY=(*D2Vars::D2CLIENT_ScreenHeight+cHeight)/2;
-		else if(hAlign == RIGHT) cY=*D2Vars::D2CLIENT_ScreenHeight;
+		if(wAlign == CENTER) cX=(*D2Vars.D2CLIENT_ScreenWidth-cWidth)/2;
+		else if(wAlign == RIGHT) cX=(*D2Vars.D2CLIENT_ScreenWidth-cWidth);
+		if(hAlign == CENTER) cY=(*D2Vars.D2CLIENT_ScreenHeight+cHeight)/2;
+		else if(hAlign == RIGHT) cY=*D2Vars.D2CLIENT_ScreenHeight;
 	}
 }
 
@@ -183,18 +183,18 @@ if(cfLabel) SetText(cfLabel(this));
 else if (cfsLabel) SetText(cfsLabel(this));
 if(Label.empty()) return;
 
-D2Funcs::D2WIN_SetTextSize(aFont);
+D2Funcs.D2WIN_SetTextSize(aFont);
 
 if(cState==VISIBLE)
 {
-D2Funcs::D2WIN_DrawTextEx(Label.c_str(),cX,cY,bBeingPressed ?  bBeingSelected ? COL_RED : COL_WHITE : (TextColor - (bHoverable ? bBeingSelected ? COL_RED : COL_WHITE : COL_WHITE)) ,0,TransLvl);
+D2Funcs.D2WIN_DrawTextEx(Label.c_str(),cX,cY,bBeingPressed ?  bBeingSelected ? COL_RED : COL_WHITE : (TextColor - (bHoverable ? bBeingSelected ? COL_RED : COL_WHITE : COL_WHITE)) ,0,TransLvl);
 if(Hoover.empty()) return;
 if(!bBeingSelected) return;
-D2Funcs::D2WIN_DrawFramedText(Hoover.c_str(),cX,cY-cHeight-10,0,0);
+D2Funcs.D2WIN_DrawFramedText(Hoover.c_str(),cX,cY-cHeight-10,0,0);
 }
 else if(cState==DISABLED)
 {
-D2Funcs::D2WIN_DrawTextEx(Label.c_str(),cX,cY,5,0,TransLvl);
+D2Funcs.D2WIN_DrawTextEx(Label.c_str(),cX,cY,5,0,TransLvl);
 }
 }
 
@@ -205,7 +205,7 @@ if(cState==VISIBLE)
 switch(Sender)
 {
 case WM_MOUSEMOVE:
-if(*D2Vars::D2CLIENT_MouseX>=cX && *D2Vars::D2CLIENT_MouseX<=(cX+cWidth) && *D2Vars::D2CLIENT_MouseY<=cY && *D2Vars::D2CLIENT_MouseY>=(cY-cHeight))
+if(*D2Vars.D2CLIENT_MouseX>=cX && *D2Vars.D2CLIENT_MouseX<=(cX+cWidth) && *D2Vars.D2CLIENT_MouseY<=cY && *D2Vars.D2CLIENT_MouseY>=(cY-cHeight))
 {
 if(event_onClick)
 {
@@ -220,17 +220,17 @@ bBeingSelected=false;
 }
 break;
 case WM_LBUTTONDOWN:
-if(*D2Vars::D2CLIENT_MouseX>=cX && *D2Vars::D2CLIENT_MouseX<=(cX+cWidth) && *D2Vars::D2CLIENT_MouseY<=cY && *D2Vars::D2CLIENT_MouseY>=(cY-cHeight))
+if(*D2Vars.D2CLIENT_MouseX>=cX && *D2Vars.D2CLIENT_MouseX<=(cX+cWidth) && *D2Vars.D2CLIENT_MouseY<=cY && *D2Vars.D2CLIENT_MouseY>=(cY-cHeight))
 {
 if(event_onClick)
-{D2Funcs::D2CLIENT_PlaySound(ExSounds::STAND_CLICK);
+{D2ASMFuncs::D2CLIENT_PlaySound(ExSounds::STAND_CLICK);
 bBeingPressed=true;
 }
 return true;
 }
 break;
 case WM_LBUTTONUP:
-if(*D2Vars::D2CLIENT_MouseX>=cX && *D2Vars::D2CLIENT_MouseX<=(cX+cWidth) && *D2Vars::D2CLIENT_MouseY<=cY && *D2Vars::D2CLIENT_MouseY>=(cY-cHeight))
+if(*D2Vars.D2CLIENT_MouseX>=cX && *D2Vars.D2CLIENT_MouseX<=(cX+cWidth) && *D2Vars.D2CLIENT_MouseY<=cY && *D2Vars.D2CLIENT_MouseY>=(cY-cHeight))
 {
 if(event_onClick)
 {event_onClick(this);

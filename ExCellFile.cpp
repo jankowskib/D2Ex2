@@ -10,7 +10,7 @@
 */
 ExCellFile::ExCellFile(string szCellFile) : FileName(szCellFile)
 {
-	ptCellFile = D2Funcs::D2WIN_LoadCellFile(szCellFile.c_str(), 0);
+	ptCellFile = D2Funcs.D2WIN_LoadCellFile(szCellFile.c_str(), 0);
 	if (!ptCellFile || (DWORD)ptCellFile == 1) // 26.01.2014 <-- fixed error when cell file fails to load
 	{
 		Misc::Log("ExCellFile: Cannot load CellFile %s", FileName.c_str());
@@ -65,8 +65,8 @@ ExCellFile::~ExCellFile(void)
 {
 	//DEBUGMSG("Trying to free cell file %s", FileName.c_str());
 	if (!ptCellFile) return;
-	D2Funcs::D2CMP_DeleteCellFile(ptCellFile);
-	D2Funcs::FOG_FreeMemory(ptCellFile, __FILE__, __LINE__, 0);
+	D2Funcs.D2CMP_DeleteCellFile(ptCellFile);
+	D2Funcs.FOG_FreeMemory(ptCellFile, __FILE__, __LINE__, 0);
 	ptCellFile = 0;
 	if (!ptCellContext) return;
 	delete ptCellContext;
