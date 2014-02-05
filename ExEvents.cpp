@@ -52,7 +52,7 @@ case 2: //Ikona nad g³ow¹
 	{
 	if(!Dane->UnitId) break;
 	if(Dane->Color>15) break;
-	if(!D2Funcs::D2CLIENT_GetUnitById(Dane->UnitId,UNIT_PLAYER)) break;
+	if(!D2Funcs.D2CLIENT_GetUnitById(Dane->UnitId,UNIT_PLAYER)) break;
 	string str = Dane->szMsg;
 	if(str.empty()) break;
 
@@ -111,22 +111,22 @@ ExParty::AddAccount(Dane->Name1, Dane->Name2);
 ExParty::Refresh();
 break;
 //case 6: //"%Name1 was Slain by %Name2" 
-//if(!Dane->Param2 && !strcmp(Dane->Name2,D2Funcs::D2CLIENT_GetPlayer()->pPlayerData->szName)) // DEATH MSG
+//if(!Dane->Param2 && !strcmp(Dane->Name2,D2Funcs.D2CLIENT_GetPlayer()->pPlayerData->szName)) // DEATH MSG
 //{
 //	KillCount++;
 //	if(!TH) TH = CreateThread(0,0,&ExEvents::KillCountEvent,0,0,0);
 //
 //	if(!ExParty::isPlayerNear(Dane->Name1))
 //	{
-//	if(Text) return D2Ptrs::D2CLIENT_EventMsg_I(aPacket);
+//	if(Text) return D2Ptrs.D2CLIENT_EventMsg_I(aPacket);
 //	Text = new ExTextBox(-1,150,1,3,L"INVISIBLE KILL!",0,0);
-//	D2Funcs::D2CLIENT_PlaySound(ExSounds::D2EX_IMPRESSIVE);
+//	D2ASMFuncs::D2CLIENT_PlaySound(ExSounds::D2EX_IMPRESSIVE);
 //	CreateThread(0,0,&ExEvents::TextFadeThread,Text,0,0);
 //	}
 //}
 //break;
 }
-return D2Ptrs::D2CLIENT_EventMsg_I(aPacket);
+return D2Funcs.D2CLIENT_EventMsg_I(aPacket);
 }
 
 
@@ -139,17 +139,17 @@ return D2Ptrs::D2CLIENT_EventMsg_I(aPacket);
 //		{
 //			case 2:
 //			Text = new ExTextBox(-1,150,1,3,L"DOUBLE KILL!",0,0);
-//			D2Funcs::D2CLIENT_PlaySound(ExSounds::D2EX_DOUBLEKILL);
+//			D2ASMFuncs::D2CLIENT_PlaySound(ExSounds::D2EX_DOUBLEKILL);
 //			CreateThread(0,0,&ExEvents::TextFadeThread,Text,0,0);
 //			break;
 //			case 3:
 //			Text = new ExTextBox(-1,150,1,3,L"TRIPPLE KILL!",0,0);
-//			D2Funcs::D2CLIENT_PlaySound(ExSounds::D2EX_TRIPLEKILL);
+//			D2ASMFuncs::D2CLIENT_PlaySound(ExSounds::D2EX_TRIPLEKILL);
 //			CreateThread(0,0,&ExEvents::TextFadeThread,Text,0,0);
 //			break;
 //			case 4:
 //			Text = new ExTextBox(-1,150,1,3,L"MONSTER KILL!",0,0);
-//			D2Funcs::D2CLIENT_PlaySound(ExSounds::D2EX_MONSTERKILL);
+//			D2ASMFuncs::D2CLIENT_PlaySound(ExSounds::D2EX_MONSTERKILL);
 //			CreateThread(0,0,&ExEvents::TextFadeThread,Text,0,0);
 //			break;
 //		}
@@ -164,7 +164,7 @@ DWORD WINAPI ExEvents::TextFadeThread(void* Params)
 while(!TextQuene.empty()) 
 {
 	const int TransTable[] = {0,1,2,5};
-	D2Funcs::D2CLIENT_PlaySound(TextQuene.front().SoundId);
+	D2ASMFuncs::D2CLIENT_PlaySound(TextQuene.front().SoundId);
 	TextQuene.front().Text->SetState(TextQuene.front().Text->VISIBLE);
 	for(int Timer = 120;Timer;Timer--)
 	{
@@ -195,13 +195,13 @@ Image->SetState(Image->VISIBLE);
 
 for(int Timer = 120;Timer;Timer--)
 {
-UnitAny * pUnit = D2Funcs::D2CLIENT_GetUnitById(UnitId, 0);
+UnitAny * pUnit = D2Funcs.D2CLIENT_GetUnitById(UnitId, 0);
 if(!pUnit) break; 
 
-POINT pPos = {D2Funcs::D2COMMON_GetUnitXOffset(pUnit),D2Funcs::D2COMMON_GetUnitYOffset(pUnit)};
+POINT pPos = {D2Funcs.D2COMMON_GetUnitXOffset(pUnit),D2Funcs.D2COMMON_GetUnitYOffset(pUnit)};
 
-pPos.x -= *D2Vars::D2CLIENT_PlayerX - *D2Vars::D2CLIENT_ScreenXShift + 15;
-pPos.y -= *D2Vars::D2CLIENT_PlayerY + 70;
+pPos.x -= *D2Vars.D2CLIENT_PlayerX - *D2Vars.D2CLIENT_ScreenXShift + 15;
+pPos.y -= *D2Vars.D2CLIENT_PlayerY + 70;
 Image->SetX(pPos.x);
 Image->SetY(pPos.y); 
 Image->SetTransLvl(Timer <= 30 ? TransTable[Timer/8] : 7 );

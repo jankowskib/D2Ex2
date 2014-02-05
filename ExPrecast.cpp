@@ -19,7 +19,7 @@ UnitAny* Weap1 = 0;
 UnitAny* Weap2 = 0;
 UnitAny* Armor = 0;
 
-	UnitAny * Me = D2Funcs::D2CLIENT_GetPlayer();
+	UnitAny * Me = D2Funcs.D2CLIENT_GetPlayer();
 
 	for(UnitAny* pItem = Me->pInventory->pFirstItem; pItem; pItem = pItem->pItemData->pNextItem)
 	{
@@ -58,7 +58,7 @@ UnitAny* Weap1 = 0;
 UnitAny* Weap2 = 0;
 UnitAny* Armor = 0;
 
-	UnitAny * Me = D2Funcs::D2CLIENT_GetPlayer();
+	UnitAny * Me = D2Funcs.D2CLIENT_GetPlayer();
 
 	for(UnitAny* pItem = Me->pInventory->pFirstItem; pItem; pItem = pItem->pItemData->pNextItem)
 	{
@@ -87,11 +87,11 @@ UnitAny* Armor = 0;
 unsigned __stdcall PrecastThread(void* Args)
 	{
 
-	UnitAny* pPlayer = D2Funcs::D2CLIENT_GetPlayer();
+	UnitAny* pPlayer = D2Funcs.D2CLIENT_GetPlayer();
 	if(pPlayer)
 	if(pPlayer->dwClassId == PLAYER_BARBARIAN) {
 
-	if(*D2Vars::D2CLIENT_isWeaponSwitch) BOSetup();
+	if(*D2Vars.D2CLIENT_isWeaponSwitch) BOSetup();
 	else  PrevSetup();
 	}
 
@@ -113,29 +113,29 @@ unsigned __stdcall PrecastThread(void* Args)
 bool ExPrecast::CubeToBody(UnitAny* ptItem, int Loc)
 {
 if(!ptItem || !Loc ) return false;
-	if(D2Funcs::D2CLIENT_GetCursorItem()) return false;
+	if(D2Funcs.D2CLIENT_GetCursorItem()) return false;
 	ExPrecast::RemoveFromBuffer(ptItem->dwUnitId);
 	int Time = GetTickCount();
 	while(GetTickCount()-Time<1500)
 	{
 	Sleep(50);
-	if(D2Funcs::D2CLIENT_GetCursorItem())
-	if(ptItem->dwUnitId==D2Funcs::D2CLIENT_GetCursorItem()->dwUnitId) break;
+	if(D2Funcs.D2CLIENT_GetCursorItem())
+	if(ptItem->dwUnitId==D2Funcs.D2CLIENT_GetCursorItem()->dwUnitId) break;
 	}
 	ExPrecast::CursorToBody(ptItem->dwUnitId,Loc); //Swap Cur with body
 	Time = GetTickCount();
 	while(GetTickCount()-Time<1500)
 	{
 	Sleep(50);
-	if(D2Funcs::D2CLIENT_GetCursorItem())
-	if(D2Funcs::D2CLIENT_GetCursorItem()->dwUnitId!=ptItem->dwUnitId) break;
+	if(D2Funcs.D2CLIENT_GetCursorItem())
+	if(D2Funcs.D2CLIENT_GetCursorItem()->dwUnitId!=ptItem->dwUnitId) break;
 	}
-	ExPrecast::ItemToCube(D2Funcs::D2CLIENT_GetCursorItem()->dwUnitId);
+	ExPrecast::ItemToCube(D2Funcs.D2CLIENT_GetCursorItem()->dwUnitId);
 	Time = GetTickCount();
 	while(GetTickCount()-Time<1500)
 	{
 	Sleep(50);
-	if(!D2Funcs::D2CLIENT_GetCursorItem()) return true;
+	if(!D2Funcs.D2CLIENT_GetCursorItem()) return true;
 	}
 	return false;
 }
@@ -152,30 +152,30 @@ if(!ptItem || !Loc ) return false;
 //GC 321:  9    1a 64 00 00 00 06 00 00 00
 //*/
 //if(!ptItem) return false;
-//	if(D2Funcs::D2CLIENT_GetCursorItem()) return false;
+//	if(D2Funcs.D2CLIENT_GetCursorItem()) return false;
 //	int Loc = ptItem->pItemData->BodyLoc;
 //	ExPrecast::RemoveFromBody(Loc);
 //	int Time = GetTickCount();
 //	while(GetTickCount()-Time<1500)
 //	{
 //	Sleep(50);
-//	if(D2Funcs::D2CLIENT_GetCursorItem())
-//	if(ptItem->dwUnitId==D2Funcs::D2CLIENT_GetCursorItem()->dwUnitId) break;
+//	if(D2Funcs.D2CLIENT_GetCursorItem())
+//	if(ptItem->dwUnitId==D2Funcs.D2CLIENT_GetCursorItem()->dwUnitId) break;
 //	}
 //	ExPrecast::ItemToCube(ptItem->dwUnitId); //Swap Cur with body
 //	Time = GetTickCount();
 //	while(GetTickCount()-Time<1500)
 //	{
 //	Sleep(50);
-//	if(D2Funcs::D2CLIENT_GetCursorItem())
-//	if(D2Funcs::D2CLIENT_GetCursorItem()->dwUnitId!=ptItem->dwUnitId) break;
+//	if(D2Funcs.D2CLIENT_GetCursorItem())
+//	if(D2Funcs.D2CLIENT_GetCursorItem()->dwUnitId!=ptItem->dwUnitId) break;
 //	}
-//	ExPrecast::CursorToBody(D2Funcs::D2CLIENT_GetCursorItem()->dwUnitId,Loc);
+//	ExPrecast::CursorToBody(D2Funcs.D2CLIENT_GetCursorItem()->dwUnitId,Loc);
 //	Time = GetTickCount();
 //	while(GetTickCount()-Time<1500)
 //	{
 //	Sleep(50);
-//	if(!D2Funcs::D2CLIENT_GetCursorItem()) return true;
+//	if(!D2Funcs.D2CLIENT_GetCursorItem()) return true;
 //	}
 //	return false;
 //}
@@ -184,14 +184,14 @@ if(!ptItem || !Loc ) return false;
 UnitAny* ExPrecast::FindItemEx(string ItemCode, int Loc, int Idx)
 {
 
-	UnitAny * Me = D2Funcs::D2CLIENT_GetPlayer();
+	UnitAny * Me = D2Funcs.D2CLIENT_GetPlayer();
 
 	for(UnitAny* pItem = Me->pInventory->pFirstItem; pItem; pItem = pItem->pItemData->pNextItem)
 	{
 		if(ExPrecast::GetItemLocation(pItem) == Loc)
 		{
 			//wstring a = boost::lexical_cast<wstring>(pItem->pItemData->FileIndex);
-			//D2Funcs::D2CLIENT_PrintGameString(a.c_str(),1);
+			//D2Funcs.D2CLIENT_PrintGameString(a.c_str(),1);
 			string szTemp = GetItemCode(pItem);
 			if(szTemp.empty()) continue;
 			if(szTemp.compare(0,3,ItemCode)==0 && pItem->pItemData->FileIndex==Idx) return pItem;
@@ -203,7 +203,7 @@ UnitAny* ExPrecast::FindItemEx(string ItemCode, int Loc, int Idx)
 UnitAny* ExPrecast::FindItem(string ItemCode, int Loc)
 {
 
-	UnitAny * Me = D2Funcs::D2CLIENT_GetPlayer();
+	UnitAny * Me = D2Funcs.D2CLIENT_GetPlayer();
 
 	for(UnitAny* pItem = Me->pInventory->pFirstItem; pItem; pItem = pItem->pItemData->pNextItem)
 	{
@@ -249,14 +249,14 @@ string ExPrecast::GetItemCode(UnitAny* ptItem)
 {
 	if(!ptItem) return 0;
 
-	ItemsTxt* pTxt = D2Funcs::D2COMMON_GetItemText(ptItem->dwClassId);
+	ItemsTxt* pTxt = D2Funcs.D2COMMON_GetItemText(ptItem->dwClassId);
 	return pTxt->szcode;
 }
 
 
 UnitAny* ExPrecast::FindEquipItem(int nLoc)
 {
-	UnitAny * Me = D2Funcs::D2CLIENT_GetPlayer();
+	UnitAny * Me = D2Funcs.D2CLIENT_GetPlayer();
 
 	for(UnitAny* pItem = Me->pInventory->pFirstItem; pItem; pItem = pItem->pItemData->pNextItem)
 		if(ExPrecast::GetItemLocation(pItem) == STORAGE_EQUIP)
@@ -270,7 +270,7 @@ UnitAny* ExPrecast::FindEquipItem(int nLoc)
 void ExPrecast::Switch()
 {
  BYTE aPacket = 0x60;
- D2Funcs::D2NET_SendPacket(1,1,&aPacket);
+ D2Funcs.D2NET_SendPacket(1,1,&aPacket);
 }
 
 void ExPrecast::DropItem(int ItemID)
@@ -281,7 +281,7 @@ void ExPrecast::DropItem(int ItemID)
 	::memset(&aPacket,0,5);
 	aPacket[0] = 0x17;
 	*(DWORD*)&aPacket[1] = ItemID;
-	D2Funcs::D2NET_SendPacket(5, 1, aPacket);
+	D2Funcs.D2NET_SendPacket(5, 1, aPacket);
 }
 
 
@@ -294,7 +294,7 @@ void ExPrecast::EquipItem(int ItemID, int Loc)
 	aPacket[0] = 0x1A;
 	*(DWORD*)&aPacket[1] = ItemID;
 	*(DWORD*)&aPacket[5] = Loc;
-	D2Funcs::D2NET_SendPacket(9, 1, aPacket);
+	D2Funcs.D2NET_SendPacket(9, 1, aPacket);
 }
 
 //void ExPrecast::SwapItem(int ItemID, int Loc)
@@ -306,7 +306,7 @@ void ExPrecast::EquipItem(int ItemID, int Loc)
 //	aPacket[0] = 0x1F;
 //	*(DWORD*)&aPacket[1] = ItemID;
 //	*(DWORD*)&aPacket[5] = Loc;
-//	D2Funcs::D2NET_SendPacket(9, 1, aPacket);
+//	D2Funcs.D2NET_SendPacket(9, 1, aPacket);
 //}
 
 void ExPrecast::ItemToBuffer(int ItemID, int Buffer)
@@ -318,7 +318,7 @@ void ExPrecast::ItemToBuffer(int ItemID, int Buffer)
 		aPacket[0] = 0x18;
 		*(DWORD*)&aPacket[1] = ItemID;
 		*(DWORD*)&aPacket[13] = Buffer;
-		D2Funcs::D2NET_SendPacket(17, 1, aPacket);
+		D2Funcs.D2NET_SendPacket(17, 1, aPacket);
 }
 
 void ExPrecast::RemoveFromBuffer(int ItemID)
@@ -329,7 +329,7 @@ void ExPrecast::RemoveFromBuffer(int ItemID)
 		::memset(&aPacket,0,5);
 		aPacket[0] = 0x19;
 		*(DWORD*)&aPacket[1] = ItemID;
-		D2Funcs::D2NET_SendPacket(5, 1, aPacket);
+		D2Funcs.D2NET_SendPacket(5, 1, aPacket);
 
 }
 
@@ -339,7 +339,7 @@ void ExPrecast::RemoveFromBody(int aLoc)
 		::memset(&aPacket,0,3);
 		aPacket[0] = 0x1C;
 		*(WORD*)&aPacket[1] = aLoc;
-		D2Funcs::D2NET_SendPacket(3, 1, aPacket);
+		D2Funcs.D2NET_SendPacket(3, 1, aPacket);
 
 }
 
@@ -347,7 +347,7 @@ void ExPrecast::ItemToCube(int ItemID)
 {
 		if(!ItemID) return;
 
-		UnitAny * Me = D2Funcs::D2CLIENT_GetPlayer();
+		UnitAny * Me = D2Funcs.D2CLIENT_GetPlayer();
 		int CubeID = 0;
 		for(UnitAny* pItem = Me->pInventory->pFirstItem; pItem; pItem = pItem->pItemData->pNextItem)
 		{	
@@ -362,7 +362,7 @@ void ExPrecast::ItemToCube(int ItemID)
 		aPacket[0] = 0x2A;
 		*(DWORD*)&aPacket[1] = ItemID;
 		*(DWORD*)&aPacket[5] = CubeID;
-		D2Funcs::D2NET_SendPacket(9, 1, aPacket);
+		D2Funcs.D2NET_SendPacket(9, 1, aPacket);
 }
 
 void ExPrecast::CursorToBody(int ItemID, int nLoc)
@@ -374,6 +374,6 @@ void ExPrecast::CursorToBody(int ItemID, int nLoc)
 	aPacket[0] = 0x1D;
 	*(DWORD*)&aPacket[1] = ItemID;
 	*(DWORD*)&aPacket[5] = nLoc;
-	D2Funcs::D2NET_SendPacket(9, 1, aPacket);
+	D2Funcs.D2NET_SendPacket(9, 1, aPacket);
 }
 

@@ -16,7 +16,7 @@ LeaveCriticalSection(&CON_CRITSECT);
 
 void ExRectangle::Draw()
 {
-if(cState!=INVISIBLE) D2Funcs::D2GFX_DrawRectangle(cX,cY,cX+cWidth,cY+cHeight,aColor,aTransLvl);
+if(cState!=INVISIBLE) D2Funcs.D2GFX_DrawRectangle(cX,cY,cX+cWidth,cY+cHeight,aColor,aTransLvl);
 }
 
 ExRectangle::~ExRectangle()

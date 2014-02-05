@@ -90,7 +90,7 @@ void ExScrollBar::Draw()
 	if (cState == INVISIBLE) return;
 	for (int ty = cY + 22; ty < cY + cHeight; ty += 12)
 	{
-		D2Funcs::D2GFX_DrawCellContextEx(aCellFile->Get(), cX, ty, -1, 5, 0);
+		D2Funcs.D2GFX_DrawCellContextEx(aCellFile->Get(), cX, ty, -1, 5, 0);
 	}
 
 }

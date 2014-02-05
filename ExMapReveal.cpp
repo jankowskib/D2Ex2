@@ -12,18 +12,18 @@ Level* GetLevelPointer(ActMisc *pActMisc, int nLevel)
 		if ((pLevel->dwLevelNo == nLevel) && (pLevel->dwSizeX > 0))
 			return pLevel;
 	}
-	return D2Funcs::D2COMMON_GetLevel(pActMisc, nLevel);
+	return D2Funcs.D2COMMON_GetLevel(pActMisc, nLevel);
 }
 
 AutoMapLayer* InitAutomapLayer(int nLevel)
 {
-	AutoMapLayer2* pLayer = D2Funcs::D2COMMON_GetLayer(nLevel);
-	return D2Funcs::D2CLIENT_InitAutomapLayer(pLayer->nLayerNo);
+	AutoMapLayer2* pLayer = D2Funcs.D2COMMON_GetLayer(nLevel);
+	return D2ASMFuncs::D2CLIENT_InitAutomapLayer(pLayer->nLayerNo);
 }
 
 void AddRoomCell(int xPos, int yPos, int nCell, Room2* pRoom)
 {
-	AutoMapCell* pCell = D2Funcs::D2CLIENT_NewAutomapCell();
+	AutoMapCell* pCell = D2Funcs.D2CLIENT_NewAutomapCell();
 
 	xPos += pRoom->dwPosX * 5;
 	yPos += pRoom->dwPosY * 5;
@@ -31,7 +31,7 @@ void AddRoomCell(int xPos, int yPos, int nCell, Room2* pRoom)
 	pCell->nCellNo = nCell;
 	pCell->xPixel = (((xPos - yPos) * 16) / 10) + 1;
 	pCell->yPixel = (((xPos + yPos) * 8) / 10) - 3;
-	D2Funcs::D2CLIENT_AddAutomapCell(pCell, &((*D2Vars::D2CLIENT_AutomapLayer)->pObjects));
+	D2Funcs.D2CLIENT_AddAutomapCell(pCell, &((*D2Vars.D2CLIENT_AutomapLayer)->pObjects));
 }
 
 int GetUnitCellNumber(DWORD dwClassId, DWORD dwLevelNo)
@@ -43,7 +43,7 @@ int GetUnitCellNumber(DWORD dwClassId, DWORD dwLevelNo)
 	if(dwClassId == 152) return 300;
 	if(dwClassId == 460) return 1468;
 
-		ObjectTxt* pTxt = D2Funcs::D2COMMON_GetObjectTxt(dwClassId);
+		ObjectTxt* pTxt = D2Funcs.D2COMMON_GetObjectTxt(dwClassId);
 	if(pTxt->nAutoMap == 310)
 		return (pTxt->nSubClass & 1) ? 310 : 0;
 
@@ -52,7 +52,7 @@ int GetUnitCellNumber(DWORD dwClassId, DWORD dwLevelNo)
 
 void RevealRoom1(Room2* pRoom)
 {
-	D2Funcs::D2CLIENT_RevealAutomapRoom(pRoom->pRoom1, TRUE, (*D2Vars::D2CLIENT_AutomapLayer));
+	D2Funcs.D2CLIENT_RevealAutomapRoom(pRoom->pRoom1, TRUE, (*D2Vars.D2CLIENT_AutomapLayer));
 
 	for(PresetUnit* pUnit = pRoom->pPreset; pUnit; pUnit = pUnit->pPresetNext)
 	{
@@ -79,10 +79,10 @@ void RevealRoom1(Room2* pRoom)
 
 void ExMapReveal::RevealLevel(int LvlId)
 {
-	Level* pLevel = GetLevelPointer((*D2Vars::D2CLIENT_Act)->pMisc,LvlId);
+	Level* pLevel = GetLevelPointer((*D2Vars.D2CLIENT_Act)->pMisc,LvlId);
 
 	InitAutomapLayer(pLevel->dwLevelNo);
-	UnitAny *pUnit = D2Funcs::D2CLIENT_GetPlayer();
+	UnitAny *pUnit = D2Funcs.D2CLIENT_GetPlayer();
 
 	for (Room2 *pRoom2 = pLevel->pRoom2First; pRoom2; pRoom2 = pRoom2->pRoom2Next)
 	{
@@ -90,7 +90,7 @@ void ExMapReveal::RevealLevel(int LvlId)
 
 		if (!pRoom2->pRoom1)
 		{
-			D2Funcs::D2COMMON_AddRoomData(pLevel->pMisc->pAct,pLevel->dwLevelNo, pRoom2->dwPosX, pRoom2->dwPosY, pUnit->pPath->pRoom1);
+			D2Funcs.D2COMMON_AddRoomData(pLevel->pMisc->pAct,pLevel->dwLevelNo, pRoom2->dwPosX, pRoom2->dwPosY, pUnit->pPath->pRoom1);
 			nAdded = true;
 		}
 
@@ -100,7 +100,7 @@ void ExMapReveal::RevealLevel(int LvlId)
 		RevealRoom1(pRoom2);
 
 		if (nAdded)
-		D2Funcs::D2COMMON_RemoveRoomData(pLevel->pMisc->pAct, pLevel->dwLevelNo, pRoom2->dwPosX, pRoom2->dwPosY, pUnit->pPath->pRoom1);
+		D2Funcs.D2COMMON_RemoveRoomData(pLevel->pMisc->pAct, pLevel->dwLevelNo, pRoom2->dwPosX, pRoom2->dwPosY, pUnit->pPath->pRoom1);
 	}
 
 }

@@ -2,7 +2,7 @@
 #define __D2STUBS_H
 
 
-namespace D2Funcs
+namespace D2ASMFuncs
 {
 	void __fastcall D2GFX_UpdateResizeVars(int nWidth, int nHeight);
 	int __fastcall D2CLIENT_DiffuseStat(int nStat);

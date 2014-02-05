@@ -2,7 +2,6 @@
 #define D2STRUCTS_H__
 
 #include "D2DataTables.h"
-
 struct UnitAny;
 struct ClientInfo;
 struct PlayerData;
@@ -40,6 +39,9 @@ struct ScrollBar;
 struct Button;
 struct List;
 struct Arena;
+struct pMsg;
+struct QuestFlags;
+struct CollMap;
 struct CellContext;
 
 

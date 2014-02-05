@@ -21,11 +21,11 @@ DWORD GetTileLevelNo(Room2* lpRoom2, DWORD dwTileNo)
 
 Level* GetLevel(DWORD dwLevelNo)
 {
-	for(Level* pLevel = D2Funcs::D2CLIENT_GetPlayer()->pAct->pMisc->pLevelFirst; pLevel; pLevel = pLevel->pNextLevel)
+	for(Level* pLevel = D2Funcs.D2CLIENT_GetPlayer()->pAct->pMisc->pLevelFirst; pLevel; pLevel = pLevel->pNextLevel)
 		if(pLevel->dwLevelNo == dwLevelNo)
 			return pLevel;
 
-	return D2Funcs::D2COMMON_GetLevel(D2Funcs::D2CLIENT_GetPlayer()->pAct->pMisc, dwLevelNo);
+	return D2Funcs.D2COMMON_GetLevel(D2Funcs.D2CLIENT_GetPlayer()->pAct->pMisc, dwLevelNo);
 }
 
 CCollisionMap::CCollisionMap()
@@ -113,7 +113,7 @@ BOOL CCollisionMap::BuildMapData(DWORD AreaId)
 	if (m_map.IsCreated())
 		return TRUE;
 	
-	UnitAny* pPlayer = D2Funcs::D2CLIENT_GetPlayer();
+	UnitAny* pPlayer = D2Funcs.D2CLIENT_GetPlayer();
 	if(!pPlayer) return FALSE;
 
 	Level* pLevel = GetLevel(AreaId);
@@ -225,14 +225,14 @@ void CCollisionMap::Search(Room2 *ro, UnitAny* ptPlayer, DwordArray &aSkip, DWOR
 	if (aSkip.Find((DWORD)ro) != -1)
 		return;
 
-	UnitAny* pPlayer = D2Funcs::D2CLIENT_GetPlayer();
+	UnitAny* pPlayer = D2Funcs.D2CLIENT_GetPlayer();
 	if (!pPlayer) return;
 
 	BOOL add_room=FALSE;
 	if(!ro->pRoom1)
 	{
 		add_room=TRUE;
-		D2Funcs::D2COMMON_AddRoomData(pPlayer->pAct, ro->pLevel->dwLevelNo, ro->dwPosX, ro->dwPosY, pPlayer->pPath->pRoom1);
+		D2Funcs.D2COMMON_AddRoomData(pPlayer->pAct, ro->pLevel->dwLevelNo, ro->dwPosX, ro->dwPosY, pPlayer->pPath->pRoom1);
 	}
 
 	aSkip.Add((DWORD)ro);
@@ -253,7 +253,7 @@ void CCollisionMap::Search(Room2 *ro, UnitAny* ptPlayer, DwordArray &aSkip, DWOR
 	
 	if(add_room)
 	{
-		D2Funcs::D2COMMON_RemoveRoomData(pPlayer->pAct,ro->pLevel->dwLevelNo, ro->dwPosX, ro->dwPosY, pPlayer->pPath->pRoom1);
+		D2Funcs.D2COMMON_RemoveRoomData(pPlayer->pAct,ro->pLevel->dwLevelNo, ro->dwPosX, ro->dwPosY, pPlayer->pPath->pRoom1);
 	}
 }
 
@@ -308,7 +308,7 @@ BOOL CCollisionMap::DumpMap(LPCSTR lpszFilePath,  const vector<COORDS> cPath) co
 		return FALSE;
 
 	//m_map.Lock();
-	wchar_t* szMapName = D2Funcs::D2CLIENT_GetLevelName(dwLevelId);
+	wchar_t* szMapName = D2ASMFuncs::D2CLIENT_GetLevelName(dwLevelId);
 
 	fwprintf(fp, L"%s (Size: %d * %d)\nKnown Collision Types: ", szMapName, m_map.GetCX(), m_map.GetCY());
 	for (int i = 0; i < m_aCollisionTypes.GetSize(); i++)
@@ -323,7 +323,7 @@ BOOL CCollisionMap::DumpMap(LPCSTR lpszFilePath,  const vector<COORDS> cPath) co
 	for(vector<COORDS>::iterator it = v_Path.begin(); it!=v_Path.end(); ++it)
 	AbsToRelative(*it);
 
-	UnitAny* Me = D2Funcs::D2CLIENT_GetPlayer();
+	UnitAny* Me = D2Funcs.D2CLIENT_GetPlayer();
 	POINT ptPlayer = {Me->pPath->xPos,Me->pPath->yPos};
 	AbsToRelative(ptPlayer);
 
@@ -563,7 +563,7 @@ INT CCollisionMap::GetLevelExits(LPLevelExit* lpLevel)
 	POINT ptExitPoints[0x40][2];
 	INT nTotalPoints = 0, nCurrentExit = 0;
 	INT nMaxExits = 0x40;
-	UnitAny* Me = D2Funcs::D2CLIENT_GetPlayer();
+	UnitAny* Me = D2Funcs.D2CLIENT_GetPlayer();
 
 	for(INT i = 0; i < m_map.GetCX(); i++)
 	{
@@ -723,7 +723,7 @@ INT CCollisionMap::GetLevelExits(LPLevelExit* lpLevel)
 
 		if(!pRoom->pRoom1)
 		{
-			D2Funcs::D2COMMON_AddRoomData(Me->pAct, pRoom->pLevel->dwLevelNo, pRoom->dwPosX, pRoom->dwPosY, Me->pPath->pRoom1);
+			D2Funcs.D2COMMON_AddRoomData(Me->pAct, pRoom->pLevel->dwLevelNo, pRoom->dwPosX, pRoom->dwPosY, Me->pPath->pRoom1);
 			bAdded = TRUE;
 		}
 			
@@ -733,7 +733,7 @@ INT CCollisionMap::GetLevelExits(LPLevelExit* lpLevel)
 				if(nCurrentExit >= nMaxExits)
 				{
 					if(bAdded)
-						D2Funcs::D2COMMON_RemoveRoomData(Me->pAct, pRoom->pLevel->dwLevelNo, pRoom->dwPosX, pRoom->dwPosY, Me->pPath->pRoom1);
+						D2Funcs.D2COMMON_RemoveRoomData(Me->pAct, pRoom->pLevel->dwLevelNo, pRoom->dwPosX, pRoom->dwPosY, Me->pPath->pRoom1);
 //					LeaveCriticalSection(&CriticalSection);
 					return FALSE;
 				}
@@ -768,7 +768,7 @@ INT CCollisionMap::GetLevelExits(LPLevelExit* lpLevel)
 			}
 
 		if(bAdded)
-			D2Funcs::D2COMMON_RemoveRoomData(Me->pAct, pRoom->pLevel->dwLevelNo, pRoom->dwPosX, pRoom->dwPosY, Me->pPath->pRoom1);
+			D2Funcs.D2COMMON_RemoveRoomData(Me->pAct, pRoom->pLevel->dwLevelNo, pRoom->dwPosX, pRoom->dwPosY, Me->pPath->pRoom1);
 	}
 
 //	LeaveCriticalSection(&CriticalSection);

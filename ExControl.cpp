@@ -64,10 +64,10 @@ void ExControl::Relocate() //- Set control align
 		else if(hAlign == RIGHT) cY=ptParent->GetY()+ptParent->GetHeight()-cHeight;
 	}
 	else {
-		if(wAlign == CENTER) cX=(*D2Vars::D2CLIENT_ScreenWidth-cWidth)/2;
-		else if(wAlign == RIGHT) cX=(*D2Vars::D2CLIENT_ScreenWidth-cWidth);
-		if(hAlign == CENTER) cY=(*D2Vars::D2CLIENT_ScreenHeight-cHeight)/2;
-		else if(hAlign == RIGHT) cY=*D2Vars::D2CLIENT_ScreenHeight-cHeight;
+		if(wAlign == CENTER) cX=(*D2Vars.D2CLIENT_ScreenWidth-cWidth)/2;
+		else if(wAlign == RIGHT) cX=(*D2Vars.D2CLIENT_ScreenWidth-cWidth);
+		if(hAlign == CENTER) cY=(*D2Vars.D2CLIENT_ScreenHeight-cHeight)/2;
+		else if(hAlign == RIGHT) cY=*D2Vars.D2CLIENT_ScreenHeight-cHeight;
 	}
 }
 
@@ -113,9 +113,9 @@ void ExControl::Draw()
 {
 if(cState!=INVISIBLE)
 {
-	D2Funcs::D2GFX_DrawRectangle(cX,cY,cX+cWidth,cY+cHeight,0xFF,5);
-	D2Funcs::D2WIN_SetTextSize(aFont);
-	D2Funcs::D2WIN_DrawText(L"<NULL CONTROL>",cX,cY,11,0); // THIS NEVER HAPPEN
+	D2Funcs.D2GFX_DrawRectangle(cX,cY,cX+cWidth,cY+cHeight,0xFF,5);
+	D2Funcs.D2WIN_SetTextSize(aFont);
+	D2Funcs.D2WIN_DrawText(L"<NULL CONTROL>",cX,cY,11,0); // THIS NEVER HAPPEN
 }
 }
 bool ExControl::isPressed(unsigned int Sender, WPARAM wParam)
@@ -123,14 +123,14 @@ bool ExControl::isPressed(unsigned int Sender, WPARAM wParam)
 switch(Sender)
 {
 case WM_LBUTTONDOWN:
-if(*D2Vars::D2CLIENT_MouseX>=cX && *D2Vars::D2CLIENT_MouseX<=cX+cWidth && *D2Vars::D2CLIENT_MouseY>=cY && *D2Vars::D2CLIENT_MouseY<=cY+cHeight) 
+if(*D2Vars.D2CLIENT_MouseX>=cX && *D2Vars.D2CLIENT_MouseX<=cX+cWidth && *D2Vars.D2CLIENT_MouseY>=cY && *D2Vars.D2CLIENT_MouseY<=cY+cHeight) 
 {
 bBeingPressed=true;
 return true;
 }
 break;
 case WM_LBUTTONUP:
-if(*D2Vars::D2CLIENT_MouseX>=cX && *D2Vars::D2CLIENT_MouseX<=cX+cWidth && *D2Vars::D2CLIENT_MouseY>=cY && *D2Vars::D2CLIENT_MouseY<=cY+cHeight) 
+if(*D2Vars.D2CLIENT_MouseX>=cX && *D2Vars.D2CLIENT_MouseX<=cX+cWidth && *D2Vars.D2CLIENT_MouseY>=cY && *D2Vars.D2CLIENT_MouseY<=cY+cHeight) 
 {
 if(cState==VISIBLE && event_onClick) event_onClick(this);
 bBeingPressed=false;
@@ -138,12 +138,12 @@ return true;
 }
 break;
 case WM_MOUSEMOVE:
-if(*D2Vars::D2CLIENT_MouseX>=cX && *D2Vars::D2CLIENT_MouseX<=cX+cWidth && *D2Vars::D2CLIENT_MouseY>=cY && *D2Vars::D2CLIENT_MouseY<=cY+cHeight) 
+if(*D2Vars.D2CLIENT_MouseX>=cX && *D2Vars.D2CLIENT_MouseX<=cX+cWidth && *D2Vars.D2CLIENT_MouseY>=cY && *D2Vars.D2CLIENT_MouseY<=cY+cHeight) 
 bBeingSelected=true;
 else
 bBeingSelected=false;
 if(!(Sender==WM_MOUSEMOVE && wParam & (MK_LBUTTON))) break;
-if(*D2Vars::D2CLIENT_MouseX>=cX && *D2Vars::D2CLIENT_MouseX<=cX+cWidth && *D2Vars::D2CLIENT_MouseY>=cY && *D2Vars::D2CLIENT_MouseY<=cY+cHeight) 
+if(*D2Vars.D2CLIENT_MouseX>=cX && *D2Vars.D2CLIENT_MouseX<=cX+cWidth && *D2Vars.D2CLIENT_MouseY>=cY && *D2Vars.D2CLIENT_MouseY<=cY+cHeight) 
 bBeingPressed=true;
 else
 bBeingPressed=false;

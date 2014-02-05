@@ -6,9 +6,9 @@ typedef boost::shared_ptr<ExBuff> pExBuff;
 
 static map<int, pExBuff> Buffs;
 
-ExBuff::ExBuff(WORD SkillNo, WORD StateNo, ExBuffsImgs ImageId, short DefaultLvl, BuffType aType, bool isTimed) : ExControl((24*Buffs.size()) + 115, *D2Vars::D2CLIENT_ScreenViewHeight-10, 24, 24, 0)
+ExBuff::ExBuff(WORD SkillNo, WORD StateNo, ExBuffsImgs ImageId, short DefaultLvl, BuffType aType, bool isTimed) : ExControl((24*Buffs.size()) + 115, *D2Vars.D2CLIENT_ScreenViewHeight-10, 24, 24, 0)
 {
-	UnitAny* pPlayer = D2Funcs::D2CLIENT_GetPlayer();
+	UnitAny* pPlayer = D2Funcs.D2CLIENT_GetPlayer();
 	Skill* pSkill = 0;
 	DWORD ATMTime = GetTickCount();
 	int SkillTime = 0;
@@ -18,12 +18,12 @@ ExBuff::ExBuff(WORD SkillNo, WORD StateNo, ExBuffsImgs ImageId, short DefaultLvl
 
 	if(SkillId)
 	{
-		pSkill = D2Funcs::D2COMMON_GetSkillById(pPlayer,SkillId,-1);
-		if(pSkill) SkillLvl = D2Funcs::D2COMMON_GetSkillLevel(pPlayer,pSkill,1);
-		SkillsTxt *pTxt = &(*D2Vars::D2COMMON_sgptDataTables)->pSkillsTxt[SkillId];
+		pSkill = D2Funcs.D2COMMON_GetSkillById(pPlayer,SkillId,-1);
+		if(pSkill) SkillLvl = D2Funcs.D2COMMON_GetSkillLevel(pPlayer,pSkill,1);
+		SkillsTxt *pTxt = &(*D2Vars.D2COMMON_sgptDataTables)->pSkillsTxt[SkillId];
 		if(!pTxt) isTimed = false;
 		else
-		SkillTime = isTimed ? (D2Funcs::D2COMMON_EvaluateSkill(pPlayer, pTxt->dwAuraLenCalc,SkillId,SkillLvl) / 25) : 0;
+		SkillTime = isTimed ? (D2Funcs.D2COMMON_EvaluateSkill(pPlayer, pTxt->dwAuraLenCalc,SkillId,SkillLvl) / 25) : 0;
 	}
 
 	if(isTimed)
@@ -82,22 +82,22 @@ void ExBuff::Draw()
 
 wchar_t* ExBuffs::GetSkillName(unsigned short SkillId)
 {
-BYTE* Tbl = (*D2Vars::D2COMMON_sgptDataTables)->pSkillDescTxt;
-if(SkillId> (*D2Vars::D2COMMON_sgptDataTables)->dwSkillsRecs) return L"?";
-SkillsTxt* pTxt = (*D2Vars::D2COMMON_sgptDataTables)->pSkillsTxt;
+BYTE* Tbl = (*D2Vars.D2COMMON_sgptDataTables)->pSkillDescTxt;
+if(SkillId> (*D2Vars.D2COMMON_sgptDataTables)->dwSkillsRecs) return L"?";
+SkillsTxt* pTxt = (*D2Vars.D2COMMON_sgptDataTables)->pSkillsTxt;
 int nRow = pTxt[SkillId].wSkillDesc;
 if(!nRow) return L"?";
 
 Tbl+= (nRow*0x120);
 WORD LocId = *(WORD*)(Tbl+8);
-return D2Funcs::D2LANG_GetLocaleText(LocId);
+return D2Funcs.D2LANG_GetLocaleText(LocId);
 }
 
 int GetSkillLvlByStat(short SkillNo, int nStat, int nValue)
 {
-UnitAny* pPlayer= D2Funcs::D2CLIENT_GetPlayer();
+UnitAny* pPlayer= D2Funcs.D2CLIENT_GetPlayer();
 ASSERT(pPlayer)
-SkillsTxt *pTxt = &(*D2Vars::D2COMMON_sgptDataTables)->pSkillsTxt[SkillNo];
+SkillsTxt *pTxt = &(*D2Vars.D2COMMON_sgptDataTables)->pSkillsTxt[SkillNo];
 ASSERT(pTxt)
 DWORD CalcId = 0;
 
@@ -109,7 +109,7 @@ else if (pTxt->wAuraStat5 == nStat) CalcId = pTxt->dwAuraStatCalc5;
 else if (pTxt->wAuraStat6 == nStat) CalcId = pTxt->dwAuraStatCalc6;
 
 	for(int i = 1; i<55; i++) {
-		int val = D2Funcs::D2COMMON_EvaluateSkill(pPlayer,CalcId,SkillNo,i);
+		int val = D2Funcs.D2COMMON_EvaluateSkill(pPlayer,CalcId,SkillNo,i);
 		//Misc::Log("Skill Lvl %d, Value %d, desired %d",i,val,nValue);
 		if(val == nValue) return i;
 	}
@@ -120,27 +120,27 @@ int GetStateStatValue(int nStatNo, BYTE* StateData, int PacketLen)
 {
 //Stat Reading
 BitBuffer pBitBuffer = {0};
-D2Funcs::FOG_InitBitBuffer(&pBitBuffer,StateData,PacketLen-8);
-for(unsigned short nStat = D2Funcs::FOG_ReadBits(&pBitBuffer, 9); nStat>=0; nStat = D2Funcs::FOG_ReadBits(&pBitBuffer, 9))
+D2Funcs.FOG_InitBitBuffer(&pBitBuffer,StateData,PacketLen-8);
+for(unsigned short nStat = D2Funcs.FOG_ReadBits(&pBitBuffer, 9); nStat>=0; nStat = D2Funcs.FOG_ReadBits(&pBitBuffer, 9))
 {
 signed short nParam = 0;
 signed int nValue = 0;
 if (nStat >= 511) 
 	break;
-if (nStat >= (*D2Vars::D2COMMON_sgptDataTables)->dwItemStatCostRecs) 
+if (nStat >= (*D2Vars.D2COMMON_sgptDataTables)->dwItemStatCostRecs) 
 	break;
-ItemStatCostTxt * pTxt = &(*D2Vars::D2COMMON_sgptDataTables)->pItemStatCostTxt[nStat];
+ItemStatCostTxt * pTxt = &(*D2Vars.D2COMMON_sgptDataTables)->pItemStatCostTxt[nStat];
 BYTE SendBits = pTxt->bSendBits;
 BYTE SendParam = pTxt->bSendParamBits;
 if(SendBits == 0) 
 	break;
 if(SendParam)
-	nParam = D2Funcs::FOG_ReadBitsSigned(&pBitBuffer, SendParam);
+	nParam = D2Funcs.FOG_ReadBitsSigned(&pBitBuffer, SendParam);
 if(SendBits <= 32)
 	if(pTxt->bItemStatFlags.bSigned) 
-		nValue = D2Funcs::FOG_ReadBitsSigned(&pBitBuffer, SendBits);
+		nValue = D2Funcs.FOG_ReadBitsSigned(&pBitBuffer, SendBits);
 	else
-		nValue = D2Funcs::FOG_ReadBits(&pBitBuffer, SendBits);
+		nValue = D2Funcs.FOG_ReadBits(&pBitBuffer, SendBits);
 if(nStat == nStatNo) 
 	return nValue;
 }
@@ -165,7 +165,7 @@ BOOL __fastcall ExBuffs::OnSetState(BYTE* aPacket)
 	if (BuffsEnabled)
 	{
 		p0xa8 *pSetState = (p0xa8*)aPacket;
-		UnitAny* pPlayer = D2Funcs::D2CLIENT_GetPlayer();
+		UnitAny* pPlayer = D2Funcs.D2CLIENT_GetPlayer();
 		ASSERT(pPlayer);
 
 		int UnitType = pSetState->UnitType;
@@ -175,30 +175,30 @@ BOOL __fastcall ExBuffs::OnSetState(BYTE* aPacket)
 		if (UnitType == UNIT_PLAYER && UnitID == pPlayer->dwUnitId)
 		{
 			BitBuffer pBitBuffer = { 0 };
-			D2Funcs::FOG_InitBitBuffer(&pBitBuffer, pSetState->Data, pSetState->PacketLen - 8);
-			//for(unsigned short nStat = D2Funcs::FOG_ReadBits(&pBitBuffer, 9); nStat>=0; nStat = D2Funcs::FOG_ReadBits(&pBitBuffer, 9))
+			D2Funcs.FOG_InitBitBuffer(&pBitBuffer, pSetState->Data, pSetState->PacketLen - 8);
+			//for(unsigned short nStat = D2Funcs.FOG_ReadBits(&pBitBuffer, 9); nStat>=0; nStat = D2Funcs.FOG_ReadBits(&pBitBuffer, 9))
 			//{
 			//signed short nParam = 0;
 			//signed int nValue = 0;
 			//if (nStat >= 511) break;
-			//if (nStat >= (*D2Vars::D2COMMON_sgptDataTables)->dwItemStatCostRecs) break;
-			//ItemStatCostTxt * pTxt = &(*D2Vars::D2COMMON_sgptDataTables)->pItemStatCostTxt[nStat];
+			//if (nStat >= (*D2Vars.D2COMMON_sgptDataTables)->dwItemStatCostRecs) break;
+			//ItemStatCostTxt * pTxt = &(*D2Vars.D2COMMON_sgptDataTables)->pItemStatCostTxt[nStat];
 			//BYTE SendBits = pTxt->bSendBits;
 			//BYTE SendParam = pTxt->bSendParamBits;
 			//if(SendBits == 0) break;
-			//if(SendParam) nParam = D2Funcs::FOG_ReadBitsSigned(&pBitBuffer, SendParam);
+			//if(SendParam) nParam = D2Funcs.FOG_ReadBitsSigned(&pBitBuffer, SendParam);
 			//if(SendBits <= 32)
 			//if(pTxt->bItemStatFlags.bSigned) 
-			//	nValue = D2Funcs::FOG_ReadBitsSigned(&pBitBuffer, SendBits);
+			//	nValue = D2Funcs.FOG_ReadBitsSigned(&pBitBuffer, SendBits);
 			//else
-			//	nValue = D2Funcs::FOG_ReadBits(&pBitBuffer, SendBits);
+			//	nValue = D2Funcs.FOG_ReadBits(&pBitBuffer, SendBits);
 			//wstring wStatName;
 			//if(nStat == 351) 
 			//wStatName = L"Skill Level";
 			//else if(nStat == 350)
 			//wStatName = ExBuffs::GetSkillName(nValue);
 			//else
-			//wStatName = D2Funcs::D2LANG_GetLocaleText(pTxt->wDescStrPos);
+			//wStatName = D2Funcs.D2LANG_GetLocaleText(pTxt->wDescStrPos);
 			//
 			//Misc::Log(L"[%d] Stat : '%s' (%d) +%d, Param %d",StateNo,wStatName.c_str(),nStat,nValue,nParam);
 			//}
@@ -303,7 +303,7 @@ BOOL __fastcall ExBuffs::OnSetState(BYTE* aPacket)
 		}
 
 	}
-	return D2Ptrs::D2CLIENT_SetState_I(aPacket);
+	return D2Funcs.D2CLIENT_SetState_I(aPacket);
 }
 
 
@@ -311,13 +311,13 @@ BOOL __fastcall ExBuffs::OnRemoveState(BYTE* aPacket)
 {
 	if (BuffsEnabled)
 	{
-		UnitAny* pPlayer= D2Funcs::D2CLIENT_GetPlayer();
+		UnitAny* pPlayer= D2Funcs.D2CLIENT_GetPlayer();
 		int UnitType = *(BYTE*)(aPacket + 1);
 		int UnitId = *(DWORD*)(aPacket + 2);
 		int StateNo = *(BYTE*)(aPacket + 6);
 		if(UnitType == UNIT_PLAYER && UnitId==pPlayer->dwUnitId){ EnterCriticalSection(&BUFF_CRITSECT); Buffs.erase(StateNo); LeaveCriticalSection(&BUFF_CRITSECT); }
 	}
-	return D2Ptrs::D2CLIENT_RemoveState_I(aPacket);
+	return D2Funcs.D2CLIENT_RemoveState_I(aPacket);
 }
 
 
@@ -326,7 +326,7 @@ void ExBuff::UpdateYPos()
 	EnterCriticalSection(&BUFF_CRITSECT);
 	for (auto it = Buffs.begin(); it != Buffs.end(); ++it)
 	{
-		it->second->SetY(*D2Vars::D2CLIENT_ScreenViewHeight - 10);
+		it->second->SetY(*D2Vars.D2CLIENT_ScreenViewHeight - 10);
 		if (it->second->Buff) it->second->Buff->SetY(it->second->GetY());
 		if (it->second->BuffTime) it->second->BuffTime->SetY(it->second->GetY() - it->second->GetHeight());
 		if (it->second->BuffInfo) it->second->BuffInfo->SetY(it->second->GetY());
@@ -336,7 +336,7 @@ void ExBuff::UpdateYPos()
 
 void ExBuff::Check()
 {
-	static int LocId = D2Funcs::D2LANG_GetLocaleId();
+	static int LocId = D2Funcs.D2LANG_GetLocaleId();
 	int i = 0;
 	EnterCriticalSection(&BUFF_CRITSECT);
 	for(map<int, pExBuff>::iterator it= Buffs.begin() ; it!=Buffs.end(); ++it, ++i)

@@ -13,28 +13,28 @@ static DWORD MenuKeyClicked;
 void ExOptions::ShowHide()
 {
 static bool wasAutoMap;
-	if(D2Vars::D2CLIENT_UIModes[UI_MAINMENU]) {
-		D2Vars::D2CLIENT_UIModes[UI_MAINMENU] = 0;
-		sMsg* pMsgs = &D2Vars::D2CLIENT_MenuMsgs[0];
+	if(D2Vars.D2CLIENT_UIModes[UI_MAINMENU]) {
+		D2Vars.D2CLIENT_UIModes[UI_MAINMENU] = 0;
+		sMsg* pMsgs = &D2Vars.D2CLIENT_MenuMsgs[0];
 		ExInput::UnregisterMsgs(pMsgs,7);
 		ExInput::DefineBindings();
-		*D2Vars::D2CLIENT_UI_Unk2 = 0;
-		if(wasAutoMap) D2Vars::D2CLIENT_UIModes[UI_AUTOMAP] = 1;
+		*D2Vars.D2CLIENT_UI_Unk2 = 0;
+		if(wasAutoMap) D2Vars.D2CLIENT_UIModes[UI_AUTOMAP] = 1;
 	}
 	else
 	{
 		if(ExParty::isOpen()) { ExParty::ShowHide(); return;}
-		if(!D2Funcs::D2CLIENT_ClearScreen3(0,1)) {
-		if(D2Vars::D2CLIENT_UIModes[UI_AUTOMAP]) wasAutoMap = true; else wasAutoMap = false;
-		if(D2Vars::D2CLIENT_UIModes[UI_NPCMENU]) return;
-		D2Funcs::D2CLIENT_ClearScreen();
-		if(D2Funcs::D2CLIENT_GetPlayer()->dwMode == PLAYER_MODE_DEAD || D2Funcs::D2CLIENT_GetPlayer()->dwMode == PLAYER_MODE_DEATH) return;
-		D2Vars::D2CLIENT_UIModes[UI_MAINMENU] = 1;
+		if(!D2Funcs.D2CLIENT_ClearScreen3(0,1)) {
+		if(D2Vars.D2CLIENT_UIModes[UI_AUTOMAP]) wasAutoMap = true; else wasAutoMap = false;
+		if(D2Vars.D2CLIENT_UIModes[UI_NPCMENU]) return;
+		D2Funcs.D2CLIENT_ClearScreen();
+		if(D2Funcs.D2CLIENT_GetPlayer()->dwMode == PLAYER_MODE_DEAD || D2Funcs.D2CLIENT_GetPlayer()->dwMode == PLAYER_MODE_DEATH) return;
+		D2Vars.D2CLIENT_UIModes[UI_MAINMENU] = 1;
 		ExInput::UndefineBindings();
-		sMsg* pMsgs = &D2Vars::D2CLIENT_MenuMsgs[0];
+		sMsg* pMsgs = &D2Vars.D2CLIENT_MenuMsgs[0];
 		ExInput::RegisterMsgs(pMsgs,7);
-		*D2Vars::D2CLIENT_UI_Unk2 = 1;
-		*D2Vars::D2CLIENT_UI_Unk1 = 0;
+		*D2Vars.D2CLIENT_UI_Unk2 = 1;
+		*D2Vars.D2CLIENT_UI_Unk1 = 0;
 
 		ExOptions::MainMenu(0,0);
 		}
@@ -43,8 +43,8 @@ static bool wasAutoMap;
 
 void ExOptions::OnClick(StormMsg * Msg)
 {
-int nMenu = *D2Vars::D2CLIENT_SelectedMenu;
-D2MenuEntry * Entries = *D2Vars::D2CLIENT_D2MenuEntries;
+int nMenu = *D2Vars.D2CLIENT_SelectedMenu;
+D2MenuEntry * Entries = *D2Vars.D2CLIENT_D2MenuEntries;
 
 	if(Entries[nMenu].EnableCheck)
 		if(!Entries[nMenu].EnableCheck(&Entries[nMenu],nMenu)) return;
@@ -56,24 +56,24 @@ D2MenuEntry * Entries = *D2Vars::D2CLIENT_D2MenuEntries;
 			Entries[nMenu].dwCurrentSwitch = 0;
 		if(Entries[nMenu].OnPress)
 			Entries[nMenu].OnPress(&Entries[nMenu],Msg);
-		D2Funcs::D2CLIENT_PlaySound(1);
+		D2ASMFuncs::D2CLIENT_PlaySound(1);
 		}
 		break;
 	case D2MENU_NORMAL:
 		{
 		if(Entries[nMenu].OnPress)
 		Entries[nMenu].OnPress(&Entries[nMenu],Msg);
-		D2Funcs::D2CLIENT_PlaySound(2);
+		D2ASMFuncs::D2CLIENT_PlaySound(2);
 		}
 		break;
 	case D2MENU_KEY:
 		{
 			if(MenuKeyClicked) {
-				D2Funcs::STORM_UnregisterMsg(D2Funcs::D2GFX_GetHwnd(),WM_KEYDOWN,&m_OnGetKey);
+				D2Funcs.STORM_UnregisterMsg(D2Funcs.D2GFX_GetHwnd(),WM_KEYDOWN,&m_OnGetKey);
 				MenuKeyClicked =  0;
 			}
 			else	{
-				D2Funcs::STORM_RegisterMsg(D2Funcs::D2GFX_GetHwnd(),WM_KEYDOWN,&m_OnGetKey);
+				D2Funcs.STORM_RegisterMsg(D2Funcs.D2GFX_GetHwnd(),WM_KEYDOWN,&m_OnGetKey);
 				MenuKeyClicked = nMenu;
 			}
 		}
@@ -84,7 +84,7 @@ D2MenuEntry * Entries = *D2Vars::D2CLIENT_D2MenuEntries;
 void __stdcall ExOptions::m_OnGetKey(StormMsg * Msg)
 {
 	if(MenuKeyClicked && Msg->wParam != VK_ESCAPE) {
-		D2MenuEntry * Entries = *D2Vars::D2CLIENT_D2MenuEntries;
+		D2MenuEntry * Entries = *D2Vars.D2CLIENT_D2MenuEntries;
 	//	ExInput::UndefineBindings();
 		*Entries[MenuKeyClicked].Bind = Msg->wParam;
 //		ExInput::DefineBindings();
@@ -92,43 +92,43 @@ void __stdcall ExOptions::m_OnGetKey(StormMsg * Msg)
 	MenuKeyClicked = 0;
 	Msg->_2 = 1;
 	Msg->_3 = 0;
-	D2Funcs::STORM_ResetMsgQuene(Msg);
-	D2Funcs::STORM_UnregisterMsg(D2Funcs::D2GFX_GetHwnd(),WM_KEYDOWN,&m_OnGetKey);
+	D2Funcs.STORM_ResetMsgQuene(Msg);
+	D2Funcs.STORM_UnregisterMsg(D2Funcs.D2GFX_GetHwnd(),WM_KEYDOWN,&m_OnGetKey);
 }
 
 void __stdcall ExOptions::m_LBUTTONDOWN(StormMsg * Msg)
 {
 	WORD mX = LOWORD(Msg->lParam);
 	WORD mY = HIWORD(Msg->lParam);
-	int nMenu = D2Funcs::D2CLIENT_GetSelectedMenu(mY);
+	int nMenu = D2ASMFuncs::D2CLIENT_GetSelectedMenu(mY);
 	if ( nMenu != -1 )
-		*D2Vars::D2CLIENT_SelectedMenu = nMenu;
+		*D2Vars.D2CLIENT_SelectedMenu = nMenu;
 	MenuUpdate(mX,mY);
 	isMenuClicked = 1;
 	Msg->_2 = 1;
 	Msg->_3 = 0;
-	D2Funcs::STORM_ResetMsgQuene(Msg);
+	D2Funcs.STORM_ResetMsgQuene(Msg);
 }
 
 void __stdcall  ExOptions::m_LBUTTONUP(StormMsg * Msg)
 {
 	WORD mY = HIWORD(Msg->lParam);
-	if(isMenuClicked && D2Funcs::D2CLIENT_GetSelectedMenu(mY) == *D2Vars::D2CLIENT_SelectedMenu) OnClick(Msg);
+	if(isMenuClicked && D2ASMFuncs::D2CLIENT_GetSelectedMenu(mY) == *D2Vars.D2CLIENT_SelectedMenu) OnClick(Msg);
 	//CBA to check what exacly those vars are, but they were in the original code...
-	*D2Vars::D2CLIENT_UI_Unk1 = 0;
-	*D2Vars::D2CLIENT_UI_Unk2 = 0;
-	*D2Vars::D2CLIENT_UiUnk1 = 0;
-	*D2Vars::D2CLIENT_UiUnk2 = 0;
-	*D2Vars::D2CLIENT_UiUnk3 = 0;
-	*D2Vars::D2CLIENT_UiUnk4 = 0;
-	*D2Vars::D2CLIENT_UI_Unk7 = 16;
-	*D2Vars::D2CLIENT_UI_Unk8 = 16;
+	*D2Vars.D2CLIENT_UI_Unk1 = 0;
+	*D2Vars.D2CLIENT_UI_Unk2 = 0;
+	*D2Vars.D2CLIENT_UiUnk1 = 0;
+	*D2Vars.D2CLIENT_UiUnk2 = 0;
+	*D2Vars.D2CLIENT_UiUnk3 = 0;
+	*D2Vars.D2CLIENT_UiUnk4 = 0;
+	*D2Vars.D2CLIENT_UI_Unk7 = 16;
+	*D2Vars.D2CLIENT_UI_Unk8 = 16;
 
 	isMenuClicked = 0;
 	MenuValueClicked = 0;
 	Msg->_2 = 1;
 	Msg->_3 = 0;
-	D2Funcs::STORM_ResetMsgQuene(Msg);
+	D2Funcs.STORM_ResetMsgQuene(Msg);
 }
 
 void __stdcall  ExOptions::m_OnEnter(StormMsg * Msg) // 28.12 -> resolved
@@ -136,15 +136,15 @@ void __stdcall  ExOptions::m_OnEnter(StormMsg * Msg) // 28.12 -> resolved
 	OnClick(Msg);
 	Msg->_2 = 1;
 	Msg->_3 = 0;
-	D2Funcs::STORM_ResetMsgQuene(Msg);
+	D2Funcs.STORM_ResetMsgQuene(Msg);
 }
 
 void ExOptions::MenuUpdate(int mX, int mY)
 {
-	int nMenu = *D2Vars::D2CLIENT_SelectedMenu;
-	if(nMenu != D2Funcs::D2CLIENT_GetSelectedMenu(mY) && !MenuValueClicked) return;
+	int nMenu = *D2Vars.D2CLIENT_SelectedMenu;
+	if(nMenu != D2ASMFuncs::D2CLIENT_GetSelectedMenu(mY) && !MenuValueClicked) return;
 
-	D2MenuEntry * Entries = *D2Vars::D2CLIENT_D2MenuEntries;
+	D2MenuEntry * Entries = *D2Vars.D2CLIENT_D2MenuEntries;
 
 	int nValue = Entries[nMenu].dwCurrentValue;
 
@@ -156,18 +156,18 @@ void ExOptions::MenuUpdate(int mX, int mY)
 		{
 			int CheckX, CheckX2;
 			if(!Entries[nMenu].ptCellFile && !Entries[nMenu].wItemName[0]) {
-				CheckX = (*D2Vars::D2CLIENT_ScreenWidth / 2) - 144; 
-				CheckX2 = (*D2Vars::D2CLIENT_ScreenWidth / 2) - 145; 
+				CheckX = (*D2Vars.D2CLIENT_ScreenWidth / 2) - 144; 
+				CheckX2 = (*D2Vars.D2CLIENT_ScreenWidth / 2) - 145; 
 			}
 			else if(Entries[nMenu].ptCellFile)
 			{
-				CheckX = (*D2Vars::D2CLIENT_ScreenWidth / 2) - 59; 
-				CheckX2 = (*D2Vars::D2CLIENT_ScreenWidth / 2) - 60; 
+				CheckX = (*D2Vars.D2CLIENT_ScreenWidth / 2) - 59; 
+				CheckX2 = (*D2Vars.D2CLIENT_ScreenWidth / 2) - 60; 
 			}
 			else
 			{
-				CheckX = (*D2Vars::D2CLIENT_ScreenWidth / 2) - 59; 
-				CheckX2 = (*D2Vars::D2CLIENT_ScreenWidth / 2) - 60; 
+				CheckX = (*D2Vars.D2CLIENT_ScreenWidth / 2) - 59; 
+				CheckX2 = (*D2Vars.D2CLIENT_ScreenWidth / 2) - 60; 
 			}
 			if(MenuValueClicked || mX> CheckX && mX < CheckX + 289) {
 				if(mX >= CheckX2 + 12)	{
@@ -186,35 +186,35 @@ void ExOptions::MenuUpdate(int mX, int mY)
 	if(nValue != Entries[nMenu].dwCurrentValue) {
 		if(Entries[nMenu].OnPress)
 			Entries[nMenu].OnPress(&Entries[nMenu],0);
-		D2Funcs::D2CLIENT_PlaySound(1);
+		D2ASMFuncs::D2CLIENT_PlaySound(1);
 	}
 }
 
 void  ExOptions::DrawMenuBar(int BarPosX, int BarPosY, D2Menu * Menu, D2MenuEntry *Entry, int nTransLvl)
 {
-	D2Funcs::D2GFX_DrawRectangle(BarPosX,BarPosY,BarPosX+144,BarPosY+30,0,(Entry->dwBarType == 0) + 1);
-	CellFile * cfBar = Entry->dwBarType ? *D2Vars::D2CLIENT_MenuBar2 : *D2Vars::D2CLIENT_MenuBar2;
-	D2Funcs::D2WIN_DrawCellFile(cfBar,400+230,BarPosY,2,nTransLvl,-1);
-	D2Funcs::D2WIN_DrawCellFile(*D2Vars::D2CLIENT_MenuBarSlider,400+250,BarPosY,2,nTransLvl,-1);
+	D2Funcs.D2GFX_DrawRectangle(BarPosX,BarPosY,BarPosX+144,BarPosY+30,0,(Entry->dwBarType == 0) + 1);
+	CellFile * cfBar = Entry->dwBarType ? *D2Vars.D2CLIENT_MenuBar2 : *D2Vars.D2CLIENT_MenuBar2;
+	D2Funcs.D2WIN_DrawCellFile(cfBar,400+230,BarPosY,2,nTransLvl,-1);
+	D2Funcs.D2WIN_DrawCellFile(*D2Vars.D2CLIENT_MenuBarSlider,400+250,BarPosY,2,nTransLvl,-1);
 }
 
 
 
 void ExOptions::DrawMenuRecon()
 {
-	ASSERT(*D2Vars::D2CLIENT_D2Menu);
-	ASSERT(*D2Vars::D2CLIENT_D2MenuEntries);
+	ASSERT(*D2Vars.D2CLIENT_D2Menu);
+	ASSERT(*D2Vars.D2CLIENT_D2MenuEntries);
 	 
-	D2Menu * Menu = *D2Vars::D2CLIENT_D2Menu;
-	D2MenuEntry * Entries = *D2Vars::D2CLIENT_D2MenuEntries;
+	D2Menu * Menu = *D2Vars.D2CLIENT_D2Menu;
+	D2MenuEntry * Entries = *D2Vars.D2CLIENT_D2MenuEntries;
  
 	static CellContext Pent = {0};
-	Pent.pCellFile = *D2Vars::D2CLIENT_MenuPent;
+	Pent.pCellFile = *D2Vars.D2CLIENT_MenuPent;
 	Pent.nCellNo = 0;
  
 	static DWORD LastTick = 0; 
 	static DWORD PentFrame = 0;
-	D2Funcs::D2WIN_SetTextSize(6);
+	D2Funcs.D2WIN_SetTextSize(6);
 	ExScreen::DrawTextEx(2,10,5,0,5,"D2Ex2/Build %s.%d.%s.%s.%s,",
 #ifdef D2EX_CLOSED_BNET
 "PVP.BNET"
@@ -229,19 +229,19 @@ void ExOptions::DrawMenuRecon()
 #endif
 );
 	
-	int MenuStartY = (*D2Vars::D2CLIENT_ScreenHeight - 80) /2 - (Menu->dwEntriesNo * Menu->dwInterline) / 2;
+	int MenuStartY = (*D2Vars.D2CLIENT_ScreenHeight - 80) /2 - (Menu->dwEntriesNo * Menu->dwInterline) / 2;
 
-	if(*D2Vars::D2CLIENT_PrevMouseY != *D2Vars::D2CLIENT_MouseY || *D2Vars::D2CLIENT_PrevMouseX != *D2Vars::D2CLIENT_MouseX)
+	if(*D2Vars.D2CLIENT_PrevMouseY != *D2Vars.D2CLIENT_MouseY || *D2Vars.D2CLIENT_PrevMouseX != *D2Vars.D2CLIENT_MouseX)
 	{
-		*D2Vars::D2CLIENT_PrevMouseY = *D2Vars::D2CLIENT_MouseY;
-		*D2Vars::D2CLIENT_PrevMouseX = *D2Vars::D2CLIENT_MouseX;
+		*D2Vars.D2CLIENT_PrevMouseY = *D2Vars.D2CLIENT_MouseY;
+		*D2Vars.D2CLIENT_PrevMouseX = *D2Vars.D2CLIENT_MouseX;
 		if(isMenuClicked) 
-			MenuUpdate(*D2Vars::D2CLIENT_MouseX,*D2Vars::D2CLIENT_MouseY);
-		//	D2Funcs::D2CLIENT_D2MenuChange(*D2Vars::D2CLIENT_MouseY,0,*D2Vars::D2CLIENT_MouseX);
+			MenuUpdate(*D2Vars.D2CLIENT_MouseX,*D2Vars.D2CLIENT_MouseY);
+		//	D2Funcs.D2CLIENT_D2MenuChange(*D2Vars.D2CLIENT_MouseY,0,*D2Vars.D2CLIENT_MouseX);
 		else
 		{
-			int SelMenu =	D2Funcs::D2CLIENT_GetSelectedMenu(*D2Vars::D2CLIENT_MouseY);
-			if(SelMenu != -1) *D2Vars::D2CLIENT_SelectedMenu=SelMenu;
+			int SelMenu =	D2ASMFuncs::D2CLIENT_GetSelectedMenu(*D2Vars.D2CLIENT_MouseY);
+			if(SelMenu != -1) *D2Vars.D2CLIENT_SelectedMenu=SelMenu;
 		}
 	}
 
@@ -249,7 +249,7 @@ void ExOptions::DrawMenuRecon()
 	{
 		Entries[eNo].dwYOffset = 0;
 		int dwTrans =  0; 
-		if( !Entries[eNo].dwExpansion || D2Funcs::FOG_isExpansion())
+		if( !Entries[eNo].dwExpansion || D2Funcs.FOG_isExpansion())
 		{
 			if(!Entries[eNo].EnableCheck || (dwTrans = Entries[eNo].EnableCheck(&Entries[eNo],eNo)) != 0 ) dwTrans = 1;
 			dwTrans = (4* dwTrans) + 1;
@@ -262,67 +262,67 @@ void ExOptions::DrawMenuRecon()
 			case D2MENU_STATIC: // Static entry
 			case D2MENU_NORMAL: // Normal entry
 				if(Entries[eNo].ptCellFile)
-					D2Funcs::D2WIN_DrawCellFile(Entries[eNo].ptCellFile,*D2Vars::D2CLIENT_ScreenWidth / 2, MenuTextY, 1, dwTrans, -1);
+					D2Funcs.D2WIN_DrawCellFile(Entries[eNo].ptCellFile,*D2Vars.D2CLIENT_ScreenWidth / 2, MenuTextY, 1, dwTrans, -1);
 				else if(Entries[eNo].wItemName[0])
 				{
-					D2Funcs::D2WIN_SetTextSize(Entries[eNo].dwFontType ? Entries[eNo].dwFontType : 3);
-					int Tw = D2Funcs::D2WIN_GetTextWidth(Entries[eNo].wItemName);
-					D2Funcs::D2WIN_DrawTextEx(Entries[eNo].wItemName,(*D2Vars::D2CLIENT_ScreenWidth - Tw) /2, MenuTextY,Entries[eNo].dwColor,0,dwTrans);
+					D2Funcs.D2WIN_SetTextSize(Entries[eNo].dwFontType ? Entries[eNo].dwFontType : 3);
+					int Tw = D2Funcs.D2WIN_GetTextWidth(Entries[eNo].wItemName);
+					D2Funcs.D2WIN_DrawTextEx(Entries[eNo].wItemName,(*D2Vars.D2CLIENT_ScreenWidth - Tw) /2, MenuTextY,Entries[eNo].dwColor,0,dwTrans);
 				}
 				break;
 			case D2MENU_SWITCH: // Switch Entry
 				if(Entries[eNo].ptCellFile)
-					D2Funcs::D2WIN_DrawCellFile(Entries[eNo].ptCellFile,*D2Vars::D2CLIENT_ScreenWidth / 2 - 230, MenuTextY, 0, dwTrans, -1);
+					D2Funcs.D2WIN_DrawCellFile(Entries[eNo].ptCellFile,*D2Vars.D2CLIENT_ScreenWidth / 2 - 230, MenuTextY, 0, dwTrans, -1);
 				else if(Entries[eNo].wItemName[0])
 				{
-					D2Funcs::D2WIN_SetTextSize(2);
-					int Tw = D2Funcs::D2WIN_GetTextWidth(Entries[eNo].wItemName);
-					D2Funcs::D2WIN_DrawTextEx(Entries[eNo].wItemName,(*D2Vars::D2CLIENT_ScreenWidth) /2 - 250, MenuTextY,0,0,dwTrans);
+					D2Funcs.D2WIN_SetTextSize(2);
+					int Tw = D2Funcs.D2WIN_GetTextWidth(Entries[eNo].wItemName);
+					D2Funcs.D2WIN_DrawTextEx(Entries[eNo].wItemName,(*D2Vars.D2CLIENT_ScreenWidth) /2 - 250, MenuTextY,0,0,dwTrans);
 				}
 				if(Entries[eNo].ptSwitchCellFile[Entries[eNo].dwCurrentValue])
-					D2Funcs::D2WIN_DrawCellFile(Entries[eNo].ptSwitchCellFile[Entries[eNo].dwCurrentValue],*D2Vars::D2CLIENT_ScreenWidth / 2 + 230, MenuTextY, 2, dwTrans, -1);
+					D2Funcs.D2WIN_DrawCellFile(Entries[eNo].ptSwitchCellFile[Entries[eNo].dwCurrentValue],*D2Vars.D2CLIENT_ScreenWidth / 2 + 230, MenuTextY, 2, dwTrans, -1);
 				else if(Entries[eNo].wItemName[0])
 				{
-					D2Funcs::D2WIN_SetTextSize(Entries[eNo].dwFontType ? Entries[eNo].dwFontType : 2);
-					int Tw = D2Funcs::D2WIN_GetTextWidth(Entries[eNo].wSwitchItemName[Entries[eNo].dwCurrentValue]);
-					D2Funcs::D2WIN_DrawTextEx(Entries[eNo].wSwitchItemName[Entries[eNo].dwCurrentValue],(*D2Vars::D2CLIENT_ScreenWidth - Tw) /2 + 230, MenuTextY,0,0,dwTrans);
+					D2Funcs.D2WIN_SetTextSize(Entries[eNo].dwFontType ? Entries[eNo].dwFontType : 2);
+					int Tw = D2Funcs.D2WIN_GetTextWidth(Entries[eNo].wSwitchItemName[Entries[eNo].dwCurrentValue]);
+					D2Funcs.D2WIN_DrawTextEx(Entries[eNo].wSwitchItemName[Entries[eNo].dwCurrentValue],(*D2Vars.D2CLIENT_ScreenWidth - Tw) /2 + 230, MenuTextY,0,0,dwTrans);
 				}
 				break;
 			case D2MENU_BAR: // Bar Entry
 				if(Entries[eNo].ptCellFile)
 				{
-					D2Funcs::D2WIN_DrawCellFile(Entries[eNo].ptCellFile,*D2Vars::D2CLIENT_ScreenWidth / 2 - 230, MenuTextY, 0, dwTrans, -1);
-					D2Funcs::D2CLIENT_D2DrawBar(MenuPosY,0,&Entries[eNo],dwTrans,Entries[eNo].ptCellFile == 0);
+					D2Funcs.D2WIN_DrawCellFile(Entries[eNo].ptCellFile,*D2Vars.D2CLIENT_ScreenWidth / 2 - 230, MenuTextY, 0, dwTrans, -1);
+					D2Funcs.D2CLIENT_D2DrawBar(MenuPosY,0,&Entries[eNo],dwTrans,Entries[eNo].ptCellFile == 0);
 				}
 				else if(Entries[eNo].wItemName[0])
 				{
-					D2Funcs::D2WIN_SetTextSize(Entries[eNo].dwFontType ? Entries[eNo].dwFontType : 7);
-					int Tw = D2Funcs::D2WIN_GetTextWidth(Entries[eNo].wItemName);
-					D2Funcs::D2WIN_DrawTextEx(Entries[eNo].wItemName,(*D2Vars::D2CLIENT_ScreenWidth - Tw) /2 - 230, MenuTextY,7,0,dwTrans);
-					D2Funcs::D2CLIENT_D2DrawBar(MenuPosY+ 7,0,&Entries[eNo],dwTrans,0);
+					D2Funcs.D2WIN_SetTextSize(Entries[eNo].dwFontType ? Entries[eNo].dwFontType : 7);
+					int Tw = D2Funcs.D2WIN_GetTextWidth(Entries[eNo].wItemName);
+					D2Funcs.D2WIN_DrawTextEx(Entries[eNo].wItemName,(*D2Vars.D2CLIENT_ScreenWidth - Tw) /2 - 230, MenuTextY,7,0,dwTrans);
+					D2Funcs.D2CLIENT_D2DrawBar(MenuPosY+ 7,0,&Entries[eNo],dwTrans,0);
 				}
 				break;
 			case D2MENU_KEY: // Key Config
 				if(Entries[eNo].wItemName[0])
 				{
-					D2Funcs::D2WIN_SetTextSize(Entries[eNo].dwFontType ? Entries[eNo].dwFontType : 8);
-					D2Funcs::D2WIN_DrawTextEx(Entries[eNo].wItemName, 130, MenuTextY,COL_ORANGE,0,dwTrans);
+					D2Funcs.D2WIN_SetTextSize(Entries[eNo].dwFontType ? Entries[eNo].dwFontType : 8);
+					D2Funcs.D2WIN_DrawTextEx(Entries[eNo].wItemName, 130, MenuTextY,COL_ORANGE,0,dwTrans);
 					if(Entries[eNo].Bind) {
 					wchar_t* szKey = ExInput::GetNameOfKey((WORD)*Entries[eNo].Bind);
-					int Tw2 = D2Funcs::D2WIN_GetTextWidth(szKey);
-					D2Funcs::D2WIN_DrawTextEx(szKey,(*D2Vars::D2CLIENT_ScreenWidth - Tw2) /2 + 230, MenuTextY,MenuKeyClicked == eNo ? COL_RED : COL_WHITE ,0,dwTrans);
+					int Tw2 = D2Funcs.D2WIN_GetTextWidth(szKey);
+					D2Funcs.D2WIN_DrawTextEx(szKey,(*D2Vars.D2CLIENT_ScreenWidth - Tw2) /2 + 230, MenuTextY,MenuKeyClicked == eNo ? COL_RED : COL_WHITE ,0,dwTrans);
 					}
 				}
 				break;
 			}
 		}
 	}
-	if(PentFrame == 0) Pent.nCellNo = 0; //*D2Vars::D2CLIENT_WidestMenu
+	if(PentFrame == 0) Pent.nCellNo = 0; //*D2Vars.D2CLIENT_WidestMenu
 	else Pent.nCellNo = 8 - PentFrame; 
-	int PentY = Menu->dwMenuOffset + Entries[*D2Vars::D2CLIENT_SelectedMenu].dwYOffset;
-	D2Funcs::D2GFX_DrawCellContext(&Pent,(int)(*D2Vars::D2CLIENT_ScreenWidth * 0.9), PentY, -1 , 5 , 0);
+	int PentY = Menu->dwMenuOffset + Entries[*D2Vars.D2CLIENT_SelectedMenu].dwYOffset;
+	D2Funcs.D2GFX_DrawCellContext(&Pent,(int)(*D2Vars.D2CLIENT_ScreenWidth * 0.9), PentY, -1 , 5 , 0);
 	Pent.nCellNo = PentFrame;
-	D2Funcs::D2GFX_DrawCellContext(&Pent,(int)(*D2Vars::D2CLIENT_ScreenWidth * 0.02), PentY, -1 , 5 , 0);
+	D2Funcs.D2GFX_DrawCellContext(&Pent,(int)(*D2Vars.D2CLIENT_ScreenWidth * 0.02), PentY, -1 , 5 , 0);
 
 	int Tick = GetTickCount();
 	if(Tick - LastTick > 50)
@@ -335,10 +335,10 @@ void ExOptions::DrawMenuRecon()
 
 BOOL __fastcall ExOptions::GiveUpCheck(D2MenuEntry* ptEntry, DWORD ItemNo)
 {
-	Room1* aRoom =D2Funcs::D2COMMON_GetUnitRoom(D2Funcs::D2CLIENT_GetPlayer());
-	int aLvl = D2Funcs::D2COMMON_GetLevelNoByRoom(aRoom);
-	int aAct = D2Funcs::D2COMMON_GetActNoByLevelNo(aLvl);
-	if(aLvl!=D2Funcs::D2COMMON_GetTownLevel(aAct))
+	Room1* aRoom =D2Funcs.D2COMMON_GetUnitRoom(D2Funcs.D2CLIENT_GetPlayer());
+	int aLvl = D2Funcs.D2COMMON_GetLevelNoByRoom(aRoom);
+	int aAct = D2Funcs.D2COMMON_GetActNoByLevelNo(aLvl);
+	if(aLvl!=D2Funcs.D2COMMON_GetTownLevel(aAct))
 		return true;
 	return false;
 }
@@ -351,18 +351,18 @@ BOOL __fastcall ExOptions::GiveUpCB(D2MenuEntry* ptEntry, StormMsg* pMsg)
 	aPacket[0] = 0x15;
 	*(WORD*)&aPacket[1] = 1;
 	memcpy(aPacket + 3, szBuffer, strlen(szBuffer));
-	D2Funcs::D2NET_SendPacket(strlen(szBuffer) + 6,1,aPacket);
+	D2Funcs.D2NET_SendPacket(strlen(szBuffer) + 6,1,aPacket);
 	delete[] aPacket;
-D2Funcs::D2CLIENT_ClearScreen();
+D2Funcs.D2CLIENT_ClearScreen();
 return true;
 }
 
 BOOL __fastcall ExOptions::ChangeHandle(D2MenuEntry* ptEntry, StormMsg* pMsg)
 {
 wstring tmp = L"You set "+ boost::lexical_cast<wstring>(ptEntry->dwCurrentValue);
-D2Funcs::D2CLIENT_PrintPartyString(tmp.c_str(),COL_WHITE);
+D2Funcs.D2CLIENT_PrintPartyString(tmp.c_str(),COL_WHITE);
 wcscpy_s((wchar_t*)ptEntry->szCellFile,130,boost::lexical_cast<wstring>(ptEntry->dwCurrentValue).c_str());
-switch(*D2Vars::D2CLIENT_SelectedMenu)
+switch(*D2Vars.D2CLIENT_SelectedMenu)
 {
 case 0:
 BOLvl=ptEntry->dwCurrentValue;
@@ -424,7 +424,7 @@ int SkillId = 1;
 	SkillId=0x11;
 	break;
 	}
-	if(!*D2Vars::D2CLIENT_isMenuClick && *D2Vars::D2CLIENT_SelectedMenu==ItemNo) {
+	if(!*D2Vars.D2CLIENT_isMenuClick && *D2Vars.D2CLIENT_SelectedMenu==ItemNo) {
 	wcscpy_s((wchar_t*)ptEntry->szCellFile,130,ExBuffs::GetSkillName(SkillId));
 	}
 
@@ -444,7 +444,7 @@ BOOL __fastcall ExOptions::Buffs(D2MenuEntry* ptEntry, StormMsg *pMsg)
 		NewMenu.dwMenuOffset=51;
 		NewMenu.dwBarHeight=36;
 	}
-	int LocId = D2Funcs::D2LANG_GetLocaleId();
+	int LocId = D2Funcs.D2LANG_GetLocaleId();
 
 
 	wcscpy_s((wchar_t*)&NewEntries[0].szCellFile,130,ExBuffs::GetSkillName(0x95));
@@ -457,7 +457,7 @@ BOOL __fastcall ExOptions::Buffs(D2MenuEntry* ptEntry, StormMsg *pMsg)
 	wcscpy_s((wchar_t*)&NewEntries[7].szCellFile,130, LocId == 10 ? L"W£ACZ EFEKTY" : L"ENABLE BUFF DISPLAY");
 	wcscpy_s((wchar_t*)&NewEntries[7].szSwitchCellFiles[0], 130, LocId == 10 ? L"WY£." : L"OFF");
 	wcscpy_s((wchar_t*)&NewEntries[7].szSwitchCellFiles[1], 130, LocId == 10 ? L"W£." : L"ON");
-	wcscpy_s((wchar_t*)&NewEntries[8].szCellFile,130,D2Funcs::D2LANG_GetLocaleText(3409));
+	wcscpy_s((wchar_t*)&NewEntries[8].szCellFile,130,D2Funcs.D2LANG_GetLocaleText(3409));
 
 	NewEntries[8].OnPress = &ExOptions::Options;
 	NewEntries[7].OnPress = &ExOptions::BuffsOpt;
@@ -486,9 +486,9 @@ BOOL __fastcall ExOptions::Buffs(D2MenuEntry* ptEntry, StormMsg *pMsg)
 
 
 
-	*D2Vars::D2CLIENT_SelectedMenu=0;
-	*D2Vars::D2CLIENT_D2Menu=&NewMenu;
-	*D2Vars::D2CLIENT_D2MenuEntries=&NewEntries[0];
+	*D2Vars.D2CLIENT_SelectedMenu=0;
+	*D2Vars.D2CLIENT_D2Menu=&NewMenu;
+	*D2Vars.D2CLIENT_D2MenuEntries=&NewEntries[0];
 	return true;
 }
 
@@ -585,7 +585,7 @@ return false;
 
 BOOL __fastcall ExOptions::EntECheck(D2MenuEntry* ptEntry, DWORD ItemNo)
 {
-	if(!*D2Vars::D2CLIENT_isMenuClick && *D2Vars::D2CLIENT_SelectedMenu==ItemNo) 
+	if(!*D2Vars.D2CLIENT_isMenuClick && *D2Vars.D2CLIENT_SelectedMenu==ItemNo) 
 	ptEntry->dwBarType=0;
 
 return true;
@@ -645,7 +645,7 @@ NewEntries[9].OnPress=&ExOptions::LagOpt;
 
 NewEntries[10].OnPress=&ExOptions::Options;
 
-int LocId = D2Funcs::D2LANG_GetLocaleId();
+int LocId = D2Funcs.D2LANG_GetLocaleId();
 
 wcscpy_s((wchar_t*)&NewEntries[0].szCellFile,130,LocId == 10 ? L"WSKAØNIK AUTOMAPY": L"AUTOMAP BLOB");
 wcscpy_s((wchar_t*)&NewEntries[0].szSwitchCellFiles[0],130,LocId == 10 ? L"KROPKA" : L"DOT");
@@ -683,9 +683,9 @@ wcscpy_s((wchar_t*)&NewEntries[10].szCellFile,130,LocId == 10 ? L"POPRZEDNIE MEN
 
 }
 
-*D2Vars::D2CLIENT_SelectedMenu=0;
-*D2Vars::D2CLIENT_D2Menu=&NewMenu;
-*D2Vars::D2CLIENT_D2MenuEntries=&NewEntries[0];
+*D2Vars.D2CLIENT_SelectedMenu=0;
+*D2Vars.D2CLIENT_D2Menu=&NewMenu;
+*D2Vars.D2CLIENT_D2MenuEntries=&NewEntries[0];
 
 return TRUE;
 }
@@ -693,7 +693,7 @@ return TRUE;
 // Import from Scrap
 BOOL __fastcall ExOptions::KeyConfig(D2MenuEntry* ptEntry, StormMsg* pMsg)
 {
-	static int LocId = D2Funcs::D2LANG_GetLocaleId();
+	static int LocId = D2Funcs.D2LANG_GetLocaleId();
 	static D2Menu NewMenu = {6, 18, 20, 37, 0, 0};
 	static D2MenuEntry NewEntries[6] = {0};
 
@@ -715,9 +715,9 @@ BOOL __fastcall ExOptions::KeyConfig(D2MenuEntry* ptEntry, StormMsg* pMsg)
 
 	}
 
-	*D2Vars::D2CLIENT_SelectedMenu=0;
-	*D2Vars::D2CLIENT_D2Menu=&NewMenu;
-	*D2Vars::D2CLIENT_D2MenuEntries=&NewEntries[0];
+	*D2Vars.D2CLIENT_SelectedMenu=0;
+	*D2Vars.D2CLIENT_D2Menu=&NewMenu;
+	*D2Vars.D2CLIENT_D2MenuEntries=&NewEntries[0];
 	return true;
 
 }
@@ -738,15 +738,15 @@ NewMenu.dwInterline=48;
 NewMenu.dwTextHeight=45;
 NewMenu.dwMenuOffset=51;
 
-D2Vars::D2CLIENT_SndOptionsMenu[7].OnPress=&ExOptions::Options;
-D2Vars::D2CLIENT_VidOptionsMenu[7].OnPress=&ExOptions::Options;
-D2Vars::D2CLIENT_MapOptionsMenu[6].OnPress=&ExOptions::Options;
+D2Vars.D2CLIENT_SndOptionsMenu[7].OnPress=&ExOptions::Options;
+D2Vars.D2CLIENT_VidOptionsMenu[7].OnPress=&ExOptions::Options;
+D2Vars.D2CLIENT_MapOptionsMenu[6].OnPress=&ExOptions::Options;
 
 
-int LocId = D2Funcs::D2LANG_GetLocaleId();
+int LocId = D2Funcs.D2LANG_GetLocaleId();
 
-memcpy(NewEntries,(const void*)*&D2Vars::D2CLIENT_OptionsMenu,sizeof(D2MenuEntry)*4);
-memcpy(&NewEntries[6],(const void*)&D2Vars::D2CLIENT_OptionsMenu[4],sizeof(D2MenuEntry));
+memcpy(NewEntries,(const void*)*&D2Vars.D2CLIENT_OptionsMenu,sizeof(D2MenuEntry)*4);
+memcpy(&NewEntries[6],(const void*)&D2Vars.D2CLIENT_OptionsMenu[4],sizeof(D2MenuEntry));
 
 wcscpy_s((wchar_t*)&NewEntries[0].szCellFile,130,LocId == 10 ? L"OPCJE DèWI KOWE" : L"SOUND OPTIONS");
 wcscpy_s((wchar_t*)&NewEntries[1].szCellFile,130,LocId == 10 ? L"OPCJE GRAFICZNE" : L"VIDEO OPTIONS");
@@ -765,9 +765,9 @@ NewEntries[5].dwCurrentValue = COL_ORANGE;
 NewEntries[5].OnPress = &ExOptions::Buffs;
 }
 
-*D2Vars::D2CLIENT_SelectedMenu=0;
-*D2Vars::D2CLIENT_D2Menu=&NewMenu;
-*D2Vars::D2CLIENT_D2MenuEntries=&NewEntries[0];
+*D2Vars.D2CLIENT_SelectedMenu=0;
+*D2Vars.D2CLIENT_D2Menu=&NewMenu;
+*D2Vars.D2CLIENT_D2MenuEntries=&NewEntries[0];
 
 return TRUE;
 }
@@ -791,18 +791,18 @@ NewMenu.dwTextHeight=45;
 NewMenu.dwMenuOffset=51;
 
 
-memcpy(NewEntries,(const void*)*&D2Vars::D2CLIENT_OldMenu,sizeof(D2MenuEntry));
+memcpy(NewEntries,(const void*)*&D2Vars.D2CLIENT_OldMenu,sizeof(D2MenuEntry));
 #ifndef D2EX_CLOSED_BNET
-memcpy(&NewEntries[2],(const void*)&D2Vars::D2CLIENT_OldMenu[1],sizeof(D2MenuEntry)*2);
+memcpy(&NewEntries[2],(const void*)&D2Vars.D2CLIENT_OldMenu[1],sizeof(D2MenuEntry)*2);
 NewEntries[1].OnPress = &ExOptions::GiveUpCB;
 NewEntries[1].EnableCheck = &ExOptions::GiveUpCheck;
 #else
-memcpy(&NewEntries[1],(const void*)&D2Vars::D2CLIENT_OldMenu[1],sizeof(D2MenuEntry)*2);
+memcpy(&NewEntries[1],(const void*)&D2Vars.D2CLIENT_OldMenu[1],sizeof(D2MenuEntry)*2);
 #endif
 NewEntries[0].OnPress=&ExOptions::Options;
 NewEntries[0].ptCellFile=NewEntries[2].ptCellFile=NewEntries[3].ptCellFile=0;
 
-int LocId = D2Funcs::D2LANG_GetLocaleId();
+int LocId = D2Funcs.D2LANG_GetLocaleId();
 int i = 0;
 wcscpy_s((wchar_t*)&NewEntries[i].szCellFile,130,LocId == 10 ? L"OPCJE" : L"OPTIONS");
 #ifndef D2EX_CLOSED_BNET
@@ -812,9 +812,9 @@ wcscpy_s((wchar_t*)&NewEntries[++i].szCellFile,130,LocId == 10 ? L"ZAPIS I WYJåC
 wcscpy_s((wchar_t*)&NewEntries[++i].szCellFile,130,LocId == 10 ? L"POWR”T DO GRY" : L"RETURN TO GAME");
 }
 
-*D2Vars::D2CLIENT_SelectedMenu=1;
-*D2Vars::D2CLIENT_D2Menu=&NewMenu;
-*D2Vars::D2CLIENT_D2MenuEntries=&NewEntries[0];
+*D2Vars.D2CLIENT_SelectedMenu=1;
+*D2Vars.D2CLIENT_D2Menu=&NewMenu;
+*D2Vars.D2CLIENT_D2MenuEntries=&NewEntries[0];
 
 return true;
 }

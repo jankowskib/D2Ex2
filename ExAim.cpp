@@ -25,7 +25,7 @@ if(!AimTarget)
 			LeaveCriticalSection(&TELE_CRITSECT);
 		}
 
-return D2Ptrs::D2CLIENT_RemoveObject_I(aPacket);
+return D2Funcs.D2CLIENT_RemoveObject_I(aPacket);
 }
 
 BOOL __fastcall ExAim::OnUnitSpellCast (UnitAny* pUnit, BYTE* aPacket)
@@ -66,7 +66,7 @@ if(pUnit->dwType == UNIT_PLAYER)
 		}
 
 SpellStrc hSpell = {pData->SkillId, -1, pData->tX, pData->tY, pData->_2, 0, 0};
-return (BOOL)D2Funcs::D2CLIENT_CreateSpell(21,pUnit,&hSpell,1);
+return (BOOL)D2Funcs.D2CLIENT_CreateSpell(21,pUnit,&hSpell,1);
 }
 
 
@@ -95,11 +95,11 @@ unsigned __stdcall ExAim::WatchThread(void * Args)
 void __stdcall ExAim::b_Aim(StormMsg * Msg)
 {
 	if((Msg->lParam & 0x40000000)) return;
-	if(D2Vars::D2CLIENT_UIModes[UI_CHAT]) return;
+	if(D2Vars.D2CLIENT_UIModes[UI_CHAT]) return;
 	DoAttack();
 	Msg->_2 = 1;
 	Msg->_3 = 0;
-	D2Funcs::STORM_ResetMsgQuene(Msg);
+	D2Funcs.STORM_ResetMsgQuene(Msg);
 
 }
 
@@ -107,12 +107,12 @@ bool ExAim::DoPredictAttack(bool left)
 {
 	if(!ExParty::isTownLvl()) {
 
-		UnitAny* pMe = D2Funcs::D2CLIENT_GetPlayer();
+		UnitAny* pMe = D2Funcs.D2CLIENT_GetPlayer();
 		if(!pMe) return false;
 
 		UnitAny* pTarget = 0;
 		if(AimTarget) {
-			pTarget = D2Funcs::D2CLIENT_GetUnitById(AimTarget,UNIT_PLAYER);
+			pTarget = D2Funcs.D2CLIENT_GetUnitById(AimTarget,UNIT_PLAYER);
 			if(!pTarget) return false;
 			if(!(ExParty::GetPvpFlags(pTarget->dwUnitId) & PVP_HOSTILED_BY_YOU)) return false;
 			if(pTarget->dwMode == PLAYER_MODE_DEAD || pTarget->dwMode == PLAYER_MODE_DEATH) return false;
@@ -130,14 +130,14 @@ bool ExAim::DoPredictAttack(bool left)
 			short dis1 = CalculateDistance(HistoryPos.at(0),HistoryPos.at(1));
 			short ang = CalculateAngle(HistoryPos.at(0),HistoryPos.at(1));
 			//if(pTarget->pPath->xTarget)
-			//	{ D2Funcs::D2CLIENT_PrintPartyString(L"Using Target.TargetPos",COL_RED); TargetPos.x = pTarget->pPath->xTarget; TargetPos.y = pTarget->pPath->yTarget; TargetPos = CalculatePointOnTrack(TargetPos,dis2,ang);}
+			//	{ D2Funcs.D2CLIENT_PrintPartyString(L"Using Target.TargetPos",COL_RED); TargetPos.x = pTarget->pPath->xTarget; TargetPos.y = pTarget->pPath->yTarget; TargetPos = CalculatePointOnTrack(TargetPos,dis2,ang);}
 			//else
 			TargetPos = CalculatePointOnTrack(TargetPos,dis1,ang);
 			if(CalculateDistance(MyPos,TargetPos)>35) return false;
 		}
 		else if(pTarget->dwMode != PLAYER_MODE_RUN)  return false;
 
-		Skill* pSkill = left ?  D2Funcs::D2COMMON_GetLeftSkill(pMe) :  D2Funcs::D2COMMON_GetRightSkill(pMe);
+		Skill* pSkill = left ?  D2Funcs.D2COMMON_GetLeftSkill(pMe) :  D2Funcs.D2COMMON_GetRightSkill(pMe);
 		if(pSkill) {
 
 			bool ret = CastSpell(pMe,(WORD)pSkill->pSkillsTxt->wSkillId,left,TargetPos.x,TargetPos.y); //Cast the attack skill
@@ -153,12 +153,12 @@ bool ExAim::DoAttack(bool left)
 {
 	if(!ExParty::isTownLvl()) {
 
-		UnitAny* pMe = D2Funcs::D2CLIENT_GetPlayer();
+		UnitAny* pMe = D2Funcs.D2CLIENT_GetPlayer();
 		if(!pMe) return false;
 
 		UnitAny* pTarget = 0;
 		if(AimTarget) {
-			pTarget = D2Funcs::D2CLIENT_GetUnitById(AimTarget,UNIT_PLAYER);
+			pTarget = D2Funcs.D2CLIENT_GetUnitById(AimTarget,UNIT_PLAYER);
 			if(!pTarget) return false;
 			if(!(ExParty::GetPvpFlags(pTarget->dwUnitId) & PVP_HOSTILED_BY_YOU)) return false;
 			if(pTarget->dwMode == PLAYER_MODE_DEAD || pTarget->dwMode == PLAYER_MODE_DEATH) return false;
@@ -169,7 +169,7 @@ bool ExAim::DoAttack(bool left)
 			if(!pTarget) return false;
 		}
 
-		Skill* pSkill = left ?  D2Funcs::D2COMMON_GetLeftSkill(pMe) :  D2Funcs::D2COMMON_GetRightSkill(pMe);
+		Skill* pSkill = left ?  D2Funcs.D2COMMON_GetLeftSkill(pMe) :  D2Funcs.D2COMMON_GetRightSkill(pMe);
 		if(pSkill) {
 			DoQuickAttack(pTarget->dwUnitId,0x2F,0,left);
 		//	bool ret = CastSpell(pMe,pSkill->pSkillsTxt->wSkillId,left,pTarget); //Cast the attack skill
@@ -192,10 +192,10 @@ EnterCriticalSection(&TELE_CRITSECT); //Clear our teleport path
 g_Stop = false;
 LeaveCriticalSection(&TELE_CRITSECT);
 
-UnitAny* pTarget = D2Funcs::D2CLIENT_GetUnitById(UnitId,UNIT_PLAYER);
+UnitAny* pTarget = D2Funcs.D2CLIENT_GetUnitById(UnitId,UNIT_PLAYER);
 if(!pTarget && HistoryPos.size() == 2)
 {
-UnitAny* pMe = D2Funcs::D2CLIENT_GetPlayer();
+UnitAny* pMe = D2Funcs.D2CLIENT_GetPlayer();
 ASSERT(pMe); // This should NEVER happen, unless you stole my code
 short ang = CalculateAngle(HistoryPos.at(0),HistoryPos.at(1));
 COORDS MyPos = {pMe->pPath->xPos, pMe->pPath->yPos };
@@ -211,14 +211,14 @@ if(!FindTeleportPath(unkTargetPos)) {ExScreen::PrintTextEx(COL_RED,L"PREDICT: Fi
 		if(!Teleport(TelePath.front())) continue;
 		for(int i = 0; (i<15 && ExParty::GetPlayerArea()); i++) {
 			if(PtInCircle(pMe->pPath->xPos, pMe->pPath->yPos,TelePath.front().x,TelePath.front().y,2)) break;
-				Sleep(*D2Vars::D2CLIENT_Ping + 5);
+				Sleep(*D2Vars.D2CLIENT_Ping + 5);
 			if(i==14) return false;
 		}
 		EnterCriticalSection(&TELE_CRITSECT); 
 		TelePath.erase(TelePath.begin());
 		LeaveCriticalSection(&TELE_CRITSECT);
-		if(pTarget = D2Funcs::D2CLIENT_GetUnitById(UnitId,UNIT_PLAYER), pTarget) return false;
-		Sleep(*D2Vars::D2CLIENT_Ping+80);
+		if(pTarget = D2Funcs.D2CLIENT_GetUnitById(UnitId,UNIT_PLAYER), pTarget) return false;
+		Sleep(*D2Vars.D2CLIENT_Ping+80);
 	}
 return true;
 }
@@ -227,7 +227,7 @@ if(pTarget->dwMode == PLAYER_MODE_DEATH || pTarget->dwMode == PLAYER_MODE_DEAD) 
 
 if(!LeftSkillId && !RightSkillId) return false;
 
-UnitAny* pMe = D2Funcs::D2CLIENT_GetPlayer();
+UnitAny* pMe = D2Funcs.D2CLIENT_GetPlayer();
 ASSERT(pMe);
 
 if(pMe->dwUnitId == pTarget->dwUnitId) return false; // Stop if our target is me
@@ -245,9 +245,9 @@ if(bPredict) { //Very basic ideas atm
 		if(abs(dis1-dis2)<=1) {
 			short ang = CalculateAngle(HistoryPos.at(1),TargetPos);
 			wostringstream wstr; wstr << L"Distance:" << dis2 << L", angle : " << ang;
-			D2Funcs::D2CLIENT_PrintPartyString(wstr.str().c_str(),COL_RED);
+			D2Funcs.D2CLIENT_PrintPartyString(wstr.str().c_str(),COL_RED);
 			if(pTarget->pPath->xTarget)
-				{ D2Funcs::D2CLIENT_PrintPartyString(L"Using Target.TargetPos",COL_RED); TargetPos.x = pTarget->pPath->xTarget; TargetPos.y = pTarget->pPath->yTarget; TargetPos = CalculatePointOnTrack(TargetPos,dis2,ang);}
+				{ D2Funcs.D2CLIENT_PrintPartyString(L"Using Target.TargetPos",COL_RED); TargetPos.x = pTarget->pPath->xTarget; TargetPos.y = pTarget->pPath->yTarget; TargetPos = CalculatePointOnTrack(TargetPos,dis2,ang);}
 			else
 				TargetPos = CalculatePointOnTrack(TargetPos,dis2*2,ang);
 		}
@@ -280,7 +280,7 @@ if(!PtInCircle(pMe->pPath->xPos, pMe->pPath->yPos,TargetPos.x,TargetPos.y,2)) {
 		if(!Teleport(TelePath.front())) continue;
 			for(int i = 0; (i<34 && ExParty::GetPlayerArea()); i++) {
 				if(PtInCircle(pMe->pPath->xPos, pMe->pPath->yPos,TelePath.front().x,TelePath.front().y,2)) break;
-				Sleep(*D2Vars::D2CLIENT_Ping + 20);
+				Sleep(*D2Vars.D2CLIENT_Ping + 20);
 				if(i==34) return false;
 			}
 		EnterCriticalSection(&TELE_CRITSECT); 
@@ -288,35 +288,35 @@ if(!PtInCircle(pMe->pPath->xPos, pMe->pPath->yPos,TargetPos.x,TargetPos.y,2)) {
 		LeaveCriticalSection(&TELE_CRITSECT);
 		if(!g_Stop)
 			if(permTargetPos.x != pTarget->pPath->xPos || permTargetPos.y != pTarget->pPath->yPos) return false;
-		Sleep(*D2Vars::D2CLIENT_Ping+80);
+		Sleep(*D2Vars.D2CLIENT_Ping+80);
 	}
 }
 
-if(pTarget = D2Funcs::D2CLIENT_GetUnitById(UnitId,UNIT_PLAYER), !pTarget) return false;
+if(pTarget = D2Funcs.D2CLIENT_GetUnitById(UnitId,UNIT_PLAYER), !pTarget) return false;
 
 //Set the proper skills 
 if(LeftSkillId) 
 	if(!SetSkill(LeftSkillId,true)) return false;
 if(RightSkillId) 
 	if(!SetSkill(RightSkillId,false)) return false;
-Sleep(*D2Vars::D2CLIENT_Ping+50);
+Sleep(*D2Vars.D2CLIENT_Ping+50);
 CastSpell(pMe,left ? LeftSkillId : RightSkillId,left,pTarget); //Cast the attack skill
-Sleep(*D2Vars::D2CLIENT_Ping+200);
+Sleep(*D2Vars.D2CLIENT_Ping+200);
 return true;
 }
 
 
 UnitAny* ExAim::GetNearestTarget()
 {
-	UnitAny* pMe = D2Funcs::D2CLIENT_GetPlayer();
+	UnitAny* pMe = D2Funcs.D2CLIENT_GetPlayer();
 	if(!pMe) return false;
 
 	int nDist = 100;
 	UnitAny* pReturn = 0;
-	for(RosterUnit* pRoster = *D2Vars::D2CLIENT_Roster; pRoster; pRoster = pRoster->pNext)
+	for(RosterUnit* pRoster = *D2Vars.D2CLIENT_Roster; pRoster; pRoster = pRoster->pNext)
 	{
 		if(pRoster->dwUnitId == pMe->dwUnitId) continue;
-		UnitAny* pTarget = D2Funcs::D2CLIENT_GetUnitById(pRoster->dwUnitId,UNIT_PLAYER);
+		UnitAny* pTarget = D2Funcs.D2CLIENT_GetUnitById(pRoster->dwUnitId,UNIT_PLAYER);
 		if(!pTarget) continue;
 		if(!(ExParty::GetPvpFlags(pTarget->dwUnitId) & PVP_HOSTILED_BY_YOU)) continue;
 		if(pTarget->dwMode == PLAYER_MODE_DEAD || pTarget->dwMode == PLAYER_MODE_DEATH) continue;
@@ -330,7 +330,7 @@ UnitAny* ExAim::GetNearestTarget()
 
 UnitAny* ExAim::FindUnitInRoom(DWORD UnitType, DWORD FileIdx, char* szOwner)
 {
-	UnitAny* pMe = D2Funcs::D2CLIENT_GetPlayer();
+	UnitAny* pMe = D2Funcs.D2CLIENT_GetPlayer();
 	if(!pMe) return false;
 
 	int nDist = 100;
@@ -354,11 +354,11 @@ return pReturn;
 
 bool ExAim::Teleport(const COORDS TargetPos)
 {
-	UnitAny* pMe = D2Funcs::D2CLIENT_GetPlayer();
+	UnitAny* pMe = D2Funcs.D2CLIENT_GetPlayer();
 	if(!pMe) return false;
 
 	if(!SetSkill(0x36,false)) return false;//Set Teleport
-	Sleep(*D2Vars::D2CLIENT_Ping+100);
+	Sleep(*D2Vars.D2CLIENT_Ping+100);
 	return CastSpell(pMe,0x36,false,TargetPos.x,TargetPos.y); //CAST TELE ON TARGET XY
 }
 
@@ -367,7 +367,7 @@ bool ExAim::FindTeleportPath(const COORDS TargetPos)
 {
 static CCollisionMap hMap;
 
-UnitAny* pMe = D2Funcs::D2CLIENT_GetPlayer();
+UnitAny* pMe = D2Funcs.D2CLIENT_GetPlayer();
 if(!pMe) return false;
 
 EnterCriticalSection(&TELE_CRITSECT);
@@ -443,7 +443,7 @@ WORD ExAim::GetUnitY(UnitAny* pUnit)
 
 bool ExAim::GetSkill(WORD SkillId) // Taken from D2BS
 {
-	UnitAny* pMe = D2Funcs::D2CLIENT_GetPlayer();
+	UnitAny* pMe = D2Funcs.D2CLIENT_GetPlayer();
 	if(!pMe) return false;
 	for(Skill* pSkill = pMe->pInfo->pFirstSkill; pSkill; pSkill = pSkill->pNextSkill)
 		if(pSkill->pSkillsTxt->wSkillId == SkillId)	return true;
@@ -452,7 +452,7 @@ bool ExAim::GetSkill(WORD SkillId) // Taken from D2BS
 
 bool ExAim::SetSkill(WORD SkillId, bool left) // Taken from D2BS, but modified a bit :)
 {
-	UnitAny* pMe = D2Funcs::D2CLIENT_GetPlayer();
+	UnitAny* pMe = D2Funcs.D2CLIENT_GetPlayer();
 	if(!pMe) return false;
 
 		if(GetSkill(SkillId))	{
@@ -467,9 +467,9 @@ bool ExAim::SetSkill(WORD SkillId, bool left) // Taken from D2BS, but modified a
 			if(left) aPacket[4] = 0x80;
 			*(DWORD*)&aPacket[5]= -1; //dwOwnerItemId
 
-			D2Funcs::D2NET_SendPacket(9, 1, aPacket);
-			*D2Vars::D2CLIENT_SentBytes+=9;
-			*D2Vars::D2CLIENT_SentPackets++;
+			D2Funcs.D2NET_SendPacket(9, 1, aPacket);
+			*D2Vars.D2CLIENT_SentBytes+=9;
+			*D2Vars.D2CLIENT_SentPackets++;
 			
 				for(int i = 0; (i<10 && ExParty::GetPlayerArea()); i++) {
 				Skill* pSkill = (left ? pMe->pInfo->pLeftSkill : pMe->pInfo->pRightSkill);
@@ -490,9 +490,9 @@ void ExAim::UseSkillOnXY(WORD x, WORD y, bool left)
 	*(LPWORD)&aPacket[1] = x;
 	*(LPWORD)&aPacket[3] = y;
 
-	D2Funcs::D2NET_SendPacket(5, 1, aPacket);
-	*D2Vars::D2CLIENT_SentBytes+=5;
-	*D2Vars::D2CLIENT_SentPackets++;
+	D2Funcs.D2NET_SendPacket(5, 1, aPacket);
+	*D2Vars.D2CLIENT_SentBytes+=5;
+	*D2Vars.D2CLIENT_SentPackets++;
 }
 
 void ExAim::UseSkillOnId(DWORD UnitId, DWORD UnitType, bool left)
@@ -501,18 +501,18 @@ void ExAim::UseSkillOnId(DWORD UnitId, DWORD UnitType, bool left)
 	aPacket[0] = left ? 0x0A : 0x0D;
 	*(DWORD*)&aPacket[1] = UnitType;
 	*(DWORD*)&aPacket[5] = UnitId;
-	D2Funcs::D2NET_SendPacket(9, 1, aPacket);
-	*D2Vars::D2CLIENT_SentBytes+=9;
-	*D2Vars::D2CLIENT_SentPackets++;			
+	D2Funcs.D2NET_SendPacket(9, 1, aPacket);
+	*D2Vars.D2CLIENT_SentBytes+=9;
+	*D2Vars.D2CLIENT_SentPackets++;			
 }
 
 
 bool ExAim::CastSpell(UnitAny* pCaster, WORD SkillId, bool left, WORD xPos, WORD yPos)
 {
 SpellStrc hSpell = {SkillId, -1, xPos, yPos, 0, 0, 0};
-if(!D2Funcs::D2CLIENT_CreateSpell(21,pCaster,&hSpell,1)) return false;
-int nPierceIdx = D2Funcs::D2COMMON_GetBaseStatSigned(pCaster,328,0);
-D2Funcs::D2COMMON_SetStat(pCaster, 328, nPierceIdx + 1,0);
+if(!D2Funcs.D2CLIENT_CreateSpell(21,pCaster,&hSpell,1)) return false;
+int nPierceIdx = D2Funcs.D2COMMON_GetBaseStatSigned(pCaster,328,0);
+D2Funcs.D2COMMON_SetStat(pCaster, 328, nPierceIdx + 1,0);
 UseSkillOnXY(xPos, yPos, left);
 if(pCaster->dwType == UNIT_PLAYER)
 	if(pCaster->pPlayerData) // Didnt check what exacly are those values, but better leave them
@@ -529,9 +529,9 @@ return true;
 bool ExAim::CastSpell(UnitAny* pCaster, WORD SkillId, bool left, UnitAny* pTarget)
 {
 SpellStrc hSpell = {SkillId, -1, pTarget->dwType, pTarget->dwUnitId, 0, 0, 0};
-if(!D2Funcs::D2CLIENT_CreateSpell(22,pCaster,&hSpell,1)) return false;
-int nPierceIdx = D2Funcs::D2COMMON_GetBaseStatSigned(pCaster,328,0);
-D2Funcs::D2COMMON_SetStat(pCaster, 328, nPierceIdx + 1,0);
+if(!D2Funcs.D2CLIENT_CreateSpell(22,pCaster,&hSpell,1)) return false;
+int nPierceIdx = D2Funcs.D2COMMON_GetBaseStatSigned(pCaster,328,0);
+D2Funcs.D2COMMON_SetStat(pCaster, 328, nPierceIdx + 1,0);
 UseSkillOnId(pTarget->dwUnitId, pTarget->dwType, left);
 if(pCaster->dwType == UNIT_PLAYER)
 	if(pCaster->pPlayerData) // Didnt check what exacly are those values
@@ -564,7 +564,7 @@ struct p0x4C
 
 p0x4C aPacket = {0x4C,UnitType,UnitId,SkillId,1,0,TargetId,0};
 	static int eLen =  0;
-	D2Funcs::D2NET_ReceivePacket(&eLen, (BYTE*)&aPacket, sizeof(p0x4C));	
+	D2Funcs.D2NET_ReceivePacket(&eLen, (BYTE*)&aPacket, sizeof(p0x4C));	
 
 }
 

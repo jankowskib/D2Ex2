@@ -18,16 +18,6 @@ DWORD GetDllOffset(const char *dll, int offset)
 }
 
 DWORD GetDllOffset(int num)
-{
-	DWORD tmp =  GetDllOffset(dlls[num&0xff], num>>8);
-//	Misc::Log("%s : 0x%x", dlls[num&0xff], tmp);
-	return tmp;
-}
-
-void DefineOffsets()
-{
-	Misc::Log("Defining %d pointers...", ((DWORD*)&_D2PTRS_END - (DWORD*)&_D2PTRS_START) / 4);
-	DWORD *p = (DWORD *)&_D2PTRS_START;
-	do *p = GetDllOffset(*p);
-		while(++p <= (DWORD *)&_D2PTRS_END);
+{ 
+	return GetDllOffset(dlls[num & 0xff], num >> 8);
 }

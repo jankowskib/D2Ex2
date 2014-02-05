@@ -49,10 +49,10 @@ void ExImage::Relocate() //- Set control align
 		else if (hAlign == RIGHT) cY = ptParent->GetY() + ptParent->GetHeight();
 	}
 	else {
-		if (wAlign == CENTER) cX = (*D2Vars::D2CLIENT_ScreenWidth - cWidth) / 2;
-		else if (wAlign == RIGHT) cX = (*D2Vars::D2CLIENT_ScreenWidth - cWidth);
-		if (hAlign == CENTER) cY = (*D2Vars::D2CLIENT_ScreenHeight + cHeight) / 2;
-		else if (hAlign == RIGHT) cY = *D2Vars::D2CLIENT_ScreenHeight;
+		if (wAlign == CENTER) cX = (*D2Vars.D2CLIENT_ScreenWidth - cWidth) / 2;
+		else if (wAlign == RIGHT) cX = (*D2Vars.D2CLIENT_ScreenWidth - cWidth);
+		if (hAlign == CENTER) cY = (*D2Vars.D2CLIENT_ScreenHeight + cHeight) / 2;
+		else if (hAlign == RIGHT) cY = *D2Vars.D2CLIENT_ScreenHeight;
 	}
 }
 
@@ -62,15 +62,15 @@ void ExImage::Draw()
 	if (MultiFrame)
 	{
 		//TODO: IMPROVE IT, ITS UNSTABLE ATM
-		//D2Funcs::D2WIN_DrawCellFile(aCellFile->GetCF(),cX,cY,0,TransLvl,ColorShift);
-		//D2Funcs::D2WIN_DrawCellFile(aCellFile->GetCF(),cX+177,cY+256,1,TransLvl,ColorShift);
-		//D2Funcs::D2WIN_DrawCellFile(aCellFile->GetCF(),cX,cY+(256*2),8,TransLvl,ColorShift);
+		//D2Funcs.D2WIN_DrawCellFile(aCellFile->GetCF(),cX,cY,0,TransLvl,ColorShift);
+		//D2Funcs.D2WIN_DrawCellFile(aCellFile->GetCF(),cX+177,cY+256,1,TransLvl,ColorShift);
+		//D2Funcs.D2WIN_DrawCellFile(aCellFile->GetCF(),cX,cY+(256*2),8,TransLvl,ColorShift);
 	}
 	else
-		D2Funcs::D2GFX_DrawCellContextEx(aCellFile->Get(), cX, cY, -1, TransLvl, ColorShift);
+		D2Funcs.D2GFX_DrawCellContextEx(aCellFile->Get(), cX, cY, -1, TransLvl, ColorShift);
 
 	if (Hoover.empty() || !bBeingSelected) return;
-	D2Funcs::D2WIN_DrawFramedText(Hoover.c_str(), cX, cY - cHeight - 10, 0, 0);
+	D2Funcs.D2WIN_DrawFramedText(Hoover.c_str(), cX, cY - cHeight - 10, 0, 0);
 }
 
 ExImage::~ExImage(void)
@@ -85,14 +85,14 @@ bool ExImage::isPressed(unsigned int Sender, WPARAM wParam)
 	switch (Sender)
 	{
 	case WM_LBUTTONDOWN:
-		if (*D2Vars::D2CLIENT_MouseX >= cX && *D2Vars::D2CLIENT_MouseX <= cX + cWidth && *D2Vars::D2CLIENT_MouseY <= cY && *D2Vars::D2CLIENT_MouseY >= cY - cHeight)
+		if (*D2Vars.D2CLIENT_MouseX >= cX && *D2Vars.D2CLIENT_MouseX <= cX + cWidth && *D2Vars.D2CLIENT_MouseY <= cY && *D2Vars.D2CLIENT_MouseY >= cY - cHeight)
 		{
 			bBeingPressed = true;
 			return true;
 		}
 		break;
 	case WM_LBUTTONUP:
-		if (*D2Vars::D2CLIENT_MouseX >= cX && *D2Vars::D2CLIENT_MouseX <= cX + cWidth && *D2Vars::D2CLIENT_MouseY <= cY && *D2Vars::D2CLIENT_MouseY >= cY - cHeight)
+		if (*D2Vars.D2CLIENT_MouseX >= cX && *D2Vars.D2CLIENT_MouseX <= cX + cWidth && *D2Vars.D2CLIENT_MouseY <= cY && *D2Vars.D2CLIENT_MouseY >= cY - cHeight)
 		{
 			if (cState == VISIBLE && event_onClick) event_onClick(this);
 			bBeingPressed = false;
@@ -100,12 +100,12 @@ bool ExImage::isPressed(unsigned int Sender, WPARAM wParam)
 		}
 		break;
 	case WM_MOUSEMOVE:
-		if (*D2Vars::D2CLIENT_MouseX >= cX && *D2Vars::D2CLIENT_MouseX <= cX + cWidth && *D2Vars::D2CLIENT_MouseY >= cY - cHeight && *D2Vars::D2CLIENT_MouseY <= cY)
+		if (*D2Vars.D2CLIENT_MouseX >= cX && *D2Vars.D2CLIENT_MouseX <= cX + cWidth && *D2Vars.D2CLIENT_MouseY >= cY - cHeight && *D2Vars.D2CLIENT_MouseY <= cY)
 			bBeingSelected = true;
 		else
 			bBeingSelected = false;
 		if (!(Sender == WM_MOUSEMOVE && wParam & (MK_LBUTTON))) break;
-		if (*D2Vars::D2CLIENT_MouseX >= cX && *D2Vars::D2CLIENT_MouseX <= cX + cWidth && *D2Vars::D2CLIENT_MouseY <= cY - cHeight && *D2Vars::D2CLIENT_MouseY >= cY)
+		if (*D2Vars.D2CLIENT_MouseX >= cX && *D2Vars.D2CLIENT_MouseX <= cX + cWidth && *D2Vars.D2CLIENT_MouseY <= cY - cHeight && *D2Vars.D2CLIENT_MouseY >= cY)
 			bBeingPressed = true;
 		else
 			bBeingPressed = false;

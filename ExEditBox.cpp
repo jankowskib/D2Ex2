@@ -57,8 +57,8 @@ void ExEditBox::SetChangeEvent(void(*event_Change)(ExEditBox*))
 void ExEditBox::Draw()
 {
 	if (cState == INVISIBLE) return;
-	D2Funcs::D2WIN_SetTextSize(aFont);
-	D2Funcs::D2GFX_DrawCellContextEx(aCellFile->Get(), cX, cY, -1, 5, cState == VISIBLE ? 0 : 1);
+	D2Funcs.D2WIN_SetTextSize(aFont);
+	D2Funcs.D2GFX_DrawCellContextEx(aCellFile->Get(), cX, cY, -1, 5, cState == VISIBLE ? 0 : 1);
 	int TextWid = 0;
 	if (!Text.empty())
 	{
@@ -73,13 +73,13 @@ void ExEditBox::Draw()
 			Buffer.erase(Buffer.length());
 		}
 		if (isHashed) Buffer.assign(Buffer.length(), L'*');
-		D2Funcs::D2WIN_DrawText(Buffer.c_str(), cX + TextX, cY - TextY, Color, 0);
+		D2Funcs.D2WIN_DrawText(Buffer.c_str(), cX + TextX, cY - TextY, Color, 0);
 
 		TextWid = ExScreen::GetTextWidth(Buffer.substr(0, CursorPos).c_str());
 	}
 	if (!isFocused) return;
 
-	if (GetTickCount() % 50 == 0) D2Funcs::D2GFX_DrawLine(TextWid + cX + TextX, cY - TextY, TextWid + cX + TextX + 5, cY - TextY, 255, 0);
+	if (GetTickCount() % 50 == 0) D2Funcs.D2GFX_DrawLine(TextWid + cX + TextX, cY - TextY, TextWid + cX + TextX + 5, cY - TextY, 255, 0);
 
 }
 
@@ -90,7 +90,7 @@ bool ExEditBox::isPressed(unsigned int Sender, WPARAM wParam)
 	{
 	case WM_LBUTTONDOWN:
 		if (cState == DISABLED) return false;
-		if (*D2Vars::D2CLIENT_MouseX >= cX && *D2Vars::D2CLIENT_MouseX <= cX + cWidth && *D2Vars::D2CLIENT_MouseY <= cY && *D2Vars::D2CLIENT_MouseY >= cY - cHeight)
+		if (*D2Vars.D2CLIENT_MouseX >= cX && *D2Vars.D2CLIENT_MouseX <= cX + cWidth && *D2Vars.D2CLIENT_MouseY <= cY && *D2Vars.D2CLIENT_MouseY >= cY - cHeight)
 		{
 			bBeingPressed = true;
 			return true;
@@ -98,10 +98,10 @@ bool ExEditBox::isPressed(unsigned int Sender, WPARAM wParam)
 		break;
 	case WM_LBUTTONUP:
 		if (cState == DISABLED) return false;
-		if (*D2Vars::D2CLIENT_MouseX >= cX && *D2Vars::D2CLIENT_MouseX <= cX + cWidth && *D2Vars::D2CLIENT_MouseY <= cY && *D2Vars::D2CLIENT_MouseY >= cY - cHeight)
+		if (*D2Vars.D2CLIENT_MouseX >= cX && *D2Vars.D2CLIENT_MouseX <= cX + cWidth && *D2Vars.D2CLIENT_MouseY <= cY && *D2Vars.D2CLIENT_MouseY >= cY - cHeight)
 		{
 			if (cState == VISIBLE) {
-				D2Funcs::D2CLIENT_PlaySound(ExSounds::STAND_CLICK); isFocused = true;
+				D2ASMFuncs::D2CLIENT_PlaySound(ExSounds::STAND_CLICK); isFocused = true;
 			}
 			bBeingPressed = false;
 			return true;

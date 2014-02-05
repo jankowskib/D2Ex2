@@ -26,7 +26,7 @@ BOOL __fastcall ExChat::OnMessage(BYTE* aPacket)
 	string szMsg = pMsg->CharName+CharLen+1;
 	Misc::Log("<%s> : %s",szCharName.c_str(),szMsg.c_str());
 	//if(aChat && !szMsg.empty()) aChat->AddMsg(szMsg,szCharName,pMsg->MsgColor);
-return	D2Ptrs::D2CLIENT_GameChat_I(aPacket);
+return	D2Funcs.D2CLIENT_GameChat_I(aPacket);
 }
 
 /*ExMsgs::ExMsgs()

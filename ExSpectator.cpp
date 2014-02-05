@@ -13,7 +13,7 @@ if(!mX && !mY) return 0;
 		inp.mi.dx=p->Coords.x;
 		inp.mi.dy=p->Coords.y;
 		SendInput(1, &inp, sizeof(INPUT));*/
-*D2Vars::D2CLIENT_MouseX=mX;
-*D2Vars::D2CLIENT_MouseY=mY;
+*D2Vars.D2CLIENT_MouseX=mX;
+*D2Vars.D2CLIENT_MouseY=mY;
 return 0;
 }

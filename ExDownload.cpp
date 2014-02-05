@@ -140,7 +140,7 @@ Abort = true;
 
 void ExDownload::ShowHide()
 {
-static wstring CancelStr = D2Funcs::D2LANG_GetLocaleText(3765);
+static wstring CancelStr = D2Funcs.D2LANG_GetLocaleText(3765);
 static ExBox * Bckg;
 
 if(!DownScreen)
