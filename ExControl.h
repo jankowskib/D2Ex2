@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include "Misc.h"
+#include "ExScreen.h"
 
 using namespace std;
 

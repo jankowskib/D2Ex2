@@ -178,9 +178,6 @@
     <ClInclude Include="Offset.h">
       <Filter>Header Files\D2 Internals</Filter>
     </ClInclude>
-    <ClInclude Include="D2Ex2.h">
-      <Filter>Header Files\Main</Filter>
-    </ClInclude>
     <ClInclude Include="ExBuffs.h">
       <Filter>Header Files\Main</Filter>
     </ClInclude>

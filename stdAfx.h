@@ -1,7 +1,13 @@
 #define WIN32_LEAN_AND_MEAN
-//#define D2EX_CLOSED_BNET // Copy&Paste from SCRAP, didn't test yet
-//#define D2EX_SCRAP_HACKS // - || -
-//#define D2EX_MULTIRES // Enables high resolution settings
+//Build flags
+//-----------------------------------------
+//#define D2EX_CLOSED_BNET "Closed Bnet|" // Copy&Paste from SCRAP, didn't test yet
+//#define D2EX_SCRAP_HACKS "Scrap Hacks|" // - || -
+//#define D2EX_MULTIRES "Multi Res|" // Enables high resolution settings
+//#define D2EX_ARGOLD "AR Gold|" // Enables client support for virutal gold service [Needs serverside dll to work]
+//#define D2EX_PVPGN_EXT "PvPGN Extensions|" // Enables serverside stuff like kill counter, spectator mode etc [Needs serverside dll to work]
+//#define D2EX_EXAIM_ENABLED "ExAim|" // Experimental -- never finished | may not work --
+#define D2EX_PVM_BUILD "PvM|" // Enables Maphack with monsters on the map, autotele, etc.
 //*******************************************
 
 #if defined VER_111B && defined VER_113D
@@ -23,8 +29,8 @@
 
 
 #include "D2Stubs.h"
+#include "Misc.h"
 #include "Vars.h"
-#include "ExScreen.h"
 
 #ifdef _DEBUG
 #define DEBUGMSG(format,...) Misc::Debug(format, ##__VA_ARGS__);

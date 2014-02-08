@@ -1,20 +1,9 @@
 #ifndef _EXBUFFS_H__
 #define _EXBUFFS_H__
 
-
-#include <string>
-#include <map>
-
-
-#include "Misc.h"
-#include "Vars.h"
-#include "ExScreen.h"
-
 #include "ExImage.h"
 #include "ExRectangle.h"
 #include "ExTextBox.h"
-#include <boost\lexical_cast.hpp>
-#include <boost\shared_ptr.hpp>
 
 using namespace std;
 
@@ -49,6 +38,19 @@ using namespace std;
 };		
 
 
+namespace ExBuffs
+{
+	wchar_t* GetSkillName(unsigned short SkillId);
+	BOOL __fastcall OnSetState(BYTE* aPacket);
+	BOOL __fastcall OnRemoveState(BYTE* aPacket);
+
+
+	void Check(void);
+	void Clear(void);
+	void UpdateYPos(void);
+}
+
+
 class ExBuff : public ExControl
 {
 public:
@@ -57,9 +59,9 @@ public:
 	~ExBuff();
 	void Draw();
 
-	static void Check(void);
-	static void Clear(void);
-	static void UpdateYPos(void);
+	friend void ExBuffs::Check(void);
+	friend void ExBuffs::Clear(void);
+	friend void ExBuffs::UpdateYPos(void);
 	int	StateId;
 	int SkillId;
 	DWORD SkillLen;
@@ -69,13 +71,6 @@ private:
 	ExRectangle * BuffTime;
 	ExTextBox * BuffInfo;
 };
-
-namespace ExBuffs
-{
-	wchar_t* GetSkillName(unsigned short SkillId);
-	BOOL __fastcall OnSetState(BYTE* aPacket);
-	BOOL __fastcall OnRemoveState(BYTE* aPacket);
-}
 
 
 #endif

@@ -1,7 +1,8 @@
-#include "ExControl.h"
-#include "ExCellFile.h"
-#include "ExEditBox.h"
-#include "ExLagometer.h"
+class ExCellFile;
+class ExControl;
+class ExLagometer;
+class ExEditBox;
+
 #include <vector>
 #include <deque>
 #include <sstream>
@@ -18,6 +19,7 @@ using namespace std;
 #define GLOBAL(type, name) extern type name;
 
 #endif
+GLOBAL(int, gLocaleId)
 GLOBAL(HANDLE, hPointersReadyEvent)
 GLOBAL(BOOL, g_FastTP)
 GLOBAL(DWORD, AimTarget)
@@ -42,8 +44,8 @@ GLOBAL(DWORD, PVMStuff)
 GLOBAL(int, ExpAtJoin)
 GLOBAL(BOOL, (__fastcall *cb01)(BYTE* aPacket))
 GLOBAL(BOOL, (__fastcall *cb02)(BYTE* aPacket))
-GLOBAL(std::vector<ExControl*>,Controls)
-GLOBAL(std::vector<ItemConfig>,ItemArray)
+GLOBAL(vector<ExControl*>,Controls)
+GLOBAL(vector<ItemConfig>,ItemArray)
 GLOBAL(WNDPROC,OldWNDPROC)
 GLOBAL(bool, DontEnterCS)
 GLOBAL(bool, DontLeaveCS)

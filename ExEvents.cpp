@@ -85,7 +85,7 @@ case 4: //Odslon mape
 	}
 break;
 default:
-	INFO("D2EX: Nieznany pakiet typu 0xA6. Sciagnij nowa wersje klienta.")
+	ExScreen::PrintTextEx(COL_PURPLE, "D2EX: Unrecognized ExEvent packet type. Please update D2Ex to new version");
 };
 
 return 0;

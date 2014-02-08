@@ -31,7 +31,7 @@ struct Seed
 HANDLE __stdcall ExLoading::CreateCacheFile(LPCSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile)
 {
 	char szFile[MAX_PATH];
-	srand(time(0));
+	srand((DWORD)time(0));
 	string path;
 	ostringstream out;
 	WIN32_FIND_DATA FindFileData;

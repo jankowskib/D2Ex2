@@ -347,7 +347,9 @@ LONG WINAPI ExInput::GameWindowEvent(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM
 					return 0;
 				}}
 		} 
-	//	if(wParam == VK_INSERT && D2Vars.D2CLIENT_UIModes[UI_CHAT] ==0 ) {ExAim::DoAttack(); return 0; }
+#ifdef D2EX_EXAIM_ENABLED
+		if(wParam == VK_INSERT && D2Vars.D2CLIENT_UIModes[UI_CHAT] ==0 ) {ExAim::DoAttack(); return 0; }
+#endif
 	#ifdef D2EX_SCRAP_HACKS
 		if(StillSwitch) {
 			if(D2Funcs.D2CLIENT_GetPlayer() && !D2Vars.D2CLIENT_UIModes[UI_CHAT]) {

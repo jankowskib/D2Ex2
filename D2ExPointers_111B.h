@@ -1,5 +1,8 @@
 #include "Offset.h"
 
+#undef DrawText
+#undef DrawTextEx
+
 #ifndef __DEFINE_EXPTRS
 
 #define EXFUNCPTR(d1,v1,t1,t2,t3, o1)  t1 (t2 *d1##_##v1)t3;

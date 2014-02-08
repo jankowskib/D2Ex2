@@ -1,9 +1,7 @@
 #include "stdafx.h"
 #include "ExOOG.h"
-
-#include "Vars.h"
-
 #include "Offset.h"
+#include "ExCellFile.h"
 
 static Image* pPortPopup;
 static EditBox* pPortBox;
@@ -48,9 +46,9 @@ pPortText = D2Funcs.D2WIN_CreateTextBox((800-iw)/2,(600+ih)/2,iw,ih,10,10, NULL,
 pPortBox =	D2Funcs.D2WIN_CreateEditBox((800-69)/2, 300, 69, 26, 10,0,CellBox->GetCF(),(BOOL (__stdcall *)(char *))&AcceptCB, NULL , 0, &Prefs);
 pPortOK =	D2Funcs.D2WIN_CreateButton((800-96)/2,370,96,32, CellButton->GetCF(), &AcceptCB, NULL, 0, 0, 0, 0);
 wcscpy_s(pPortOK->wText,256,L"OK");
-int LocId = D2Funcs.D2LANG_GetLocaleId();
 
-D2Funcs.D2WIN_SetTextBoxText(pPortText,LocId == 10 ? L"Zmien port Battle.Net :" : L"Change Battle.Net Port :");
+
+D2Funcs.D2WIN_SetTextBoxText(pPortText,gLocaleId == 10 ? L"Zmien port Battle.Net :" : L"Change Battle.Net Port :");
 
 pPortBox->dwMaxLength=5;
 wostringstream wPort; wPort << Port;
@@ -144,11 +142,11 @@ Control* ExOOG::FindControl(int Type, wchar_t* Text)
 	return 0;
 }
 
-Control* ExOOG::FindControl(int Type, int LocId)
+Control* ExOOG::FindControl(int Type, int gLocaleId)
 {
 	if(!Type) return 0;
 	char* sLoc = {0};
-	return ExOOG::FindControl(Type,D2Funcs.D2LANG_GetLocaleText((short)LocId));
+	return ExOOG::FindControl(Type,D2Funcs.D2LANG_GetLocaleText((short)gLocaleId));
 }
 
 Control* ExOOG::FindControl(int Type, int cX, int cY)

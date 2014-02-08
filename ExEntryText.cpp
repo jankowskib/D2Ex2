@@ -14,9 +14,8 @@ void ExEntryText::Draw()
 	static int LevelId;
 	const int TransTable[] = {0,1,2,5};
 	Room1* pRoom = D2Funcs.D2COMMON_GetUnitRoom(D2Funcs.D2CLIENT_GetPlayer());
-	static int LocId = D2Funcs.D2LANG_GetLocaleId();
 
-   if (pRoom == 0)
+   if (!pRoom)
       return;
 
    int lvlNo = D2Funcs.D2COMMON_GetLevelNoByRoom(pRoom);
@@ -35,7 +34,7 @@ void ExEntryText::Draw()
    {
 	   int Trans = (Timer <= 30 ? TransTable[Timer/8] : 7 );
       wstring szLevelName = D2ASMFuncs::D2CLIENT_GetLevelName(LevelId);
-	  wstring szNameBuffer = (LocId ==10 ? L"Wchodzisz do: " : L"Entering: ") + szLevelName ;
+	  wstring szNameBuffer = (gLocaleId == 10 ? L"Wchodzisz do: " : L"Entering: ") + szLevelName ;
 
 	  int old = D2Funcs.D2WIN_SetTextSize(EnteringFont);
 

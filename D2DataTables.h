@@ -914,7 +914,37 @@ DWORD dwCostMult;		//0x234
 DWORD dwCostAdd;		//0x238
 }; 
 
+#pragma pack(push,1)
+struct SkillDescTxt
+{
+	WORD wSkillDesc;               //0x00
+	BYTE bSkillPage;               //0x02
+	BYTE bSkillRow;                  //0x03
+	BYTE bSkillColumn;               //0x04
+	BYTE bListRow;                  //0x05
+	BYTE bListPool;                  //0x06
+	BYTE bIconCel;                  //0x07
+	WORD wStrName;                  //0x08
+	WORD wStrShort;                  //0x0A
+	WORD wStrLong;                  //0x0C
+	WORD wStrAlt;                  //0x0E
+	WORD wStrMana;                  //0x10
+	WORD wDescDam;                  //0x12
+	WORD wDescAtt;                  //0x14
+	WORD _1;					  //0x16
+	DWORD dwDamCalc[2];               //0x18
+	BYTE bPrgDamElem[4];            //0x20
+	DWORD dwProgDmgMin[3];            //0x24
+	DWORD dwProgDmgMax[3];            //0x30
+	WORD wDescMissile[3];            //0x3C
+	BYTE bDescLine[18];               //0x42
+	WORD wDescTextA[17];            //0x54
+	WORD wDescTextB[17];            //0x76
+	DWORD dwDescCalcA[17];            //0x98
+	DWORD dwDescCalcB[17];            //0xDC
+};
 
+#pragma pack(pop)
 
 struct ItemsTxt //size = 0x1A8, Valid for Weapons, Armors, Misc.txts
 {
@@ -1227,7 +1257,7 @@ struct sgptDataTable {
 	DWORD	dwMonSeqRecs;			//0xB80
 	BYTE*	pMonSequences;			//0xB84
 	DWORD	dwMonSequencesRecs;		//0xB88
-	BYTE*	pSkillDescTxt;			//0xB8C
+	SkillDescTxt*	pSkillDescTxt;	//0xB8C
 	BYTE*	pSkillDesc;				//0xB90
 	DWORD	dwSkillDescRecs;		//0xB94
 	SkillsTxt*pSkillsTxt;			//0xB98

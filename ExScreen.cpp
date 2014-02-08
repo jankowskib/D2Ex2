@@ -126,9 +126,9 @@ void __stdcall ExScreen::Display()
 	wStr << "X: " << *D2Vars.D2CLIENT_MouseX << " Y:" << *D2Vars.D2CLIENT_MouseY;
 	if(D2Funcs.D2CLIENT_GetSelectedUnit())
 	{
-	wStr << " UnitId: " << hex << D2Funcs.D2CLIENT_GetSelectedUnit()->dwUnitId;
-	wStr << " ClassId: " << hex << D2Funcs.D2CLIENT_GetSelectedUnit()->dwClassId;
-	wStr << " [" << dec << ExAim::GetUnitX(D2Funcs.D2CLIENT_GetSelectedUnit()) << "," << dec <<  ExAim::GetUnitY(D2Funcs.D2CLIENT_GetSelectedUnit()) << "]";
+		wStr << " UnitId: " << hex << D2Funcs.D2CLIENT_GetSelectedUnit()->dwUnitId;
+		wStr << " ClassId: " << hex << D2Funcs.D2CLIENT_GetSelectedUnit()->dwClassId;
+		wStr << " [" << dec << ExAim::GetUnitX(D2Funcs.D2CLIENT_GetSelectedUnit()) << "," << dec <<  ExAim::GetUnitY(D2Funcs.D2CLIENT_GetSelectedUnit()) << "]";
 	}
 	int aLen =ExScreen::GetTextWidth(wStr.str().c_str());
 	D2Funcs.D2WIN_DrawText(wStr.str().c_str(), *D2Vars.D2CLIENT_ScreenWidth - aLen - 10, *D2Vars.D2CLIENT_ScreenHeight - 10, 11, 0);
@@ -152,13 +152,15 @@ __forceinline wstring ExScreen::GetColorCode(int ColNo)
 {
 //wchar_t Result[4];
 wchar_t* pCol = D2Funcs.D2LANG_GetLocaleText(3994);
-if(!pCol) OutputDebugString("Get Col code fail!");
+if(!pCol) DEBUGMSG("Get Col code fail!");
 //if(!pCol) return L"";
 //swprintf_s(Result,4,L"%s%c",pCol, (char)(ColNo + '0'));
 wostringstream Result;
 Result << pCol << (wchar_t)(ColNo + '0');
 return Result.str();
 }
+
+#ifdef D2EX_ARGOLD
 
 void OnGoldChange(ExEditBox* pControl)
 {
@@ -172,6 +174,7 @@ strcpy_s((char*)&Packet[1],16,aPass.c_str());
 Packet[17] = 0; 
 D2Funcs.D2NET_SendPacket(18, 0, (BYTE*)&Packet);
 }
+
 
 BOOL __fastcall ExScreen::OnTradeData(BYTE* aPacket)
 {
@@ -191,6 +194,8 @@ BOOL __fastcall ExScreen::OnTradeButton(BYTE* aPacket)
 
 	return D2Funcs.D2CLIENT_TradeButton_I(aPacket);
 }
+
+#endif
 
 void ExScreen::DrawLifeManaTxt()
 {
@@ -229,7 +234,6 @@ wchar_t szText[100] = L"";
 void ExScreen::DrawAutoMapVer()
 {
 	wostringstream wPatch, wRes; 
-	int LocId = D2Funcs.D2LANG_GetLocaleId();
 
 	wPatch << L"Patch: " << GetColorCode(COL_YELLOW) 
 #ifdef VER_111B
@@ -246,7 +250,7 @@ void ExScreen::DrawAutoMapVer()
 	ExMultiRes::D2GFX_GetModeParams(*D2Vars.D2GFX_GfxMode, &x, &y);
 	if (x > 800 && y > 600)
 	{
-		wRes << (LocId == LOCALE_ENG ? L"Resolution: " : L"Rozdzielczoœæ: ") << GetColorCode(COL_YELLOW) << x << L"x" << y;
+		wRes << (gLocaleId == LOCALE_ENG ? L"Resolution: " : L"Rozdzielczoœæ: ") << GetColorCode(COL_YELLOW) << x << L"x" << y;
 		int cSize2 = ExScreen::GetTextWidth(wRes.str().c_str());
 		D2Funcs.D2WIN_DrawText(wRes.str().c_str(), *D2Vars.D2CLIENT_ScreenWidth - cSize2 - 16, *D2Vars.D2CLIENT_AutomapInfoY, 4, 0);
 		*D2Vars.D2CLIENT_AutomapInfoY += 16;
@@ -298,13 +302,13 @@ void __fastcall ExScreen::DrawAutoMapInfo(int OldTextSize)
 
 	if (PVMStuff)
 	{
-		int LocId = D2Funcs.D2LANG_GetLocaleId();
+		
 		unsigned int CExp = D2Funcs.D2COMMON_GetStatSigned(D2Funcs.D2CLIENT_GetPlayer(), STAT_EXPERIENCE, 0);
 		wchar_t wExp[100] = { 0 };
 		int ExpGained = CExp - ExpAtJoin;
 		Misc::ConvertIntegers(ExpGained, wExp);
 		wchar_t wExp2[100] = { 0 };
-		swprintf_s(wExp2, 100, LocId == LOCALE_POL ? L"Doœwiadczenie: %s%s" : L"Experience: %s%s", GetColorCode(COL_YELLOW).c_str(), wExp);
+		swprintf_s(wExp2, 100, gLocaleId == LOCALE_POL ? L"Doœwiadczenie: %s%s" : L"Experience: %s%s", GetColorCode(COL_YELLOW).c_str(), wExp);
 		int wSize = ExScreen::GetTextWidth(wExp2);
 		D2Funcs.D2WIN_DrawText(wExp2, *D2Vars.D2CLIENT_ScreenWidth - wSize - 16, *D2Vars.D2CLIENT_AutomapInfoY, 4, 0);
 		*D2Vars.D2CLIENT_AutomapInfoY += 16;
@@ -313,7 +317,7 @@ void __fastcall ExScreen::DrawAutoMapInfo(int OldTextSize)
 		int GExp = 0;
 		if (ExpGained) GExp = Misc::round(DExp / (float)ExpGained);
 		wchar_t wGames[70] = { 0 };
-		swprintf_s(wGames, 70, LocId == LOCALE_POL ? L"Gier do poziomu %s%d" : L"Games To Level: %s%d", GetColorCode(COL_YELLOW).c_str(), GExp);
+		swprintf_s(wGames, 70, gLocaleId == LOCALE_POL ? L"Gier do poziomu %s%d" : L"Games To Level: %s%d", GetColorCode(COL_YELLOW).c_str(), GExp);
 		int wSize2 = ExScreen::GetTextWidth(wGames);
 		D2Funcs.D2WIN_DrawText(wGames, *D2Vars.D2CLIENT_ScreenWidth - wSize2 - 16, *D2Vars.D2CLIENT_AutomapInfoY, 4, 0);
 		*D2Vars.D2CLIENT_AutomapInfoY += 16;
@@ -398,8 +402,8 @@ wchar_t* GetMonsterName(unsigned int MonIdx)
 
 wchar_t* GetDyeCol(int Col)
 {
-int LocId = D2Funcs.D2LANG_GetLocaleId();
-if(LocId==10)
+
+if(gLocaleId==10)
 {
 	switch(Col)
 	{
@@ -449,7 +453,7 @@ return 0;
 
 void __stdcall ExScreen::DrawProperties(wchar_t *wTxt)
 {
-	int LocId = D2Funcs.D2LANG_GetLocaleId();
+	
 	UnitAny* ptItem = *D2Vars.D2CLIENT_SelectedItem;
 	if(!ptItem) return;
 	//if(ptItem->pItemData->QualityNo == ItemQ::Set) return;
@@ -461,7 +465,7 @@ void __stdcall ExScreen::DrawProperties(wchar_t *wTxt)
 	aLen = wcslen(wTxt);
 	if(1024-aLen>20)
 	{
-	if(LocId==10)
+	if(gLocaleId==10)
 	swprintf_s(wTxt+aLen,1024-aLen,L"%sKolor: %s\n",GetColorCode(COL_PURPLE).c_str(),GetDyeCol(aCol));
 	else
 	swprintf_s(wTxt+aLen,1024-aLen,L"%sColor: %s\n",GetColorCode(COL_PURPLE).c_str(),GetDyeCol(aCol));
@@ -473,7 +477,7 @@ void __stdcall ExScreen::DrawProperties(wchar_t *wTxt)
 	aLen = wcslen(wTxt);
 	if(1024-aLen>20)
 	{
-	if(LocId==10)
+	if(gLocaleId==10)
 	swprintf_s(wTxt+aLen,1024-aLen,L"%sWypad³o z: %s\n",GetColorCode(COL_PURPLE).c_str(),GetMonsterName(aLvl));
 	else
 	swprintf_s(wTxt+aLen,1024-aLen,L"%Looted from: %s\n",GetColorCode(COL_PURPLE).c_str(),GetMonsterName(aLvl));
@@ -484,7 +488,7 @@ void __stdcall ExScreen::DrawProperties(wchar_t *wTxt)
 #ifdef _DEBUG
 	if(1024-aLen>20)
 	{
-	if(LocId==10)
+	if(gLocaleId==10)
 	swprintf_s(wTxt+aLen,1024-aLen,L"%sPoziom przedmiotu: %d\n",GetColorCode(COL_YELLOW).c_str(),iLvl);
 	else
 	swprintf_s(wTxt+aLen,1024-aLen,L"%sUnique Idx: %d\n",GetColorCode(COL_YELLOW).c_str(),ptItem->pItemData->FileIndex);
@@ -500,7 +504,6 @@ void ExScreen::DrawResInfo()
 	int mX = *D2Vars.D2CLIENT_MouseX;
 	int mY = *D2Vars.D2CLIENT_MouseY;
 	signed int nRes = 0;
-	static int LocId = D2Funcs.D2LANG_GetLocaleId();
 	if(!*D2Vars.D2CLIENT_isExpansion) { //Classic handle
 		if(*D2Vars.D2CLIENT_ServerDifficulty == 1) nRes = -20;
 		else if(*D2Vars.D2CLIENT_ServerDifficulty == 2) nRes = -50;
@@ -514,7 +517,7 @@ void ExScreen::DrawResInfo()
 	{ 
 		nRes+= D2Funcs.D2COMMON_GetStatSigned(ptUnit,STAT_FIRERESIST,0);
 		wostringstream wInfo;
-		wInfo << (LocId == 10? L"Ca³kowita odpornoœæ: " : L"Stacked resistance: ") << GetColorCode(COL_RED) << nRes ; 
+		wInfo << (gLocaleId == 10? L"Ca³kowita odpornoœæ: " : L"Stacked resistance: ") << GetColorCode(COL_RED) << nRes ; 
 		D2Funcs.D2WIN_SetTextSize(0);
 		D2Funcs.D2WIN_DrawRectangledText(wInfo.str().c_str(),252,390,0,2,COL_WHITE);
 	}
@@ -523,7 +526,7 @@ void ExScreen::DrawResInfo()
 	{ 
 		nRes+= D2Funcs.D2COMMON_GetStatSigned(ptUnit,STAT_COLDRESIST,0);
 		wostringstream wInfo;
-		wInfo << (LocId == 10? L"Ca³kowita odpornoœæ: " : L"Stacked resistance: ") << GetColorCode(COL_BLUE) << nRes ; 
+		wInfo << (gLocaleId == 10? L"Ca³kowita odpornoœæ: " : L"Stacked resistance: ") << GetColorCode(COL_BLUE) << nRes ; 
 		D2Funcs.D2WIN_SetTextSize(0);
 		D2Funcs.D2WIN_DrawRectangledText(wInfo.str().c_str(),252,390,0,2,COL_WHITE);
 	}
@@ -532,7 +535,7 @@ void ExScreen::DrawResInfo()
 	{
 		nRes+= D2Funcs.D2COMMON_GetStatSigned(ptUnit,STAT_LIGHTRESIST,0);
 		wostringstream wInfo;
-		wInfo << (LocId == 10? L"Ca³kowita odpornoœæ: " : L"Stacked resistance: ") << GetColorCode(COL_YELLOW) << nRes ; 
+		wInfo << (gLocaleId == 10? L"Ca³kowita odpornoœæ: " : L"Stacked resistance: ") << GetColorCode(COL_YELLOW) << nRes ; 
 		D2Funcs.D2WIN_SetTextSize(0);
 		D2Funcs.D2WIN_DrawRectangledText(wInfo.str().c_str(),252,390,0,2,COL_WHITE);
 	}
@@ -541,7 +544,7 @@ void ExScreen::DrawResInfo()
 	{ 
 		nRes+= D2Funcs.D2COMMON_GetStatSigned(ptUnit,STAT_POISONRESIST,0);
 		wostringstream wInfo;
-		wInfo << (LocId == 10? L"Ca³kowita odpornoœæ: " : L"Stacked resistance: ") << GetColorCode(COL_LIGHTGREEN) << nRes ; 
+		wInfo << (gLocaleId == 10? L"Ca³kowita odpornoœæ: " : L"Stacked resistance: ") << GetColorCode(COL_LIGHTGREEN) << nRes ; 
 		D2Funcs.D2WIN_SetTextSize(0);
 		D2Funcs.D2WIN_DrawRectangledText(wInfo.str().c_str(),252,390,0,2,COL_WHITE);
 	}
@@ -598,7 +601,6 @@ void ExScreen::DrawDmg()
 	int mY = *D2Vars.D2CLIENT_MouseY;
 	UnitAny * ptUnit = D2Funcs.D2CLIENT_GetPlayer();
 	ASSERT(ptUnit)
-	static int LocId = D2Funcs.D2LANG_GetLocaleId();
 	if (mX > 240 && mX < 394 && mY > (*D2Vars.D2CLIENT_ScreenHeight - 455) && mY < (*D2Vars.D2CLIENT_ScreenHeight - 435))
 		{ 
 
@@ -639,7 +641,7 @@ void ExScreen::DrawDmg()
 			if(AvgDmg)
 			{
 				wostringstream wInfo;
-				wInfo <<  (LocId == 10? L"Œrednie Obra¿enia: " :L"Average Damage: ") << GetColorCode(COL_YELLOW) << AvgDmg; 
+				wInfo <<  (gLocaleId == 10? L"Œrednie Obra¿enia: " :L"Average Damage: ") << GetColorCode(COL_YELLOW) << AvgDmg; 
 				D2Funcs.D2WIN_SetTextSize(0);
 				D2Funcs.D2WIN_DrawRectangledText(wInfo.str().c_str(), 242, *D2Vars.D2CLIENT_ScreenHeight - 458, 0, 2, COL_WHITE);
 			}
@@ -683,7 +685,7 @@ void ExScreen::DrawDmg()
 				if(AvgDmg)
 				{
 					wostringstream wInfo;
-					wInfo <<  (LocId == 10? L"Œrednie Obra¿enia: " :L"Average Damage: ") << GetColorCode(COL_YELLOW) << AvgDmg; 
+					wInfo <<  (gLocaleId == 10? L"Œrednie Obra¿enia: " :L"Average Damage: ") << GetColorCode(COL_YELLOW) << AvgDmg; 
 					D2Funcs.D2WIN_SetTextSize(0);
 					D2Funcs.D2WIN_DrawRectangledText(wInfo.str().c_str(), 242, *D2Vars.D2CLIENT_ScreenHeight - 437, 0, 2, COL_WHITE);
 				}
@@ -763,9 +765,9 @@ BYTE * __stdcall ExScreen::DrawItem(UnitAny *ptPlayer, UnitAny* ptItem, BYTE* ou
 
 	if(col)
 	{
-	ItemsTxt* pTxt = D2Funcs.D2COMMON_GetItemText(ptItem->dwClassId);
-	*out= GetDyeRealCol(col);
-	return D2Funcs.D2CMP_MixPalette(a4 ? pTxt->bInvTrans : pTxt->bTransform,GetDyeRealCol(col));
+		ItemsTxt* pTxt = D2Funcs.D2COMMON_GetItemText(ptItem->dwClassId);
+		*out= GetDyeRealCol(col);
+		return D2Funcs.D2CMP_MixPalette(a4 ? pTxt->bInvTrans : pTxt->bTransform,GetDyeRealCol(col));
 	}
 	//ItemsTxt* pTxt = D2Funcs.D2COMMON_GetItemText(ptItem->dwClassId);
 	//wostringstream str;

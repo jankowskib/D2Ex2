@@ -1,16 +1,13 @@
 #include "stdafx.h"
 
+#include <sstream>
+#include <string>
+#include <process.h>
+
 //-Must be
 #include "Vars.h"
 #define  __DEFINE_VARS
 #include "Vars.h"
-
-//#define _DEFINE_PTRS
-//#ifdef VER_113D
-//#include "D2Ptrs_113D.h"
-//#elif defined VER_111B
-//#include "D2Ptrs_111B.h"
-//#endif
 
 #define __DEFINE_EXPTRS
 #ifdef VER_113D
@@ -18,9 +15,6 @@
 #else
 #include "D2ExPointers_111B.h"
 #endif
-
-#include "D2Ex2.h"
-
 
 //--Structs
 #include "Misc.h"
@@ -48,6 +42,8 @@
 #include <boost/algorithm/string.hpp>
 
 static HMODULE gModule;
+#define MAX_SOUND_TXT_ROWS 4954
+
 
 void LoadItemConfig()
 {
@@ -87,12 +83,15 @@ void LoadItemConfig()
  
 }
 
-unsigned __stdcall Thread(void * Args)
+unsigned int __stdcall Thread(void * Args)
 {
-	Sleep(1000); // Delay loading because on my computer somethings works too fast :(
+#ifdef VER_111B
+	Sleep(1000); // Delay loading because on my computer something works too fast with D2Loader :(
+#endif
 	//Load config...
 	HANDLE hEvent = *((HANDLE*)Args);
 	Misc::Log("Defining offsets...");
+
 	SetupD2Vars();
 	SetupD2Pointers();
 	SetupD2Funcs();
@@ -151,7 +150,8 @@ unsigned __stdcall Thread(void * Args)
 	#endif 
 
 	LoadItemConfig();
-
+	gLocaleId = D2Funcs.D2LANG_GetLocaleId();
+	Misc::Log("Locale ID is %d", gLocaleId);
 	#ifdef D2EX_MULTIRES
 	ExMultiRes::EnumDisplayModes();
 	#endif
@@ -201,15 +201,18 @@ unsigned __stdcall Thread(void * Args)
 	Misc::Patch(0x5B,GetDllOffset("D2Client.dll",0x8F992),0x90909090,5,"UI Minibar fix");
 	Misc::Patch(0xC3,GetDllOffset("D2Client.dll",0x8F997),0,1,"UI Minibar fix");
 
+#ifdef D2EX_PVPGN_EXT
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0xB95E1),(DWORD)ExScreen::DrawItem,5,"Colour Item Intercept I");
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x4845B),(DWORD)ExScreen::DrawItem,5,"Colour Item Intercept II");
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x4686D),(DWORD)ExScreen::DrawItem,5,"Colour Item Intercept III");
 	Misc::Patch(CALL,GetDllOffset("D2Common.dll",0x41B6D),(DWORD)ExScreen::DrawItem,5,"Colour Item Intercept IV");
 	Misc::Patch(CALL,GetDllOffset("D2Common.dll",0x418DC),(DWORD)ExScreen::DrawItem,5,"Colour Item Intercept V");
+#endif
 	Misc::Patch(JUMP,GetDllOffset("D2Client.dll",0x5D9FA),(DWORD)D2Stubs::D2CLIENT_HideItem_STUB,6,"ALT Draw Intercept");
 
 	//Misc::Patch(CALL,GetDllOffset("D2Client.dll", 0x4D707), (DWORD)D2Stubs::D2CLIENT_GetRoomByXY_STUB, 5, "Get Room XY Test");
 	//Misc::Patch(JUMP,GetDllOffset("D2Client.dll", 0x64510),(DWORD)ExLoading::Draw,5,"Loading Draw Hook");
+#ifdef D2EX_PVPGN_EXT
 	Misc::Patch(CUSTOM,GetDllOffset("D2Multi.dll",0x11C40),MaxPlayers+1,1,"Player Count Set I");
 	Misc::Patch(CUSTOM,GetDllOffset("D2Multi.dll",0x1310A),MaxPlayers,1,"Player Count Set II");
 	Misc::Patch(CUSTOM,GetDllOffset("D2Multi.dll",0x13A7D),MaxPlayers,1,"Player Count Set III");
@@ -219,15 +222,16 @@ unsigned __stdcall Thread(void * Args)
 	Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x1D2CB),MaxPlayers,1,"Player Count Set VI");
 	Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0xBC948),MaxPlayers,1,"Player Count Set VII");
 
-	Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x254C0),0x135A,4,"Extend Sound.Txt I");
-	Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x532B2),0x135A,4,"Extend Sound.Txt II");
-	Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x6E63C),0x135A,4,"Extend Sound.Txt III");
-
 	Misc::Patch(CUSTOM,GetDllOffset("BNClient.dll",0xBFC9),Port,4,"Change default B.net port I");
 	Misc::Patch(CUSTOM,GetDllOffset("BNClient.dll",0xD55F),Port,4,"Change default B.net port II");
 	Misc::Patch(CUSTOM,GetDllOffset("BNClient.dll",0xD589),Port,4,"Change default B.net port III");
 
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x337B0),(DWORD)D2Stubs::D2CLIENT_SendJoinGame_STUB,5,"Join Game Override");
+#endif
+
+	Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x254C0),MAX_SOUND_TXT_ROWS,4,"Extend Sound.Txt I");
+	Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x532B2),MAX_SOUND_TXT_ROWS,4,"Extend Sound.Txt II");
+	Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x6E63C),MAX_SOUND_TXT_ROWS,4,"Extend Sound.Txt III");
 	//Misc::Patch(JUMP,GetDllOffset("BNClient.dll",0xB3A0),(DWORD)D2Stubs::BNCLIENT_OverrideVersion_STUB,6,"Override version");
 
 	//Misc::Patch(JUMP,GetDllOffset("D2Launch.dll",0x17999),(DWORD)D2Stubs::D2LAUNCH_OnMainMenuCreate,7,"Add Main Menu Controls");
@@ -258,9 +262,6 @@ unsigned __stdcall Thread(void * Args)
 	// <- Removed Life/Mana patch cause 1.13d supports it natively
 	Misc::Patch(JUMP,GetDllOffset("D2Client.dll",0x2E3FC),(DWORD)D2Stubs::D2CLIENT_Properties,6,"New Properties");  //k
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x233A7),(DWORD)D2Stubs::D2CLIENT_Lighting_STUB,6,"Lighting Patch"); //k
-	//!!!!!!!!!!!!!!!!!! CODE UNSAFE FOR WARDEN !!!!!!!!!!!!!!!!!!!!!!
-	//Misc::Patch(CALL,GetDllOffset("D2Client.dll",0xBDFB1),(DWORD)ExInput::PacketInput_STUB,5,"Realm Input Wrapper"); // still 1.11b
-	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// <- Removed Minimalize button patch cause 1.13d supports it natively
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x6E91B),(DWORD)D2Stubs::D2CLIENT_FixHostilePic,5,"Move Hostile Button"); //k
 	Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x6415C),0x26,1,"RandTrans.dat Fix"); //k
@@ -284,13 +285,15 @@ unsigned __stdcall Thread(void * Args)
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0xC444D),(DWORD)ExParty::ShowHide,5,"UI Minibar fix"); //k
 	Misc::Patch(0x5B,GetDllOffset("D2Client.dll",0xC444D +5),0x90909090,5,"UI Minibar fix"); //k
 	Misc::Patch(0xC3,GetDllOffset("D2Client.dll",0xC444D +10),0,1,"UI Minibar fix"); //k
+	
+	Misc::Patch(JUMP, GetDllOffset("D2Client.dll", 0x4E61A), (DWORD)D2Stubs::D2CLIENT_HideItem_STUB, 6, "ALT Draw Intercept"); // k
 
+#ifdef D2EX_PVPGN_EXT
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0xACA11),(DWORD)ExScreen::DrawItem,5,"Colour Item Intercept I"); //k
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x61011),(DWORD)ExScreen::DrawItem,5,"Colour Item Intercept II"); //k
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x5F54D),(DWORD)ExScreen::DrawItem,5,"Colour Item Intercept III"); //k
 	Misc::Patch(CALL,GetDllOffset("D2Common.dll",0x3AC6C),(DWORD)ExScreen::DrawItem,5,"Colour Item Intercept IV"); //k
 	Misc::Patch(CALL,GetDllOffset("D2Common.dll",0x3ADCD),(DWORD)ExScreen::DrawItem,5,"Colour Item Intercept V"); //k
-	Misc::Patch(JUMP,GetDllOffset("D2Client.dll",0x4E61A),(DWORD)D2Stubs::D2CLIENT_HideItem_STUB,6,"ALT Draw Intercept"); // k
 
 	Misc::Patch(CUSTOM,GetDllOffset("D2Multi.dll",0x83B0),MaxPlayers+1,1,"Player Count Set I"); //k
 	Misc::Patch(CUSTOM,GetDllOffset("D2Multi.dll",0x8A7A),MaxPlayers,1,"Player Count Set II"); //k
@@ -301,13 +304,13 @@ unsigned __stdcall Thread(void * Args)
 	Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x286FB),MaxPlayers,1,"Player Count Set VI"); //k
 	Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x889B8),MaxPlayers,1,"Player Count Set VII"); //k
 
-	Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0xB40D0),0x135A,4,"Extend Sound.Txt I"); //k
-	Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x25342),0x135A,4,"Extend Sound.Txt II"); //k
-	Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x1F47C),0x135A,4,"Extend Sound.Txt III"); //k
-
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x460C0),(DWORD)D2Stubs::D2CLIENT_SendJoinGame_STUB,5,"Join Game Override"); //k
+#endif
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0xB40D0), MAX_SOUND_TXT_ROWS, 4, "Extend Sound.Txt I"); //k
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x25342), MAX_SOUND_TXT_ROWS, 4, "Extend Sound.Txt II"); //k
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x1F47C), MAX_SOUND_TXT_ROWS, 4, "Extend Sound.Txt III"); //k
 
-	Misc::Patch(CUSTOM, GetDllOffset("D2Gfx.dll", 0xB6B0),0x45EB, 2, "Allow multi window");
+	Misc::Patch(CUSTOM, GetDllOffset("D2Gfx.dll", 0xB6B0), 0x45EB, 2, "Allow multi window");
 	Misc::Patch(CALL, GetDllOffset("BNClient.dll",0xF494),(DWORD)ExLoading::CreateCacheFile, 6, "Cache file creation fix");
 	Misc::Patch(CALL, GetDllOffset("BNClient.dll",0xF7E4),(DWORD)ExLoading::CreateCacheFile, 6, "Cache file creation fix");
 
@@ -348,18 +351,12 @@ unsigned __stdcall Thread(void * Args)
 
 	//END PATCHES-----------------------------------------------------------------------------------
 	//KEYBOARD CALL TREE
-	//D2Vars.D2CLIENT_UIModesCallTree[UICall::PARTYSCREEN]=(int)&ExParty::ShowHide;
-	//D2Vars.D2CLIENT_UIModesCallTree[UICall::ESCMENU]=(int)&ExOptions::ShowHide;
-	//D2Vars.D2CLIENT_UIModesCallTree[UICall::CLEARSCREEN]=(int)&ExParty::ClearScreenHandle;
-
 	Misc::WriteDword((DWORD*)&D2Vars.D2CLIENT_UIModesCallTree[UICall::PARTYSCREEN], (DWORD)&ExParty::ShowHide);
 	Misc::WriteDword((DWORD*)&D2Vars.D2CLIENT_UIModesCallTree[UICall::ESCMENU], (DWORD)&ExOptions::ShowHide);
 	Misc::WriteDword((DWORD*)&D2Vars.D2CLIENT_UIModesCallTree[UICall::CLEARSCREEN], (DWORD)&ExParty::ClearScreenHandle);
 
 
 	//PACKET HANDLERS
-	//D2Vars.D2CLIENT_PacketHandler[0x26].CallBack=&ExChat::OnMessage;
-	//D2Vars.D2CLIENT_PacketHandler[0x5A].CallBack=&ExEvents::OnEvent;
 	Misc::WriteDword((DWORD*)&D2Vars.D2CLIENT_PacketHandler[0x26].CallBack, (DWORD)&ExChat::OnMessage);
 	Misc::WriteDword((DWORD*)&D2Vars.D2CLIENT_PacketHandler[0x5A].CallBack, (DWORD)&ExEvents::OnEvent);
 
@@ -370,42 +367,39 @@ unsigned __stdcall Thread(void * Args)
 	Misc::WriteDword((DWORD*)&D2Vars.D2CLIENT_PacketHandler[0x4D].CallBack2, (DWORD)&ExAim::OnUnitSpellCast);
 	Misc::WriteDword((DWORD*)&D2Vars.D2CLIENT_PacketHandler[0x0A].CallBack, (DWORD)&ExAim::OnRemoveObject);
 	#endif
-
-	//D2Vars.D2CLIENT_PacketHandler[0x65].CallBack=&ExParty::GetKillCount;
-	//D2Vars.D2CLIENT_PacketHandler[0x66].CallBack=&ExParty::GetRoster;
+#ifdef D2EX_PVPGN_EXT
 	Misc::WriteDword((DWORD*)&D2Vars.D2CLIENT_PacketHandler[0x66].CallBack, (DWORD)&ExParty::GetRoster);
+#endif
 
-	//D2Vars.D2CLIENT_PacketHandler[0xA8].CallBack=&ExBuffs::OnSetState;
-	//D2Vars.D2CLIENT_PacketHandler[0xA9].CallBack=&ExBuffs::OnRemoveState;
 	Misc::WriteDword((DWORD*)&D2Vars.D2CLIENT_PacketHandler[0xA8].CallBack, (DWORD)&ExBuffs::OnSetState);
 	Misc::WriteDword((DWORD*)&D2Vars.D2CLIENT_PacketHandler[0xA9].CallBack, (DWORD)&ExBuffs::OnRemoveState);
 
-	//D2Vars.D2CLIENT_PacketHandler[0x8B].CallBack=&ExParty::OnPartyUpdate2;
-	//D2Vars.D2CLIENT_PacketHandler[0x8C].CallBack=&ExParty::OnPartyUpdate;
-	//D2Vars.D2CLIENT_PacketHandler[0x8D].CallBack=&ExParty::OnPartyUpdate3;
 	Misc::WriteDword((DWORD*)&D2Vars.D2CLIENT_PacketHandler[0x8B].CallBack, (DWORD)&ExParty::OnPartyUpdate2);
 	Misc::WriteDword((DWORD*)&D2Vars.D2CLIENT_PacketHandler[0x8C].CallBack, (DWORD)&ExParty::OnPartyUpdate);
 	Misc::WriteDword((DWORD*)&D2Vars.D2CLIENT_PacketHandler[0x8D].CallBack, (DWORD)&ExParty::OnPartyUpdate3);
 
-	// for location on party screeen -unused-
-	//D2Vars.D2CLIENT_PacketHandler[0x7F].CallBack=&ExParty::OnLocationUpdate;
+	// for location on party screeen
+#ifndef D2EX_PVPGN_EXT
+	D2Vars.D2CLIENT_PacketHandler[0x7F].CallBack=&ExParty::OnLocationUpdate;
+#endif
 
-	//D2Vars.D2CLIENT_PacketHandler[0x77].CallBack=&ExScreen::OnTradeButton;
-	//D2Vars.D2CLIENT_PacketHandler[0x78].CallBack=&ExScreen::OnTradeData;
+#ifdef D2EX_ARGOLD
 	Misc::WriteDword((DWORD*)&D2Vars.D2CLIENT_PacketHandler[0x77].CallBack, (DWORD)&ExScreen::OnTradeButton);
 	Misc::WriteDword((DWORD*)&D2Vars.D2CLIENT_PacketHandler[0x78].CallBack, (DWORD)&ExScreen::OnTradeData);
+#endif
 
 	//ExEvents
-	//D2Vars.D2CLIENT_PacketHandler[0xA6].CallBack = &ExEvents::OnTextEvent;
+#ifdef D2EX_PVPGN_EXT
 	Misc::WriteDword((DWORD*)&D2Vars.D2CLIENT_PacketHandler[0xA6].CallBack, (DWORD)&ExEvents::OnTextEvent);
 	//ExSpectator
-	//D2Vars.D2CLIENT_PacketHandler[0x7E].CallBack = &ExSpec::OnMousePacket;
-	//D2Vars.D2CLIENT_PacketHandler[0x8F].CallBack = &ExLagometer::OnPong;
 	Misc::WriteDword((DWORD*)&D2Vars.D2CLIENT_PacketHandler[0x7E].CallBack, (DWORD)&ExSpec::OnMousePacket);
-	Misc::WriteDword((DWORD*)&D2Vars.D2CLIENT_PacketHandler[0x8F].CallBack, (DWORD)&ExLagometer::OnPong);
 
-	//D2Vars.D2NET_SrvPacketLenTable[0x2C]=18;
-	Misc::WriteDword((DWORD*)&D2Vars.D2NET_SrvPacketLenTable[0x2C], 18);
+	//0x2C SERVER HELLO -- deprecated -- 
+	//Misc::WriteDword((DWORD*)&D2Vars.D2NET_SrvPacketLenTable[0x2C], 18);
+#endif
+
+	//ExLagometer
+	Misc::WriteDword((DWORD*)&D2Vars.D2CLIENT_PacketHandler[0x8F].CallBack, (DWORD)&ExLagometer::OnPong);
 
 	for(int i = 1; i<38; ++i) {
 		if(i == UI_PARTY) continue;
@@ -460,10 +454,15 @@ unsigned __stdcall Thread(void * Args)
 			ResetEvent(hAimEvent);
 			hAim = (HANDLE)_beginthreadex(0,0,&ExAim::WatchThread,&hAimEvent,0,0);
 #endif
-			if(!lagometer && bLagometer)	lagometer = new ExLagometer(273,571);
+			if(!lagometer && bLagometer)	
+				lagometer = new ExLagometer(273,571);
 			ExpAtJoin = D2Funcs.D2COMMON_GetStatSigned(D2Funcs.D2CLIENT_GetPlayer(),STAT_EXPERIENCE,0);
 			TickAtJoin = GetTickCount();
-			if(AutoShowMap) {D2Funcs.D2CLIENT_SetUiVar(UI_AUTOMAP,0,1);  D2Vars.D2CLIENT_UIModes[UI_AUTOMAP] = 1;}
+			if(AutoShowMap)
+			{
+				D2Funcs.D2CLIENT_SetUiVar(UI_AUTOMAP,0,1); 
+				D2Vars.D2CLIENT_UIModes[UI_AUTOMAP] = 1;
+			}
 			ExInput::DefineBindings();
 			while(ExParty::GetPlayerArea())	
 			{
@@ -479,14 +478,20 @@ unsigned __stdcall Thread(void * Args)
 #endif
 				Sleep(50);
 			}
-			if(lagometer) delete lagometer;
-			lagometer = 0;
-			if(GoldBox) {
+			if(lagometer) 
+			{
+				delete lagometer;
+				lagometer = 0;
+			}
+#ifdef D2EX_ARGOLD
+			if(GoldBox) 
+			{
 				delete GoldBox;
 				GoldBox = 0;
 			}
+#endif
 			if(ExDownload::isOpen()) ExDownload::ShowHide();
-			if(!D2Funcs.D2CLIENT_GetPlayer()) ExBuff::Clear();
+			if(!D2Funcs.D2CLIENT_GetPlayer()) ExBuffs::Clear();
 #ifdef D2EX_EXAIM_ENABLED
 			SetEvent(hAimEvent);
 #endif
@@ -518,7 +523,6 @@ DWORD WINAPI DllMain(HMODULE hModule, int dwReason, void* lpReserved)
 				SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
 				gModule = hModule;
 				InitializeCriticalSectionAndSpinCount(&EX_CRITSECT,1000);
-//				InitializeCriticalSectionAndSpinCount(&MEM_CRITSECT,1000);
 				InitializeCriticalSectionAndSpinCount(&CON_CRITSECT,1000);
 				InitializeCriticalSectionAndSpinCount(&BUFF_CRITSECT,1000);
 #ifdef D2EX_EXAIM_ENABLED
@@ -536,7 +540,7 @@ DWORD WINAPI DllMain(HMODULE hModule, int dwReason, void* lpReserved)
 		break;
 	case DLL_PROCESS_DETACH:
 		{
-			ExBuff::Clear();
+			ExBuffs::Clear();
 			for(auto i = 0; (unsigned int)i < Controls.size(); ++i) delete Controls.at(i); 
 
 			//ExMultiRes::FreeImages();
@@ -544,10 +548,7 @@ DWORD WINAPI DllMain(HMODULE hModule, int dwReason, void* lpReserved)
 
 			if(CellBox) delete CellBox;
 			if(CellButton) delete CellButton;
-			//	ExMemory::LogLeaks();
-			//	ExMemory::Release();
 			DeleteCriticalSection(&EX_CRITSECT);
-			// DeleteCriticalSection(&MEM_CRITSECT);
 			DeleteCriticalSection(&BUFF_CRITSECT);
 			DeleteCriticalSection(&CON_CRITSECT);
 #ifdef D2EX_EXAIM_ENABLED
@@ -559,7 +560,6 @@ DWORD WINAPI DllMain(HMODULE hModule, int dwReason, void* lpReserved)
 			CloseHandle(Handle);
 			hEvent = 0;
 			Handle = 0;
-			//exit(0);
 		}
 		break;
 	}

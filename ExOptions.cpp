@@ -215,11 +215,31 @@ void ExOptions::DrawMenuRecon()
 	static DWORD LastTick = 0; 
 	static DWORD PentFrame = 0;
 	D2Funcs.D2WIN_SetTextSize(6);
-	ExScreen::DrawTextEx(2,10,5,0,5,"D2Ex2/Build %s.%d.%s.%s.%s,",
+	ExScreen::DrawTextEx(2, 10, 5, 0, 5, "D2Ex2/Build %s%d.%s.%s.%s,",
+#if !defined D2EX_CLOSED_BNET && !defined D2EX_SCRAP_HACK && !defined D2EX_MULTIRES && !defined D2EX_ARGOLD && \
+		!defined D2EX_PVPGN_EXT && !defined D2EX_EXAIM_ENABLED && !defined D2EX_PVM_BUILD
+		"GENERIC|"
+#endif 
 #ifdef D2EX_CLOSED_BNET
-"PVP.BNET"
-#else
-"GENERIC"
+		D2EX_CLOSED_BNET
+#endif
+#ifdef D2EX_SCRAP_HACKS
+		D2EX_SCRAP_HACKS
+#endif
+#ifdef D2EX_MULTIRES
+		D2EX_MULTIRES
+#endif
+#ifdef D2EX_ARGOLD
+		D2EX_ARGOLD
+#endif
+#ifdef D2EX_PVPGN_EXT
+		D2EX_PVPGN_EXT
+#endif
+#ifdef D2EX_EXAIM_ENABLED
+		D2EX_EXAIM_ENABLED
+#endif
+#ifdef D2EX_PVM_BUILD
+		D2EX_PVM_BUILD
 #endif
 ,__BUILDNO__,__DATE__,__TIME__,
 #ifdef _DEBUG
@@ -444,7 +464,7 @@ BOOL __fastcall ExOptions::Buffs(D2MenuEntry* ptEntry, StormMsg *pMsg)
 		NewMenu.dwMenuOffset=51;
 		NewMenu.dwBarHeight=36;
 	}
-	int LocId = D2Funcs.D2LANG_GetLocaleId();
+	
 
 
 	wcscpy_s((wchar_t*)&NewEntries[0].szCellFile,130,ExBuffs::GetSkillName(0x95));
@@ -454,9 +474,9 @@ BOOL __fastcall ExOptions::Buffs(D2MenuEntry* ptEntry, StormMsg *pMsg)
 	wcscpy_s((wchar_t*)&NewEntries[4].szCellFile,130,ExBuffs::GetSkillName(0x42));
 	wcscpy_s((wchar_t*)&NewEntries[5].szCellFile,130,ExBuffs::GetSkillName(0x5B));
 	wcscpy_s((wchar_t*)&NewEntries[6].szCellFile,130,ExBuffs::GetSkillName(0x11));
-	wcscpy_s((wchar_t*)&NewEntries[7].szCellFile,130, LocId == 10 ? L"W£ACZ EFEKTY" : L"ENABLE BUFF DISPLAY");
-	wcscpy_s((wchar_t*)&NewEntries[7].szSwitchCellFiles[0], 130, LocId == 10 ? L"WY£." : L"OFF");
-	wcscpy_s((wchar_t*)&NewEntries[7].szSwitchCellFiles[1], 130, LocId == 10 ? L"W£." : L"ON");
+	wcscpy_s((wchar_t*)&NewEntries[7].szCellFile,130, gLocaleId == 10 ? L"W£ACZ EFEKTY" : L"ENABLE BUFF DISPLAY");
+	wcscpy_s((wchar_t*)&NewEntries[7].szSwitchCellFiles[0], 130, gLocaleId == 10 ? L"WY£." : L"OFF");
+	wcscpy_s((wchar_t*)&NewEntries[7].szSwitchCellFiles[1], 130, gLocaleId == 10 ? L"W£." : L"ON");
 	wcscpy_s((wchar_t*)&NewEntries[8].szCellFile,130,D2Funcs.D2LANG_GetLocaleText(3409));
 
 	NewEntries[8].OnPress = &ExOptions::Options;
@@ -497,7 +517,7 @@ BOOL __fastcall ExOptions::BuffsOpt(D2MenuEntry* ptEntry, StormMsg* pMsg)
 	BuffsEnabled = ptEntry->dwCurrentSwitch;
 	WritePrivateProfileString("D2Ex", "BuffsEnabled", boost::lexical_cast<string>(ptEntry->dwCurrentSwitch).c_str(), ConfigIni.c_str());
 	if (!BuffsEnabled)
-		ExBuff::Clear();
+		ExBuffs::Clear();
 	return TRUE;
 }
 
@@ -645,41 +665,41 @@ NewEntries[9].OnPress=&ExOptions::LagOpt;
 
 NewEntries[10].OnPress=&ExOptions::Options;
 
-int LocId = D2Funcs.D2LANG_GetLocaleId();
 
-wcscpy_s((wchar_t*)&NewEntries[0].szCellFile,130,LocId == 10 ? L"WSKAØNIK AUTOMAPY": L"AUTOMAP BLOB");
-wcscpy_s((wchar_t*)&NewEntries[0].szSwitchCellFiles[0],130,LocId == 10 ? L"KROPKA" : L"DOT");
-wcscpy_s((wchar_t*)&NewEntries[0].szSwitchCellFiles[1],130,LocId == 10 ? L"K”£KO" : L"CIRCLE");
-wcscpy_s((wchar_t*)&NewEntries[0].szSwitchCellFiles[2],130,LocId == 10 ? L"KRZYØYK" : L"CROSS");
+
+wcscpy_s((wchar_t*)&NewEntries[0].szCellFile,130,gLocaleId == 10 ? L"WSKAØNIK AUTOMAPY": L"AUTOMAP BLOB");
+wcscpy_s((wchar_t*)&NewEntries[0].szSwitchCellFiles[0],130,gLocaleId == 10 ? L"KROPKA" : L"DOT");
+wcscpy_s((wchar_t*)&NewEntries[0].szSwitchCellFiles[1],130,gLocaleId == 10 ? L"K”£KO" : L"CIRCLE");
+wcscpy_s((wchar_t*)&NewEntries[0].szSwitchCellFiles[2],130,gLocaleId == 10 ? L"KRZYØYK" : L"CROSS");
 	
-wcscpy_s((wchar_t*)&NewEntries[1].szCellFile,130,LocId == 10 ? L"CZCIONKA NAZWY POZIOMU" : L"ENTERING LVL TEXT FONT");
-wcscpy_s((wchar_t*)&NewEntries[2].szCellFile,130,LocId == 10 ? L"ZAWSZE POKAZUJ ØYCIE" : L"ALWAYS SHOW LIFE");
-wcscpy_s((wchar_t*)&NewEntries[2].szSwitchCellFiles[0],130,LocId == 10 ? L"WY£." : L"OFF");
-wcscpy_s((wchar_t*)&NewEntries[2].szSwitchCellFiles[1],130,LocId == 10 ? L"W£." : L"ON");
-wcscpy_s((wchar_t*)&NewEntries[3].szCellFile,130,LocId == 10 ? L"ZAWSZE POKAZUJ MANE" : L"ALWAYS SHOW MANA");
-wcscpy_s((wchar_t*)&NewEntries[3].szSwitchCellFiles[0],130,LocId == 10 ? L"WY£." : L"OFF");
-wcscpy_s((wchar_t*)&NewEntries[3].szSwitchCellFiles[1],130,LocId == 10 ? L"W£." : L"ON");
-wcscpy_s((wchar_t*)&NewEntries[4].szCellFile,130,LocId == 10 ? L"PE£NA WIDOCZNOå∆" : L"FULL VISIBILITY");
-wcscpy_s((wchar_t*)&NewEntries[4].szSwitchCellFiles[0],130,LocId == 10 ? L"WY£." : L"OFF");
-wcscpy_s((wchar_t*)&NewEntries[4].szSwitchCellFiles[1],130,LocId == 10 ? L"W£." : L"ON");
-wcscpy_s((wchar_t*)&NewEntries[5].szCellFile,130,LocId == 10 ? L"AUTOM. W£•CZ MAP " : L"AUTO. TURN ON THE MAP");
-wcscpy_s((wchar_t*)&NewEntries[5].szSwitchCellFiles[0],130,LocId == 10 ? L"WY£." : L"OFF");
-wcscpy_s((wchar_t*)&NewEntries[5].szSwitchCellFiles[1],130,LocId == 10 ? L"W£." : L"ON");
+wcscpy_s((wchar_t*)&NewEntries[1].szCellFile,130,gLocaleId == 10 ? L"CZCIONKA NAZWY POZIOMU" : L"ENTERING LVL TEXT FONT");
+wcscpy_s((wchar_t*)&NewEntries[2].szCellFile,130,gLocaleId == 10 ? L"ZAWSZE POKAZUJ ØYCIE" : L"ALWAYS SHOW LIFE");
+wcscpy_s((wchar_t*)&NewEntries[2].szSwitchCellFiles[0],130,gLocaleId == 10 ? L"WY£." : L"OFF");
+wcscpy_s((wchar_t*)&NewEntries[2].szSwitchCellFiles[1],130,gLocaleId == 10 ? L"W£." : L"ON");
+wcscpy_s((wchar_t*)&NewEntries[3].szCellFile,130,gLocaleId == 10 ? L"ZAWSZE POKAZUJ MANE" : L"ALWAYS SHOW MANA");
+wcscpy_s((wchar_t*)&NewEntries[3].szSwitchCellFiles[0],130,gLocaleId == 10 ? L"WY£." : L"OFF");
+wcscpy_s((wchar_t*)&NewEntries[3].szSwitchCellFiles[1],130,gLocaleId == 10 ? L"W£." : L"ON");
+wcscpy_s((wchar_t*)&NewEntries[4].szCellFile,130,gLocaleId == 10 ? L"PE£NA WIDOCZNOå∆" : L"FULL VISIBILITY");
+wcscpy_s((wchar_t*)&NewEntries[4].szSwitchCellFiles[0],130,gLocaleId == 10 ? L"WY£." : L"OFF");
+wcscpy_s((wchar_t*)&NewEntries[4].szSwitchCellFiles[1],130,gLocaleId == 10 ? L"W£." : L"ON");
+wcscpy_s((wchar_t*)&NewEntries[5].szCellFile,130,gLocaleId == 10 ? L"AUTOM. W£•CZ MAP " : L"AUTO. TURN ON THE MAP");
+wcscpy_s((wchar_t*)&NewEntries[5].szSwitchCellFiles[0],130,gLocaleId == 10 ? L"WY£." : L"OFF");
+wcscpy_s((wchar_t*)&NewEntries[5].szSwitchCellFiles[1],130,gLocaleId == 10 ? L"W£." : L"ON");
 wcscpy_s((wchar_t*)&NewEntries[6].szCellFile,130, L"MAPHACK");
-wcscpy_s((wchar_t*)&NewEntries[6].szSwitchCellFiles[0],130,LocId == 10 ? L"WY£." : L"OFF");
-wcscpy_s((wchar_t*)&NewEntries[6].szSwitchCellFiles[1],130,LocId == 10 ? L"W£." : L"ON");
-wcscpy_s((wchar_t*)&NewEntries[7].szCellFile,130,LocId == 10 ? L"UKRYJ Z£OTO NA ZIEMI" : L"HIDE GOLD ON THE GROUND");
-wcscpy_s((wchar_t*)&NewEntries[7].szSwitchCellFiles[0],130,LocId == 10 ? L"WY£." : L"OFF");
-wcscpy_s((wchar_t*)&NewEntries[7].szSwitchCellFiles[1],130,LocId == 10 ? L"W£." : L"ON");
-wcscpy_s((wchar_t*)&NewEntries[8].szCellFile,130,LocId == 10 ? L"UKRYJ åMIECI NA ZIEMI" : L"HIDE CRAP ON THE GROUND");
-wcscpy_s((wchar_t*)&NewEntries[8].szSwitchCellFiles[0],130,LocId == 10 ? L"WY£." : L"OFF");
-wcscpy_s((wchar_t*)&NewEntries[8].szSwitchCellFiles[1],130,LocId == 10 ? L"W£." : L"ON");
-wcscpy_s((wchar_t*)&NewEntries[9].szCellFile,130,LocId == 10 ? L"LAGOMETR" : L"LAGOMETER");
-wcscpy_s((wchar_t*)&NewEntries[9].szSwitchCellFiles[0],130,LocId == 10 ? L"WY£." : L"OFF");
-wcscpy_s((wchar_t*)&NewEntries[9].szSwitchCellFiles[1],130,LocId == 10 ? L"W£." : L"ON");
+wcscpy_s((wchar_t*)&NewEntries[6].szSwitchCellFiles[0],130,gLocaleId == 10 ? L"WY£." : L"OFF");
+wcscpy_s((wchar_t*)&NewEntries[6].szSwitchCellFiles[1],130,gLocaleId == 10 ? L"W£." : L"ON");
+wcscpy_s((wchar_t*)&NewEntries[7].szCellFile,130,gLocaleId == 10 ? L"UKRYJ Z£OTO NA ZIEMI" : L"HIDE GOLD ON THE GROUND");
+wcscpy_s((wchar_t*)&NewEntries[7].szSwitchCellFiles[0],130,gLocaleId == 10 ? L"WY£." : L"OFF");
+wcscpy_s((wchar_t*)&NewEntries[7].szSwitchCellFiles[1],130,gLocaleId == 10 ? L"W£." : L"ON");
+wcscpy_s((wchar_t*)&NewEntries[8].szCellFile,130,gLocaleId == 10 ? L"UKRYJ åMIECI NA ZIEMI" : L"HIDE CRAP ON THE GROUND");
+wcscpy_s((wchar_t*)&NewEntries[8].szSwitchCellFiles[0],130,gLocaleId == 10 ? L"WY£." : L"OFF");
+wcscpy_s((wchar_t*)&NewEntries[8].szSwitchCellFiles[1],130,gLocaleId == 10 ? L"W£." : L"ON");
+wcscpy_s((wchar_t*)&NewEntries[9].szCellFile,130,gLocaleId == 10 ? L"LAGOMETR" : L"LAGOMETER");
+wcscpy_s((wchar_t*)&NewEntries[9].szSwitchCellFiles[0],130,gLocaleId == 10 ? L"WY£." : L"OFF");
+wcscpy_s((wchar_t*)&NewEntries[9].szSwitchCellFiles[1],130,gLocaleId == 10 ? L"W£." : L"ON");
 
 
-wcscpy_s((wchar_t*)&NewEntries[10].szCellFile,130,LocId == 10 ? L"POPRZEDNIE MENU" : L"PREVIOUS MENU");
+wcscpy_s((wchar_t*)&NewEntries[10].szCellFile,130,gLocaleId == 10 ? L"POPRZEDNIE MENU" : L"PREVIOUS MENU");
 
 }
 
@@ -693,7 +713,6 @@ return TRUE;
 // Import from Scrap
 BOOL __fastcall ExOptions::KeyConfig(D2MenuEntry* ptEntry, StormMsg* pMsg)
 {
-	static int LocId = D2Funcs.D2LANG_GetLocaleId();
 	static D2Menu NewMenu = {6, 18, 20, 37, 0, 0};
 	static D2MenuEntry NewEntries[6] = {0};
 
@@ -706,11 +725,11 @@ BOOL __fastcall ExOptions::KeyConfig(D2MenuEntry* ptEntry, StormMsg* pMsg)
 	//	NewEntries[4].Bind = (DWORD*)&VK_FastTP;
 	//	NewEntries[5].Bind = (DWORD*)&VK_AntiJoder;
 
-		wcscpy_s(NewEntries[0].wItemName,130,LocId == LOCALE_POL ? L"KONFIG. KLAWISZY" : L"CONFIGURE CONTROLS");
-		wcscpy_s(NewEntries[1].wItemName,130,LocId == LOCALE_POL ? L"BEZPOåR. AA" : L"DIRECT AA");
-		wcscpy_s(NewEntries[2].wItemName,130,LocId == LOCALE_POL ? L"åLEPY PKT. AA" : L"BLINDSPOT AA");
-		wcscpy_s(NewEntries[3].wItemName,130,LocId == LOCALE_POL ? L"WKURZACZ" : L"TEASE ATTACK");
-		wcscpy_s(NewEntries[4].wItemName,130,LocId == LOCALE_POL ? L"SZYBKIE TP" : L"FAST TP");
+		wcscpy_s(NewEntries[0].wItemName,130,gLocaleId == LOCALE_POL ? L"KONFIG. KLAWISZY" : L"CONFIGURE CONTROLS");
+		wcscpy_s(NewEntries[1].wItemName,130,gLocaleId == LOCALE_POL ? L"BEZPOåR. AA" : L"DIRECT AA");
+		wcscpy_s(NewEntries[2].wItemName,130,gLocaleId == LOCALE_POL ? L"åLEPY PKT. AA" : L"BLINDSPOT AA");
+		wcscpy_s(NewEntries[3].wItemName,130,gLocaleId == LOCALE_POL ? L"WKURZACZ" : L"TEASE ATTACK");
+		wcscpy_s(NewEntries[4].wItemName,130,gLocaleId == LOCALE_POL ? L"SZYBKIE TP" : L"FAST TP");
 		wcscpy_s(NewEntries[5].wItemName,130,L"ANTI-JODER");
 
 	}
@@ -743,18 +762,18 @@ D2Vars.D2CLIENT_VidOptionsMenu[7].OnPress=&ExOptions::Options;
 D2Vars.D2CLIENT_MapOptionsMenu[6].OnPress=&ExOptions::Options;
 
 
-int LocId = D2Funcs.D2LANG_GetLocaleId();
+
 
 memcpy(NewEntries,(const void*)*&D2Vars.D2CLIENT_OptionsMenu,sizeof(D2MenuEntry)*4);
 memcpy(&NewEntries[6],(const void*)&D2Vars.D2CLIENT_OptionsMenu[4],sizeof(D2MenuEntry));
 
-wcscpy_s((wchar_t*)&NewEntries[0].szCellFile,130,LocId == 10 ? L"OPCJE DèWI KOWE" : L"SOUND OPTIONS");
-wcscpy_s((wchar_t*)&NewEntries[1].szCellFile,130,LocId == 10 ? L"OPCJE GRAFICZNE" : L"VIDEO OPTIONS");
-wcscpy_s((wchar_t*)&NewEntries[2].szCellFile,130,LocId == 10 ? L"OPCJE AUTOMAPY" : L"AUTOMAP OPTIONS");
-wcscpy_s((wchar_t*)&NewEntries[3].szCellFile,130,LocId == 10 ? L"KONFIGURACJA STEROWANIA" : L"CONFIGURE CONTROLS");
-wcscpy_s((wchar_t*)&NewEntries[4].szCellFile,130,LocId == 10 ? L"USTAWIENIA D2EX" : L"D2EX SETTINGS");
-wcscpy_s((wchar_t*)&NewEntries[5].szCellFile,130,LocId == 10 ? L"USTAWIENIA EFEKT”W" : L"BUFFS SETTINGS");
-wcscpy_s((wchar_t*)&NewEntries[6].szCellFile,130,LocId == 10 ? L"POPRZEDNIE MENU" : L"PREVIOUS MENU");
+wcscpy_s((wchar_t*)&NewEntries[0].szCellFile,130,gLocaleId == 10 ? L"OPCJE DèWI KOWE" : L"SOUND OPTIONS");
+wcscpy_s((wchar_t*)&NewEntries[1].szCellFile,130,gLocaleId == 10 ? L"OPCJE GRAFICZNE" : L"VIDEO OPTIONS");
+wcscpy_s((wchar_t*)&NewEntries[2].szCellFile,130,gLocaleId == 10 ? L"OPCJE AUTOMAPY" : L"AUTOMAP OPTIONS");
+wcscpy_s((wchar_t*)&NewEntries[3].szCellFile,130,gLocaleId == 10 ? L"KONFIGURACJA STEROWANIA" : L"CONFIGURE CONTROLS");
+wcscpy_s((wchar_t*)&NewEntries[4].szCellFile,130,gLocaleId == 10 ? L"USTAWIENIA D2EX" : L"D2EX SETTINGS");
+wcscpy_s((wchar_t*)&NewEntries[5].szCellFile,130,gLocaleId == 10 ? L"USTAWIENIA EFEKT”W" : L"BUFFS SETTINGS");
+wcscpy_s((wchar_t*)&NewEntries[6].szCellFile,130,gLocaleId == 10 ? L"POPRZEDNIE MENU" : L"PREVIOUS MENU");
 
 NewEntries[0].ptCellFile=NewEntries[1].ptCellFile=NewEntries[2].ptCellFile=NewEntries[3].ptCellFile=NewEntries[4].ptCellFile=NewEntries[5].ptCellFile = NewEntries[6].ptCellFile=0;
 NewEntries[6].OnPress=&ExOptions::MainMenu;
@@ -802,14 +821,14 @@ memcpy(&NewEntries[1],(const void*)&D2Vars.D2CLIENT_OldMenu[1],sizeof(D2MenuEntr
 NewEntries[0].OnPress=&ExOptions::Options;
 NewEntries[0].ptCellFile=NewEntries[2].ptCellFile=NewEntries[3].ptCellFile=0;
 
-int LocId = D2Funcs.D2LANG_GetLocaleId();
+
 int i = 0;
-wcscpy_s((wchar_t*)&NewEntries[i].szCellFile,130,LocId == 10 ? L"OPCJE" : L"OPTIONS");
+wcscpy_s((wchar_t*)&NewEntries[i].szCellFile,130,gLocaleId == 10 ? L"OPCJE" : L"OPTIONS");
 #ifndef D2EX_CLOSED_BNET
-wcscpy_s((wchar_t*)&NewEntries[++i].szCellFile,130,LocId == 10 ? L"PODDAJ SI " : L"GIVE UP");
+wcscpy_s((wchar_t*)&NewEntries[++i].szCellFile,130,gLocaleId == 10 ? L"PODDAJ SI " : L"GIVE UP");
 #endif
-wcscpy_s((wchar_t*)&NewEntries[++i].szCellFile,130,LocId == 10 ? L"ZAPIS I WYJåCIE Z GRY" : L"SAVE AND EXIT GAME");
-wcscpy_s((wchar_t*)&NewEntries[++i].szCellFile,130,LocId == 10 ? L"POWR”T DO GRY" : L"RETURN TO GAME");
+wcscpy_s((wchar_t*)&NewEntries[++i].szCellFile,130,gLocaleId == 10 ? L"ZAPIS I WYJåCIE Z GRY" : L"SAVE AND EXIT GAME");
+wcscpy_s((wchar_t*)&NewEntries[++i].szCellFile,130,gLocaleId == 10 ? L"POWR”T DO GRY" : L"RETURN TO GAME");
 }
 
 *D2Vars.D2CLIENT_SelectedMenu=1;

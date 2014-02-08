@@ -1,9 +1,18 @@
 #include "stdafx.h"
+
+#include <string>
+#include <map>
+#include <memory>
+#include <boost\lexical_cast.hpp>
+
+#include "Misc.h"
+#include "Vars.h"
+#include "ExScreen.h"
+
 #include "ExBuffs.h"
 
 
-typedef boost::shared_ptr<ExBuff> pExBuff;
-
+typedef shared_ptr<ExBuff> pExBuff;
 static map<int, pExBuff> Buffs;
 
 ExBuff::ExBuff(WORD SkillNo, WORD StateNo, ExBuffsImgs ImageId, short DefaultLvl, BuffType aType, bool isTimed) : ExControl((24*Buffs.size()) + 115, *D2Vars.D2CLIENT_ScreenViewHeight-10, 24, 24, 0)
@@ -39,7 +48,7 @@ ExBuff::ExBuff(WORD SkillNo, WORD StateNo, ExBuffsImgs ImageId, short DefaultLvl
 
 	EnterCriticalSection(&BUFF_CRITSECT);
 	//Buffs[StateId].reset();
-	if(Buffs.find(StateId) != Buffs.end()) Buffs.erase(StateId);
+	if (Buffs.find(StateId) != Buffs.end()) Buffs.erase(StateId);
 	LeaveCriticalSection(&BUFF_CRITSECT);
 
 	this->SetX((24 * Buffs.size()) + 115);
@@ -77,43 +86,45 @@ ExBuff::~ExBuff()
 
 void ExBuff::Draw()
 {
-	Check();
+	ExBuffs::Check();
 }
 
 wchar_t* ExBuffs::GetSkillName(unsigned short SkillId)
 {
-BYTE* Tbl = (*D2Vars.D2COMMON_sgptDataTables)->pSkillDescTxt;
-if(SkillId> (*D2Vars.D2COMMON_sgptDataTables)->dwSkillsRecs) return L"?";
-SkillsTxt* pTxt = (*D2Vars.D2COMMON_sgptDataTables)->pSkillsTxt;
-int nRow = pTxt[SkillId].wSkillDesc;
-if(!nRow) return L"?";
+	sgptDataTable* pDataTable = *D2Vars.D2COMMON_sgptDataTables;
+	if (!SkillId || !pDataTable) return L"?";
 
-Tbl+= (nRow*0x120);
-WORD LocId = *(WORD*)(Tbl+8);
-return D2Funcs.D2LANG_GetLocaleText(LocId);
+	SkillDescTxt* pSkillDesc = pDataTable->pSkillDescTxt;
+	if (SkillId > pDataTable->dwSkillsRecs) return L"?";
+
+	SkillsTxt* pTxt = pDataTable->pSkillsTxt;
+	int nRow = pTxt[SkillId].wSkillDesc;
+	if(!nRow) return L"?";
+
+	return D2Funcs.D2LANG_GetLocaleText(pSkillDesc[nRow].wStrName);
 }
 
 int GetSkillLvlByStat(short SkillNo, int nStat, int nValue)
 {
-UnitAny* pPlayer= D2Funcs.D2CLIENT_GetPlayer();
-ASSERT(pPlayer)
-SkillsTxt *pTxt = &(*D2Vars.D2COMMON_sgptDataTables)->pSkillsTxt[SkillNo];
-ASSERT(pTxt)
-DWORD CalcId = 0;
+	UnitAny* pPlayer= D2Funcs.D2CLIENT_GetPlayer();
+	ASSERT(pPlayer)
+	SkillsTxt *pTxt = &(*D2Vars.D2COMMON_sgptDataTables)->pSkillsTxt[SkillNo];
+	ASSERT(pTxt)
+	DWORD CalcId = 0;
 
-if(pTxt->wAuraStat1 == nStat) CalcId = pTxt->dwAuraStatCalc1;
-else if (pTxt->wAuraStat2 == nStat) CalcId = pTxt->dwAuraStatCalc2;
-else if (pTxt->wAuraStat3 == nStat) CalcId = pTxt->dwAuraStatCalc3;
-else if (pTxt->wAuraStat4 == nStat) CalcId = pTxt->dwAuraStatCalc4;
-else if (pTxt->wAuraStat5 == nStat) CalcId = pTxt->dwAuraStatCalc5;
-else if (pTxt->wAuraStat6 == nStat) CalcId = pTxt->dwAuraStatCalc6;
+	if(pTxt->wAuraStat1 == nStat) CalcId = pTxt->dwAuraStatCalc1;
+	else if (pTxt->wAuraStat2 == nStat) CalcId = pTxt->dwAuraStatCalc2;
+	else if (pTxt->wAuraStat3 == nStat) CalcId = pTxt->dwAuraStatCalc3;
+	else if (pTxt->wAuraStat4 == nStat) CalcId = pTxt->dwAuraStatCalc4;
+	else if (pTxt->wAuraStat5 == nStat) CalcId = pTxt->dwAuraStatCalc5;
+	else if (pTxt->wAuraStat6 == nStat) CalcId = pTxt->dwAuraStatCalc6;
 
-	for(int i = 1; i<55; i++) {
-		int val = D2Funcs.D2COMMON_EvaluateSkill(pPlayer,CalcId,SkillNo,i);
-		//Misc::Log("Skill Lvl %d, Value %d, desired %d",i,val,nValue);
-		if(val == nValue) return i;
-	}
-return 0;
+		for(int i = 1; i<55; ++i) {
+			int val = D2Funcs.D2COMMON_EvaluateSkill(pPlayer,CalcId,SkillNo,i);
+			//Misc::Log("Skill Lvl %d, Value %d, desired %d",i,val,nValue);
+			if(val == nValue) return i;
+		}
+	return 0;
 }
 
 int GetStateStatValue(int nStatNo, BYTE* StateData, int PacketLen)
@@ -301,7 +312,6 @@ BOOL __fastcall ExBuffs::OnSetState(BYTE* aPacket)
 			Buffs[StateNo] = pNewBuff; } break;
 			}
 		}
-
 	}
 	return D2Funcs.D2CLIENT_SetState_I(aPacket);
 }
@@ -315,13 +325,20 @@ BOOL __fastcall ExBuffs::OnRemoveState(BYTE* aPacket)
 		int UnitType = *(BYTE*)(aPacket + 1);
 		int UnitId = *(DWORD*)(aPacket + 2);
 		int StateNo = *(BYTE*)(aPacket + 6);
-		if(UnitType == UNIT_PLAYER && UnitId==pPlayer->dwUnitId){ EnterCriticalSection(&BUFF_CRITSECT); Buffs.erase(StateNo); LeaveCriticalSection(&BUFF_CRITSECT); }
+
+		if (UnitType == UNIT_PLAYER && UnitId == pPlayer->dwUnitId)
+		{
+			EnterCriticalSection(&BUFF_CRITSECT); 
+			Buffs.erase(StateNo);
+			LeaveCriticalSection(&BUFF_CRITSECT);
+		}
+
 	}
 	return D2Funcs.D2CLIENT_RemoveState_I(aPacket);
 }
 
 
-void ExBuff::UpdateYPos()
+void ExBuffs::UpdateYPos()
 {
 	EnterCriticalSection(&BUFF_CRITSECT);
 	for (auto it = Buffs.begin(); it != Buffs.end(); ++it)
@@ -334,37 +351,38 @@ void ExBuff::UpdateYPos()
 	LeaveCriticalSection(&BUFF_CRITSECT);
 }
 
-void ExBuff::Check()
+void ExBuffs::Check()
 {
-	static int LocId = D2Funcs.D2LANG_GetLocaleId();
 	int i = 0;
 	EnterCriticalSection(&BUFF_CRITSECT);
-	for(map<int, pExBuff>::iterator it= Buffs.begin() ; it!=Buffs.end(); ++it, ++i)
+	for(auto it = Buffs.begin() ; it!=Buffs.end(); ++it, ++i)
 	{
 	if(it->second->StateId==0) continue;
 	if(it->second->Buff) it->second->Buff->SetX((24*i)+115);
-	if(it->second->BuffTime) {
-		if(it->second->SkillExpire) {
+	if(it->second->BuffTime)
+	{
+		if(it->second->SkillExpire) 
+		{
 			wstringstream wstr;
-			LocId == LOCALE_POL ? wstr << ExScreen::GetColorCode(COL_GREY) << L"Czas pozosta³y : " << Misc::ConvertTickToTime(it->second->SkillExpire - GetTickCount()) << L" sekund(y)" << L"\n" : wstr << ExScreen::GetColorCode(COL_GREY) << L"Time remaining : " << Misc::ConvertTickToTime(it->second->SkillExpire - GetTickCount()) << L" sec(s)" << L"\n";
+			gLocaleId == LOCALE_POL ? wstr << ExScreen::GetColorCode(COL_GREY) << L"Czas pozosta³y : " << Misc::ConvertTickToTime(it->second->SkillExpire - GetTickCount()) << L" sekund(y)" << L"\n" : wstr << ExScreen::GetColorCode(COL_GREY) << L"Time remaining : " << Misc::ConvertTickToTime(it->second->SkillExpire - GetTickCount()) << L" sec(s)" << L"\n";
 			wstr << ExScreen::GetColorCode(COL_LIGHTGREEN) << ExBuffs::GetSkillName(it->second->SkillId);
 			it->second->Buff->Hoover = wstr.str(); 
-		int a = it->second->SkillExpire < GetTickCount() ? 0 : ((it->second->SkillExpire - GetTickCount()) * 24) / ( it->second->SkillLen ? it->second->SkillLen : 1);
-		it->second->BuffTime->SetY(it->second->Buff->GetY()-a);
-		it->second->BuffTime->SetHeight(a);
+			int a = it->second->SkillExpire < GetTickCount() ? 0 : ((it->second->SkillExpire - GetTickCount()) * 24) / ( it->second->SkillLen ? it->second->SkillLen : 1);
+			it->second->BuffTime->SetY(it->second->Buff->GetY()-a);
+			it->second->BuffTime->SetHeight(a);
 		}
-
-	it->second->BuffTime->SetX((24*i)+115); 
+		it->second->BuffTime->SetX((24*i)+115); 
 	}
 	if(it->second->BuffInfo) it->second->BuffInfo->SetX((24*i)+120);
 	}
+
 	LeaveCriticalSection(&BUFF_CRITSECT);
 }
 
-void ExBuff::Clear()
+void ExBuffs::Clear()
 {
-EnterCriticalSection(&BUFF_CRITSECT);
-Buffs.clear();
-LeaveCriticalSection(&BUFF_CRITSECT);
+	EnterCriticalSection(&BUFF_CRITSECT);
+	Buffs.clear();
+	LeaveCriticalSection(&BUFF_CRITSECT);
 }
 
