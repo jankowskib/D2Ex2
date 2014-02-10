@@ -27,10 +27,14 @@ namespace ExMultiRes
 	BOOL __stdcall D2GFX_InitWindow(HINSTANCE hInstance, LRESULT(__stdcall *pWndProc)(HWND, UINT, WPARAM, LPARAM), int nRenderMode, BOOL bWindowed);
 
 	void __stdcall  D2GFX_GetModeParams(int nMode, int* pWidth, int* pHeight);
-	BOOL __stdcall  D2GFX_SetResolutionMode(int nMode, BOOL bUpdate);
+	BOOL __stdcall  D2GFX_SetResolution(int nMode, BOOL bUpdate);
 	void __stdcall  D2GFX_SetStoredGammaAndContrast();
 	void __fastcall D2GFX_FillYBufferTable(void *ppvBits, int nWidth, int nHeight, int aZero);
+	int __stdcall GFX_GetResolutionMode();
+	void __stdcall GFX_SetResolutionMode(int nMode);
+	void D2GFX_WindowCleanUp(); 
 
+	//GFX pos fixes
 	void __stdcall GetBeltPos(int nIndex, int nMode, D2BeltBox *out, int nBox);
 	void __stdcall GetBeltsTxtRecord(int nIndex, int nMode, BeltsTxt *out);
 

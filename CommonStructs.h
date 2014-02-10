@@ -9,6 +9,13 @@ struct Control;
 struct ScrollBar;
 
 #pragma pack(push, 1)
+
+struct D2WinPlacement
+{
+	HWND hWnd;
+	WINDOWPLACEMENT hWindowPlacement;
+};
+
 struct D2Config // sizeof 0x5C
 {
 	char szSection[27];		// 0x00
@@ -139,7 +146,7 @@ struct GFXSettings // size 0x18
 
 struct GFXHelpers
 {
-	void(__fastcall *D2GFX_FillYBufferTable)(void *ppvBits, int nWidth, int nHeight, int aZero);
+	void(__fastcall *FillYBufferTable)(void *ppvBits, int nWidth, int nHeight, int aZero);
 	void(__fastcall *f2)(int a1, int a2, int a3);
 	void(__fastcall *f3)(int a1, int a2, int a3, int a4);
 	void(__fastcall *f4)(int a1, int a2, int a3, int a4);
@@ -151,7 +158,7 @@ struct GFXHelpers
 
 struct fnRendererCallbacks
 {
-	BOOL(__fastcall *D2GFX_InitWindow)(HINSTANCE); // 0
+	BOOL(__fastcall *InitWindow)(HINSTANCE); // 0
 	BOOL(__fastcall *InitPerspective)(GFXSettings* pgfxSettings, GFXHelpers* pfnHelpers); // 1
 	BOOL(__fastcall *Release)(); // 2
 	BOOL(__fastcall *Init)(HANDLE hWnd, int nResolution); // 3

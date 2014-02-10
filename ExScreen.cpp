@@ -258,51 +258,13 @@ void ExScreen::DrawAutoMapVer()
 #endif
 }
 
-void OnMapDraw()
-{
-	UnitAny* Me = D2Funcs.D2CLIENT_GetPlayer();
-	if(!Me) return;
-
-	EnterCriticalSection(&TELE_CRITSECT);
-	for(vector<COORDS>::const_iterator it = TelePath.begin(); it!=TelePath.end(); ++it) {
-	static POINT hPos2;
-	ExScreen::ScreenToAutomap(&hPos2, it->x, it->y);
-	ExScreen::DrawBlob(hPos2.x,hPos2.y,COL_PURPLE);
-	static POINT hPos3;
-	if(it == TelePath.begin()) {
-		ExScreen::ScreenToAutomap(&hPos3, Me->pPath->xPos,Me->pPath->yPos);
-		D2Funcs.D2GFX_DrawLine(hPos2.x,hPos2.y,hPos3.x,hPos3.y,0x9B,0);
-	}
-	if(it+1 != TelePath.end()) {
-	ExScreen::ScreenToAutomap(&hPos3, (it+1)->x, (it+1)->y);
-	D2Funcs.D2GFX_DrawLine(hPos2.x,hPos2.y,hPos3.x,hPos3.y,0x9B,0);
-	}
-	}
-
-for(deque<COORDS>::const_iterator it = HistoryPos.begin(); it!=HistoryPos.end(); ++it) {
-	static POINT hPos2;
-	ExScreen::ScreenToAutomap(&hPos2, it->x, it->y);
-	ExScreen::DrawBlob(hPos2.x,hPos2.y,COL_GREY);
-	static POINT hPos3;
-
-	if(it+1 != HistoryPos.end()) {
-	ExScreen::ScreenToAutomap(&hPos3, (it+1)->x, (it+1)->y);
-	D2Funcs.D2GFX_DrawLine(hPos2.x,hPos2.y,hPos3.x,hPos3.y,0x84,0);
-	}
-	}
-LeaveCriticalSection(&TELE_CRITSECT);
-}
-
 
 void __fastcall ExScreen::DrawAutoMapInfo(int OldTextSize)
 {
-#ifdef D2EX_EXAIM_ENABLED
-	OnMapDraw();
-#endif
 
-	if (PVMStuff)
-	{
-		
+	ExMapReveal::OnMapDraw();
+
+#ifdef D2EX_PVM_BUILD		
 		unsigned int CExp = D2Funcs.D2COMMON_GetStatSigned(D2Funcs.D2CLIENT_GetPlayer(), STAT_EXPERIENCE, 0);
 		wchar_t wExp[100] = { 0 };
 		int ExpGained = CExp - ExpAtJoin;
@@ -321,7 +283,7 @@ void __fastcall ExScreen::DrawAutoMapInfo(int OldTextSize)
 		int wSize2 = ExScreen::GetTextWidth(wGames);
 		D2Funcs.D2WIN_DrawText(wGames, *D2Vars.D2CLIENT_ScreenWidth - wSize2 - 16, *D2Vars.D2CLIENT_AutomapInfoY, 4, 0);
 		*D2Vars.D2CLIENT_AutomapInfoY += 16;
-	}
+#endif
 
 	int secs = TickAtJoin ? (GetTickCount() - TickAtJoin ) / 1000 : 0;
 	wostringstream wTime;
@@ -692,7 +654,7 @@ void ExScreen::DrawDmg()
 			}
 }
 
-void DrawCircle(int x0, int y0, int radius, int Color)
+void ExScreen::DrawCircle(int x0, int y0, int radius, int Color)
 {
   int f = 1 - radius;
   int ddF_x = 1;

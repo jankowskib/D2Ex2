@@ -76,5 +76,9 @@ GLOBAL(short, cResModeX)
 GLOBAL(short, cResModeY)
 GLOBAL(int, gRenderer)
 
+GLOBAL(short, VK_ATNext)
+GLOBAL(short, VK_ATWP)
+GLOBAL(short, VK_ATPrev)
+
 #undef GLOBAL
 #undef __DEFINE_VARS

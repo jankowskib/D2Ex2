@@ -121,13 +121,16 @@ unsigned int __stdcall Thread(void * Args)
 	PVMStuff = GetPrivateProfileInt("D2Ex","PVMStuff",0,ConfigIni.c_str());
 	FullVisibility = GetPrivateProfileInt("D2Ex","FullVisibility",0,ConfigIni.c_str());
 	BuffsEnabled = GetPrivateProfileInt("D2Ex","BuffsEnabled",1,ConfigIni.c_str());
-	BOLvl = GetPrivateProfileInt("D2Ex", "BOLvl", 42, ConfigIni.c_str());
+
 	BCLvl = GetPrivateProfileInt("D2Ex", "BCLvl", 12, ConfigIni.c_str());
-	ShoutLvl = GetPrivateProfileInt("D2Ex", "ShoutLvl", 34, ConfigIni.c_str());
-	EnchLvl = GetPrivateProfileInt("D2Ex", "EnchLvl", 42, ConfigIni.c_str());
 	AmpLvl = GetPrivateProfileInt("D2Ex", "AmpLvl", 40, ConfigIni.c_str());
-	LRLvl = GetPrivateProfileInt("D2Ex", "LRLvl", 12, ConfigIni.c_str());
 	SMLvl = GetPrivateProfileInt("D2Ex", "SMLvl", 12, ConfigIni.c_str());
+
+#ifdef D2EX_PVM_BUILD
+	VK_ATNext = GetPrivateProfileInt("Keys", "ATNext", VK_F5, ConfigIni.c_str());
+	VK_ATWP = GetPrivateProfileInt("Keys", "ATWP", VK_F6, ConfigIni.c_str());
+	VK_ATPrev = GetPrivateProfileInt("Keys", "ATPrev", VK_F7, ConfigIni.c_str());
+#endif
 	char sRes[50];
 	string strRes;
 	GetPrivateProfileString("D2Ex", "Resolution", "800x600", sRes, 50, ConfigIni.c_str());
@@ -318,7 +321,7 @@ unsigned int __stdcall Thread(void * Args)
 	//Res stuff
 	Misc::Patch(JUMP, GetDllOffset("D2Client.dll", 0x2C220), (DWORD)D2Stubs::D2CLIENT_SetResolution_STUB, 5, "Set Resolution Mode");
 	Misc::Patch(JUMP, GetDllOffset("D2Client.dll", 0x5C4F0), (DWORD)D2Stubs::D2CLIENT_ResizeView_STUB, 6, "Resize View");
-	Misc::Patch(JUMP, GetDllOffset("D2Gfx.dll", -10069), (DWORD)D2Stubs::D2GFX_SetResolutionMode_STUB, 5, "D2GFX_SetResolutionMode");
+	Misc::Patch(JUMP, GetDllOffset("D2Gfx.dll", -10069), (DWORD)D2Stubs::D2GFX_SetResolutionMode_STUB, 5, "D2GFX_SetResolution");
 	Misc::Patch(JUMP, GetDllOffset("D2Gfx.dll", -10064), (DWORD)D2Stubs::D2GFX_GetModeParams_STUB, 7, "D2GFX_GetModeParams");
 	Misc::Patch(CALL, GetDllOffset("D2Gfx.dll", 0x95EA), (DWORD)D2Stubs::D2GFX_LookUpFix_I_STUB, 7, "LookUpYFix_I");
 	Misc::Patch(CALL, GetDllOffset("D2Gfx.dll", 0xA257), (DWORD)D2Stubs::D2GFX_LookUpFix_II_STUB, 7, "LookUpYFix_II");
@@ -330,13 +333,11 @@ unsigned int __stdcall Thread(void * Args)
 	//Res UI fixups
 	Misc::Patch(JUMP, GetDllOffset("D2Common.dll", -10689), (DWORD)ExMultiRes::GetBeltPos, 7, "D2COMMON_GetBeltPos");
 	Misc::Patch(JUMP, GetDllOffset("D2Common.dll", -10370), (DWORD)ExMultiRes::GetBeltsTxtRecord, 10, "D2COMMON_GetBeltsTxtRecord");
-	Misc::WriteDword((DWORD*)&((GFXHelpers*)GetDllOffset("D2Gfx.dll", 0x10BFC))->D2GFX_FillYBufferTable, (DWORD)&ExMultiRes::D2GFX_FillYBufferTable);
+	Misc::WriteDword((DWORD*)&((GFXHelpers*)GetDllOffset("D2Gfx.dll", 0x10BFC))->FillYBufferTable, (DWORD)&ExMultiRes::D2GFX_FillYBufferTable);
 	#endif
 
 	#else
-	ShowWindow(D2Funcs.D2GFX_GetHwnd(),SW_HIDE);
-	MessageBoxA(0,"Version is not supported!","D2Ex",0); 
-	exit(-1);
+	#error "Version is not supported!"
 	#endif
 
 	ExMpq::LoadMPQ();
@@ -443,11 +444,11 @@ unsigned int __stdcall Thread(void * Args)
 		if(ExParty::GetPlayerArea())
 		{
 #ifdef D2EX_MULTIRES
-			int mDesiredMode = ExMultiRes::FindDisplayMode(cResModeX, cResModeX);
-			if (!mDesiredMode)
-				ExMultiRes::D2CLIENT_SetResolution(mDesiredMode);
-			else
-				D2EXERROR("Cannot set resolution %dx%d. Please correct your setting in D2Ex.ini", cResModeX, cResModeY);
+			//int mDesiredMode = ExMultiRes::FindDisplayMode(cResModeX, cResModeX);
+			//if (!mDesiredMode)
+			//	ExMultiRes::D2CLIENT_SetResolution(mDesiredMode);
+			//else
+			//	D2EXERROR("Cannot set resolution %dx%d. Please correct your setting in D2Ex.ini", cResModeX, cResModeY);
 #endif
 
 #ifdef D2EX_EXAIM_ENABLED

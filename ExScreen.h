@@ -14,6 +14,7 @@ wstring GetColorCode(int ColNo);
 
 void ScreenToAutomap(POINT* ptPos, int x, int y);
 void AutomapToScreen(POINT* ptPos, int x, int y);
+void DrawCircle(int x0, int y0, int radius, int Color);
 
 BOOL __fastcall OnTradeData(BYTE* aPacket);
 BOOL __fastcall OnTradeButton(BYTE* aPacket);

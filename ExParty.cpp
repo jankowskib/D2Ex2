@@ -1034,10 +1034,10 @@ void ExParty::ShowHide()
 #endif
 		Ping  = new ExTextBox(PartyScreen->GetX()+10,64,0,0,&ExParty::GetPingFps,&ExParty::SharePing,0);
 		Ping->SetHoverable(false);
-		LeaveB = new ExButton(PartyScreen->GetX()+440,105,2,0,D2Funcs.D2LANG_GetLocaleText(4152),CellFiles::PARTYBUTTON,&ExParty::Leave,0);
+		LeaveB = new ExButton(PartyScreen->GetX()+PartyScreen->GetWidth()-80,105,2,0,D2Funcs.D2LANG_GetLocaleText(4152),CellFiles::PARTYBUTTON,&ExParty::Leave,0);
 		if(ExParty::GetRosterById(D2Funcs.D2CLIENT_GetPlayer()->dwUnitId)->wPartyId==0xFFFF)  
 			LeaveB->SetState(LeaveB->INVISIBLE);
-		Scroll = new ExScrollBar(PartyScreen->GetX()+510,PartyScreen->GetY(),0,GetPlayerCount() - 15,PartyScreen->GetHeight(),&pOffset,&ExParty::OnScroll);
+		Scroll = new ExScrollBar(PartyScreen->GetX() + PartyScreen->GetWidth(), PartyScreen->GetY(), 0, GetPlayerCount() - 15, PartyScreen->GetHeight(), &pOffset, &ExParty::OnScroll);
 		if(GetPlayerCount()<15) 
 			Scroll->SetState(Scroll->INVISIBLE);
 		PartyScreen->AddChild(PlayerCount);

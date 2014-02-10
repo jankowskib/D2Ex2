@@ -193,6 +193,28 @@ enum PlayerModes
 };		// being knocked back
 
 
+
+enum MonsterMode
+{
+	NPC_MODE_DEATH = 0,		// NPC death
+	NPC_MODE_STAND = 1,			// NPC standing still
+	NPC_MODE_WALK  = 2,			// NPC walking
+	NPC_MODE_BEING_HIT = 3,		// NPC getting hit
+	NPC_MODE_ATTACK1 = 4,		// NPC attacking 1
+	NPC_MODE_ATTACK2 = 5,		// NPC attacking 2
+	NPC_MODE_BLOCK = 6,			// NPC blocking
+	NPC_MODE_CAST = 7 ,			// NPC casting spell skill
+	NPC_MODE_USESKILL1 = 8,		// NPC using skill 1
+	NPC_MODE_USESKILL2 = 9,		// NPC using skill 2
+	NPC_MODE_USESKILL3 = 10,		// NPC using skill 3
+	NPC_MODE_USESKILL4 = 11,		// NPC using skill 4
+	NPC_MODE_DEAD = 12,			// NPC dead
+	NPC_MODE_BEING_KNOCKBACK = 13,// NPC being knocked back
+	NPC_MODE_SEQUENCE = 14,		// NPC sequence
+	NPC_MODE_RUN = 15			// NPC running
+};
+
+
 enum UICollision
 {
 	UICOLL_NONE = 0x0,

@@ -1,12 +1,5 @@
 #ifndef __EXOPTIONS_H__
 #define __EXOPTIONS_H__
-#include "ExInput.h"
-#include "Misc.h"
-#include  <boost\lexical_cast.hpp>
-#include "ExParty.h"
-#include "ExBuffs.h"
-#include "ExScreen.h"
-using namespace std;
 
 namespace ExOptions
 {
@@ -25,6 +18,7 @@ namespace ExOptions
 
 	BOOL __fastcall GiveUpCheck(D2MenuEntry* ptEntry, DWORD ItemNo);
 	BOOL __fastcall GiveUpCB(D2MenuEntry* ptEntry, StormMsg* pMsg);
+	BOOL __fastcall RejoinCB(D2MenuEntry* ptEntry, StormMsg* pMsg);
 	BOOL __fastcall BuffECheck(D2MenuEntry* ptEntry, DWORD ItemNo);
 	BOOL __fastcall ChangeHandle(D2MenuEntry* ptEntry, StormMsg* pMsg);
 	BOOL __fastcall Buffs(D2MenuEntry* ptEntry, StormMsg* pMsg);
@@ -40,6 +34,7 @@ namespace ExOptions
 	BOOL __fastcall CrapOpt(D2MenuEntry* ptEntry, StormMsg* pMsg);
 	BOOL __fastcall LagOpt(D2MenuEntry* ptEntry, StormMsg* pMsg);
 	BOOL __fastcall BuffsOpt(D2MenuEntry* ptEntry, StormMsg* pMsg);
+	BOOL __fastcall D2ExOpts(D2MenuEntry* ptEntry, StormMsg* pMsg);
 
 	BOOL __fastcall Various(D2MenuEntry* ptEntry, StormMsg* pMsg);
 	BOOL __fastcall AutoMapOpt(D2MenuEntry* ptEntry, StormMsg* pMsg);

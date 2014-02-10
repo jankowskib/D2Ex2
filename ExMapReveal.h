@@ -11,6 +11,7 @@ using namespace std;
 namespace ExMapReveal
 {
 	void RevealLevel(int LvlId);
+	void OnMapDraw();
 }
 
 #endif

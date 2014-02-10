@@ -24,107 +24,108 @@ struct _d2f {
 #else
 _d2f D2Funcs = {0}; void SetupD2Funcs() {
 #endif
-		EXFUNCPTR(D2CLIENT, PrintGameString, void, __stdcall, (const wchar_t* wMessage, int nColor), 0x75EB0) // ns
-		EXFUNCPTR(D2CLIENT, PrintPartyString, void, __stdcall, (const wchar_t* wMessage, int nColor), 0x75C70) //ns
-		EXFUNCPTR(D2CLIENT, GetPlayer, UnitAny*, __stdcall, (void), 0x613C0) //ns
-		EXFUNCPTR(D2CLIENT, GetSelectedUnit, UnitAny*, __stdcall, (void), 0x17280) //k
-		EXFUNCPTR(D2CLIENT, GetUnitById, UnitAny*, __fastcall, (DWORD UnitID, DWORD UnitType), 0x620D0) //k
-		EXFUNCPTR(D2CLIENT, ClearScreen, int, __stdcall, (void), 0x3E630) //k
-		EXFUNCPTR(D2CLIENT, ClearScreen2, void, __stdcall, (void), 0x44980) //k 
-		EXFUNCPTR(D2CLIENT, ClearScreen3, BOOL, __stdcall, (BOOL bUnk, BOOL bClearScreen), 0x18500)
-		EXFUNCPTR(D2CLIENT, SetUiVar, int, __fastcall, (int UIMode, BOOL HowSet, int bClearScreen), 0x1C190)
+EXFUNCPTR(D2CLIENT, PrintGameString, void, __stdcall, (const wchar_t* wMessage, int nColor), 0x75EB0) // ns
+EXFUNCPTR(D2CLIENT, PrintPartyString, void, __stdcall, (const wchar_t* wMessage, int nColor), 0x75C70) //ns
+EXFUNCPTR(D2CLIENT, GetPlayer, UnitAny*, __stdcall, (void), 0x613C0) //ns
+EXFUNCPTR(D2CLIENT, GetSelectedUnit, UnitAny*, __stdcall, (void), 0x17280) //k
+EXFUNCPTR(D2CLIENT, GetUnitById, UnitAny*, __fastcall, (DWORD UnitID, DWORD UnitType), 0x620D0) //k
+EXFUNCPTR(D2CLIENT, ClearScreen, int, __stdcall, (void), 0x3E630) //k
+EXFUNCPTR(D2CLIENT, ClearScreen2, void, __stdcall, (void), 0x44980) //k 
+EXFUNCPTR(D2CLIENT, ClearScreen3, BOOL, __stdcall, (BOOL bUnk, BOOL bClearScreen), 0x18500)
+EXFUNCPTR(D2CLIENT, SetUiVar, int, __fastcall, (int UIMode, BOOL HowSet, int bClearScreen), 0x1C190)
 
-		EXFUNCPTR(D2CLIENT, CreateSpell, UnitAny*, __fastcall, (DWORD nType, UnitAny* pUnit, SpellStrc* pSpellData, BOOL bOverrideStun), 0x49A90)
+EXFUNCPTR(D2CLIENT, CreateSpell, UnitAny*, __fastcall, (DWORD nType, UnitAny* pUnit, SpellStrc* pSpellData, BOOL bOverrideStun), 0x49A90)
 
-		EXFUNCPTR(D2CLIENT, RevealAutomapRoom, void, __stdcall, (Room1* pRoom1, DWORD dwClipFlag, AutoMapLayer* aLayer), 0x73160) //ns
-		EXFUNCPTR(D2CLIENT, NewAutomapCell, AutoMapCell*, __fastcall, (void), 0x703C0) // ns
-		EXFUNCPTR(D2CLIENT, AddAutomapCell, void, __fastcall, (AutoMapCell* aCell, AutoMapCell** node), 0x71EA0) //ns
+EXFUNCPTR(D2CLIENT, RevealAutomapRoom, void, __stdcall, (Room1* pRoom1, DWORD dwClipFlag, AutoMapLayer* aLayer), 0x73160) //ns
+EXFUNCPTR(D2CLIENT, NewAutomapCell, AutoMapCell*, __fastcall, (void), 0x703C0) // ns
+EXFUNCPTR(D2CLIENT, AddAutomapCell, void, __fastcall, (AutoMapCell* aCell, AutoMapCell** node), 0x71EA0) //ns
 
-		EXFUNCPTR(D2CLIENT, D2MenuChange, int, __fastcall, (int MouseX, int aNull, int MouseY), 0xC3190) //k
-		EXFUNCPTR(D2CLIENT, D2DrawBar, void, __fastcall, (int MenuPosY, int aNull, D2MenuEntry *Entry, int nTransLvl, bool isCellFile), 0xC1740) //k
+EXFUNCPTR(D2CLIENT, D2MenuChange, int, __fastcall, (int MouseX, int aNull, int MouseY), 0xC3190) //k
+EXFUNCPTR(D2CLIENT, D2DrawBar, void, __fastcall, (int MenuPosY, int aNull, D2MenuEntry *Entry, int nTransLvl, bool isCellFile), 0xC1740) //k
 
-		EXFUNCPTR(D2CLIENT, GetCursorItem, UnitAny*, __fastcall, (void), 0x144A0) //ns
-		EXFUNCPTR(D2CLIENT, GetItemEleDmg, BOOL, __stdcall, (UnitAny *ptUnit, int *MinDmg, int *MaxDmg, int *aCol, Skill *ptSkill), 0x35E10) //k
+EXFUNCPTR(D2CLIENT, GetCursorItem, UnitAny*, __fastcall, (void), 0x144A0) //ns
+EXFUNCPTR(D2CLIENT, GetItemEleDmg, BOOL, __stdcall, (UnitAny *ptUnit, int *MinDmg, int *MaxDmg, int *aCol, Skill *ptSkill), 0x35E10) //k
 
-		EXFUNCPTR(D2CLIENT, UpdateAutoMap, void, __fastcall, (BOOL bUpdate), 0x71FC0)
-		EXFUNCPTR(D2CLIENT, ClearScreen4, void, __fastcall, (), 0x1CA90)
+EXFUNCPTR(D2CLIENT, UpdateAutoMap, void, __fastcall, (BOOL bUpdate), 0x71FC0)
+EXFUNCPTR(D2CLIENT, ClearScreen4, void, __fastcall, (), 0x1CA90)
 
-		//D2COMMON
-		//Skill Funcs
-		EXFUNCPTR(D2COMMON, GetSkillById, Skill*, __fastcall, (UnitAny *ptUnit, int SkillId, int SkillFlags), -10984) //k
-		EXFUNCPTR(D2COMMON, GetSkillLevel, int, __stdcall, (UnitAny* ptUnit, Skill* ptSkill, int aType), -10007) //k
-		EXFUNCPTR(D2COMMON, GetSkillType, int, __stdcall, (UnitAny* ptUnit, Skill* ptSkill), -10274) //k
-		EXFUNCPTR(D2COMMON, GetSkillId, int, __stdcall, (Skill* ptSkill, char* szFile, int aLine), -11151) //k
+//D2COMMON
+//Skill Funcs
+EXFUNCPTR(D2COMMON, GetSkillById, Skill*, __fastcall, (UnitAny *ptUnit, int SkillId, int SkillFlags), -10984) //k
+EXFUNCPTR(D2COMMON, GetSkillLevel, int, __stdcall, (UnitAny* ptUnit, Skill* ptSkill, int aType), -10007) //k
+EXFUNCPTR(D2COMMON, GetSkillType, int, __stdcall, (UnitAny* ptUnit, Skill* ptSkill), -10274) //k
+EXFUNCPTR(D2COMMON, GetSkillId, int, __stdcall, (Skill* ptSkill, char* szFile, int aLine), -11151) //k
 
-		EXFUNCPTR(D2COMMON, GetSkillDmgBonus, int, __stdcall, (UnitAny* ptUnit, int FormulaNo, int SkillId, int SkillLvl), -10586) // k
-		EXFUNCPTR(D2COMMON, GetPhysMinDmg, int, __stdcall, (UnitAny* ptUnit, int SkillId, int SkillLvl, int aZero), -10687) //k
-		EXFUNCPTR(D2COMMON, GetPhysMaxDmg, int, __stdcall, (UnitAny* ptUnit, int SkillId, int SkillLvl, int aZero), -10196) //k
-		EXFUNCPTR(D2COMMON, GetEleDmgDuration, int, __stdcall, (UnitAny* ptUnit, int SkillId, int SkillLvl, int aOne), -11154) //k
-		EXFUNCPTR(D2COMMON, GetEleMinDmg, int, __stdcall, (UnitAny* ptUnit, int SkillId, int SkillLvl, int aOne), -10728) //k
-		EXFUNCPTR(D2COMMON, GetEleMaxDmg, int, __stdcall, (UnitAny* ptUnit, int SkillId, int SkillLvl, int aOne), -10662) //k
-		EXFUNCPTR(D2COMMON, EvaluateSkill, int, __stdcall, (UnitAny* ptUnit, int FormulaNo, int SkillId, int SkillLvl), -11081) //k
+EXFUNCPTR(D2COMMON, GetSkillDmgBonus, int, __stdcall, (UnitAny* ptUnit, int FormulaNo, int SkillId, int SkillLvl), -10586) // k
+EXFUNCPTR(D2COMMON, GetPhysMinDmg, int, __stdcall, (UnitAny* ptUnit, int SkillId, int SkillLvl, int aZero), -10687) //k
+EXFUNCPTR(D2COMMON, GetPhysMaxDmg, int, __stdcall, (UnitAny* ptUnit, int SkillId, int SkillLvl, int aZero), -10196) //k
+EXFUNCPTR(D2COMMON, GetEleDmgDuration, int, __stdcall, (UnitAny* ptUnit, int SkillId, int SkillLvl, int aOne), -11154) //k
+EXFUNCPTR(D2COMMON, GetEleMinDmg, int, __stdcall, (UnitAny* ptUnit, int SkillId, int SkillLvl, int aOne), -10728) //k
+EXFUNCPTR(D2COMMON, GetEleMaxDmg, int, __stdcall, (UnitAny* ptUnit, int SkillId, int SkillLvl, int aOne), -10662) //k
+EXFUNCPTR(D2COMMON, EvaluateSkill, int, __stdcall, (UnitAny* ptUnit, int FormulaNo, int SkillId, int SkillLvl), -11081) //k
 
-		EXFUNCPTR(D2COMMON, GetLeftSkill, Skill*, __stdcall, (UnitAny* ptUnit), -10909) //k
-		EXFUNCPTR(D2COMMON, GetRightSkill, Skill*, __stdcall, (UnitAny* ptUnit), -10942) //k
+EXFUNCPTR(D2COMMON, GetLeftSkill, Skill*, __stdcall, (UnitAny* ptUnit), -10909) //k
+EXFUNCPTR(D2COMMON, GetRightSkill, Skill*, __stdcall, (UnitAny* ptUnit), -10942) //k
 
-		//Map Funcs
-		EXFUNCPTR(D2COMMON, GetLevelNoByRoom, int, __stdcall, (Room1* ptRoom), -10691) // k
-		EXFUNCPTR(D2COMMON, GetActNoByLevelNo, int, __stdcall, (int dwLevelNo), -10864) //k
-		EXFUNCPTR(D2COMMON, GetTownLevel, int, __stdcall, (int dwActNo), -10353) //k
-		EXFUNCPTR(D2COMMON, AddRoomData, void, __stdcall, (Act* ptAct, int LevelId, int Xpos, int Ypos, Room1*  pRoom), -10890) //k
-		EXFUNCPTR(D2COMMON, RemoveRoomData, void, __stdcall, (Act* ptAct, int LevelId, int Xpos, int Ypos, Room1*  pRoom), -10208) //k
-		EXFUNCPTR(D2COMMON, GetLevel, Level*, __fastcall, (ActMisc* pMisc, int dwLevelNo), -10283) //k
-		EXFUNCPTR(D2COMMON, GetLayer, AutoMapLayer2*, __fastcall, (DWORD dwLevelNo), -10087) //k
-		EXFUNCPTR(D2COMMON, GetObjectTxt, ObjectTxt*, __stdcall, (DWORD objno), -10319) //k
-		EXFUNCPTR(D2COMMON, GetRoomXYByLevel, Room1*, __stdcall, (Act* ptAct, int LevelNo, int Unk0, int* xPos, int* yPos, int UnitAlign), -10632) //k // Player Align =  2
-		EXFUNCPTR(D2COMMON, GetRoomByXY, Room1*, __stdcall, (Act* ptAct, int nX, int nY), -11056) // k
-		EXFUNCPTR(D2COMMON, CheckXYType, BOOL, __stdcall, (UnitAny *pUnit, int pX, int pY, int Type), -10841)
-		EXFUNCPTR(D2COMMON, MapToAbsScreen, void, __stdcall, (long *pX, long *pY), -10582) //k
-		EXFUNCPTR(D2COMMON, AbsScreenToMap, void, __stdcall, (long *mX, long *mY), -10720) //k
-		EXFUNCPTR(D2COMMON, GetUnitXOffset, int, __stdcall, (UnitAny* pUnit), -10641) //k
-		EXFUNCPTR(D2COMMON, GetUnitYOffset, int, __stdcall, (UnitAny* pUnit), -10057) //k
+//Map Funcs
+EXFUNCPTR(D2COMMON, GetLevelNoByRoom, int, __stdcall, (Room1* ptRoom), -10691) // k
+EXFUNCPTR(D2COMMON, GetActNoByLevelNo, int, __stdcall, (int dwLevelNo), -10864) //k
+EXFUNCPTR(D2COMMON, GetTownLevel, int, __stdcall, (int dwActNo), -10353) //k
+EXFUNCPTR(D2COMMON, AddRoomData, void, __stdcall, (Act* ptAct, int LevelId, int Xpos, int Ypos, Room1*  pRoom), -10890) //k
+EXFUNCPTR(D2COMMON, RemoveRoomData, void, __stdcall, (Act* ptAct, int LevelId, int Xpos, int Ypos, Room1*  pRoom), -10208) //k
+EXFUNCPTR(D2COMMON, GetLevel, Level*, __fastcall, (ActMisc* pMisc, int dwLevelNo), -10283) //k
+EXFUNCPTR(D2COMMON, GetLayer, AutoMapLayer2*, __fastcall, (DWORD dwLevelNo), -10087) //k
+EXFUNCPTR(D2COMMON, GetObjectTxt, ObjectTxt*, __stdcall, (DWORD objno), -10319) //k
+EXFUNCPTR(D2COMMON, GetRoomXYByLevel, Room1*, __stdcall, (Act* ptAct, int LevelNo, int Unk0, int* xPos, int* yPos, int UnitAlign), -10632) //k // Player Align =  2
+EXFUNCPTR(D2COMMON, GetRoomByXY, Room1*, __stdcall, (Act* ptAct, int nX, int nY), -11056) // k
+EXFUNCPTR(D2COMMON, CheckXYType, BOOL, __stdcall, (UnitAny *pUnit, int pX, int pY, int Type), -10841)
+EXFUNCPTR(D2COMMON, MapToAbsScreen, void, __stdcall, (long *pX, long *pY), -10582) //k
+EXFUNCPTR(D2COMMON, AbsScreenToMap, void, __stdcall, (long *mX, long *mY), -10720) //k
+EXFUNCPTR(D2COMMON, GetUnitXOffset, int, __stdcall, (UnitAny* pUnit), -10641) //k
+EXFUNCPTR(D2COMMON, GetUnitYOffset, int, __stdcall, (UnitAny* pUnit), -10057) //k
 
-		//Stat funcs
-		EXFUNCPTR(D2COMMON, SetStat, void, __stdcall, (UnitAny *ptUnit, int nStat, int nValue, int nLayer), -10590) // 1.13d
-		EXFUNCPTR(D2COMMON, GetStatSigned, int, __stdcall, (UnitAny *ptUnit, int nStat, int nLayer), -10550) // 1.13d
-		EXFUNCPTR(D2COMMON, GetBaseStatSigned, int, __stdcall, (UnitAny *ptUnit, int nStat, int nLayer), -10216) // 1.13d
-		EXFUNCPTR(D2COMMON, GetUnitState, int, __stdcall, (UnitAny *ptUnit, DWORD dwStateNo), -10706) //k
-		EXFUNCPTR(D2COMMON, GetUnitMaxLife, unsigned int, __stdcall, (UnitAny *ptUnit), -10574) //k
-		EXFUNCPTR(D2COMMON, GetUnitMaxMana, unsigned int, __stdcall, (UnitAny *ptUnit), -10084) //k
-		EXFUNCPTR(D2COMMON, GetUnitRoom, Room1*, __stdcall, (UnitAny *ptUnit), -10846) //k
-		EXFUNCPTR(D2COMMON, GetExpToAchiveLvl, int, __stdcall, (int ClassId, int ExpLvl), -10949) //k
+//Stat funcs
+EXFUNCPTR(D2COMMON, SetStat, void, __stdcall, (UnitAny *ptUnit, int nStat, int nValue, int nLayer), -10590) // 1.13d
+EXFUNCPTR(D2COMMON, GetStatSigned, int, __stdcall, (UnitAny *ptUnit, int nStat, int nLayer), -10550) // 1.13d
+EXFUNCPTR(D2COMMON, GetBaseStatSigned, int, __stdcall, (UnitAny *ptUnit, int nStat, int nLayer), -10216) // 1.13d
+EXFUNCPTR(D2COMMON, GetUnitState, int, __stdcall, (UnitAny *ptUnit, DWORD dwStateNo), -10706) //k
+EXFUNCPTR(D2COMMON, GetUnitMaxLife, unsigned int, __stdcall, (UnitAny *ptUnit), -10574) //k
+EXFUNCPTR(D2COMMON, GetUnitMaxMana, unsigned int, __stdcall, (UnitAny *ptUnit), -10084) //k
+EXFUNCPTR(D2COMMON, GetUnitRoom, Room1*, __stdcall, (UnitAny *ptUnit), -10846) //k
+EXFUNCPTR(D2COMMON, GetExpToAchiveLvl, int, __stdcall, (int ClassId, int ExpLvl), -10949) //k
 
-		//Item Related
-		EXFUNCPTR(D2COMMON, GetItemText, ItemsTxt*, __stdcall, (int RecordNo), -10994) //k
-		EXFUNCPTR(D2COMMON, GetItemByBodyLoc, UnitAny*, __stdcall, (Inventory * pInventory, int aLoc), -10292) //k
-		EXFUNCPTR(D2COMMON, GetItemFlag, BOOL, __stdcall, (UnitAny *item, DWORD flagmask, DWORD lineno, char *filename), -10458) //k
-		EXFUNCPTR(D2COMMON, GetItemColor, BYTE*, __stdcall, (UnitAny *ptPlayer, UnitAny* ptItem, BYTE* out, BOOL a4), -11062) //k
+//Item Related
+EXFUNCPTR(D2COMMON, GetItemText, ItemsTxt*, __stdcall, (int RecordNo), -10994) //k
+EXFUNCPTR(D2COMMON, GetItemByBodyLoc, UnitAny*, __stdcall, (Inventory * pInventory, int aLoc), -10292) //k
+EXFUNCPTR(D2COMMON, GetItemFlag, BOOL, __stdcall, (UnitAny *item, DWORD flagmask, DWORD lineno, char *filename), -10458) //k
+EXFUNCPTR(D2COMMON, GetItemColor, BYTE*, __stdcall, (UnitAny *ptPlayer, UnitAny* ptItem, BYTE* out, BOOL a4), -11062) //k
 
-		//D2NET
-		EXFUNCPTR(D2NET, SendPacket, bool, __stdcall, (int PacketLen, int _1, BYTE *aPacket), -10015) // k
-		EXFUNCPTR(D2NET, ReceivePacket, void, __fastcall, (int *eLen, BYTE* aPacket, int aLen), 0x7450) //k
+//D2NET
+EXFUNCPTR(D2NET, SendPacket, bool, __stdcall, (int PacketLen, int _1, BYTE *aPacket), -10015) // k
+EXFUNCPTR(D2NET, ReceivePacket, void, __fastcall, (int *eLen, BYTE* aPacket, int aLen), 0x7450) //k
 
-		//BNCLIENT
-		EXFUNCPTR(BNCLIENT, SendBNMessage, void, __fastcall, (const char* szMsg), 0x13050) // ns
+//BNCLIENT
+EXFUNCPTR(BNCLIENT, SendBNMessage, void, __fastcall, (const char* szMsg), 0x13050) // ns
 
-		//D2GFX 
-		EXFUNCPTR(D2GFX, DrawRectangle, void, __stdcall, (int X1, int Y1, int X2, int Y2, int dwColor, int dwTrans), -10028) // k
-		EXFUNCPTR(D2GFX, DrawLine, void, __stdcall, (int X1, int Y1, int X2, int Y2, BYTE Col, BYTE Unk), -10013) //k
+//D2GFX 
+EXFUNCPTR(D2GFX, DrawRectangle, void, __stdcall, (int X1, int Y1, int X2, int Y2, int dwColor, int dwTrans), -10028) // k
+EXFUNCPTR(D2GFX, DrawLine, void, __stdcall, (int X1, int Y1, int X2, int Y2, BYTE Col, BYTE Unk), -10013) //k
 
-		EXFUNCPTR(D2GFX, GetHwnd, HWND, __stdcall, (void), -10007) // k
-		EXFUNCPTR(D2GFX, DrawCellContext, void, __stdcall, (CellContext *context, int Xpos, int Ypos, int dwl, int nTransLvl, BYTE *Pal255), -10042) // k
-		EXFUNCPTR(D2GFX, DrawCellContextEx, void, __stdcall, (CellContext *context, int Xpos, int Ypos, int dwl, int nTransLvl, BYTE Color), -10067) //k
-		EXFUNCPTR(D2GFX, GetResolutionMode, int, __stdcall, (), -10012)
-		EXFUNCPTR(D2GFX, SetResolutionMode, BOOL, __stdcall, (int nMode, BOOL bUpdate), -10069)
-		EXFUNCPTR(D2GFX, SetScreenShift, void, __fastcall, (int nShift), -10047)
+EXFUNCPTR(D2GFX, GetHwnd, HWND, __stdcall, (void), -10007) // k
+EXFUNCPTR(D2GFX, DrawCellContext, void, __stdcall, (CellContext *context, int Xpos, int Ypos, int dwl, int nTransLvl, BYTE *Pal255), -10042) // k
+EXFUNCPTR(D2GFX, DrawCellContextEx, void, __stdcall, (CellContext *context, int Xpos, int Ypos, int dwl, int nTransLvl, BYTE Color), -10067) //k
+EXFUNCPTR(D2GFX, GetResolutionMode, int, __stdcall, (), -10012)
+EXFUNCPTR(D2GFX, SetResolutionMode, BOOL, __stdcall, (int nMode, BOOL bUpdate), -10069)
+EXFUNCPTR(D2GFX, SetScreenShift, void, __fastcall, (int nShift), -10047)
+EXFUNCPTR(D2GFX, InitGouraudCache, void, __stdcall, (), 0x9750)
 
-		//D2GDI
-		EXFUNCPTR(D2GDI, GetCallbacks, fnRendererCallbacks*, __fastcall, (), -10000) // Same oridinal for every patch and GFX driver (GDI, D2D, D3D, GLIDE). Used directly but left just in case.
+//D2GDI
+EXFUNCPTR(D2GDI, GetCallbacks, fnRendererCallbacks*, __fastcall, (), -10000) // Same oridinal for every patch and GFX driver (GDI, D2D, D3D, GLIDE). Used directly but left just in case.
+
 
 		//D2GLIDE
-
 		EXFUNCPTR(D2GLIDE, AllocCache, BOOL, __stdcall, (), 0xD180)
-
+		EXFUNCPTR(D2GLIDE, CreateDebugFont, BOOL, __stdcall, (), 0x7E90)
 		//D2WIN
 		EXFUNCPTR(D2WIN, ResizeWindow, BOOL, __stdcall, (int nMode), -10037)
 
@@ -347,6 +348,7 @@ void SetupD2Vars() {
 		EXVARPTR(D2GFX, hDriverModHandle, HMODULE, 0x14A4C)
 		EXVARPTR(D2GFX, bPerspective, BOOL, 0x10BE8)
 		EXVARPTR(D2GFX, GammaValue, int, 0x10BF0)
+		EXVARPTR(D2GFX, WinPlacementCache, D2WinPlacement, 0x14570)
 
 		EXVARPTR(D2GDI, WindowWidth, int, 0xCA98)
 		EXVARPTR(D2GDI, BitmapHeight, int, 0xC980)
@@ -354,7 +356,7 @@ void SetupD2Vars() {
 		EXVARPTR(D2GDI, gpbBuffer, void*, 0xCA9C)
 		EXVARPTR(D2GDI, DIB, HBITMAP, 0xC97C)
 		EXVARPTR(D2GDI, hWnd, HANDLE, 0xC568)
-		EXVARPTR(D2GDI, PaletteEntries, PALETTEENTRY*, 0xC570)
+		EXVARPTR(D2GDI, PaletteEntries, PALETTEENTRY, 0xC570)
 		EXVARPTR(D2GDI, Palette, HPALETTE, 0xC974)
 		EXVARPTR(D2GDI, hFont, HFONT, 0xC988)
 		EXVARPTR(D2GDI, Unk, int, 0xCA94)
@@ -368,6 +370,8 @@ void SetupD2Vars() {
 		EXVARPTR(D2GLIDE, TextureAlign, FxI32, 0x17B20)
 		EXVARPTR(D2GLIDE, bUMAAvailable, BOOL, 0x17B1C)
 		EXVARPTR(D2GLIDE, hWnd, HANDLE, 0x15A74)
+		EXVARPTR(D2GLIDE, SpritesInited, BOOL, 0x17B54)
+		EXVARPTR(D2GLIDE, UnkBool1, BOOL, 0x14984)
 
 		//Key Config
 		EXVARPTR(D2CLIENT, KeyBindings, KeyBinding, 0x108D90) // ArraySize = 114

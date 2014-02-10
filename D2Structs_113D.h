@@ -310,7 +310,7 @@ struct PlayerData { //size 0x16C , copied from serverside, dunno if everything i
 
 struct ObjectData
 {
-	void* pObjectTxt;				//0x00
+	ObjectTxt* pObjectTxt;				//0x00
 	BYTE InteractType;				//0x04
 	BYTE _1[3];						//0x05
 	DWORD _2[8];					//0x08

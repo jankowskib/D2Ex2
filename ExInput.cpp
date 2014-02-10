@@ -7,14 +7,18 @@
 // IMPORT FROM SCRAP Project
 void ExInput::DefineBindings()
 {
-//D2Funcs.STORM_RegisterKeyDown(D2Funcs.D2GFX_GetHwnd(),VK_Aim,&ExAim::b_Aim);
+#ifdef D2EX_PVM_BUILD
+//D2Funcs.STORM_RegisterKeyDown(D2Funcs.D2GFX_GetHwnd(),VK_ATNext,&ExAim::b_Aim);
 //D2Funcs.STORM_RegisterKeyDown(D2Funcs.D2GFX_GetHwnd(),VK_FastTP,&ExChicken::b_FastTP);
+#endif
 }
 
 void ExInput::UndefineBindings()
 {
-//D2Funcs.STORM_UnregisterKeyDown(D2Funcs.D2GFX_GetHwnd(),VK_Aim,&ExAim::b_Aim);
+#ifdef D2EX_PVM_BUILD
+//D2Funcs.STORM_UnregisterKeyDown(D2Funcs.D2GFX_GetHwnd(), VK_ATNext, &ExAim::b_Aim);
 //D2Funcs.STORM_UnregisterKeyDown(D2Funcs.D2GFX_GetHwnd(),VK_FastTP,&ExChicken::b_FastTP);
+#endif
 }
 
 void ExInput::RegisterMsgs(sMsg* pMsgList, int nCount)
@@ -313,7 +317,7 @@ LONG WINAPI ExInput::GameWindowEvent(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM
 		}
 		else if (GET_WHEEL_DELTA_WPARAM(wParam) > 0)
 		{
-			if (*D2Vars.D2GFX_GfxMode (unsigned int)<  ExMultiRes::lResModes.size() + 2)
+			if ((unsigned int)*D2Vars.D2GFX_GfxMode <  ExMultiRes::lResModes.size() + 2)
 			{
 				EnterCriticalSection(&CON_CRITSECT);
 				int x, y;

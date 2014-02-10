@@ -41,15 +41,79 @@ namespace ExMultiRes
 	} static ResFiles;
 
 	vector<ResMode> lResModes;
-	int *gptBufferXLookUpTable;
+    int *gptBufferXLookUpTable;
 //	int gBufferXLookUpTable[GDI_MAXY + 1] = { 0 };
+
+//D2Client funcs
+
+	void __fastcall D2CLIENT_SetResolution(int nMode) // Wrapper on D2CLIENT.0x2C220
+	{
+		DEBUGMSG("Changing window resolution to %d mode", nMode);
+
+		if (GFX_GetResolutionMode() == nMode)
+			return;
+
+		D2GFX_GetModeParams(nMode, D2Vars.D2CLIENT_ScreenWidth, D2Vars.D2CLIENT_ScreenHeight);
+		*D2Vars.D2CLIENT_ScreenMode = (nMode == 2 ? 1 : nMode);
+
+		*D2Vars.D2CLIENT_ScreenViewWidth = *D2Vars.D2CLIENT_ScreenWidth;
+		*D2Vars.D2CLIENT_ScreenViewHeight = *D2Vars.D2CLIENT_ScreenHeight - 40;
+		*D2Vars.D2CLIENT_ScreenWidthUnk = *D2Vars.D2CLIENT_ScreenWidth;
+
+		D2Funcs.D2WIN_ResizeWindow(nMode);
+		D2CLIENT_ResizeView(*D2Vars.D2CLIENT_UiCover);
+		D2Funcs.D2CLIENT_UpdateAutoMap(TRUE);
+		D2Funcs.D2CLIENT_ClearScreen4();
+		if(BuffsEnabled)
+			ExBuffs::UpdateYPos();
+	}
+
+	void __fastcall D2CLIENT_ResizeView(int UiCover) // Wrapper on D2CLIENT.0x5C4F0
+	{
+		switch (UiCover)
+		{
+		case COVER_NONE:
+		{
+			*D2Vars.D2CLIENT_ScreenXShift = 0;
+			D2ASMFuncs::D2CLIENT_SetView(0, *D2Vars.D2CLIENT_ScreenViewWidth, 0, *D2Vars.D2CLIENT_ScreenViewHeight, *D2Vars.D2CLIENT_GameView);
+		}
+			break;
+		case COVER_BOTH:
+		{
+			*D2Vars.D2CLIENT_ScreenXShift = 0;
+			D2ASMFuncs::D2CLIENT_SetView(0, *D2Vars.D2CLIENT_ScreenViewWidth, 0, *D2Vars.D2CLIENT_ScreenViewHeight, *D2Vars.D2CLIENT_GameView);
+			*D2Vars.D2CLIENT_UiUnk1 = 0;
+			*D2Vars.D2CLIENT_UiUnk2 = 0;
+			*D2Vars.D2CLIENT_UiUnk3 = 0;
+			*D2Vars.D2CLIENT_UiUnk4 = 0;
+		}
+			break;
+		case COVER_LEFT:
+		{
+			*D2Vars.D2CLIENT_ScreenXShift = *D2Vars.D2CLIENT_ScreenWidth / -4;
+			D2ASMFuncs::D2CLIENT_SetView(*D2Vars.D2CLIENT_ScreenViewWidth / -4, *D2Vars.D2CLIENT_ScreenViewWidth - (*D2Vars.D2CLIENT_ScreenViewWidth / 4), 0, *D2Vars.D2CLIENT_ScreenViewHeight, *D2Vars.D2CLIENT_GameView);
+		}
+			break;
+		case COVER_RIGHT:
+		{
+			*D2Vars.D2CLIENT_ScreenXShift = *D2Vars.D2CLIENT_ScreenWidth / 4;
+			D2ASMFuncs::D2CLIENT_SetView(*D2Vars.D2CLIENT_ScreenViewWidth / 4, *D2Vars.D2CLIENT_ScreenViewWidth + (*D2Vars.D2CLIENT_ScreenViewWidth / 4), 0, *D2Vars.D2CLIENT_ScreenViewHeight, *D2Vars.D2CLIENT_GameView);
+		}
+			break;
+		}
+		*D2Vars.D2CLIENT_UiCover = UiCover;
+		D2Funcs.D2GFX_SetScreenShift(*D2Vars.D2CLIENT_ScreenXShift);
+
+	}
+
+// D2GFX funcs
 	
 	BOOL __stdcall D2GFX_InitWindow(HINSTANCE hInstance, LRESULT(__stdcall *pWndProc)(HWND, UINT, WPARAM, LPARAM), int nRenderMode, BOOL bWindowed) // Wrapper on D2Gfx.10073
 	{
 		WNDCLASS WndClass;
 		const char * szDriverDLLs[] = { "", "D2Gdi.dll", "D2Rave.dll", "D2DDraw.dll", "D2Glide.dll", "D2OpenGL.dll", "D2Direct3D.dll" };
 		typedef fnRendererCallbacks* (__stdcall * GetCallbacks_t)();
-		DEBUGMSG("D2GFX->D2GFX_InitWindow()");
+		DEBUGMSG("D2GFX->InitWindow()");
 
 		gRenderer = nRenderMode;
 		DEBUGMSG("Waiting for ready event...");
@@ -57,9 +121,9 @@ namespace ExMultiRes
 		WaitForSingleObject(hPointersReadyEvent, 10000);
 		DEBUGMSG("Waited %.2f sec!", (float)(GetTickCount() - t) / 1000);
 		*D2Vars.D2GFX_hInstance = hInstance;
-		//WndClass.cbSize = sizeof(WNDCLASSEX);
+	//	WndClass.cbSize = sizeof(WNDCLASSEX);
 		WndClass.lpfnWndProc = pWndProc;
-		WndClass.style = 0;
+		WndClass.style = nRenderMode == VIDEO_MODE_GLIDE ? 0x20 : 0;
 		WndClass.cbClsExtra = 0;
 		WndClass.cbWndExtra = 0;
 		WndClass.hInstance = hInstance;
@@ -73,12 +137,12 @@ namespace ExMultiRes
 		{
 			int err  = GetLastError();
 			DEBUGMSG("RegisterClass ERROR (%d)!", err)
-			//TODO: GFX_Error_6FA87AA0((char *)v5);
+			//@TODO: GFX_Error_6FA87AA0((char *)v5);
 			return FALSE;
 		}
-		// TODO:sub_6FA89750();
+		D2Funcs.D2GFX_InitGouraudCache();
 		*D2Vars.D2GFX_gpbBuffer = 0;
-		// TODO: atexit(sub_6FA8AB60);
+		atexit(&D2GFX_WindowCleanUp);
 		*D2Vars.D2GFX_DriverType = nRenderMode;
 		*D2Vars.D2GFX_WindowMode = bWindowed;
 		*D2Vars.D2GFX_hDriverModHandle = LoadLibrary(szDriverDLLs[nRenderMode]);
@@ -106,28 +170,43 @@ namespace ExMultiRes
 			break;
 			case VIDEO_MODE_GLIDE:
 			{
+				DEBUGMSG("Using GLIDE video mode!")
+
 				Misc::WriteDword((DWORD*)&(fns->Init), (DWORD)&ExMultiRes::GLIDE_Init);
 				Misc::WriteDword((DWORD*)&(fns->ResizeWin), (DWORD)&ExMultiRes::GLIDE_ResizeWindow);
-				DEBUGMSG("Using GLIDE video mode!")
 			}
 			break;
 			default:
 			{
-				D2EXERROR("Video mode %d is not yet supported... :(", nRenderMode)
+				D2EXERROR("Video mode %s is not yet supported... :(", szDriverDLLs[nRenderMode])
 			}
 			break;
 		}
 
-		fns->SetOption(8, bWindowed == 1);
+		fns->SetOption(8, bWindowed);
 
-		if (!fns->D2GFX_InitWindow(hInstance))
+		if (!fns->InitWindow(hInstance))
 		{
 			D2EXERROR("Cannot initialize GFX driver. Please run D2VidTest and try again");
 		}
 		if (nRenderMode < VIDEO_MODE_GLIDE)
-			*D2Vars.D2GFX_bPerspective = FALSE;
+			(*D2Vars.D2GFX_Settings).bPerspectiveCapable = FALSE;
 
 		return fns->InitPerspective((GFXSettings*)&(*D2Vars.D2GFX_Settings), (GFXHelpers*)&(*D2Vars.D2GFX_fnHelpers));
+	}
+
+	void D2GFX_WindowCleanUp() // Wrapper on D2GFX.6FA8AB60 
+	{
+		if (*D2Vars.D2GFX_WindowMode == 1)
+			return;
+
+		for (int i = 0; i < 4; ++i)
+		{
+			D2WinPlacement* wp = (D2WinPlacement*)&D2Vars.D2GFX_WinPlacementCache[i];
+			if (!wp->hWnd) break;
+			DEBUGMSG("D2GFX_CleanUp: Showing window with cmd %d", wp->hWindowPlacement.showCmd)
+			ShowWindow(wp->hWnd, wp->hWindowPlacement.showCmd);
+		}
 	}
 
 	bool enterFullscreen() 
@@ -183,29 +262,43 @@ namespace ExMultiRes
 					if (pHeight) *pHeight = 600;
 					break;
 				}
-				if (pWidth) *pWidth = lResModes.at(nMode - 3).nWidth;
-				if (pHeight) *pHeight = lResModes.at(nMode - 3).nHeight;
+			/*	if (*D2Vars.D2GFX_DriverType == VIDEO_MODE_GLIDE)
+				{
+					const struct {
+						int x;
+						int y;
+					} res[] = { { 1024, 768 }, { 1280, 1024 }, { 1600, 1200 }};
+					if (pWidth) *pWidth = res[nMode % 3].x;
+					if (pHeight) *pHeight = res[nMode % 3].y;
+				}
+				else*/
+				{
+					if (pWidth) *pWidth = lResModes.at(nMode - 3).nWidth;
+					if (pHeight) *pHeight = lResModes.at(nMode - 3).nHeight;
+				}
 			}
 			break;
 		}
 	}
 
-	BOOL __stdcall D2GFX_SetResolutionMode(int nMode, BOOL bUpdate) // Wrapper on D2Gfx.10069
+	BOOL __stdcall D2GFX_SetResolution(int nMode, BOOL bUpdate) // Wrapper on D2Gfx.10069
 	{
-		ASSERT(*D2Vars.D2GFX_pfnDriverCallback)
+		DEBUGMSG("D2GFX_SetResolution(%d, %d)", nMode, bUpdate);
 
-		if (bUpdate || nMode != *D2Vars.D2GFX_GfxMode)
+		if (bUpdate || nMode != GFX_GetResolutionMode())
 		{
-			*D2Vars.D2GFX_GfxMode = nMode;
+			GFX_SetResolutionMode(nMode);
 			if (*D2Vars.D2GFX_WindowMode == TRUE)
 			{
 				RECT r = { 0 };
 				D2GFX_GetModeParams(nMode, (int*)&r.right, (int*)&r.bottom);
-				AdjustWindowRectEx(&r, 0xCB0000, 0, 0x40000);
-				SetWindowPos(D2Funcs.D2GFX_GetHwnd(), (HWND)-2, 0, 0, r.right - r.left, r.bottom - r.top, 0x16);
+				AdjustWindowRectEx(&r, 0xCB0000, FALSE, WS_EX_APPWINDOW);
+				SetWindowPos(D2Funcs.D2GFX_GetHwnd(), HWND_NOTOPMOST, 0, 0, r.right - r.left, r.bottom - r.top, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+				
 			}
+			BOOL res =(*D2Vars.D2GFX_pfnDriverCallback)->ResizeWin(D2Funcs.D2GFX_GetHwnd(), nMode);	 
 			D2GFX_SetStoredGammaAndContrast();
-			return (*D2Vars.D2GFX_pfnDriverCallback)->ResizeWin(D2Funcs.D2GFX_GetHwnd(), nMode);	 
+			return res;
 		}
 		return TRUE;
 	}
@@ -217,66 +310,6 @@ namespace ExMultiRes
 		(*D2Vars.D2GFX_pfnDriverCallback)->SetOption(11, c);
 		(*D2Vars.D2GFX_pfnDriverCallback)->SetGamma(g);
 		*D2Vars.D2GFX_GammaValue = g;
-	}
-
-	void __fastcall D2CLIENT_SetResolution(int nMode) // Wrapper on D2CLIENT.0x2C220
-	{
-		DEBUGMSG("Changing window resolution to %d mode", nMode);
-
-		if (D2Funcs.D2GFX_GetResolutionMode() == nMode)
-			return;
-		//nMode = 3;
-
-		D2GFX_GetModeParams(nMode, D2Vars.D2CLIENT_ScreenWidth, D2Vars.D2CLIENT_ScreenHeight);
-		*D2Vars.D2CLIENT_ScreenMode = (nMode == 2 ? 1 : nMode);
-
-		*D2Vars.D2CLIENT_ScreenViewWidth = *D2Vars.D2CLIENT_ScreenWidth;
-		*D2Vars.D2CLIENT_ScreenViewHeight = *D2Vars.D2CLIENT_ScreenHeight - 40;
-		*D2Vars.D2CLIENT_ScreenWidthUnk = *D2Vars.D2CLIENT_ScreenWidth;
-
-		D2Funcs.D2WIN_ResizeWindow(nMode);
-		D2CLIENT_ResizeView(*D2Vars.D2CLIENT_UiCover);
-		D2Funcs.D2CLIENT_UpdateAutoMap(TRUE);
-		D2Funcs.D2CLIENT_ClearScreen4();
-		ExBuff::UpdateYPos();
-	}
-
-	void __fastcall D2CLIENT_ResizeView(int UiCover) // Wraper on D2CLIENT.0x5C4F0
-	{
-		switch (UiCover)
-		{
-			case COVER_NONE:
-			{
-				*D2Vars.D2CLIENT_ScreenXShift = 0;
-				D2ASMFuncs::D2CLIENT_SetView(0, *D2Vars.D2CLIENT_ScreenViewWidth, 0, *D2Vars.D2CLIENT_ScreenViewHeight, *D2Vars.D2CLIENT_GameView);
-			}
-			break;
-			case COVER_BOTH:
-			{
-				*D2Vars.D2CLIENT_ScreenXShift = 0;
-				D2ASMFuncs::D2CLIENT_SetView(0, *D2Vars.D2CLIENT_ScreenViewWidth, 0, *D2Vars.D2CLIENT_ScreenViewHeight, *D2Vars.D2CLIENT_GameView);
-				*D2Vars.D2CLIENT_UiUnk1 = 0;
-				*D2Vars.D2CLIENT_UiUnk2 = 0;
-				*D2Vars.D2CLIENT_UiUnk3 = 0;
-				*D2Vars.D2CLIENT_UiUnk4 = 0;
-			}
-			break;
-			case COVER_LEFT:
-			{
-				*D2Vars.D2CLIENT_ScreenXShift = *D2Vars.D2CLIENT_ScreenWidth / -4;
-				D2ASMFuncs::D2CLIENT_SetView(*D2Vars.D2CLIENT_ScreenViewWidth / -4, *D2Vars.D2CLIENT_ScreenViewWidth - (*D2Vars.D2CLIENT_ScreenViewWidth / 4), 0, *D2Vars.D2CLIENT_ScreenViewHeight, *D2Vars.D2CLIENT_GameView);
-			}
-			break;
-			case COVER_RIGHT:
-			{
-				*D2Vars.D2CLIENT_ScreenXShift = *D2Vars.D2CLIENT_ScreenWidth / 4;
-				D2ASMFuncs::D2CLIENT_SetView(*D2Vars.D2CLIENT_ScreenViewWidth / 4, *D2Vars.D2CLIENT_ScreenViewWidth + (*D2Vars.D2CLIENT_ScreenViewWidth / 4), 0, *D2Vars.D2CLIENT_ScreenViewHeight, *D2Vars.D2CLIENT_GameView);
-			}
-			break;
-		}
-		*D2Vars.D2CLIENT_UiCover = UiCover;
-		D2Funcs.D2GFX_SetScreenShift(*D2Vars.D2CLIENT_ScreenXShift);
-		
 	}
 
 	//void __fastcall D2GFX_FillYBufferTable_OLD(void *ppvBits, int nWidth, int nHeight, int aZero) // Wrapper on D2GFX.6FA893B0
@@ -309,7 +342,9 @@ namespace ExMultiRes
 	{
 		static int LastWidth, LastHeight;
 		DEBUGMSG("FillYBuffer(), %dx%d, %d", nWidth, nHeight, aZero)
-
+			/*
+			@TODO: Optimize it a bit...
+			*/
 		*D2Vars.D2GFX_gpbBuffer = ppvBits;
 		*D2Vars.D2GFX_Width = nWidth;
 		*D2Vars.D2GFX_Height = nHeight;
@@ -328,7 +363,6 @@ namespace ExMultiRes
 			{
 				DEBUGMSG(">> Allocating gptXLookTbl, %dx%d", nWidth, nHeight);
 				gptBufferXLookUpTable = new signed int[nHeight + 33];
-				
 				for (int i = 0, YStartOffset = (-32 * nWidth); i < nHeight + 32; YStartOffset += nWidth)
 				{
 					gptBufferXLookUpTable[i++] = YStartOffset;
@@ -355,12 +389,21 @@ namespace ExMultiRes
 			LastHeight = nHeight;
 			LastWidth = nWidth;
 
-			if (*D2Vars.D2GFX_ScreenShift != -1 && gptBufferXLookUpTable)
+			if (*D2Vars.D2GFX_ScreenShift != -1)
 			{
 				D2ASMFuncs::D2GFX_UpdateResizeVars(nWidth, nHeight);
-				gptBufferXLookUpTable[nHeight + 32] = *D2Vars.D2GFX_ScreenShift == 2 ? (nWidth / 2) : 0;
 			}
 		}
+	}
+
+	int __stdcall GFX_GetResolutionMode() // Wrapper on D2GFX.10012
+	{
+		return *D2Vars.D2GFX_GfxMode;
+	}
+
+	void __stdcall GFX_SetResolutionMode(int nMode) // Created to replace external variable in the future
+	{
+		 *D2Vars.D2GFX_GfxMode = nMode;
 	}
 
 // D2GDI.dll recons
@@ -388,7 +431,7 @@ namespace ExMultiRes
 		HDC hdc = GetDC(NULL);
 		DEBUGMSG("Initing %dx%d bitmap buffer...", *D2Vars.D2GDI_BitmapWidth, *D2Vars.D2GDI_BitmapHeight)
 
-		*D2Vars.D2GDI_DIB = CreateDIBSection(hdc, (BITMAPINFO*)&bm, DIB_PAL_COLORS, D2Vars.D2GDI_gpbBuffer, NULL, NULL);
+		*D2Vars.D2GDI_DIB = CreateDIBSection(hdc, (BITMAPINFO*)&bm, DIB_RGB_COLORS, D2Vars.D2GDI_gpbBuffer, NULL, NULL);
 		ReleaseDC(NULL, hdc);
 
 		D2GFX_FillYBufferTable(*D2Vars.D2GDI_gpbBuffer, *D2Vars.D2GDI_BitmapWidth, *D2Vars.D2GDI_BitmapHeight, 0);
@@ -407,8 +450,7 @@ namespace ExMultiRes
 			PALETTEENTRY	palPalEntry[256];
 		};
 
-		memset(D2Vars.D2GDI_PaletteEntries, 0, 1024);
-		DEBUGMSG("D2LOGPALETTE size = %d", sizeof(D2LOGPALETTE))
+		memset(&(*D2Vars.D2GDI_PaletteEntries), 0, sizeof(PALETTEENTRY) * 256);
 		D2LOGPALETTE plpal = { 0 };
 
 		plpal.palVersion = 768;
@@ -463,7 +505,7 @@ namespace ExMultiRes
 
 	BOOL __fastcall GLIDE_SetRes(HANDLE hWND, int nMode) // Wrapper on D2GLIDE.6F85D5A0<eax>(int nResolution<eax>, HANDLE hWnd<edi>)
 	{
-		int w, h;
+		int w, h, r = 0;
 		static FxI32 nTexSize, nTexAspectRatio, nFB, nTMU;
 		static bool bHardwareChecked;
 
@@ -472,12 +514,23 @@ namespace ExMultiRes
 			D2EXERROR("Failed to initialize GLIDE Renderer (Window is already open!)");
 		}
 
+		D2Funcs.D2GLIDE_CreateDebugFont();
 		D2GFX_GetModeParams(nMode, &w, &h);
 		*D2Vars.D2GLIDE_Width = w;
 		*D2Vars.D2GLIDE_Height = h;
 		*D2Vars.D2GLIDE_hWnd = hWND;
 		DEBUGMSG("Opening Glide window @ %dx%d", w, h);
-		*D2Vars.D2GLIDE_Context = grSstWinOpen((FxU32)hWND, GR_RESOLUTION_MAX, GR_REFRESH_60Hz, GR_COLORFORMAT_RGBA, GR_ORIGIN_UPPER_LEFT, 2, 0);
+
+		//If you dont set this flag game crashes on res change that involve size change
+		*D2Vars.D2GLIDE_SpritesInited = 1;
+
+		if (w <= 1600 && h <= 1200) r = GR_RESOLUTION_1600x1200; 
+		if (w <= 1280 && h <= 1024) r = GR_RESOLUTION_1280x1024;
+		if (w <= 1024 && h <= 768) r = GR_RESOLUTION_1024x768;
+		if (w <= 800 && h <= 600) r = GR_RESOLUTION_800x600;
+		if (w <= 640 && h <= 480) r = GR_RESOLUTION_640x480;
+		if (r == 0) r = GR_RESOLUTION_MAX;
+		*D2Vars.D2GLIDE_Context = grSstWinOpen((FxU32)hWND, r, GR_REFRESH_60Hz, GR_COLORFORMAT_RGBA, GR_ORIGIN_UPPER_LEFT, 2, 0);
 		if (!*D2Vars.D2GLIDE_Context)
 		{
 			D2EXERROR("Failed to open GLIDE WINDOW!");
@@ -486,6 +539,7 @@ namespace ExMultiRes
 			*D2Vars.D2GLIDE_bIsWindowOpen = TRUE;
 			if (!bHardwareChecked)
 			{
+				bHardwareChecked = TRUE;
 				FxI32 nMemUma;
 		
 				grGet(GR_NUM_TMU, sizeof(FxI32), &nTMU);
@@ -503,10 +557,10 @@ namespace ExMultiRes
 				grGet(GR_MAX_TEXTURE_SIZE, sizeof(FxI32), &nTexSize);
 				grGet(GR_MAX_TEXTURE_ASPECT_RATIO, sizeof(FxI32), &nTexAspectRatio);
 				grGet(GR_NUM_FB, sizeof(FxI32), &nFB);
-				grGet(GR_TEXTURE_ALIGN, sizeof(FxI32), D2Vars.D2GLIDE_TextureAlign);
+				grGet(GR_TEXTURE_ALIGN, sizeof(FxI32), &(*D2Vars.D2GLIDE_TextureAlign));
 				grGet(GR_MEMORY_UMA, sizeof(FxI32),&nMemUma);
 				if (nMemUma) *D2Vars.D2GLIDE_bUMAAvailable = TRUE;
-				bHardwareChecked = true;
+
 			}
 
 			grCoordinateSpace(GR_WINDOW_COORDS);
@@ -521,11 +575,11 @@ namespace ExMultiRes
 			grVertexLayout(48, 8, 1);
 			grDepthMask(0);
 			grColorMask(1, 0);
-		/*	if (dword_6F864984)
+			if (*D2Vars.D2GLIDE_UnkBool1)
 			{
 				grTexCombine(0, 1, 0, 1, 0, 0, 0);
-				dword_6F864984 = 0;
-			}*/
+				*D2Vars.D2GLIDE_UnkBool1 = 0;
+			}
 			grTexFilterMode(0, 0, 0);
 			grTexCombine(0, 1, 0, 1, 0, 0, 0);
 			if (nTMU > 1)
@@ -653,7 +707,7 @@ namespace ExMultiRes
 		DWORD** r = reinterpret_cast<DWORD**>(&ResFiles);
 
 		if (!r[0]) return;
-		Misc::Log("Freeing ExMultiRes resources...");
+		DEBUGMSG("Freeing ExMultiRes resources...");
 		for (int i = 0; i < (sizeof(ResFiles) / 4); ++i)
 		{
 			if (!r[i]) break;
@@ -661,49 +715,6 @@ namespace ExMultiRes
 			r[i] = 0;
 		}
 	}
-
-	/*
-	We don't need this function anymore since we got renderer from D2GFX_InitWindow func
-	*/
-	//int GetRenderMode()
-	//{
-	//	HKEY hKey = {0};
-	//	DWORD nRenderMode = 0;
-
-	//	//HWND hWnd = GetForegroundWindow();
-	//	//if (hWnd != GetDesktopWindow() && hWnd != GetShellWindow())
-	//	//{
-	//	//	RECT dim;
-	//	//	GetWindowRect(hWnd, &dim);
-	//	//	
-	//	//	return VIDEO_MODE_GDI;
-	//	//}
-
-	//	if (RegOpenKeyEx(HKEY_CURRENT_USER, "SOFTWARE\\Blizzard Entertainment\\Diablo II\\VideoConfig", 0, KEY_QUERY_VALUE, &hKey) == ERROR_SUCCESS ||
-	//		RegOpenKeyEx(HKEY_LOCAL_MACHINE, "SOFTWARE\\Blizzard Entertainment\\Diablo II\\VideoConfig", 0, KEY_QUERY_VALUE, &hKey) == ERROR_SUCCESS)
-	//		{
-	//			DWORD nSize = 4;
-	//			if (RegQueryValueEx(hKey, "Render", NULL, NULL, (BYTE*)&nRenderMode, &nSize) == ERROR_SUCCESS)
-	//			{
-	//				switch (nRenderMode)
-	//				{
-	//				case 0:
-	//					return VIDEO_MODE_DDRAW;
-	//				case 1:
-	//					return VIDEO_MODE_D3D;
-	//				case 2:
-	//					return VIDEO_MODE_OPENGL;
-	//				case 3:
-	//					return VIDEO_MODE_GLIDE;
-	//				case 4:
-	//					return VIDEO_MODE_GDI;
-	//				}
-	//			}
-	//		}
-	//		return VIDEO_MODE_DDRAW;
-
-	//}
-
 
 	int FindDisplayMode(int Width, int Height)
 	{

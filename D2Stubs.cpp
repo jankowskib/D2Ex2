@@ -305,7 +305,7 @@ __declspec(naked) BOOL D2Stubs::D2GFX_SetResolutionMode_STUB()
 {
 	__asm
 	{
-		jmp ExMultiRes::D2GFX_SetResolutionMode
+		jmp ExMultiRes::D2GFX_SetResolution
 	}
 }
 
