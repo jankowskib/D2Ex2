@@ -17,7 +17,6 @@ namespace ExMultiRes
 	extern vector<ResMode> lResModes;
 
 	bool EnumDisplayModes();
-	int GetRenderMode();
 
 	int FindDisplayMode(int Width, int Height);
 	bool InitImages();
@@ -37,6 +36,9 @@ namespace ExMultiRes
 	//GFX pos fixes
 	void __stdcall GetBeltPos(int nIndex, int nMode, D2BeltBox *out, int nBox);
 	void __stdcall GetBeltsTxtRecord(int nIndex, int nMode, BeltsTxt *out);
+	void __stdcall GetInventorySize(int nRecord, int nScreenMode, InventorySize *pOutRect);
+	void __stdcall GetInventoryGrid(int nRecord, int nScreenMode, InventoryGrid *pOut);
+	void __stdcall GetInventoryField(int nRecord, int nScreenMode, InventoryLayout *pOut, int nField);
 
 	//Driver handlers
 	BOOL __fastcall GDI_ResizeWindow(HANDLE HWND, int nMode);

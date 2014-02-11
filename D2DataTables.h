@@ -12,6 +12,57 @@ struct ArenaTxt
 
 #pragma pack(push,1)
 
+/*
+	Time-saving credit goes to Mnw1995
+	http://d2mods.info/forum/viewtopic.php?f=8&t=61189
+	Isn't simpler now?
+*/
+
+struct InventoryLayout //sizeof 0x14
+{
+	DWORD dwLeft;		//0x00
+	DWORD dwRight;		//0x04
+	DWORD dwTop;		//0x08
+	DWORD dwBottom;		//0x0C
+	union 
+	{
+		struct 
+		{
+			BYTE nGridX;		//0x10
+			BYTE nGridY;		//0x11
+		};
+		struct
+		{
+			BYTE nWidth;	//0x10
+			BYTE nHeight;	//0x11
+		};
+	};
+	WORD _align;		//0x12
+};
+
+struct InventoryTxt //sizeof 0xF0
+{
+	InventoryLayout Inventory;		//0x00
+	InventoryLayout Grid;			//0x14
+	union
+		{
+		struct 
+		{
+			InventoryLayout RightArm;		//0x28
+			InventoryLayout Torso;			//0x3C
+			InventoryLayout LeftArm;		//0x50
+			InventoryLayout Head;			//0x64
+			InventoryLayout Neck;			//0x78
+			InventoryLayout RightHand;		//0x8C
+			InventoryLayout LeftHand;		//0xA0
+			InventoryLayout Belt;			//0xB4
+			InventoryLayout Feet;			//0xC8
+			InventoryLayout Gloves;			//0xDC
+		};
+		InventoryLayout hItem[9];
+	};
+};
+
 struct D2BeltBox
 {
 	DWORD dwBoxLeft;			//0x00

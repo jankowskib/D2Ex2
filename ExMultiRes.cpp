@@ -658,8 +658,10 @@ namespace ExMultiRes
 		out->dwBoxTop = out->dwBoxBottom - 29;
 	}
 
+// Why the hell Blizzard put in .txts the UI stuff?!
 	void __stdcall GetBeltsTxtRecord(int nIndex, int nMode, BeltsTxt *out) // Wrapper on D2Common.Ordinal10370
 	{
+		//@TODO: Don't make this const hardcoded
 		const int nBeltBoxesTbl[] = { 12, 8, 4, 16, 8, 12, 16 };
 
 		out->dwNumBoxes = nBeltBoxesTbl[nIndex % 7];
@@ -667,6 +669,143 @@ namespace ExMultiRes
 		for (int i = 0; (unsigned int) i < out->dwNumBoxes; ++i)
 		{
 			GetBeltPos(nIndex, nMode, &out->hBox[i], i);
+		}
+
+	}
+
+	void __stdcall GetInventorySize(int nRecord, int nScreenMode, InventorySize *pOut) // Wrapper on D2Common.Ordinal10770
+	{
+		if (nScreenMode < 2) // Legacy support
+		{
+			InventoryTxt* pTxt = &(*D2Vars.D2COMMON_InventoryTxt)[nRecord + (nScreenMode * 16)];
+			D2EXASSERT(pTxt, "Error in Inventory.txt. Record #%d doesn't exist", nRecord + (nScreenMode * 16));
+
+			pOut->dwLeft = pTxt->Inventory.dwLeft;
+			pOut->dwRight = pTxt->Inventory.dwRight;
+			pOut->dwTop = pTxt->Inventory.dwTop;
+			pOut->dwBottom = pTxt->Inventory.dwBottom;
+		}
+		else
+		{
+			InventoryTxt* pTxt = &(*D2Vars.D2COMMON_InventoryTxt)[nRecord];
+			D2EXASSERT(pTxt, "Error in Inventory.txt. Record #%d doesn't exist", nRecord);
+			
+			int xLeft = -1;
+			int xRight = -1;
+
+			if (pTxt->Grid.dwLeft > 300)
+			{
+				xLeft = pTxt->Inventory.dwLeft == -1 ? -1 : (*D2Vars.D2CLIENT_ScreenWidth - (640 - pTxt->Inventory.dwLeft));
+				xRight = pTxt->Inventory.dwRight == -1 ? -1 : (*D2Vars.D2CLIENT_ScreenWidth - (640 - pTxt->Inventory.dwRight));
+			}
+			else
+			{
+				xLeft = pTxt->Inventory.dwLeft;
+				xRight = pTxt->Inventory.dwRight;
+			}
+			int xTop = pTxt->Inventory.dwTop == -1 ? -1 : (*D2Vars.D2CLIENT_ScreenHeight - (480 - pTxt->Inventory.dwTop));
+			int xBottom = pTxt->Inventory.dwBottom == -1 ? -1 : (*D2Vars.D2CLIENT_ScreenHeight - (480 - pTxt->Inventory.dwBottom));
+			
+			pOut->dwLeft = xLeft;
+			pOut->dwRight = xRight;
+			pOut->dwTop = xTop;
+			pOut->dwBottom = xBottom;
+		}
+
+	}
+
+	void __stdcall GetInventoryGrid(int nRecord, int nScreenMode, InventoryGrid *pOut) // Wrapper on D2Common.Ordinal10964
+	{
+		if (nScreenMode < 2) // Legacy support
+		{
+			InventoryTxt* pTxt = &(*D2Vars.D2COMMON_InventoryTxt)[nRecord + (nScreenMode * 16)];
+			D2EXASSERT(pTxt, "Error in Inventory.txt. Record #%d doesn't exist", nRecord + (nScreenMode * 16));
+
+			pOut->nGridX = pTxt->Inventory.nGridX;
+			pOut->nGridY = pTxt->Inventory.nGridY;
+			pOut->dwLeft = pTxt->Grid.dwLeft;
+			pOut->dwRight = pTxt->Grid.dwRight;
+			pOut->dwTop = pTxt->Grid.dwTop;
+			pOut->dwBottom = pTxt->Grid.dwBottom;
+			pOut->nGridWidth = pTxt->Grid.nWidth;
+			pOut->nGridHeight= pTxt->Grid.nHeight;
+		}
+		else
+		{
+			DEBUGMSG("Creating a grid for #%d on %d mode", nRecord, nScreenMode)
+			InventoryTxt* pTxt = &(*D2Vars.D2COMMON_InventoryTxt)[nRecord];
+			D2EXASSERT(pTxt, "Error in Inventory.txt. Record #%d doesn't exist", nRecord);
+			int xLeft = -1;
+			int xRight = -1;
+			if (pTxt->Grid.dwLeft > 300)
+			{
+				xLeft = pTxt->Grid.dwLeft == -1 ? -1 : (*D2Vars.D2CLIENT_ScreenWidth - (640 - pTxt->Grid.dwLeft));
+				xRight = pTxt->Grid.dwRight == -1 ? -1 : (*D2Vars.D2CLIENT_ScreenWidth - (640 - pTxt->Grid.dwRight));
+			}
+			else
+			{
+				xLeft = pTxt->Grid.dwLeft;
+				xRight = pTxt->Grid.dwRight;
+			}
+			int xTop = pTxt->Grid.dwTop == -1 ? -1 : (*D2Vars.D2CLIENT_ScreenHeight - (480 - pTxt->Grid.dwTop));
+			int xBottom = pTxt->Grid.dwBottom == -1 ? -1 : (*D2Vars.D2CLIENT_ScreenHeight - (480 - pTxt->Grid.dwBottom));
+
+			pOut->nGridX = pTxt->Inventory.nGridX;
+			pOut->nGridY = pTxt->Inventory.nGridY;
+			pOut->dwLeft = xLeft;
+			pOut->dwRight = xRight;
+			pOut->dwTop = xTop;
+			pOut->dwBottom = xBottom;
+			pOut->nGridWidth = pTxt->Grid.nWidth;
+			pOut->nGridHeight = pTxt->Grid.nHeight;
+			DEBUGMSG("Grid Left %d, Right %d @%d", xLeft, xRight, xRight - xLeft)
+		}
+
+	}
+
+	void __stdcall GetInventoryField(int nRecord, int nScreenMode, InventoryLayout *pOut, int nField) // Wrapper on D2Common.Ordinal10441
+	{
+		if (nScreenMode < 2) // Legacy support
+		{
+			InventoryTxt* pTxt = &(*D2Vars.D2COMMON_InventoryTxt)[nRecord + (nScreenMode * 16)];
+			D2EXASSERT(pTxt, "Error in Inventory.txt. Record #%d doesn't exist", nRecord + (nScreenMode * 16));
+			InventoryLayout * pLayout = &pTxt->hItem[nField];
+			
+			pOut->dwLeft = pLayout->dwLeft;
+			pOut->dwRight = pLayout->dwRight;
+			pOut->dwTop = pLayout->dwTop;
+			pOut->dwBottom = pLayout->dwBottom;
+			pOut->nWidth = pLayout->nWidth;
+			pOut->nHeight = pLayout->nHeight;
+		}
+		else
+		{
+			InventoryTxt* pTxt = &(*D2Vars.D2COMMON_InventoryTxt)[nRecord];
+			D2EXASSERT(pTxt, "Error in Inventory.txt. Record #%d doesn't exist", nRecord);
+			InventoryLayout * pLayout = &pTxt->hItem[nField];
+
+			int xLeft = -1;
+			int xRight = -1;
+
+			if (pTxt->Grid.dwLeft > 300)
+			{
+				xLeft = pLayout->dwLeft == -1 ? -1 : (*D2Vars.D2CLIENT_ScreenWidth - (640 - pLayout->dwLeft));
+				xRight = pLayout->dwRight == -1 ? -1 : (*D2Vars.D2CLIENT_ScreenWidth - (640 - pLayout->dwRight));
+			}
+			else
+			{
+				xLeft = pLayout->dwLeft;
+				xRight = pLayout->dwRight;
+			}
+			int xTop = pLayout->dwTop == -1 ? -1 : (*D2Vars.D2CLIENT_ScreenHeight - (480 - pLayout->dwTop));
+			int xBottom = pLayout->dwBottom == -1 ? -1 : (*D2Vars.D2CLIENT_ScreenHeight - (480 - pLayout->dwBottom));
+
+			pOut->dwLeft = xLeft;
+			pOut->dwRight = xRight;
+			pOut->dwTop = xTop;
+			pOut->dwBottom = xBottom;
+			pOut->nWidth = pLayout->nWidth;
+			pOut->nHeight = pLayout->nHeight;
 		}
 
 	}

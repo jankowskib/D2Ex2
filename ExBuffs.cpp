@@ -3,19 +3,19 @@
 #include <string>
 #include <map>
 #include <memory>
-#include <boost\lexical_cast.hpp>
 
-#include "Misc.h"
-#include "Vars.h"
+#include <boost\lexical_cast.hpp>
+#include "ExBuffs.h"
+
+#include "ExMultiRes.h"
 #include "ExScreen.h"
 
-#include "ExBuffs.h"
 
 
 typedef shared_ptr<ExBuff> pExBuff;
 static map<int, pExBuff> Buffs;
 
-ExBuff::ExBuff(WORD SkillNo, WORD StateNo, ExBuffsImgs ImageId, short DefaultLvl, BuffType aType, bool isTimed) : ExControl((24*Buffs.size()) + 115, *D2Vars.D2CLIENT_ScreenViewHeight-10, 24, 24, 0)
+ExBuff::ExBuff(WORD SkillNo, WORD StateNo, ExBuffsImgs ImageId, short DefaultLvl, BuffType aType, bool isTimed) : ExControl(0, ExMultiRes::GFX_GetResolutionMode() > 2 ? (*D2Vars.D2CLIENT_ScreenHeight - 15) : (*D2Vars.D2CLIENT_ScreenViewHeight - 10), 24, 24, 0)
 {
 	UnitAny* pPlayer = D2Funcs.D2CLIENT_GetPlayer();
 	Skill* pSkill = 0;
@@ -51,7 +51,7 @@ ExBuff::ExBuff(WORD SkillNo, WORD StateNo, ExBuffsImgs ImageId, short DefaultLvl
 	if (Buffs.find(StateId) != Buffs.end()) Buffs.erase(StateId);
 	LeaveCriticalSection(&BUFF_CRITSECT);
 
-	this->SetX((24 * Buffs.size()) + 115);
+	this->SetX((24 * Buffs.size()) + (ExMultiRes::GFX_GetResolutionMode() > 2 ? 170 : 115));
 
 
 	DontEnterCS = true;
@@ -343,10 +343,11 @@ void ExBuffs::UpdateYPos()
 	EnterCriticalSection(&BUFF_CRITSECT);
 	for (auto it = Buffs.begin(); it != Buffs.end(); ++it)
 	{
-		it->second->SetY(*D2Vars.D2CLIENT_ScreenViewHeight - 10);
+		it->second->SetY(ExMultiRes::GFX_GetResolutionMode() > 2 ? (*D2Vars.D2CLIENT_ScreenHeight - 15) : (*D2Vars.D2CLIENT_ScreenViewHeight - 10));
 		if (it->second->Buff) it->second->Buff->SetY(it->second->GetY());
 		if (it->second->BuffTime) it->second->BuffTime->SetY(it->second->GetY() - it->second->GetHeight());
 		if (it->second->BuffInfo) it->second->BuffInfo->SetY(it->second->GetY());
+
 	}
 	LeaveCriticalSection(&BUFF_CRITSECT);
 }
@@ -358,7 +359,7 @@ void ExBuffs::Check()
 	for(auto it = Buffs.begin() ; it!=Buffs.end(); ++it, ++i)
 	{
 	if(it->second->StateId==0) continue;
-	if(it->second->Buff) it->second->Buff->SetX((24*i)+115);
+	if (it->second->Buff) it->second->Buff->SetX((24 * i) + (ExMultiRes::GFX_GetResolutionMode() > 2 ? 170 : 115));
 	if(it->second->BuffTime)
 	{
 		if(it->second->SkillExpire) 
@@ -371,9 +372,9 @@ void ExBuffs::Check()
 			it->second->BuffTime->SetY(it->second->Buff->GetY()-a);
 			it->second->BuffTime->SetHeight(a);
 		}
-		it->second->BuffTime->SetX((24*i)+115); 
+		it->second->BuffTime->SetX((24 * i) + (ExMultiRes::GFX_GetResolutionMode() > 2 ? 170 : 115));
 	}
-	if(it->second->BuffInfo) it->second->BuffInfo->SetX((24*i)+120);
+	if (it->second->BuffInfo) it->second->BuffInfo->SetX((24 * i) + (ExMultiRes::GFX_GetResolutionMode() > 2 ? 175 : 120));
 	}
 
 	LeaveCriticalSection(&BUFF_CRITSECT);
