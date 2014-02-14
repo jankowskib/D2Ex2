@@ -5,11 +5,12 @@
 enum D2RenderModes
 {
 	VIDEO_MODE_GDI = 1,
-	VIDEO_MODE_RAVE = 2, // UNUSED
+	VIDEO_MODE_SOFTWARE = 2,
 	VIDEO_MODE_DDRAW = 3,
 	VIDEO_MODE_GLIDE = 4,
 	VIDEO_MODE_OPENGL = 5, // UNUSED
-	VIDEO_MODE_D3D = 6
+	VIDEO_MODE_D3D = 6,
+	VIDEO_MODE_RAVE = 7, // UNUSED
 };
 
 
@@ -742,6 +743,7 @@ namespace CellFiles
 {
 	char * const PARTY = "data\\D2Ex\\partyboxes";
 	char * const EDITBOX = "data\\GLOBAL\\UI\\FrontEnd\\textbox2";
+	char * const CHECKBOX = "data\\D2Ex\\checkbox";
 	char * const SELECTBOX = "data\\global\\ui\\FrontEnd\\clickbox";
 	char * const SMALLBUTTON = "data\\global\\ui\\FrontEnd\\CancelButtonBlank";
 	char * const MEDIUMBUTTON = "data\\global\\ui\\FrontEnd\\MediumButtonBlank2";

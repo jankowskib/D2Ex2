@@ -4,14 +4,11 @@
 #include <string>
 #include <sstream>
 
-#include "Vars.h"
-#include "Misc.h"
 #include "ExEditBox.h"
 #include "ExParty.h"
 #include "ExOOG.h"
 #include "ExFriends.h"
 
-using namespace std;
 
 namespace ExInput
 {

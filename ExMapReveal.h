@@ -12,6 +12,7 @@ namespace ExMapReveal
 {
 	void RevealLevel(int LvlId);
 	void OnMapDraw();
+	const COORDS FindPresetUnitXY(int nLevel, DWORD dwType, DWORD dwClassId);
 }
 
 #endif

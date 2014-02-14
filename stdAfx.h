@@ -7,8 +7,11 @@
 //#define D2EX_ARGOLD "AR Gold|" // Enables client support for virutal gold service [Needs serverside dll to work]
 //#define D2EX_PVPGN_EXT "PvPGN Extensions|" // Enables serverside stuff like kill counter, spectator mode etc [Needs serverside dll to work]
 //#define D2EX_EXAIM_ENABLED "ExAim|" // Experimental -- never finished | may not work --
-//#define D2EX_PVM_BUILD "PvM|" // Enables Maphack with monsters on the map, autotele, etc.
+#define D2EX_PVM_BUILD "PvM|" // Enables Maphack with monsters on the map, autotele, etc.
+#define MAX_SOUND_TXT_ROWS 4954 // Maximum rows in Sound.txt
 //*******************************************
+
+#define TP_RANGE		32		// Maximum teleport range
 
 #if defined VER_111B && defined VER_113D
 #error "Only one version can be defined at once!"

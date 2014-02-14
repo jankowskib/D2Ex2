@@ -109,7 +109,7 @@ _d2f D2Funcs = {0}; void SetupD2Funcs() {
 
 		//D2GFX 
 		EXFUNCPTR(D2GFX, DrawRectangle, void, __stdcall, (int X1, int Y1, int X2, int Y2, int dwColor, int dwTrans), -10028) // k
-		EXFUNCPTR(D2GFX, DrawLine, void, __stdcall, (int X1, int Y1, int X2, int Y2, BYTE Col, BYTE Unk), -10013) //k
+		EXFUNCPTR(D2GFX, DrawLine, void, __stdcall, (int X1, int Y1, int X2, int Y2, BYTE Col, BYTE Alpha), -10013) //k
 
 		EXFUNCPTR(D2GFX, GetHwnd, HWND, __stdcall, (void), -10007) // k
 		EXFUNCPTR(D2GFX, DrawCellContext, void, __stdcall, (CellContext *context, int Xpos, int Ypos, int dwl, int nTransLvl, BYTE *Pal255), -10042) // k
@@ -327,6 +327,8 @@ void SetupD2Vars() {
 		EXVARPTR(D2CLIENT, ScreenViewHeight, int, 0x123D60)
 		EXVARPTR(D2CLIENT, ScreenViewWidth, int, 0x123D64)
 		EXVARPTR(D2CLIENT, ScreenWidthUnk, int, 0xF703C) // This var seems be unused, mby it is by other module didn't check deeply
+		EXVARPTR(D2CLIENT, UIPanelDrawXOffset, signed int, 0x11D354) // These two values are added on every panel draw func
+		EXVARPTR(D2CLIENT, UIPanelDrawYOffset, signed int, 0x11D358)
 		EXVARPTR(D2CLIENT, GameView, GameView*, 0x11D20C)
 		EXVARPTR(D2CLIENT, UiCover, int, 0x11D070)
 		EXVARPTR(D2CLIENT, UiUnk1, int, 0x11D224)

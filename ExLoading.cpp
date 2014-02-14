@@ -1,4 +1,6 @@
 #include "stdafx.h"
+#include <random>
+
 #include "ExLoading.h"
 #include "Vars.h"
 #include "ExScreen.h"
@@ -31,13 +33,15 @@ struct Seed
 HANDLE __stdcall ExLoading::CreateCacheFile(LPCSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile)
 {
 	char szFile[MAX_PATH];
-	srand((DWORD)time(0));
 	string path;
 	ostringstream out;
 	WIN32_FIND_DATA FindFileData;
 	HANDLE hFind;
 	HMODULE gClient = GetModuleHandle("D2Client.dll");
-
+	if (!gClient)
+	{
+		gClient = LoadLibrary("D2Client.dll");
+	}
 	if (gClient)
 	{
 		Misc::Log("Removing cache files...");
@@ -57,9 +61,13 @@ HANDLE __stdcall ExLoading::CreateCacheFile(LPCSTR lpFileName, DWORD dwDesiredAc
 			} while (FindNextFile(hFind, &FindFileData));
 			FindClose(hFind);
 		}
-			out << "bncache" << (rand() % 8192) << ".dat";
+		uniform_int_distribution<int> get_rand_cache_number(0, 8192);
+		default_random_engine eng;
+
+		out << "bncache" << get_rand_cache_number(eng) << ".dat";
 		return CreateFileA(out.str().c_str(), dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
 	}
+	else
 	return CreateFileA(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
 }
 

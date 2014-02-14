@@ -1,9 +1,6 @@
 #include "stdafx.h"
 #include "ExButton.h"
 
-#include "Misc.h"
-
-
 
 ExButton::ExButton(int bX, int bY, int TextColor, unsigned int Frame, wstring szLabel, string szFile, void(*tevent_onClick)(ExControl*), bool LongButton) : ExControl(bX, bY, -1, -1, tevent_onClick)
 {

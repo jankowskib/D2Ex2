@@ -2,22 +2,27 @@
 #include "ExInput.h"
 #include "ExEvents.h"
 #include "ExAim.h"
+#include "ExAutoTele.h"
 #include "ExMultiRes.h"
 
 // IMPORT FROM SCRAP Project
 void ExInput::DefineBindings()
 {
 #ifdef D2EX_PVM_BUILD
-//D2Funcs.STORM_RegisterKeyDown(D2Funcs.D2GFX_GetHwnd(),VK_ATNext,&ExAim::b_Aim);
-//D2Funcs.STORM_RegisterKeyDown(D2Funcs.D2GFX_GetHwnd(),VK_FastTP,&ExChicken::b_FastTP);
+	D2Funcs.STORM_RegisterKeyDown(D2Funcs.D2GFX_GetHwnd(), VK_ATNext, &ExAutoTele::b_TeleportNext);
+	D2Funcs.STORM_RegisterKeyDown(D2Funcs.D2GFX_GetHwnd(), VK_ATPrev, &ExAutoTele::b_TeleportPrev);
+	D2Funcs.STORM_RegisterKeyDown(D2Funcs.D2GFX_GetHwnd(), VK_ATWP, &ExAutoTele::b_TeleportWP);
+	//D2Funcs.STORM_RegisterKeyDown(D2Funcs.D2GFX_GetHwnd(),VK_FastTP,&ExChicken::b_FastTP);
 #endif
 }
 
 void ExInput::UndefineBindings()
 {
 #ifdef D2EX_PVM_BUILD
-//D2Funcs.STORM_UnregisterKeyDown(D2Funcs.D2GFX_GetHwnd(), VK_ATNext, &ExAim::b_Aim);
-//D2Funcs.STORM_UnregisterKeyDown(D2Funcs.D2GFX_GetHwnd(),VK_FastTP,&ExChicken::b_FastTP);
+	D2Funcs.STORM_UnregisterKeyDown(D2Funcs.D2GFX_GetHwnd(), VK_ATNext, &ExAutoTele::b_TeleportNext);
+	D2Funcs.STORM_UnregisterKeyDown(D2Funcs.D2GFX_GetHwnd(), VK_ATPrev, &ExAutoTele::b_TeleportPrev);
+	D2Funcs.STORM_UnregisterKeyDown(D2Funcs.D2GFX_GetHwnd(), VK_ATWP, &ExAutoTele::b_TeleportWP);
+	//D2Funcs.STORM_UnregisterKeyDown(D2Funcs.D2GFX_GetHwnd(),VK_FastTP,&ExChicken::b_FastTP);
 #endif
 }
 

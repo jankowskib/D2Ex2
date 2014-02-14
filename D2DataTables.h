@@ -63,7 +63,7 @@ struct InventoryTxt //sizeof 0xF0
 	};
 };
 
-struct D2BeltBox
+struct BeltBox
 {
 	DWORD dwBoxLeft;			//0x00
 	DWORD dwBoxRight;			//0x04
@@ -75,7 +75,7 @@ struct BeltsTxt //sizeof 0x108
 {
 	DWORD _unusedName;			    //0x00 placeholder for name field
 	DWORD dwNumBoxes;               //0x04
-	D2BeltBox hBox[16];				//0x08
+	BeltBox hBox[16];				//0x08
 };
 
 struct AutomapTxt
@@ -118,6 +118,53 @@ struct ObjectTxt
 	BYTE _5[8];						//0x1B4
 	DWORD nAutoMap;					//0x1BB
 }; 
+
+struct LevelsTxt
+{
+	WORD wLevelNo;
+	BYTE nPal;
+	BYTE nAct;
+	BYTE nTeleport;
+	BYTE nRain;
+	BYTE nMud;
+	BYTE nNoPer;
+	BYTE nIsInside;
+	BYTE nDrawEdges;
+	WORD unk0x0A;
+	DWORD dwWarpDist;
+	WORD wMonLvl1;
+	WORD wMonLvl2;
+	WORD wMonLvl3;
+	WORD wMonLvl1Ex;
+	WORD wMonLvl2Ex;
+	WORD wMonLvl3Ex;
+	DWORD dwMonDen[3];
+	BYTE nMonUMin[3];
+	BYTE nMonUMax[3];
+	BYTE nMonWndr;
+	BYTE nMonSpcWalk;
+	BYTE nQuest;
+	BYTE nRangedSpawn;
+	DWORD dwNumMon;
+	WORD wMon[25];
+	WORD wNMon[25];
+	WORD wUMon[25];
+	WORD wCMon[4];
+	WORD wCPct[4];
+	WORD wCAmt[4];
+	BYTE nWaypoint;
+	BYTE nObjGroup[8];
+	BYTE nObjPrb[8];
+	char szLevelName[40];
+	char szLevelWarp[40];
+	char szEntryFile[41];
+	wchar_t wszLevelName[40];
+	wchar_t wszLevelWarp[41];
+	DWORD dwThemes;
+	DWORD dwFloorFilter;
+	DWORD dwBlankScreen;
+	DWORD dwSoundEnv;
+};
 
 struct ItemStatCostTxt  //size 0x144
 {
@@ -1359,7 +1406,7 @@ struct sgptDataTable {
 	BYTE*	pMonUMod;				//0xC4C
 	BYTE*	pMonUModTxt;			//0xC50
 	DWORD	dwMonUModRecs;			//0xC54
-	BYTE*	pLevels;				//0xC58
+	LevelsTxt*	pLevelsTxt;			//0xC58
 	DWORD	dwLevelsRecs;			//0xC5C
 	BYTE*	pLvlDefs;				//0xC60
 	BYTE*	pLvlPrest;				//0xC64

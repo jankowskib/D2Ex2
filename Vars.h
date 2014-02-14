@@ -7,6 +7,7 @@ class ExEditBox;
 #include <deque>
 #include <sstream>
 #include <string>
+#include <atomic>
 
 using namespace std;
 
@@ -21,6 +22,12 @@ using namespace std;
 #endif
 GLOBAL(int, gLocaleId)
 GLOBAL(HANDLE, hPointersReadyEvent)
+GLOBAL(HANDLE, hAutoTeleEvent)
+
+GLOBAL(DWORD, gAutoTeleAction)
+GLOBAL(DWORD, gAutoTeleArgument)
+GLOBAL(atomic<bool>, gStopTeleport)
+
 GLOBAL(BOOL, g_FastTP)
 GLOBAL(DWORD, AimTarget)
 GLOBAL(deque<COORDS>, HistoryPos) // Last 2 Coords

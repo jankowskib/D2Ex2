@@ -31,7 +31,7 @@ Level* GetLevel(DWORD dwLevelNo)
 CCollisionMap::CCollisionMap()
 {
 	m_iCurMap = 0x00;
-	::memset(&m_ptLevelOrigin, 0, sizeof(POINT));
+	m_ptLevelOrigin = { 0 };
 }
 
 CCollisionMap::~CCollisionMap()
@@ -127,8 +127,8 @@ BOOL CCollisionMap::BuildMapData(DWORD AreaId)
 //	if(!pArea)
 //	{
 		dwLevelId = AreaId;	
-		m_ptLevelOrigin.x = pLevel->dwPosX * 5;
-		m_ptLevelOrigin.y = pLevel->dwPosY * 5;
+		m_ptLevelOrigin.x = (short)(pLevel->dwPosX * 5);
+		m_ptLevelOrigin.y = (short)(pLevel->dwPosY * 5);
 
 		if (!m_map.Create(pLevel->dwSizeX * 5, pLevel->dwSizeY * 5, MAP_DATA_INVALID))
 		{
@@ -265,7 +265,7 @@ BOOL CCollisionMap::CreateMap(DWORD AreaId)
 	return bOK;
 }
 
-POINT CCollisionMap::GetMapOrigin() const
+COORDS CCollisionMap::GetMapOrigin() const
 {
 	return m_ptLevelOrigin;
 }
@@ -516,7 +516,7 @@ void CCollisionMap::DestroyMap()
 	//m_map.Unlock();
 	m_iCurMap = 0x00;
 	m_aCollisionTypes.RemoveAll();
-	::memset(&m_ptLevelOrigin, 0, sizeof(POINT));
+	m_ptLevelOrigin = { 0 };
 }
 
 BOOL CCollisionMap::CopyMapData(WordMatrix& rBuffer) const
@@ -560,7 +560,7 @@ BOOL CCollisionMap::ReportCollisionType(POINT ptOrigin, long lRadius) const
 
 INT CCollisionMap::GetLevelExits(LPLevelExit* lpLevel)
 {
-	POINT ptExitPoints[0x40][2];
+	COORDS ptExitPoints[0x40][2];
 	INT nTotalPoints = 0, nCurrentExit = 0;
 	INT nMaxExits = 0x40;
 	UnitAny* Me = D2Funcs.D2CLIENT_GetPlayer();
@@ -653,7 +653,7 @@ INT CCollisionMap::GetLevelExits(LPLevelExit* lpLevel)
 		}
 	}
 
-	LPPOINT ptCenters = new POINT[nTotalPoints];
+	COORDS* ptCenters = new COORDS[nTotalPoints];
 	for(INT i = 0; i < nTotalPoints; i++)
 	{
 		INT nXDiff = ptExitPoints[i][1].x - ptExitPoints[i][0].x;
@@ -734,7 +734,6 @@ INT CCollisionMap::GetLevelExits(LPLevelExit* lpLevel)
 				{
 					if(bAdded)
 						D2Funcs.D2COMMON_RemoveRoomData(Me->pAct, pRoom->pLevel->dwLevelNo, pRoom->dwPosX, pRoom->dwPosY, Me->pPath->pRoom1);
-//					LeaveCriticalSection(&CriticalSection);
 					return FALSE;
 				}
 
@@ -770,8 +769,6 @@ INT CCollisionMap::GetLevelExits(LPLevelExit* lpLevel)
 		if(bAdded)
 			D2Funcs.D2COMMON_RemoveRoomData(Me->pAct, pRoom->pLevel->dwLevelNo, pRoom->dwPosX, pRoom->dwPosY, Me->pPath->pRoom1);
 	}
-
-//	LeaveCriticalSection(&CriticalSection);
 
 	return nCurrentExit;
 }

@@ -10,8 +10,7 @@
 #pragma comment(lib, "glide3x.lib")
 /*
 	Partially reversed D2MultiRes ported to 1.11b/1.13d
-	Credit goes to Sluggy
-	Thx for most ugly code I've ever reversed.
+	Credits: Sluggy
 	http://d2mods.info/forum/viewtopic.php?t=51560
 */
 
@@ -64,12 +63,22 @@ namespace ExMultiRes
 		D2CLIENT_ResizeView(*D2Vars.D2CLIENT_UiCover);
 		D2Funcs.D2CLIENT_UpdateAutoMap(TRUE);
 		D2Funcs.D2CLIENT_ClearScreen4();
+
 		if(BuffsEnabled)
 			ExBuffs::UpdateYPos();
 	}
 
 	void __fastcall D2CLIENT_ResizeView(int UiCover) // Wrapper on D2CLIENT.0x5C4F0
 	{
+		if (GFX_GetResolutionMode() > 2)
+		{
+			*D2Vars.D2CLIENT_ScreenXShift = 0;
+			D2ASMFuncs::D2CLIENT_SetView(0, *D2Vars.D2CLIENT_ScreenViewWidth, 0, *D2Vars.D2CLIENT_ScreenViewHeight, *D2Vars.D2CLIENT_GameView);
+			*D2Vars.D2CLIENT_UiCover = UiCover;
+			D2Funcs.D2GFX_SetScreenShift(*D2Vars.D2CLIENT_ScreenXShift);
+			return;
+		}
+
 		switch (UiCover)
 		{
 		case COVER_NONE:
@@ -110,7 +119,7 @@ namespace ExMultiRes
 	
 	BOOL __stdcall D2GFX_InitWindow(HINSTANCE hInstance, LRESULT(__stdcall *pWndProc)(HWND, UINT, WPARAM, LPARAM), int nRenderMode, BOOL bWindowed) // Wrapper on D2Gfx.10073
 	{
-		WNDCLASS WndClass;
+		WNDCLASSEX WndClass;
 		const char * szDriverDLLs[] = { "", "D2Gdi.dll", "D2Rave.dll", "D2DDraw.dll", "D2Glide.dll", "D2OpenGL.dll", "D2Direct3D.dll" };
 		typedef fnRendererCallbacks* (__stdcall * GetCallbacks_t)();
 		DEBUGMSG("D2GFX->InitWindow()");
@@ -121,7 +130,7 @@ namespace ExMultiRes
 		WaitForSingleObject(hPointersReadyEvent, 10000);
 		DEBUGMSG("Waited %.2f sec!", (float)(GetTickCount() - t) / 1000);
 		*D2Vars.D2GFX_hInstance = hInstance;
-	//	WndClass.cbSize = sizeof(WNDCLASSEX);
+		WndClass.cbSize = sizeof(WNDCLASSEX);
 		WndClass.lpfnWndProc = pWndProc;
 		WndClass.style = nRenderMode == VIDEO_MODE_GLIDE ? 0x20 : 0;
 		WndClass.cbClsExtra = 0;
@@ -131,13 +140,13 @@ namespace ExMultiRes
 		WndClass.hCursor = LoadCursor(0, (LPCSTR)0x7F00);
 		WndClass.hbrBackground = (HBRUSH)GetStockObject(COLOR_DESKTOP);
 		WndClass.lpszMenuName = NULL;
-		//WndClass.hIconSm = NULL;
+		WndClass.hIconSm = NULL;
 		WndClass.lpszClassName = "Diablo II";
-		if (!RegisterClass(&WndClass))
+		if (!RegisterClassEx(&WndClass))
 		{
 			int err  = GetLastError();
-			DEBUGMSG("RegisterClass ERROR (%d)!", err)
-			//@TODO: GFX_Error_6FA87AA0((char *)v5);
+			D2EXERROR("RegisterClass ERROR (%d)!", err)
+			//TODO: GFX_Error_6FA87AA0((char *)v5);
 			return FALSE;
 		}
 		D2Funcs.D2GFX_InitGouraudCache();
@@ -343,7 +352,7 @@ namespace ExMultiRes
 		static int LastWidth, LastHeight;
 		DEBUGMSG("FillYBuffer(), %dx%d, %d", nWidth, nHeight, aZero)
 			/*
-			@TODO: Optimize it a bit...
+			TODO: Optimize it a bit...
 			*/
 		*D2Vars.D2GFX_gpbBuffer = ppvBits;
 		*D2Vars.D2GFX_Width = nWidth;
@@ -630,7 +639,7 @@ namespace ExMultiRes
 		return TRUE;
 	}
 
-	void __stdcall GetBeltPos(int nIndex, int nMode, D2BeltBox *out, int nBox) // Wrapper on D2Common.Ordinal10689
+	void __stdcall GetBeltPos(int nIndex, int nMode, BeltBox *out, int nBox) // Wrapper on D2Common.Ordinal10689
 	{
 		int w, h, panelsize, xpos;
 
@@ -661,7 +670,7 @@ namespace ExMultiRes
 // Why the hell Blizzard put in .txts the UI stuff?!
 	void __stdcall GetBeltsTxtRecord(int nIndex, int nMode, BeltsTxt *out) // Wrapper on D2Common.Ordinal10370
 	{
-		//@TODO: Don't make this const hardcoded
+		//TODO: Don't make this const hardcoded
 		const int nBeltBoxesTbl[] = { 12, 8, 4, 16, 8, 12, 16 };
 
 		out->dwNumBoxes = nBeltBoxesTbl[nIndex % 7];
@@ -675,6 +684,7 @@ namespace ExMultiRes
 
 	void __stdcall GetInventorySize(int nRecord, int nScreenMode, InventorySize *pOut) // Wrapper on D2Common.Ordinal10770
 	{
+		int xBottom, xTop;
 		if (nScreenMode < 2) // Legacy support
 		{
 			InventoryTxt* pTxt = &(*D2Vars.D2COMMON_InventoryTxt)[nRecord + (nScreenMode * 16)];
@@ -703,13 +713,29 @@ namespace ExMultiRes
 				xLeft = pTxt->Inventory.dwLeft;
 				xRight = pTxt->Inventory.dwRight;
 			}
-			int xTop = pTxt->Inventory.dwTop == -1 ? -1 : (*D2Vars.D2CLIENT_ScreenHeight - (480 - pTxt->Inventory.dwTop));
-			int xBottom = pTxt->Inventory.dwBottom == -1 ? -1 : (*D2Vars.D2CLIENT_ScreenHeight - (480 - pTxt->Inventory.dwBottom));
+			xTop = pTxt->Inventory.dwTop == -1 ? -1 : (*D2Vars.D2CLIENT_ScreenHeight / 2) - ((pTxt->Inventory.dwBottom - pTxt->Inventory.dwTop) / 2);   // (*D2Vars.D2CLIENT_ScreenHeight - (480 - pTxt->Inventory.dwTop));
+			xBottom = pTxt->Inventory.dwBottom == -1 ? -1 : xTop + (pTxt->Inventory.dwBottom - pTxt->Inventory.dwTop); //  (*D2Vars.D2CLIENT_ScreenHeight - (480 - pTxt->Inventory.dwBottom));
 			
 			pOut->dwLeft = xLeft;
 			pOut->dwRight = xRight;
 			pOut->dwTop = xTop;
 			pOut->dwBottom = xBottom;
+		}
+
+		if (GFX_GetResolutionMode() < 2) // Legacy support
+		{
+			*D2Vars.D2CLIENT_UIPanelDrawXOffset = 0;
+			*D2Vars.D2CLIENT_UIPanelDrawYOffset = 0;
+		}
+		else if (GFX_GetResolutionMode() == 2)
+		{
+			*D2Vars.D2CLIENT_UIPanelDrawXOffset = 80;
+			*D2Vars.D2CLIENT_UIPanelDrawYOffset = -60;
+		}
+		else
+		{
+			*D2Vars.D2CLIENT_UIPanelDrawXOffset = 0;
+			*D2Vars.D2CLIENT_UIPanelDrawYOffset = -140; //TODO: Fix y pos
 		}
 
 	}
@@ -747,8 +773,11 @@ namespace ExMultiRes
 				xLeft = pTxt->Grid.dwLeft;
 				xRight = pTxt->Grid.dwRight;
 			}
-			int xTop = pTxt->Grid.dwTop == -1 ? -1 : (*D2Vars.D2CLIENT_ScreenHeight - (480 - pTxt->Grid.dwTop));
-			int xBottom = pTxt->Grid.dwBottom == -1 ? -1 : (*D2Vars.D2CLIENT_ScreenHeight - (480 - pTxt->Grid.dwBottom));
+
+			int xInvBottomOffset = pTxt->Inventory.dwTop- pTxt->Grid.dwTop;
+
+			int xTop = pTxt->Grid.dwTop == -1 ? -1 : (*D2Vars.D2CLIENT_ScreenHeight / 2) - ((pTxt->Inventory.dwBottom - pTxt->Inventory.dwTop) / 2) - xInvBottomOffset;   // (*D2Vars.D2CLIENT_ScreenHeight - (480 - pTxt->Grid.dwTop));
+			int xBottom = pTxt->Grid.dwBottom == -1 ? -1 : xTop + (pTxt->Grid.dwBottom - pTxt->Grid.dwTop);  // (*D2Vars.D2CLIENT_ScreenHeight - (480 - pTxt->Grid.dwBottom));
 
 			pOut->nGridX = pTxt->Inventory.nGridX;
 			pOut->nGridY = pTxt->Inventory.nGridY;
@@ -797,8 +826,10 @@ namespace ExMultiRes
 				xLeft = pLayout->dwLeft;
 				xRight = pLayout->dwRight;
 			}
-			int xTop = pLayout->dwTop == -1 ? -1 : (*D2Vars.D2CLIENT_ScreenHeight - (480 - pLayout->dwTop));
-			int xBottom = pLayout->dwBottom == -1 ? -1 : (*D2Vars.D2CLIENT_ScreenHeight - (480 - pLayout->dwBottom));
+			int xInvBottomOffset = pTxt->Inventory.dwTop - pLayout->dwTop;
+
+			int xTop = pLayout->dwTop == -1 ? -1 : (*D2Vars.D2CLIENT_ScreenHeight / 2) - ((pTxt->Inventory.dwBottom - pTxt->Inventory.dwTop) / 2) - xInvBottomOffset;   //(*D2Vars.D2CLIENT_ScreenHeight - (480 - pLayout->dwTop));
+			int xBottom = pLayout->dwBottom == -1 ? -1 : xTop + (pLayout->dwBottom - pLayout->dwTop);    //(*D2Vars.D2CLIENT_ScreenHeight - (480 - pLayout->dwBottom));
 
 			pOut->dwLeft = xLeft;
 			pOut->dwRight = xRight;

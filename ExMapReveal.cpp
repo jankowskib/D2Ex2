@@ -50,6 +50,55 @@ int GetUnitCellNumber(DWORD dwClassId, DWORD dwLevelNo)
 	return pTxt->nAutoMap;
 }
 
+const COORDS ExMapReveal::FindPresetUnitXY(int nLevel, DWORD dwType, DWORD dwClassId)
+{
+	COORDS out = { 0 };
+	if ((unsigned)nLevel > (*D2Vars.D2COMMON_sgptDataTables)->dwLevelsRecs)
+	{
+		DEBUGMSG("Warning: Tryed to find preset unit on non existing level (%d)!", nLevel)
+		return out;
+	}
+
+	UnitAny* pMe = D2Funcs.D2CLIENT_GetPlayer();
+	if (!pMe)
+		return out;
+
+	Level* pLevel = GetLevelPointer(pMe->pAct->pMisc, nLevel);
+
+	if (!pLevel)
+		return out;
+
+	bool bAddedRoom = false;
+	for (Room2 *pRoom = pLevel->pRoom2First; pRoom; pRoom = pRoom->pRoom2Next)
+	{
+		bAddedRoom = false;
+		if (!pRoom->pPreset && !pRoom->pRoomTiles)
+		{
+			D2Funcs.D2COMMON_AddRoomData(pLevel->pMisc->pAct, pLevel->dwLevelNo, pRoom->dwPosX, pRoom->dwPosY, pMe->pPath->pRoom1);
+			bAddedRoom = true;
+		}
+
+		for (PresetUnit* pPreset = pRoom->pPreset; pPreset; pPreset = pPreset->pPresetNext)
+		{
+			if (dwType == pPreset->dwType && dwClassId == pPreset->dwClassId)
+			{
+				out.x = (short)(pPreset->dwPosX + (pRoom->dwPosX * 5));
+				out.y = (short)(pPreset->dwPosY + (pRoom->dwPosY * 5));
+				DEBUGMSG("Found PresetUnit %s @ %d, %d", D2Funcs.D2COMMON_GetObjectTxt(dwClassId)->szName, out.x, out.y)
+				break;
+			}
+		}
+
+		if (bAddedRoom)
+		{
+			D2Funcs.D2COMMON_RemoveRoomData(pLevel->pMisc->pAct, pLevel->dwLevelNo, pRoom->dwPosX, pRoom->dwPosY, pMe->pPath->pRoom1);
+			bAddedRoom = false;
+		}
+	}
+
+	return out;
+}
+
 void RevealRoom1(Room2* pRoom)
 {
 	D2Funcs.D2CLIENT_RevealAutomapRoom(pRoom->pRoom1, TRUE, (*D2Vars.D2CLIENT_AutomapLayer));
@@ -69,7 +118,7 @@ void RevealRoom1(Room2* pRoom)
 #else
 		/*
 		Copy&Paste from mMap source 
-		Credit goes to McGod
+		Credits: McGod
 		*/
 		int nCell = -1;
 		if (pUnit->dwType == UNIT_MONSTER)
@@ -126,6 +175,8 @@ void ExMapReveal::RevealLevel(int LvlId)
 
 	InitAutomapLayer(pLevel->dwLevelNo);
 	UnitAny *pUnit = D2Funcs.D2CLIENT_GetPlayer();
+	if (!pUnit)
+		return;
 
 	for (Room2 *pRoom2 = pLevel->pRoom2First; pRoom2; pRoom2 = pRoom2->pRoom2Next)
 	{
@@ -133,7 +184,7 @@ void ExMapReveal::RevealLevel(int LvlId)
 
 		if (!pRoom2->pRoom1)
 		{
-			D2Funcs.D2COMMON_AddRoomData(pLevel->pMisc->pAct,pLevel->dwLevelNo, pRoom2->dwPosX, pRoom2->dwPosY, pUnit->pPath->pRoom1);
+			D2Funcs.D2COMMON_AddRoomData(pLevel->pMisc->pAct, pLevel->dwLevelNo, pRoom2->dwPosX, pRoom2->dwPosY, pUnit->pPath->pRoom1);
 			nAdded = true;
 		}
 
@@ -225,23 +276,29 @@ void ExMapReveal::OnMapDraw()
 	}
 #endif
 
-#ifdef D2EX_EXAIM_ENABLED
+#if defined D2EX_EXAIM_ENABLED || defined D2EX_PVM_BUILD
 	EnterCriticalSection(&TELE_CRITSECT);
-	for (vector<COORDS>::const_iterator it = TelePath.begin(); it != TelePath.end(); ++it) {
+	for (vector<COORDS>::const_iterator it = TelePath.begin(); it != TelePath.end(); ++it) 
+	{
 		static POINT hPos2;
-		ExScreen::ScreenToAutomap(&hPos2, it->x, it->y);
-		ExScreen::DrawBlob(hPos2.x, hPos2.y, COL_PURPLE);
 		static POINT hPos3;
-		if (it == TelePath.begin()) {
+		ExScreen::ScreenToAutomap(&hPos2, it->x, it->y);
+		ExScreen::DrawCircle(hPos2.x, hPos2.y, 2, COL_GREEN);
+		if (it == TelePath.begin()) 
+		{
 			ExScreen::ScreenToAutomap(&hPos3, Me->pPath->xPos, Me->pPath->yPos);
-			D2Funcs.D2GFX_DrawLine(hPos2.x, hPos2.y, hPos3.x, hPos3.y, 0x9B, 0);
+			D2Funcs.D2GFX_DrawLine(hPos2.x, hPos2.y, hPos3.x, hPos3.y, D2Funcs.D2WIN_MixRGB(0, 255, 0), 150);
 		}
-		if (it + 1 != TelePath.end()) {
+		if (it + 1 != TelePath.end())
+		{
+			int dist = ExAim::CalculateDistance(*it, *(it+1));
 			ExScreen::ScreenToAutomap(&hPos3, (it + 1)->x, (it + 1)->y);
-			D2Funcs.D2GFX_DrawLine(hPos2.x, hPos2.y, hPos3.x, hPos3.y, 0x9B, 0);
+			D2Funcs.D2GFX_DrawLine(hPos2.x, hPos2.y, hPos3.x, hPos3.y, D2Funcs.D2WIN_MixRGB(0,255,0), 150);
+			D2Funcs.D2WIN_SetTextSize(6);
+			ExScreen::DrawTextEx(hPos3.x, hPos3.y, COL_PURPLE, 0, 5, "%d y", dist);
 		}
 	}
-
+#if defined D2EX_EXAIM_ENABLED
 	for (deque<COORDS>::const_iterator it = HistoryPos.begin(); it != HistoryPos.end(); ++it) {
 		static POINT hPos2;
 		ExScreen::ScreenToAutomap(&hPos2, it->x, it->y);
@@ -250,9 +307,10 @@ void ExMapReveal::OnMapDraw()
 
 		if (it + 1 != HistoryPos.end()) {
 			ExScreen::ScreenToAutomap(&hPos3, (it + 1)->x, (it + 1)->y);
-			D2Funcs.D2GFX_DrawLine(hPos2.x, hPos2.y, hPos3.x, hPos3.y, 0x84, 0);
+			D2Funcs.D2GFX_DrawLine(hPos2.x, hPos2.y, hPos3.x, hPos3.y, 0x84, 255);
 		}
 	}
+#endif
 	LeaveCriticalSection(&TELE_CRITSECT);
 #endif
 }

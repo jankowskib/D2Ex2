@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "D2Ex2.h"
 
 #include <sstream>
 #include <string>
@@ -42,8 +43,9 @@
 #include <boost/algorithm/string.hpp>
 
 static HMODULE gModule;
-#define MAX_SOUND_TXT_ROWS 4954
-
+static HANDLE Handle;
+static HANDLE hEvent;
+static unsigned Id;
 
 void LoadItemConfig()
 {
@@ -85,9 +87,9 @@ void LoadItemConfig()
 
 unsigned int __stdcall Thread(void * Args)
 {
-#ifdef VER_111B
+//#ifdef VER_111B
 	Sleep(1000); // Delay loading because on my computer something works too fast with D2Loader :(
-#endif
+//#endif
 	//Load config...
 	HANDLE hEvent = *((HANDLE*)Args);
 	Misc::Log("Defining offsets...");
@@ -251,7 +253,7 @@ unsigned int __stdcall Thread(void * Args)
 	Misc::Patch(JUMP, GetDllOffset("D2Client.dll", 0x36FE0), (DWORD)ExMultiRes::D2CLIENT_SetResolution, 5, "Set Resolution Mode");
 	Misc::Patch(JUMP, GetDllOffset("D2Client.dll", 0x1C4B0), (DWORD)D2Stubs::D2CLIENT_ResizeView_STUB, 6, "Resize View");
 	Misc::Patch(JUMP, GetDllOffset("D2Gfx.dll", -10029), (DWORD)D2Stubs::D2GFX_SetResolutionMode_STUB, 5, "D2GFX_D2GFX_SetResolutionMode");
-	//@TODO: Port the rest
+	//TODO: Port the rest
 	#endif
 
 	#elif defined VER_113D
@@ -313,10 +315,6 @@ unsigned int __stdcall Thread(void * Args)
 	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x25342), MAX_SOUND_TXT_ROWS, 4, "Extend Sound.Txt II"); //k
 	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x1F47C), MAX_SOUND_TXT_ROWS, 4, "Extend Sound.Txt III"); //k
 
-	Misc::Patch(CUSTOM, GetDllOffset("D2Gfx.dll", 0xB6B0), 0x45EB, 2, "Allow multi window");
-	Misc::Patch(CALL, GetDllOffset("BNClient.dll",0xF494),(DWORD)ExLoading::CreateCacheFile, 6, "Cache file creation fix");
-	Misc::Patch(CALL, GetDllOffset("BNClient.dll",0xF7E4),(DWORD)ExLoading::CreateCacheFile, 6, "Cache file creation fix");
-
 	#ifdef D2EX_MULTIRES
 	//Res stuff
 	Misc::Patch(JUMP, GetDllOffset("D2Client.dll", 0x2C220), (DWORD)D2Stubs::D2CLIENT_SetResolution_STUB, 5, "Set Resolution Mode");
@@ -336,6 +334,8 @@ unsigned int __stdcall Thread(void * Args)
 	Misc::Patch(JUMP, GetDllOffset("D2Common.dll", -10770), (DWORD)ExMultiRes::GetInventorySize, 8, "D2COMMON_GetInventorySize");
 	Misc::Patch(JUMP, GetDllOffset("D2Common.dll", -10964), (DWORD)ExMultiRes::GetInventoryGrid, 8, "D2COMMON_GetInventoryGrid");
 	Misc::Patch(JUMP, GetDllOffset("D2Common.dll", -10441), (DWORD)ExMultiRes::GetInventoryField, 8, "D2COMMON_GetInventoryField");
+	Misc::Patch(0x90, GetDllOffset("D2Client.dll", 0x1D3F1), 0x90909090, 44, "Nullify UI panels draw offset set");
+
 
 	Misc::WriteDword((DWORD*)&((GFXHelpers*)GetDllOffset("D2Gfx.dll", 0x10BFC))->FillYBufferTable, (DWORD)&ExMultiRes::D2GFX_FillYBufferTable);
 
@@ -432,9 +432,10 @@ unsigned int __stdcall Thread(void * Args)
 #endif
 //-----------------------
 //HERE WE GO
-#ifdef D2EX_EXAIM_ENABLED
+#if defined D2EX_EXAIM_ENABLED || defined D2EX_PVM_BUILD
 	HANDLE hAim = 0;
-	HANDLE hAimEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	atomic_init(&gStopTeleport, false);
+	HANDLE hAimEvent = CreateEvent(NULL, TRUE, FALSE, "D2EX_TELEPORT");
 #endif
 	while (WaitForSingleObject(hEvent, 0) != WAIT_OBJECT_0) 
 	{
@@ -456,9 +457,10 @@ unsigned int __stdcall Thread(void * Args)
 			//	D2EXERROR("Cannot set resolution %dx%d. Please correct your setting in D2Ex.ini", cResModeX, cResModeY);
 #endif
 
-#ifdef D2EX_EXAIM_ENABLED
+#if defined D2EX_EXAIM_ENABLED || defined D2EX_PVM_BUILD
 			ResetEvent(hAimEvent);
-			hAim = (HANDLE)_beginthreadex(0,0,&ExAim::WatchThread,&hAimEvent,0,0);
+
+			hAim = (HANDLE)_beginthreadex(0, 0, &ExAim::TeleportWatchThread, &hAimEvent, 0, 0);
 #endif
 			if(!lagometer && bLagometer)	
 				lagometer = new ExLagometer(273,571);
@@ -466,7 +468,7 @@ unsigned int __stdcall Thread(void * Args)
 			TickAtJoin = GetTickCount();
 			if(AutoShowMap)
 			{
-				D2Funcs.D2CLIENT_SetUiVar(UI_AUTOMAP,0,1); 
+				D2Funcs.D2CLIENT_SetUiVar(UI_AUTOMAP, 0, 1); 
 				D2Vars.D2CLIENT_UIModes[UI_AUTOMAP] = 1;
 			}
 			ExInput::DefineBindings();
@@ -484,26 +486,12 @@ unsigned int __stdcall Thread(void * Args)
 #endif
 				Sleep(50);
 			}
-			if(lagometer) 
-			{
-				delete lagometer;
-				lagometer = 0;
-			}
-#ifdef D2EX_ARGOLD
-			if(GoldBox) 
-			{
-				delete GoldBox;
-				GoldBox = 0;
-			}
-#endif
-			if(ExDownload::isOpen()) ExDownload::ShowHide();
-			if(!D2Funcs.D2CLIENT_GetPlayer()) ExBuffs::Clear();
-#ifdef D2EX_EXAIM_ENABLED
+			
+			D2Ex::CleanUp();
+#if defined D2EX_EXAIM_ENABLED || defined D2EX_PVM_BUILD
 			SetEvent(hAimEvent);
+			gStopTeleport.store(true);
 #endif
-			ExInput::UndefineBindings();
-			ExParty::Clear();
-			ExParty::ClearRoster();
 		}
 
 		Sleep(50);
@@ -511,40 +499,64 @@ unsigned int __stdcall Thread(void * Args)
 	return 0;
 }
 
+void D2Ex::CleanUp()
+{
+	if (ExDownload::isOpen()) 
+		ExDownload::ShowHide();
+	ExBuffs::Clear();
+	ExInput::UndefineBindings();
+	ExParty::Clear();
+	ExParty::ClearRoster();
+	if (lagometer)
+	{
+		delete lagometer;
+		lagometer = 0;
+	}
+#ifdef D2EX_ARGOLD
+	if (GoldBox)
+	{
+		delete GoldBox;
+		GoldBox = 0;
+	}
+#endif
+
+}
 
 DWORD WINAPI DllMain(HMODULE hModule, int dwReason, void* lpReserved)
 {
-	static unsigned Id;
-	static HANDLE Handle;
-	static HANDLE hEvent;
-
 	switch (dwReason)
 	{
-	case DLL_PROCESS_ATTACH:
+		case DLL_PROCESS_ATTACH:
 		{
-			if(!Handle) 
-			{
-				hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-				ASSERT(hEvent);
-				SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
-				gModule = hModule;
-				InitializeCriticalSectionAndSpinCount(&EX_CRITSECT,1000);
-				InitializeCriticalSectionAndSpinCount(&CON_CRITSECT,1000);
-				InitializeCriticalSectionAndSpinCount(&BUFF_CRITSECT,1000);
-#ifdef D2EX_EXAIM_ENABLED
-				InitializeCriticalSectionAndSpinCount(&TELE_CRITSECT,1000);
+			SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
+			gModule = hModule;
+			hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+			ASSERT(hEvent);
+
+			InitializeCriticalSectionAndSpinCount(&EX_CRITSECT,1000);
+			InitializeCriticalSectionAndSpinCount(&CON_CRITSECT,1000);
+			InitializeCriticalSectionAndSpinCount(&BUFF_CRITSECT,1000);
+#if defined D2EX_EXAIM_ENABLED || defined D2EX_PVM_BUILD
+			InitializeCriticalSectionAndSpinCount(&TELE_CRITSECT,1000);
 #endif
+
 #ifdef D2EX_MULTIRES
-				hPointersReadyEvent = CreateEvent(NULL, TRUE, FALSE, "D2EX_READY");
-				ASSERT(hPointersReadyEvent);
-				Misc::Patch(JUMP, GetDllOffset("D2Gfx.dll", -10073), (DWORD)ExMultiRes::D2GFX_InitWindow, 7, "D2GFX_InitWindow");
+			hPointersReadyEvent = CreateEvent(NULL, TRUE, FALSE, "D2EX_READY");
+			ASSERT(hPointersReadyEvent);
+			Misc::Patch(JUMP, GetDllOffset("D2Gfx.dll", -10073), (DWORD)ExMultiRes::D2GFX_InitWindow, 7, "D2GFX_InitWindow");
 #endif
-				Handle = (HANDLE)_beginthreadex(0,0,&Thread,&hEvent,0,&Id);
-				ASSERT(Handle)
-			}
+
+#ifdef VER_113D
+			Misc::Patch(CUSTOM, GetDllOffset("D2Gfx.dll", 0xB6B0), 0x45EB, 2, "Allow multi window");
+			Misc::Patch(CALL, GetDllOffset("BNClient.dll", 0xF494), (DWORD)ExLoading::CreateCacheFile, 6, "Cache file creation fix");
+			Misc::Patch(CALL, GetDllOffset("BNClient.dll", 0xF7E4), (DWORD)ExLoading::CreateCacheFile, 6, "Cache file creation fix");
+
+#endif
+			Handle = (HANDLE)_beginthreadex(0, 0, &Thread, &hEvent, 0, &Id);
+			ASSERT(Handle)
 		}
 		break;
-	case DLL_PROCESS_DETACH:
+		case DLL_PROCESS_DETACH:
 		{
 			ExBuffs::Clear();
 			for(auto i = 0; (unsigned int)i < Controls.size(); ++i) delete Controls.at(i); 
@@ -557,12 +569,15 @@ DWORD WINAPI DllMain(HMODULE hModule, int dwReason, void* lpReserved)
 			DeleteCriticalSection(&EX_CRITSECT);
 			DeleteCriticalSection(&BUFF_CRITSECT);
 			DeleteCriticalSection(&CON_CRITSECT);
-#ifdef D2EX_EXAIM_ENABLED
+#if defined D2EX_EXAIM_ENABLED || defined D2EX_PVM_BUILD
 			DeleteCriticalSection(&TELE_CRITSECT);
 #endif
 			SetEvent(hEvent);
 			WaitForSingleObject(Handle,5000);
 			CloseHandle(hEvent);
+#ifdef D2EX_MULTIRES
+			CloseHandle(hPointersReadyEvent);
+#endif
 			CloseHandle(Handle);
 			hEvent = 0;
 			Handle = 0;

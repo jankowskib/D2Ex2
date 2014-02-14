@@ -34,7 +34,7 @@ namespace ExMultiRes
 	void D2GFX_WindowCleanUp(); 
 
 	//GFX pos fixes
-	void __stdcall GetBeltPos(int nIndex, int nMode, D2BeltBox *out, int nBox);
+	void __stdcall GetBeltPos(int nIndex, int nMode, BeltBox *out, int nBox);
 	void __stdcall GetBeltsTxtRecord(int nIndex, int nMode, BeltsTxt *out);
 	void __stdcall GetInventorySize(int nRecord, int nScreenMode, InventorySize *pOutRect);
 	void __stdcall GetInventoryGrid(int nRecord, int nScreenMode, InventoryGrid *pOut);

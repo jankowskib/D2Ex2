@@ -236,6 +236,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="D2Stubs.cpp" />
+    <ClCompile Include="ExAutoTele.cpp" />
+    <ClCompile Include="ExCheckBox.cpp" />
     <ClCompile Include="ExMultiRes.cpp" />
     <ClCompile Include="Offset.cpp" />
     <ClCompile Include="D2Ex2.cpp" />
@@ -283,11 +285,14 @@
     <ClInclude Include="ArrayEx.h" />
     <ClInclude Include="CollisionMap.h" />
     <ClInclude Include="CommonStructs.h" />
+    <ClInclude Include="D2Ex2.h" />
     <ClInclude Include="D2ExPointers_111B.h" />
     <ClInclude Include="D2ExPointers_113D.h" />
     <ClInclude Include="D2Structs_111B.h" />
     <ClInclude Include="D2Structs_113D.h" />
     <ClInclude Include="ExAim.h" />
+    <ClInclude Include="ExAutoTele.h" />
+    <ClInclude Include="ExCheckBox.h" />
     <ClInclude Include="ExMultiRes.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="SyncObj.h" />

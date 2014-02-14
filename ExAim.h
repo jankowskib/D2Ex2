@@ -19,7 +19,7 @@ namespace ExAim
 {
 	void __stdcall b_Aim(StormMsg * Msg);			//VK_AIM
 
-	unsigned __stdcall WatchThread(void * Args);
+	unsigned __stdcall TeleportWatchThread(void * Args);
 	BOOL __fastcall OnRemoveObject (BYTE* aPacket); // 0x0A intercept
 	BOOL __fastcall OnUnitSpellCast (UnitAny* pUnit, BYTE* aPacket); // 0x4D intercept
 

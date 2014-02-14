@@ -31,22 +31,22 @@ void ExScreen::AutomapToScreen(POINT* ptPos, int x, int y) //BHHack, converts Au
 
 int ExScreen::GetTextWidth(const wchar_t *wText)
 {
-int Len = wcslen(wText);
-typedef int (__fastcall *pGetSize)(wchar_t);
-pGetSize fGetSize = *D2Vars.D2WIN_CurrentFont == 13 ? (pGetSize)D2Ptrs.D2WIN_Font13 : (pGetSize)D2Ptrs.D2WIN_FontNon13;
+	int Len = wcslen(wText);
+	typedef int (__fastcall *pGetSize)(wchar_t);
+	pGetSize fGetSize = *D2Vars.D2WIN_CurrentFont == 13 ? (pGetSize)D2Ptrs.D2WIN_Font13 : (pGetSize)D2Ptrs.D2WIN_FontNon13;
 
-int TextWid = 0;
-int z = 0;
-for(const wchar_t* i = wText; *i; ++z, ++i)
-{
-if(z>=Len) break;
-if(Len-z>=3)
-	if(*i==0xFF && *(i+1)==L'c') i+=3;
-if(*i==0) break;
-if(*i!=10) TextWid+= *(BYTE*)(fGetSize(*i) + 3);
+	int TextWid = 0;
+	int z = 0;
+	for(const wchar_t* i = wText; *i; ++z, ++i)
+	{
+		if(z>=Len) break;
+		if(Len-z>=3)
+			if(*i==0xFF && *(i+1)==L'c') i+=3;
+		if(*i==0) break;
+		if(*i!=10) TextWid+= *(BYTE*)(fGetSize(*i) + 3);
 
-}
-return TextWid;
+	}
+	return TextWid;
 }
 
 void ExScreen::PrintTextEx(int Color, char* Msg,...)
@@ -247,7 +247,7 @@ void ExScreen::DrawAutoMapVer()
 
 #ifdef D2EX_MULTIRES
 	int x, y;
-	ExMultiRes::D2GFX_GetModeParams(*D2Vars.D2GFX_GfxMode, &x, &y);
+	ExMultiRes::D2GFX_GetModeParams(ExMultiRes::GFX_GetResolutionMode(), &x, &y);
 	if (x > 800 && y > 600)
 	{
 		wRes << (gLocaleId == LOCALE_ENG ? L"Resolution: " : L"Rozdzielczoœæ: ") << GetColorCode(COL_YELLOW) << x << L"x" << y;

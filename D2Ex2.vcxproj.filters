@@ -146,6 +146,12 @@
     <ClCompile Include="ExMultiRes.cpp">
       <Filter>Source Files\Main</Filter>
     </ClCompile>
+    <ClCompile Include="ExAutoTele.cpp">
+      <Filter>Source Files\Main</Filter>
+    </ClCompile>
+    <ClCompile Include="ExCheckBox.cpp">
+      <Filter>Source Files\Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArrayEx.h">
@@ -256,9 +262,6 @@
     <ClInclude Include="ExLagometer.h">
       <Filter>Header Files\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="ExRectangle.h">
-      <Filter>Header Files\Controls</Filter>
-    </ClInclude>
     <ClInclude Include="ExScrollBar.h">
       <Filter>Header Files\Controls</Filter>
     </ClInclude>
@@ -288,6 +291,18 @@
     </ClInclude>
     <ClInclude Include="D2ExPointers_111B.h">
       <Filter>Header Files\D2 Internals</Filter>
+    </ClInclude>
+    <ClInclude Include="ExAutoTele.h">
+      <Filter>Header Files\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="ExCheckBox.h">
+      <Filter>Header Files\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="ExRectangle.h">
+      <Filter>Header Files\D2 Internals</Filter>
+    </ClInclude>
+    <ClInclude Include="D2Ex2.h">
+      <Filter>Header Files\Main</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

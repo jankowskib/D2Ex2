@@ -40,7 +40,7 @@ ExEditBox::ExEditBox(int X, int Y, int TextXOffset, int TextYOffset, int TextLen
 		DontEnterCS = false;
 	}
 	else
-		LeaveCriticalSection(&CON_CRITSECT);
+		if (!DontLeaveCS) LeaveCriticalSection(&CON_CRITSECT);
 }
 
 void ExEditBox::SetHashed(bool How)

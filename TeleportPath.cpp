@@ -12,7 +12,6 @@
 
 #include <math.h>
 
-#define TP_RANGE		35		// Maximum teleport range
 #define RANGE_INVALID	10000  // invalid range flag
 
 /////////////////////////////////////////////////////////////////////
@@ -32,8 +31,8 @@ CTeleportPath::CTeleportPath(WORD** pCollisionMap, int cx, int cy)
 	m_ppTable = pCollisionMap;
 	m_nCX = cx;
 	m_nCY = cy;
-	::memset(&m_ptStart,0,sizeof(COORDS));
-	::memset(&m_ptEnd,0,sizeof(COORDS));
+	m_ptStart = { 0 };
+	m_ptEnd = { 0 };
 }
 
 CTeleportPath::~CTeleportPath()
@@ -107,7 +106,7 @@ BOOL CTeleportPath::GetBestMove(COORDS& pos, int nAdjust)
 
 vector<COORDS> CTeleportPath::FindTeleportPath(COORDS ptStart, COORDS ptEnd)
 {
-vector<COORDS> v_Output; 
+	vector<COORDS> v_Output; 
 
 	if (m_nCX <= 0 || m_nCY <= 0 || m_ppTable == NULL)
 		return v_Output;
@@ -123,10 +122,20 @@ vector<COORDS> v_Output;
 
 	for (int nRes = GetBestMove(ptStart); nRes != PATH_FAIL; nRes = GetBestMove(pos))
 	{
-		nRes = GetBestMove(pos);
+		if (ExAim::CalculateDistance(v_Output.back(), pos) > TP_RANGE)
+		{
+			DEBUGMSG("WARNING: Calculated distance is > %d", TP_RANGE)
+		}
+		
+		if (nRes == PATH_FAIL)
+		{
+			DEBUGMSG("WARNING: PATH FAILED!")
+		}
+
 		v_Output.push_back(pos);
 
 		if(nRes == PATH_REACHED) return v_Output;
+
 		if(v_Output.size()>255) break;
 	}	
 
@@ -147,6 +156,8 @@ void CTeleportPath::Block(COORDS pos, int nRange)
 		}
 	}
 }
+
+
 
 BOOL CTeleportPath::IsValidIndex(WORD x, WORD y) const
 {

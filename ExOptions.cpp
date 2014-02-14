@@ -39,6 +39,7 @@ void ExOptions::ShowHide()
 			ExParty::ShowHide(); 
 			return;
 		}
+
 		if (!D2Funcs.D2CLIENT_ClearScreen3(0, 1)) 
 		{
 			if (D2Vars.D2CLIENT_UIModes[UI_AUTOMAP]) 
@@ -820,13 +821,14 @@ BOOL __fastcall ExOptions::MainMenu(D2MenuEntry* ptEntry, StormMsg* pMsg)
 		NewEntries[0].OnPress = &ExOptions::Options;
 		NewEntries[0].ptCellFile = NewEntries[2].ptCellFile = NewEntries[3].ptCellFile = 0;
 
+		NewEntries[2].OnPress = &ExOOG::LeaveGame;
 
 		int i = 0;
 		wcscpy_s((wchar_t*)&NewEntries[i].szCellFile, 130, gLocaleId == 10 ? L"OPCJE" : L"OPTIONS");
 #ifdef D2EX_PVPGN_EXT
 		wcscpy_s((wchar_t*)&NewEntries[++i].szCellFile,130,gLocaleId == 10 ? L"PODDAJ SIÊ" : L"GIVE UP");
 #else
-		wcscpy_s((wchar_t*)&NewEntries[++i].szCellFile, 130, gLocaleId == 10 ? L"SZYBKI POWRÓT" : L"REJOIN");
+		wcscpy_s((wchar_t*)&NewEntries[++i].szCellFile, 130, gLocaleId == 10 ? L"SZYBKI POWRÓT" : L"QUICK REJOIN");
 #endif
 		wcscpy_s((wchar_t*)&NewEntries[++i].szCellFile, 130, gLocaleId == 10 ? L"ZAPIS I WYJŒCIE Z GRY" : L"SAVE AND EXIT GAME");
 		wcscpy_s((wchar_t*)&NewEntries[++i].szCellFile, 130, gLocaleId == 10 ? L"POWRÓT DO GRY" : L"RETURN TO GAME");
