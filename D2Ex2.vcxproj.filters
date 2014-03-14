@@ -36,6 +36,18 @@
     <Filter Include="Header Files\Controls">
       <UniqueIdentifier>{ba67761f-4d48-4bed-8a36-00b4a50410d8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\D2 Internals\1.11b">
+      <UniqueIdentifier>{6ac5cf31-97d8-4016-a1cc-4501d6f24479}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\D2 Internals\1.13d">
+      <UniqueIdentifier>{f523e883-df48-4eaa-803e-2ee56bc0076a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\OpenGL">
+      <UniqueIdentifier>{96cb2333-36ca-409e-a88e-a41aae9a2cac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\OpenGL">
+      <UniqueIdentifier>{af22b029-3f76-4af2-910f-5e14ab5f295a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="D2Stubs.cpp">
@@ -137,9 +149,6 @@
     <ClCompile Include="CollisionMap.cpp">
       <Filter>Source Files\Temp</Filter>
     </ClCompile>
-    <ClCompile Include="ExAim.cpp">
-      <Filter>Source Files\Temp</Filter>
-    </ClCompile>
     <ClCompile Include="TeleportPath.cpp">
       <Filter>Source Files\Temp</Filter>
     </ClCompile>
@@ -152,15 +161,24 @@
     <ClCompile Include="ExCheckBox.cpp">
       <Filter>Source Files\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="ExChicken.cpp">
+      <Filter>Source Files\Main</Filter>
+    </ClCompile>
+    <ClCompile Include="ExAim.cpp">
+      <Filter>Source Files\Main</Filter>
+    </ClCompile>
+    <ClCompile Include="ExOpenGL.cpp">
+      <Filter>Source Files\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="ExTexture.cpp">
+      <Filter>Source Files\OpenGL</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArrayEx.h">
       <Filter>Source Files\Temp</Filter>
     </ClInclude>
     <ClInclude Include="CollisionMap.h">
-      <Filter>Source Files\Temp</Filter>
-    </ClInclude>
-    <ClInclude Include="ExAim.h">
       <Filter>Source Files\Temp</Filter>
     </ClInclude>
     <ClInclude Include="Matrix.h">
@@ -274,22 +292,10 @@
     <ClInclude Include="Build.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="D2Structs_113D.h">
-      <Filter>Header Files\D2 Internals</Filter>
-    </ClInclude>
-    <ClInclude Include="D2Structs_111B.h">
-      <Filter>Header Files\D2 Internals</Filter>
-    </ClInclude>
     <ClInclude Include="ExMultiRes.h">
       <Filter>Header Files\Main</Filter>
     </ClInclude>
     <ClInclude Include="CommonStructs.h">
-      <Filter>Header Files\D2 Internals</Filter>
-    </ClInclude>
-    <ClInclude Include="D2ExPointers_113D.h">
-      <Filter>Header Files\D2 Internals</Filter>
-    </ClInclude>
-    <ClInclude Include="D2ExPointers_111B.h">
       <Filter>Header Files\D2 Internals</Filter>
     </ClInclude>
     <ClInclude Include="ExAutoTele.h">
@@ -298,11 +304,35 @@
     <ClInclude Include="ExCheckBox.h">
       <Filter>Header Files\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="ExRectangle.h">
-      <Filter>Header Files\D2 Internals</Filter>
-    </ClInclude>
     <ClInclude Include="D2Ex2.h">
       <Filter>Header Files\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="ExRectangle.h">
+      <Filter>Header Files\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="ExChicken.h">
+      <Filter>Header Files\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="ExAim.h">
+      <Filter>Header Files\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="D2ExPointers_111B.h">
+      <Filter>Header Files\D2 Internals\1.11b</Filter>
+    </ClInclude>
+    <ClInclude Include="D2Structs_111B.h">
+      <Filter>Header Files\D2 Internals\1.11b</Filter>
+    </ClInclude>
+    <ClInclude Include="D2ExPointers_113D.h">
+      <Filter>Header Files\D2 Internals\1.13d</Filter>
+    </ClInclude>
+    <ClInclude Include="D2Structs_113D.h">
+      <Filter>Header Files\D2 Internals\1.13d</Filter>
+    </ClInclude>
+    <ClInclude Include="ExOpenGL.h">
+      <Filter>Header Files\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="ExTexture.h">
+      <Filter>Header Files\OpenGL</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

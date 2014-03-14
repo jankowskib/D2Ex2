@@ -1,8 +1,29 @@
+/*==========================================================
+* D2Ex2
+* https://github.com/lolet/D2Ex2
+* ==========================================================
+* Copyright (c) 2011-2014 Bartosz Jankowski
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+* ==========================================================
+*/
+
 #include "stdafx.h"
 #include "ExInput.h"
 #include "ExEvents.h"
 #include "ExAim.h"
 #include "ExAutoTele.h"
+#include "ExChicken.h"
 #include "ExMultiRes.h"
 
 // IMPORT FROM SCRAP Project
@@ -12,7 +33,7 @@ void ExInput::DefineBindings()
 	D2Funcs.STORM_RegisterKeyDown(D2Funcs.D2GFX_GetHwnd(), VK_ATNext, &ExAutoTele::b_TeleportNext);
 	D2Funcs.STORM_RegisterKeyDown(D2Funcs.D2GFX_GetHwnd(), VK_ATPrev, &ExAutoTele::b_TeleportPrev);
 	D2Funcs.STORM_RegisterKeyDown(D2Funcs.D2GFX_GetHwnd(), VK_ATWP, &ExAutoTele::b_TeleportWP);
-	//D2Funcs.STORM_RegisterKeyDown(D2Funcs.D2GFX_GetHwnd(),VK_FastTP,&ExChicken::b_FastTP);
+	D2Funcs.STORM_RegisterKeyDown(D2Funcs.D2GFX_GetHwnd(),VK_FastTP,&ExChicken::b_FastTP);
 #endif
 }
 
@@ -22,7 +43,7 @@ void ExInput::UndefineBindings()
 	D2Funcs.STORM_UnregisterKeyDown(D2Funcs.D2GFX_GetHwnd(), VK_ATNext, &ExAutoTele::b_TeleportNext);
 	D2Funcs.STORM_UnregisterKeyDown(D2Funcs.D2GFX_GetHwnd(), VK_ATPrev, &ExAutoTele::b_TeleportPrev);
 	D2Funcs.STORM_UnregisterKeyDown(D2Funcs.D2GFX_GetHwnd(), VK_ATWP, &ExAutoTele::b_TeleportWP);
-	//D2Funcs.STORM_UnregisterKeyDown(D2Funcs.D2GFX_GetHwnd(),VK_FastTP,&ExChicken::b_FastTP);
+	D2Funcs.STORM_UnregisterKeyDown(D2Funcs.D2GFX_GetHwnd(),VK_FastTP,&ExChicken::b_FastTP);
 #endif
 }
 
@@ -313,7 +334,7 @@ LONG WINAPI ExInput::GameWindowEvent(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM
 			if (*D2Vars.D2GFX_GfxMode > 0)
 			{
 				EnterCriticalSection(&CON_CRITSECT);
-				int x, y;
+				unsigned int x, y;
 				ExMultiRes::D2GFX_GetModeParams(*D2Vars.D2GFX_GfxMode - 1, &x, &y);
 				DEBUGMSG("Changing resolution to %dx%d", x, y);
 				ExMultiRes::D2CLIENT_SetResolution((*D2Vars.D2GFX_GfxMode) - 1);
@@ -325,10 +346,31 @@ LONG WINAPI ExInput::GameWindowEvent(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM
 			if ((unsigned int)*D2Vars.D2GFX_GfxMode <  ExMultiRes::lResModes.size() + 2)
 			{
 				EnterCriticalSection(&CON_CRITSECT);
-				int x, y;
-				ExMultiRes::D2GFX_GetModeParams(*D2Vars.D2GFX_GfxMode + 1, &x, &y);
+				unsigned int x, y, r;
+				if (ExMultiRes::GFX_GetRenderType() == VIDEO_MODE_GLIDE)
+				{
+					for (int i = *D2Vars.D2GFX_GfxMode + 1; i < ExMultiRes::lResModes.size(); ++i)
+					{
+						ExMultiRes::D2GFX_GetModeParams(i, &x, &y);
+						if (x == 1600 && y == 1200 ||
+							(x == 1280 && y == 1024) ||
+							(x == 1024 && y == 768) ||
+							(x == 800 && y == 600) ||
+							(x == 640 && y == 480))
+						{
+							r = i;
+							break;
+						}
+					}
+				}
+				else
+				{
+					ExMultiRes::D2GFX_GetModeParams(*D2Vars.D2GFX_GfxMode + 1, &x, &y);
+					r = *D2Vars.D2GFX_GfxMode + 1;
+				}
+
 				DEBUGMSG("Changing resolution to %dx%d", x, y);
-				ExMultiRes::D2CLIENT_SetResolution((*D2Vars.D2GFX_GfxMode) + 1);
+				ExMultiRes::D2CLIENT_SetResolution(r);
 				LeaveCriticalSection(&CON_CRITSECT);
 			}
 		}

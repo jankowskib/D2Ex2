@@ -9,8 +9,9 @@
 #include "ArrayEx.h"
 #include "Matrix.h"
 
-
 #include <math.h>
+#include "ExScreen.h"
+#include "ExAim.h"
 
 #define RANGE_INVALID	10000  // invalid range flag
 
@@ -33,10 +34,6 @@ CTeleportPath::CTeleportPath(WORD** pCollisionMap, int cx, int cy)
 	m_nCY = cy;
 	m_ptStart = { 0 };
 	m_ptEnd = { 0 };
-}
-
-CTeleportPath::~CTeleportPath()
-{
 }
 
 BOOL CTeleportPath::MakeDistanceTable()
@@ -119,24 +116,50 @@ vector<COORDS> CTeleportPath::FindTeleportPath(COORDS ptStart, COORDS ptEnd)
 	v_Output.push_back(ptStart); // start point
 
 	COORDS pos = ptStart;
+	COORDS prevpos = ptStart;
 
-	for (int nRes = GetBestMove(ptStart); nRes != PATH_FAIL; nRes = GetBestMove(pos))
+	int nRes = GetBestMove(ptStart);
+
+	while(nRes != PATH_FAIL)
 	{
+
+		if (nRes != PATH_REACHED && ExAim::CalculateDistance(v_Output.back(), pos) < 20)
+		{
+			ExScreen::PrintPartyTextEx(COL_RED, "AT: Trying to avoid teleport loop, because dist == %d...", ExAim::CalculateDistance(v_Output.back(), pos));
+			prevpos.x++;
+			prevpos.y++;
+			pos = prevpos;
+			continue;
+		}
+
 		if (ExAim::CalculateDistance(v_Output.back(), pos) > TP_RANGE)
 		{
-			DEBUGMSG("WARNING: Calculated distance is > %d", TP_RANGE)
+			prevpos.x--;
+			prevpos.y--;
+			pos = prevpos;
+			ExScreen::PrintPartyTextEx(COL_RED, "AT: Calculated distance is > %d", TP_RANGE);
+			continue;
 		}
 		
 		if (nRes == PATH_FAIL)
 		{
-			DEBUGMSG("WARNING: PATH FAILED!")
+			ExScreen::PrintPartyTextEx(COL_RED, "AT: PATH FAILED!");
+			prevpos.x--;
+			prevpos.y--;
+			pos = prevpos;
+			continue;
 		}
 
 		v_Output.push_back(pos);
 
-		if(nRes == PATH_REACHED) return v_Output;
+		if(nRes == PATH_REACHED) 
+			return v_Output;
 
-		if(v_Output.size()>255) break;
+		if(v_Output.size()>255) 
+			break;
+
+		prevpos = pos;
+		nRes = GetBestMove(pos);
 	}	
 
 	v_Output.clear();

@@ -1,3 +1,23 @@
+/*==========================================================
+* D2Ex2
+* https://github.com/lolet/D2Ex2
+* ==========================================================
+* Copyright (c) 2011-2014 Bartosz Jankowski
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+* ==========================================================
+*/
+
 class ExCellFile;
 class ExControl;
 class ExLagometer;
@@ -27,8 +47,8 @@ GLOBAL(HANDLE, hAutoTeleEvent)
 GLOBAL(DWORD, gAutoTeleAction)
 GLOBAL(DWORD, gAutoTeleArgument)
 GLOBAL(atomic<bool>, gStopTeleport)
+GLOBAL(atomic<bool>, gFastTP)
 
-GLOBAL(BOOL, g_FastTP)
 GLOBAL(DWORD, AimTarget)
 GLOBAL(deque<COORDS>, HistoryPos) // Last 2 Coords
 GLOBAL(vector<COORDS>, TelePath)
@@ -86,6 +106,7 @@ GLOBAL(int, gRenderer)
 GLOBAL(short, VK_ATNext)
 GLOBAL(short, VK_ATWP)
 GLOBAL(short, VK_ATPrev)
+GLOBAL(short, VK_FastTP)
 
 #undef GLOBAL
 #undef __DEFINE_VARS

@@ -1,3 +1,23 @@
+/*==========================================================
+* D2Ex2
+* https://github.com/lolet/D2Ex2
+* ==========================================================
+* Copyright (c) 2011-2014 Bartosz Jankowski
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+* ==========================================================
+*/
+
 #ifndef __EXMULTIRES_H__
 #define __EXMULTIRES_H__
 
@@ -25,13 +45,15 @@ namespace ExMultiRes
 	void __fastcall D2CLIENT_ResizeView(int UiCover);
 	BOOL __stdcall D2GFX_InitWindow(HINSTANCE hInstance, LRESULT(__stdcall *pWndProc)(HWND, UINT, WPARAM, LPARAM), int nRenderMode, BOOL bWindowed);
 
-	void __stdcall  D2GFX_GetModeParams(int nMode, int* pWidth, int* pHeight);
+	void __stdcall  D2GFX_GetModeParams(int nMode, unsigned int* pWidth, unsigned int* pHeight);
 	BOOL __stdcall  D2GFX_SetResolution(int nMode, BOOL bUpdate);
 	void __stdcall  D2GFX_SetStoredGammaAndContrast();
 	void __fastcall D2GFX_FillYBufferTable(void *ppvBits, int nWidth, int nHeight, int aZero);
 	int __stdcall GFX_GetResolutionMode();
+	int __stdcall GFX_GetRenderType();
 	void __stdcall GFX_SetResolutionMode(int nMode);
 	void D2GFX_WindowCleanUp(); 
+	void D2GFX_Finish();
 
 	//GFX pos fixes
 	void __stdcall GetBeltPos(int nIndex, int nMode, BeltBox *out, int nBox);

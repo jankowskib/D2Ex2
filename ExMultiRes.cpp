@@ -1,12 +1,33 @@
+/*==========================================================
+* D2Ex2
+* https://github.com/lolet/D2Ex2
+* ==========================================================
+* Copyright (c) 2011-2014 Bartosz Jankowski
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+* ========================================================== 
+*/
+
 #include "stdafx.h"
 #ifdef D2EX_MULTIRES
 #include "ExMultiRes.h"
 #include "ExCellFile.h"
 #include "ExBuffs.h"
-#include "Offset.h"
+#ifdef D2EX_OPENGL
+#include "ExOpenGL.h"
+#endif
 #include <glide.h>
 
-//#pragma comment(lib, "opengl32.lib")
 #pragma comment(lib, "glide3x.lib")
 /*
 	Partially reversed D2MultiRes ported to 1.11b/1.13d
@@ -42,6 +63,7 @@ namespace ExMultiRes
 	vector<ResMode> lResModes;
     int *gptBufferXLookUpTable;
 //	int gBufferXLookUpTable[GDI_MAXY + 1] = { 0 };
+	static HMODULE gRendererModule;
 
 //D2Client funcs
 
@@ -122,23 +144,28 @@ namespace ExMultiRes
 		WNDCLASSEX WndClass;
 		const char * szDriverDLLs[] = { "", "D2Gdi.dll", "D2Rave.dll", "D2DDraw.dll", "D2Glide.dll", "D2OpenGL.dll", "D2Direct3D.dll" };
 		typedef fnRendererCallbacks* (__stdcall * GetCallbacks_t)();
-		DEBUGMSG("D2GFX->InitWindow()");
 
-		gRenderer = nRenderMode;
+#ifdef D2EX_OPENGL //Temp hack to enable opengl
+		nRenderMode = VIDEO_MODE_OPENGL;
+#endif
+		DEBUGMSG("D2GFX->InitWindow()");
 		DEBUGMSG("Waiting for ready event...");
 		DWORD t = GetTickCount();
 		WaitForSingleObject(hPointersReadyEvent, 10000);
 		DEBUGMSG("Waited %.2f sec!", (float)(GetTickCount() - t) / 1000);
+
+		gRenderer = nRenderMode;
 		*D2Vars.D2GFX_hInstance = hInstance;
+
 		WndClass.cbSize = sizeof(WNDCLASSEX);
 		WndClass.lpfnWndProc = pWndProc;
-		WndClass.style = nRenderMode == VIDEO_MODE_GLIDE ? 0x20 : 0;
+		WndClass.style = (nRenderMode == VIDEO_MODE_GLIDE || nRenderMode == VIDEO_MODE_OPENGL) ? CS_OWNDC : 0;
 		WndClass.cbClsExtra = 0;
 		WndClass.cbWndExtra = 0;
 		WndClass.hInstance = hInstance;
 		WndClass.hIcon = (HICON)LoadImage(hInstance, (LPCSTR)(D2Funcs.FOG_isExpansion() ? 103 : 102), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
 		WndClass.hCursor = LoadCursor(0, (LPCSTR)0x7F00);
-		WndClass.hbrBackground = (HBRUSH)GetStockObject(COLOR_DESKTOP);
+		WndClass.hbrBackground = nRenderMode ==  VIDEO_MODE_OPENGL ? NULL : (HBRUSH)GetStockObject(COLOR_DESKTOP);
 		WndClass.lpszMenuName = NULL;
 		WndClass.hIconSm = NULL;
 		WndClass.lpszClassName = "Diablo II";
@@ -154,18 +181,29 @@ namespace ExMultiRes
 		atexit(&D2GFX_WindowCleanUp);
 		*D2Vars.D2GFX_DriverType = nRenderMode;
 		*D2Vars.D2GFX_WindowMode = bWindowed;
-		*D2Vars.D2GFX_hDriverModHandle = LoadLibrary(szDriverDLLs[nRenderMode]);
-		if (!*D2Vars.D2GFX_hDriverModHandle)
+		fnRendererCallbacks * fns;
+		if (nRenderMode != VIDEO_MODE_OPENGL)
 		{
-			D2EXERROR("Cannot renderer load library: %s", szDriverDLLs[nRenderMode])
-		}
-		
-		GetCallbacks_t GetCallbacks = (GetCallbacks_t)GetDllOffset(szDriverDLLs[nRenderMode], -10000);
-		ASSERT(GetCallbacks)
-		fnRendererCallbacks * fns = GetCallbacks();
-		ASSERT(fns)
-		*D2Vars.D2GFX_pfnDriverCallback = fns;
+			*D2Vars.D2GFX_hDriverModHandle = LoadLibrary(szDriverDLLs[nRenderMode]);
+			gRendererModule = *D2Vars.D2GFX_hDriverModHandle;
+			if (!*D2Vars.D2GFX_hDriverModHandle)
+			{
+				D2EXERROR("Cannot renderer load library: %s", szDriverDLLs[nRenderMode])
+			}
 
+			GetCallbacks_t GetCallbacks = (GetCallbacks_t)GetDllOffset(szDriverDLLs[nRenderMode], -10000);
+			ASSERT(GetCallbacks)
+				fns = GetCallbacks();
+			ASSERT(fns)
+				*D2Vars.D2GFX_pfnDriverCallback = fns;
+		}
+#ifdef D2EX_OPENGL 
+		else
+		{
+			*D2Vars.D2GFX_pfnDriverCallback = &gfnOpenGLRenderer;
+			fns = &gfnOpenGLRenderer;
+		}
+#endif
 		switch (nRenderMode)
 		{
 			case VIDEO_MODE_GDI:
@@ -183,6 +221,11 @@ namespace ExMultiRes
 
 				Misc::WriteDword((DWORD*)&(fns->Init), (DWORD)&ExMultiRes::GLIDE_Init);
 				Misc::WriteDword((DWORD*)&(fns->ResizeWin), (DWORD)&ExMultiRes::GLIDE_ResizeWindow);
+			}
+			break;
+			case VIDEO_MODE_OPENGL:
+			{
+				DEBUGMSG("Using OpenGL video mode!")
 			}
 			break;
 			default:
@@ -218,6 +261,25 @@ namespace ExMultiRes
 		}
 	}
 
+	void D2GFX_Finish() // Wrapper on D2GFX.10050
+	{
+		
+		fnRendererCallbacks * fns = *D2Vars.D2GFX_pfnDriverCallback;
+		D2EXASSERT(fns, "GFX deinit error - driver ptr is null!");
+
+		fns->Release();
+		UnregisterClass("Diablo II", *D2Vars.D2GFX_hInstance);
+
+		D2EXASSERT(!(*D2Vars.D2GFX_bInitSucceed), "A critical error has occurred while initializing GFX system for %d renderer", gRenderer);
+		if (gRendererModule)
+		{
+			FreeLibrary(gRendererModule);
+			gRendererModule = 0;
+			*D2Vars.D2GFX_hDriverModHandle = 0;
+			*D2Vars.D2GFX_pfnDriverCallback = 0;
+		}
+	}
+
 	bool enterFullscreen() 
 	{
 		DEVMODE fs;
@@ -245,7 +307,7 @@ namespace ExMultiRes
 	}
 
 	// Only function for screen width to rule them all!
-	void __stdcall D2GFX_GetModeParams(int nMode, int* pWidth, int* pHeight) // Wrapper on D2Gfx.10064, 1.11b is int __usercall sub_6FA880F0<eax>(int pHeight<eax>, int nMode<edx>, int pWidth<ecx>)
+	void __stdcall D2GFX_GetModeParams(int nMode, unsigned int* pWidth, unsigned int* pHeight) // Wrapper on D2Gfx.10064, 1.11b is int __usercall sub_6FA880F0<eax>(int pHeight<eax>, int nMode<edx>, int pWidth<ecx>)
 	{
 		switch (nMode)
 		{
@@ -300,7 +362,7 @@ namespace ExMultiRes
 			if (*D2Vars.D2GFX_WindowMode == TRUE)
 			{
 				RECT r = { 0 };
-				D2GFX_GetModeParams(nMode, (int*)&r.right, (int*)&r.bottom);
+				D2GFX_GetModeParams(nMode, (unsigned int*)&r.right, (unsigned int*)&r.bottom);
 				AdjustWindowRectEx(&r, 0xCB0000, FALSE, WS_EX_APPWINDOW);
 				SetWindowPos(D2Funcs.D2GFX_GetHwnd(), HWND_NOTOPMOST, 0, 0, r.right - r.left, r.bottom - r.top, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
 				
@@ -405,6 +467,9 @@ namespace ExMultiRes
 		}
 	}
 
+	/*
+		Gets current GFX resolution integer type.
+	*/
 	int __stdcall GFX_GetResolutionMode() // Wrapper on D2GFX.10012
 	{
 		return *D2Vars.D2GFX_GfxMode;
@@ -413,6 +478,11 @@ namespace ExMultiRes
 	void __stdcall GFX_SetResolutionMode(int nMode) // Created to replace external variable in the future
 	{
 		 *D2Vars.D2GFX_GfxMode = nMode;
+	}
+
+	int __stdcall GFX_GetRenderType() 
+	{
+		return *D2Vars.D2GFX_DriverType;
 	}
 
 // D2GDI.dll recons
@@ -514,7 +584,7 @@ namespace ExMultiRes
 
 	BOOL __fastcall GLIDE_SetRes(HANDLE hWND, int nMode) // Wrapper on D2GLIDE.6F85D5A0<eax>(int nResolution<eax>, HANDLE hWnd<edi>)
 	{
-		int w, h, r = 0;
+		unsigned int w, h, r = 0;
 		static FxI32 nTexSize, nTexAspectRatio, nFB, nTMU;
 		static bool bHardwareChecked;
 
@@ -641,7 +711,7 @@ namespace ExMultiRes
 
 	void __stdcall GetBeltPos(int nIndex, int nMode, BeltBox *out, int nBox) // Wrapper on D2Common.Ordinal10689
 	{
-		int w, h, panelsize, xpos;
+		unsigned int w, h, panelsize, xpos;
 
 		D2GFX_GetModeParams(nMode, &w, &h);
 

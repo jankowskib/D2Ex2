@@ -400,35 +400,33 @@ bool ExAim::FindTeleportPath(const COORDS TargetPos)
 	LeaveCriticalSection(&TELE_CRITSECT);
 
 	if (!hMap.CreateMap(ExParty::GetPlayerArea())) 
-	{
-		ExScreen::PrintTextEx(COL_RED, L"CreateMap failed!"); 
 		return false; 
-	}
 
 	COORDS cTarget = { TargetPos.x, TargetPos.y };
 	COORDS cMyPos = { pMe->pPath->xPos, pMe->pPath->yPos };
 
 	if (!hMap.IsValidAbsLocation(cMyPos.x, cMyPos.y)) 
 	{ 
-		ExScreen::PrintTextEx(COL_RED, L"ERROR: isValidBeginLocation failed!"); 
+		ExScreen::PrintTextEx(COL_RED, L"AT: isValidBeginLocation failed!"); 
 		return false;
 	}
 	while (!hMap.IsValidAbsLocation(cTarget.x, cTarget.y))
 	{
+		DEBUGMSG("Adjusting destination XY cause they're not valid!")
 		int err = 0;
 		bool action = false;
 		if (!action)
-			err % 2 ? cTarget.x-- : cTarget.y--;
+			err % 2 ? cTarget.x++ : cTarget.y--;
 		else
-			err % 2 ? cTarget.x++ : cTarget.y++;
+			err % 2 ? cTarget.x-- : cTarget.y++;
 		if (CalculateDistance(cMyPos, cTarget) > TP_RANGE)
 		{
 			cTarget.x += err;
-			cTarget.y += err;
+			cTarget.y -= err;
 			err = 0;
 			action = true;
 		}
-		if (err > 10) { ExScreen::PrintTextEx(COL_RED, L"isValidTargetLocation failed!"); return false; }
+		if (err > 10) { ExScreen::PrintTextEx(COL_RED, L"AT: isValidTargetLocation failed!"); return false; }
 		err++;
 	}
 
@@ -440,11 +438,11 @@ bool ExAim::FindTeleportPath(const COORDS TargetPos)
 		return false;
 
 	CTeleportPath tf(matrix.GetData(), matrix.GetCX(), matrix.GetCY());
-	vector<COORDS> temp = tf.FindTeleportPath(cMyPos, cTarget);
-	if (temp.empty()) { ExScreen::PrintTextEx(COL_RED, L"FindPath failed!"); return false; }
+	auto temp = tf.FindTeleportPath(cMyPos, cTarget);
+	if (temp.empty()) { ExScreen::PrintTextEx(COL_RED, L"AT: FindPath failed!"); return false; }
 
 	EnterCriticalSection(&TELE_CRITSECT);
-	for (vector<COORDS>::iterator it = temp.begin(); it != temp.end(); ++it) 
+	for (auto it = temp.begin(); it != temp.end(); ++it) 
 	{
 		hMap.RelativeToAbs(*it);
 		TelePath.push_back(*it);

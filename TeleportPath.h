@@ -15,10 +15,7 @@
 #ifndef __TELEPORTPATH_H__
 #define __TELEPORTPATH_H__
 
-
-
 #include <vector>
-#include "ExAim.h"
 
 using namespace std;
 
@@ -27,8 +24,6 @@ class CTeleportPath
 public:	
 	
 	CTeleportPath(WORD** pCollisionMap, int cx, int cy);
-	virtual ~CTeleportPath();	
-
 	vector<COORDS> FindTeleportPath(COORDS ptStart, COORDS ptEnd); // Calculate path
 
 private:

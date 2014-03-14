@@ -1,8 +1,27 @@
+/*==========================================================
+* D2Ex2
+* https://github.com/lolet/D2Ex2
+* ==========================================================
+* Copyright (c) 2011-2014 Bartosz Jankowski
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+* ==========================================================
+*/
+
 #include "stdafx.h"
 #include "ExParty.h"
 #include "ExInput.h"
-#include "Misc.h"
-#include "Vars.h"
+
 //=====================
 #include "ExScreen.h"
 #include "ExWindow.h"
@@ -303,6 +322,24 @@ for(RosterUnit* pRoster = *D2Vars.D2CLIENT_Roster; pRoster; pRoster = pRoster->p
 	if(!strcmp(pRoster->szName,szName)) return pRoster;
 	}
 return 0;
+}
+
+/*
+	Checks if pPlayer has a dwClassId type player unit in his party
+*/
+bool ExParty::IsInPartyWithClass(UnitAny* pPlayer, DWORD dwClassId)
+{
+	D2EXASSERT(pPlayer, "IsInPartyWithClass: Unit not exist!")
+	RosterUnit* pMe = ExParty::GetRosterById(pPlayer->dwUnitId);
+	if (!pMe)
+		return false;
+	for (RosterUnit* pRoster = *D2Vars.D2CLIENT_Roster; pRoster; pRoster = pRoster->pNext)
+	{
+		if (pRoster->dwClassId != dwClassId) continue;
+		if (pRoster->wPartyId != pMe->wPartyId) continue;
+		return true;
+	}
+	return false;
 }
 
 list<PlayerTable>::iterator ExParty::GetPartyListEntry(DWORD UnitID)

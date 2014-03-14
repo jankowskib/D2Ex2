@@ -32,7 +32,7 @@ typedef CMatrix<WORD, WORD> WordMatrix;
 
 typedef struct LevelExit_t
 {
-	COORDS ptPos;
+	POINT ptPos;
 	DWORD dwTargetLevel;
 	DWORD dwType;
 	Room2* pRoom;
@@ -61,7 +61,7 @@ public:
 	////////////////////////////////////////////////////////////
 	// Attributes & Operations
 	////////////////////////////////////////////////////////////
-	COORDS GetMapOrigin() const; // Map origin point(top-left)
+	POINT GetMapOrigin() const; // Map origin point(top-left)
 	SIZE GetMapSize() const; // map size
 	WORD GetMapData(long x, long y, BOOL bAbs) const; // Retrieve map data at a particular location
 	BOOL IsValidAbsLocation(long x, long y) const; // Map location verification
@@ -101,7 +101,7 @@ private:
 	////////////////////////////////////////////////////////////
 	
 	BYTE m_iCurMap; // Current map ID
-	COORDS m_ptLevelOrigin; // level top-left
+	POINT m_ptLevelOrigin; // level top-left
 	WordArray m_aCollisionTypes;
 	WordMatrix m_map; // The map
 	

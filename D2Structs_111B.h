@@ -1,3 +1,23 @@
+/*==========================================================
+* D2Ex2
+* https://github.com/lolet/D2Ex2
+* ==========================================================
+* Copyright (c) 2011-2014 Bartosz Jankowski
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+* ==========================================================
+*/
+
 #ifndef D2STRUCTS_H__
 #define D2STRUCTS_H__
 
@@ -610,20 +630,6 @@ struct GfxCell {
 	DWORD lpParent;					//0x18
 	DWORD length;					//0x1C
 	BYTE cols;						//0x20
-};
-
-struct CellFile {
-	DWORD dwVersion;				//0x00
-	struct {
-		WORD dwFlags;
-		BYTE mylastcol;
-		BYTE mytabno:1;
-	};								//0x04
-	DWORD eFormat;					//0x08
-	DWORD termination;				//0x0C
-	DWORD numdirs;					//0x10
-	DWORD numcells;					//0x14
-	GfxCell *cells[255];			//0x18
 };
 
 struct CellContext		//size 0x48

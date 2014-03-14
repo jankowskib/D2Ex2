@@ -1,3 +1,22 @@
+/*==========================================================
+* D2Ex2
+* https://github.com/lolet/D2Ex2
+* ==========================================================
+* Copyright (c) 2011-2014 Bartosz Jankowski
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+* ==========================================================
+*/
 
 struct ArenaTxt
 {
@@ -98,6 +117,79 @@ struct BodyLocsTxt
       DWORD dwCode;               //0x00
       char szCode[4];               //0x00
    };
+};
+
+struct StatesTxt
+{
+	WORD wState;                  //0x00
+	WORD wOverlay[4];               //0x02
+	WORD wCastOverlay;               //0x0A
+	WORD wRemoveOverlay;            //0x0C
+	WORD wPrgOverlay;               //0x0E
+	struct {
+		BYTE	bNosend : 1;	//1
+		BYTE	bAura : 1;	//2
+		BYTE	bHide : 1;	//3
+		BYTE	bTransform : 1;	//4
+		BYTE	bPgsv : 1;	//5
+		BYTE	bActive : 1;	//6
+		BYTE	bRemhit : 1;	//7
+		BYTE	bDamblue : 1;	//8
+		BYTE	bDamred : 1;	//9
+		BYTE	bAttblue : 1;	//10
+		BYTE	bAttred : 1;	//11
+		BYTE	bCurse : 1;	//12
+		BYTE	bCurable : 1;	//13
+		BYTE	bPlrstaydeath : 1;	//14
+		BYTE	bMonstaydeath : 1;	//15
+		BYTE	bBossstaydeath : 1;	//16
+		BYTE	bDisguise : 1;	//17
+		BYTE	bRestrict : 1;	//18
+		BYTE	bBlue : 1;	//19
+		BYTE	bArmblue : 1;	//20
+		BYTE	bRfblue : 1;	//21
+		BYTE	bRcblue : 1;	//22
+		BYTE	bRlblue : 1;	//23
+		BYTE	bRpblue : 1;	//24
+		BYTE	bStambarblue : 1;	//25
+		BYTE	bArmred : 1;	//26
+		BYTE	bRfred : 1;	//27
+		BYTE	bRcred : 1;	//28
+		BYTE	bRlred : 1;	//29
+		BYTE	bRpred : 1;	//30
+		BYTE	bExp : 1;	//31
+		BYTE	bShatter : 1;	//32
+	} bStateFlags; //0x10
+	struct {
+		BYTE	bLife : 1;	//1
+		BYTE	bUdead : 1;	//2
+		BYTE	bGreen : 1;	//3
+		BYTE	bNooverlays : 1;	//4
+		BYTE	bNoclear : 1;	//5
+		BYTE	bBossinv : 1;	//6
+		BYTE	bMeleeonly : 1;	//7
+		BYTE	bNotondead : 1;	//8
+	} bStateFlagsEx; //0x14
+	BYTE _1[3];	//0x15
+	WORD wStat;                     //0x18
+	WORD wSetFunc;                  //0x1A
+	WORD wRemFunc;                  //0x1C
+	WORD wGroup;                  //0x1E
+	BYTE nColorPri;                  //0x20
+	BYTE nColorShift;               //0x21
+	BYTE nLightRGB[4];               //0x22
+	WORD wOnSound;                  //0x26
+	WORD wOffSound;                  //0x28
+	WORD wItemType;                  //0x2A
+	BYTE nItemTrans;               //0x2C
+	BYTE nGfxType;                  //0x2D
+	WORD wGfxClass;                  //0x2E
+	WORD wCltEvent;                  //0x30
+	WORD wCltEventFunc;               //0x32
+	WORD wCltActiveFunc;            //0x34
+	WORD wSrvActiveFunc;            //0x36
+	WORD wSkill;                  //0x38
+	WORD wMissile;                  //0x3A
 };
 
 struct ObjectTxt
@@ -1296,8 +1388,8 @@ struct sgptDataTable {
 	BYTE*	pRunes;					//0xB0
 	BYTE*	pHireDescs;				//0xB4
 	DWORD	dwHireDescsRecs;		//0xB8
-	BYTE*	pStates;				//0xBC
-	DWORD	dwStatesRecs;			//0xC0
+	StatesTxt*	pStatesTxt;			//0xBC
+	DWORD	dwStatesTxtRecs;		//0xC0
 	DWORD	dwStates;				//0xC4
 	BYTE*	pStateMaskFirst;		//0xC8
 	BYTE*	pStateMaskArr[40];		//0xCC

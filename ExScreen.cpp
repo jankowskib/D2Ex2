@@ -1,3 +1,23 @@
+/*==========================================================
+* D2Ex2
+* https://github.com/lolet/D2Ex2
+* ==========================================================
+* Copyright (c) 2011-2014 Bartosz Jankowski
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+* ==========================================================
+*/
+
 #include "stdafx.h"
 #include "ExScreen.h"
 #include "Vars.h"
@@ -86,6 +106,42 @@ void ExScreen::PrintTextEx(int Color, wchar_t* Msg,...)
 
 }
 
+void ExScreen::PrintPartyTextEx(int Color, wchar_t* Msg, ...)
+{
+
+	va_list arguments;
+	va_start(arguments, Msg);
+
+	int len = _vscwprintf(Msg, arguments) + 1;
+	wchar_t * text = new wchar_t[len];
+	vswprintf_s(text, len, Msg, arguments);
+	va_end(arguments);
+
+	D2Funcs.D2CLIENT_PrintPartyString(text, Color);
+
+	delete[] text;
+
+}
+
+void ExScreen::PrintPartyTextEx(int Color, char* Msg, ...)
+{
+
+	va_list arguments;
+	va_start(arguments, Msg);
+
+	int len = _vscprintf(Msg, arguments) + 1;
+	char * text = new char[len];
+	vsprintf_s(text, len, Msg, arguments);
+	va_end(arguments);
+
+	wchar_t* wtext = new wchar_t[len];
+	Misc::CharToWide(text, len, wtext, len);
+	D2Funcs.D2CLIENT_PrintPartyString(wtext, Color);
+
+	delete[] text;
+	delete[] wtext;
+}
+
 void ExScreen::DrawTextEx(int X, int Y, int Color, int Cent, int TransLvl, wchar_t* Msg,...)
 {
 	va_list arguments;
@@ -137,8 +193,17 @@ void __stdcall ExScreen::Display()
 	wPool+=L" Mem taken:" + boost::lexical_cast<wstring>(ExMemory::GetMemUsage() /1024 / 1024);
 	wPool+=L" mb";
 	D2Funcs.D2WIN_DrawText(wPool.c_str(),10,20,11,0);*/
+	D2Funcs.D2WIN_SetTextSize(2);
+	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_NORMAL", 5, 40, COL_GOLD, 0, DRAW_MODE_NORMAL);
+	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_ALPHA_25", 5, 60, COL_GOLD, 0, DRAW_MODE_ALPHA_25);
+	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_ALPHA_25_BRIGHT", 5, 80, COL_GOLD, 0, DRAW_MODE_ALPHA_25_BRIGHT);
+	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_ALPHA_50", 5, 100, COL_GOLD, 0, DRAW_MODE_ALPHA_50);
+	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_ALPHA_50_BRIGHT", 5, 120, COL_GOLD, 0, DRAW_MODE_ALPHA_50_BRIGHT);
+	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_ALPHA_75", 5, 140, COL_GOLD, 0, DRAW_MODE_ALPHA_75);
+	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_BRIGHT", 5, 160, COL_GOLD, 0, DRAW_MODE_BRIGHT);
+	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_INVERTED", 5, 180, COL_GOLD, 0, DRAW_MODE_INVERTED);
 #endif
-//	D2Funcs.D2WIN_SetTextSize(3);
+	D2Funcs.D2WIN_SetTextSize(1);
 //	D2Funcs.D2WIN_DrawText(D2Vars.D2CLIENT_TempMessage,0,40,0,0);
 
 	EnterCriticalSection(&CON_CRITSECT);
@@ -246,7 +311,7 @@ void ExScreen::DrawAutoMapVer()
 	*D2Vars.D2CLIENT_AutomapInfoY+=16;
 
 #ifdef D2EX_MULTIRES
-	int x, y;
+	unsigned int x, y;
 	ExMultiRes::D2GFX_GetModeParams(ExMultiRes::GFX_GetResolutionMode(), &x, &y);
 	if (x > 800 && y > 600)
 	{
@@ -559,8 +624,8 @@ void ExScreen::DrawBreakpoints()
 
 void ExScreen::DrawDmg()
 {
-	int mX = *D2Vars.D2CLIENT_MouseX;
-	int mY = *D2Vars.D2CLIENT_MouseY;
+	unsigned int mX = *D2Vars.D2CLIENT_MouseX;
+	unsigned int mY = *D2Vars.D2CLIENT_MouseY;
 	UnitAny * ptUnit = D2Funcs.D2CLIENT_GetPlayer();
 	ASSERT(ptUnit)
 	if (mX > 240 && mX < 394 && mY > (*D2Vars.D2CLIENT_ScreenHeight - 455) && mY < (*D2Vars.D2CLIENT_ScreenHeight - 435))
@@ -600,15 +665,15 @@ void ExScreen::DrawDmg()
 
 			//	ExScreen::DrawTextEx(100,420,1,0,5,L"Min %d, Max %d, B %d, BMax %d, sId %d",MinDmg,MaxDmg,sBonus, sBonusMax,sId);
 
-			if(AvgDmg)
-			{
-				wostringstream wInfo;
-				wInfo <<  (gLocaleId == 10? L"Œrednie Obra¿enia: " :L"Average Damage: ") << GetColorCode(COL_YELLOW) << AvgDmg; 
-				D2Funcs.D2WIN_SetTextSize(0);
-				D2Funcs.D2WIN_DrawRectangledText(wInfo.str().c_str(), 242, *D2Vars.D2CLIENT_ScreenHeight - 458, 0, 2, COL_WHITE);
+				if(AvgDmg)
+				{
+					wostringstream wInfo;
+					wInfo <<  (gLocaleId == 10? L"Œrednie Obra¿enia: " :L"Average Damage: ") << GetColorCode(COL_YELLOW) << AvgDmg; 
+					D2Funcs.D2WIN_SetTextSize(0);
+					D2Funcs.D2WIN_DrawRectangledText(wInfo.str().c_str(), 242, *D2Vars.D2CLIENT_ScreenHeight - 458, 0, 2, COL_WHITE);
+				}
 			}
-		}
-	else if (mX>240 && mX<394 && mY>(*D2Vars.D2CLIENT_ScreenHeight - 430) && mY<(*D2Vars.D2CLIENT_ScreenHeight - 410))
+			else if (mX>240 && mX<394 && mY>(*D2Vars.D2CLIENT_ScreenHeight - 430) && mY<(*D2Vars.D2CLIENT_ScreenHeight - 410))
 			{	
 				Skill * ptSkill = D2Funcs.D2COMMON_GetRightSkill(ptUnit);
 				ASSERT(ptSkill)

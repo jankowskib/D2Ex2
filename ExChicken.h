@@ -18,35 +18,24 @@
 * ==========================================================
 */
 
-#include "stdafx.h"
-#include "ExMPQ.h"
+#ifndef __EXCHICKEN__H__
+#define __EXCHICKEN__H__
 
-void ExMpq::LoadMPQ()
+#include "Misc.h"
+#include "Vars.h"
+#include "ExPrecast.h"
+#include "ExParty.h"
+#include "ExAim.h"
+
+namespace ExChicken 
 {
-	string MpqPath = D2ExDir + "D2Ex.MPQ";
-	MPQHandle = D2ASMFuncs::D2WIN_LoadMpq(5000,"D2Ex2.dll",MpqPath.c_str(),"D2EX",0,0);
-	if(!MPQHandle) 
-	{
-		Misc::Log("Failed to load D2Ex.MPQ!");
-		D2Funcs.FOG_Error(__FILE__,0,__LINE__);
-		ExitProcess(-1);
-	}
-#ifdef _DEBUG
-Misc::Log("Loaded D2Ex.MPQ file...");
-#endif
+	void __stdcall b_FastTP(StormMsg * Msg);		//VK_FastTP
+
+	bool FastTP();
+	bool OpenPortal(UnitAny* pTarget = 0);
+	void AntiChicken();
+	void UseItem(DWORD UnitId, WORD wX, WORD wY);
+	void Interact(DWORD UnitType, DWORD UnitId);
 }
 
-void ExMpq::UnloadMPQ()
-{
-	//Skipping this function because archive is already closed when don't use D2Loader.
-	//Seems the same things appears on 1.11b
-	return;
-	if (MPQHandle) {
-		D2Funcs.STORM_CloseArchive((DWORD *)MPQHandle);
-		D2Funcs.FOG_FreeMemory(MPQHandle, __FILE__, __LINE__, 0);
-		MPQHandle = 0;
-	}
-#ifdef _DEBUG
-	Misc::Log("Freed memory of D2Ex.MPQ file!");
 #endif
-}

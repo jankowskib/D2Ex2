@@ -1,3 +1,23 @@
+/*==========================================================
+* D2Ex2
+* https://github.com/lolet/D2Ex2
+* ==========================================================
+* Copyright (c) 2011-2014 Bartosz Jankowski
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+* ==========================================================
+*/
+
 #include "Offset.h"
 
 #undef DrawText
@@ -156,7 +176,9 @@ _d2f D2Funcs = {0}; void SetupD2Funcs() {
 		//D2CMP
 		EXFUNCPTR(D2CMP, DeleteCellFile, void, __stdcall, (CellFile* cf), -10020) //k
 		EXFUNCPTR(D2CMP, MixPalette, BYTE*, __stdcall, (int TransLvl, int ColorNo), -10009) //k
-
+		EXFUNCPTR(D2CMP, SetupGfxCell, BOOL, __stdcall, (CellContext *cc, int aZero, int aOne), -10025)
+		EXFUNCPTR(D2CMP, SetupGfxTile, BOOL, __stdcall, (TileContext *tc, int aZero, int aOne), -10084)
+		EXFUNCPTR(D2CMP, DrawCellOnBitmapBuffer, void, __stdcall, (CellContext *pContext, int nX, int nY, int a4, int nWidth, void *pBitmapBuffer, int BitmapWidth, int BitmapHeight, int a9, int a10, BYTE *bPalette), -10001)
 		//FOG
 		EXFUNCPTR(FOG, AllocMemory, void*, __fastcall, (int MemSize, char* szFile, int Line, int aNull), -10042)
 		EXFUNCPTR(FOG, FreeMemory, void, __fastcall, (void* MemPool, char* szFile, int Line, int aNull), -10043)
@@ -321,8 +343,8 @@ void SetupD2Vars() {
 		EXVARPTR(D2CLIENT, UI_Unk8, DWORD, 0xF6250)
 
 		//D2MultiRes stuff
-		EXVARPTR(D2CLIENT, ScreenHeight, int, 0xF7038) //k
-		EXVARPTR(D2CLIENT, ScreenWidth, int, 0xF7034) // k
+		EXVARPTR(D2CLIENT, ScreenHeight, unsigned int, 0xF7038) //k
+		EXVARPTR(D2CLIENT, ScreenWidth, unsigned int, 0xF7034) // k
 		EXVARPTR(D2CLIENT, ScreenMode, int, 0x11D2B4)
 		EXVARPTR(D2CLIENT, ScreenViewHeight, int, 0x123D60)
 		EXVARPTR(D2CLIENT, ScreenViewWidth, int, 0x123D64)
@@ -341,20 +363,21 @@ void SetupD2Vars() {
 		EXVARPTR(D2GFX, WindowMode, BOOL, 0x14A3C)
 		EXVARPTR(D2GFX, DriverType, int, 0x14A38)
 		EXVARPTR(D2GFX, gpbBuffer, void*, 0x14320)
-		EXVARPTR(D2GFX, Width, int, 0x14324)
-		EXVARPTR(D2GFX, Height, int, 0x14328)
+		EXVARPTR(D2GFX, Width, unsigned int, 0x14324)
+		EXVARPTR(D2GFX, Height, unsigned int, 0x14328)
 		EXVARPTR(D2GFX, ScreenShift, int, 0x14A50)
 		EXVARPTR(D2GFX, fnHelpers, GFXHelpers, 0x10BFC) // table of 7 functions
 		EXVARPTR(D2GFX, Settings, GFXSettings, 0x10BE4)
 		EXVARPTR(D2GFX, hInstance, HINSTANCE, 0x14A30)
 		EXVARPTR(D2GFX, hDriverModHandle, HMODULE, 0x14A4C)
+		EXVARPTR(D2GFX, bInitSucceed, BOOL, 0x1D638)
 		EXVARPTR(D2GFX, bPerspective, BOOL, 0x10BE8)
 		EXVARPTR(D2GFX, GammaValue, int, 0x10BF0)
 		EXVARPTR(D2GFX, WinPlacementCache, D2WinPlacement, 0x14570)
 
-		EXVARPTR(D2GDI, WindowWidth, int, 0xCA98)
-		EXVARPTR(D2GDI, BitmapHeight, int, 0xC980)
-		EXVARPTR(D2GDI, BitmapWidth, int, 0xC970)
+		EXVARPTR(D2GDI, WindowWidth, unsigned int, 0xCA98)
+		EXVARPTR(D2GDI, BitmapHeight, unsigned int, 0xC980)
+		EXVARPTR(D2GDI, BitmapWidth, unsigned int, 0xC970)
 		EXVARPTR(D2GDI, gpbBuffer, void*, 0xCA9C)
 		EXVARPTR(D2GDI, DIB, HBITMAP, 0xC97C)
 		EXVARPTR(D2GDI, hWnd, HANDLE, 0xC568)
@@ -365,8 +388,8 @@ void SetupD2Vars() {
 		EXVARPTR(D2GDI, csPause, CRITICAL_SECTION*, 0xCAA4)
 
 		EXVARPTR(D2GLIDE, bIsWindowOpen, BOOL, 0x17B2C)
-		EXVARPTR(D2GLIDE, Width, int, 0x15A78)
-		EXVARPTR(D2GLIDE, Height, int, 0x15B14)
+		EXVARPTR(D2GLIDE, Width, unsigned int, 0x15A78)
+		EXVARPTR(D2GLIDE, Height, unsigned int, 0x15B14)
 		EXVARPTR(D2GLIDE, Context, GrContext_t, 0x15AA0)
 		EXVARPTR(D2GLIDE, TMUCount, FxI32, 0x17B18)
 		EXVARPTR(D2GLIDE, TextureAlign, FxI32, 0x17B20)

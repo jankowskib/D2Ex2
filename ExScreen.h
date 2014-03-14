@@ -1,3 +1,23 @@
+/*==========================================================
+* D2Ex2
+* https://github.com/lolet/D2Ex2
+* ==========================================================
+* Copyright (c) 2011-2014 Bartosz Jankowski
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+* ==========================================================
+*/
+
 #ifndef __EXSCREEN_H__
 #define __EXSCREEN_H__
 
@@ -9,6 +29,9 @@ void DrawTextEx(int X, int Y, int Color, int Cent, int TransLvl, wchar_t* Msg,..
 void DrawTextEx(int X, int Y, int Color, int Cent, int TransLvl, char* Msg,...);
 void PrintTextEx(int Color, char* Msg,...);
 void PrintTextEx(int Color, wchar_t* Msg,...);
+void PrintPartyTextEx(int Color, char* Msg, ...);
+void PrintPartyTextEx(int Color, wchar_t* Msg, ...);
+
 int GetTextWidth(const wchar_t *wText);
 wstring GetColorCode(int ColNo);
 

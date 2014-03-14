@@ -1,3 +1,23 @@
+/*==========================================================
+* D2Ex2
+* https://github.com/lolet/D2Ex2
+* ==========================================================
+* Copyright (c) 2011-2014 Bartosz Jankowski
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+* ==========================================================
+*/
+
 #ifndef COMMONSTRUCTS_H__
 #define COMMONSTRUCTS_H__
 
@@ -7,6 +27,9 @@ struct CellContext;
 struct CellFile;
 struct Control;
 struct ScrollBar;
+struct TileContext;
+struct GfxCell;
+
 
 #pragma pack(push, 1)
 
@@ -89,8 +112,13 @@ struct sMsg	//size 0x0C
 #pragma pack(pop)
 
 
-
-struct D2PacketTable //1.11b : (0x6FB8BC30 + (4 *(0xPacket*3)))
+/*
+	D2PacketTable - structure contains packet callbacks S->C
+	Here is location of table for patches:
+	1.11b: D2CLIENT.0xDBC30
+	1.13d: D2CLIENT.0xEF4B0
+*/
+struct D2PacketTable 
 {
 	BOOL(__fastcall *CallBack)(BYTE* aPacket);
 	int PacketLen;
@@ -169,14 +197,39 @@ struct GFXSettings // size 0x18
 struct GFXHelpers
 {
 	void(__fastcall *FillYBufferTable)(void *ppvBits, int nWidth, int nHeight, int aZero);
-	void(__fastcall *f2)(int a1, int a2, int a3);
+	void(__fastcall *DrawVisTile)(int a1, int a2, int a3);
 	void(__fastcall *f3)(int a1, int a2, int a3, int a4);
-	void(__fastcall *f4)(int a1, int a2, int a3, int a4);
-	void(__fastcall *f5)(int a1, int a2, int a3, int a4);
-	void(__fastcall *f6)(int a1, int a2, int a3, int a4);
-	void(__fastcall *f7)(int a1, int a2, int a3, int a4, int a5);
+	void(__fastcall *DrawGroundTile)(TileContext* tc, int xPos, int yPos, int* pLight);
+	void(__fastcall *DrawWallTile)(int a1, int a2, int a3, int a4);
+	void(__fastcall *DrawBlendedVisTile)(int a1, int a2, int a3, int a4);
+	void(__fastcall *DrawRoofTile)(int a1, int a2, int a3, int a4, int a5);
 };
 
+
+struct TileContext
+{	
+	// (...)
+	DWORD dwSize;					//0x4C
+	DWORD _1;						//0x50
+	void* pData;					//0x54
+	char* szTileName;				//0x58
+	void *ptBlock;					//0x5C
+};
+
+struct CellFile 
+{
+	DWORD dwVersion;				//0x00
+	struct {
+		WORD dwFlags; // 0x4 = CELFILE_24BIT
+		BYTE mylastcol;
+		BYTE mytabno : 1;
+	};								//0x04
+	DWORD eFormat;					//0x08
+	DWORD termination;				//0x0C
+	DWORD numdirs;					//0x10
+	DWORD numcells;					//0x14
+	GfxCell *cells[255];			//0x18
+};
 
 struct fnRendererCallbacks
 {
@@ -201,36 +254,36 @@ struct fnRendererCallbacks
 	BOOL(__fastcall *CloseSmacker)(void *pcontext); // 18
 	int(__fastcall *GetRenderStats)(); // 19
 	void(__fastcall *GetScreenSize)(int *pwidth, int *pheight); // 20
-	BOOL(__fastcall *SetScaleFactor)(); // 21
+	void(__fastcall *SetScaleFactor)(int nFactor); // 21
 	BOOL(__fastcall *SetGamma)(int nGamma); // 22
 	BOOL(__fastcall *CheckGamma)(); // 23
 	BOOL(__fastcall *SetPerspectiveScale)(); // 24
 	BOOL(__fastcall *AdjustPerspective)(int nXpos, int nYpos, int nBais, int *pxadjust, int *pyadjust); // 25
 	BOOL(__fastcall *ScalePerspectivepos)(int nXpos, int nYpos, int nAngle, int *pxpos, int *pypos, BOOL bOrder); // 26
 	BOOL(__fastcall *SetDefperspectivefactor)(); // 27
-	BOOL(__fastcall *SetPalette)(BYTE* pPalette); // 28
+	void(__fastcall *SetPalette)(BYTE* pPalette); // 28
 	BOOL(__fastcall *SetPalettetable)(BYTE** pPalette); // 29
 	BOOL(__fastcall *SetGlobalLight)(BYTE nRed, BYTE nGreen, BYTE nBlue); // 30
-	BOOL(__fastcall *DrawGroundTile)(void* pTile, DWORD** pLight, int nXpos, int nYpos, int nWorldXpos, int nWorldYpos, BYTE nAlpha, int nScreenPanels, void* pTileData); // 31
-	BOOL(__fastcall *DrawPerspectiveImage)(CellContext* pData, int nXpos, int nYpos, DWORD dwGamma, int nDrawMode, int nScreenMode, BYTE* pPalette); // 32
-	BOOL(__fastcall *DrawImage)(CellContext* pData, int nXpos, int nYpos, DWORD dwGamma, int nDrawMode, BYTE* pPalette); // 33
-	BOOL(__fastcall *DrawShiftedImage)(CellContext* pData, int nXpos, int nYpos, DWORD dwGamma, int nDrawMode, int nGlobalPaletteShift); // 34
+	BOOL(__fastcall *DrawGroundTile)(TileContext* pTile, DWORD** pLight, int nXpos, int nYpos, int nWorldXpos, int nWorldYpos, BYTE nAlpha, int nScreenPanels, void* pTileData); // 31
+	BOOL(__fastcall *DrawPerspectiveImage)(CellContext* pData, unsigned int nXpos, unsigned int nYpos, BYTE dwGamma, int nDrawMode, int nScreenMode, BYTE* pPalette); // 32
+	BOOL(__fastcall *DrawImage)(CellContext* pData, unsigned int nXpos, unsigned int nYpos, BYTE dwGamma, int nDrawMode, BYTE* pPalette); // 33
+	BOOL(__fastcall *DrawShiftedImage)(CellContext* pData, int nXpos, int nYpos, BYTE dwGamma, int nDrawMode, int nGlobalPaletteShift); // 34
 	BOOL(__fastcall *DrawVerticalCropImage)(CellContext* pData, int nXpos, int nYpos, int nSkipLines, int nDrawLines, int nDrawMode); // 35
 	BOOL(__fastcall *DrawShadows)(CellContext* pData, int nXpos, int nYpos); // 36
 	BOOL(__fastcall *DrawImageFast)(CellContext* pData, int nXpos, int nYpos, BYTE nPaletteIndex); // 37
 	BOOL(__fastcall *DrawClippedImage)(CellContext* pData, int nXpos, int nYpos, void* pCropRect, int nDrawMode); // 38
-	BOOL(__fastcall *DrawWallTile)(void* pTile, int nXpos, int nYpos, DWORD** pLight, int nScreenPanels, BYTE nAlpha); // 39
-	BOOL(__fastcall *DrawRoofTile)(void* pTile, int nXpos, int nYpos, DWORD** pLight, int nScreenPanels, BYTE nAlpha); // 40
-	BOOL(__fastcall *DrawVisTile)(void* pTile, int nXpos, int nYpos, int nDrawMode, int nScreenPanels); // 41
-	BOOL(__fastcall *DrawRect)(RECT *Prect, BYTE nPaletteIndex); // 42
-	BOOL(__fastcall *DrawRectEx)(RECT *Prect, BYTE nPaletteIndex); // 43
-	BOOL(__fastcall *DrawSolidRect)(RECT *Prect, BYTE nPaletteIndex); // 44
-	BOOL(__fastcall *DrawSolidSquare)(RECT *Prect, BYTE nPaletteIndex, int nSize); // 45
-	BOOL(__fastcall *DrawSolidRectEx)(int nXStart, int nYStart, int nXEnd, int nYEnd, DWORD dwColor, int nDrawMode); // 46
-	BOOL(__fastcall *DrawSolidRectAlpha)(int nXStart, int nYStart, int nXEnd, int nYEnd, DWORD dwColor, BYTE nAlpha); // 47
+	BOOL(__fastcall *DrawWallTile)(TileContext* pTile, int nXpos, int nYpos, DWORD** pLight, int nScreenPanels); // 39
+	BOOL(__fastcall *DrawRoofTile)(TileContext* pTile, int nXpos, int nYpos, DWORD** pLight, int nScreenPanels, BYTE nAlpha); // 40
+	BOOL(__fastcall *DrawVisTile)(TileContext* pTile, int nXpos, int nYpos, int nDrawMode, int nScreenPanels); // 41
+	BOOL(__fastcall *DrawRect)(RECT *Prect, BYTE nColor); // 42
+	BOOL(__fastcall *DrawRectEx)(RECT *Prect, BYTE nColor); // 43
+	BOOL(__fastcall *DrawSolidRect)(RECT *Prect, BYTE nColor); // 44
+	BOOL(__fastcall *DrawSquare)(POINT *pos, int nSize, BYTE nColor); // 45
+	BOOL(__fastcall *DrawSolidRectEx)(int nXStart, int nYStart, int nXEnd, int nYEnd, BYTE nColor, int nDrawMode); // 46
+	BOOL(__fastcall *DrawSolidRectAlpha)(int nXStart, int nYStart, int nXEnd, int nYEnd, BYTE nColor, BYTE nAlpha); // 47
 	BOOL(__fastcall *DrawLine)(int nXStart, int nYStart, int nXEnd, int nYEnd, BYTE nColor, BYTE nAlpha); // 48
 	BOOL(__fastcall *ClearScreen)(BOOL bPartial); // 49
-	BOOL(__fastcall *DrawString)(int nXpos, int nYpos, const char *Szformat, ...); // 50
+	BOOL(__fastcall *DrawString)(int nXpos, int nYpos, const char *msg, ...); // 50
 	BOOL(__fastcall *DrawLight)(DWORD *plight, DWORD *pplayerlight, int nXpos, int nYpos); // 51
 	BOOL(__fastcall *DebugFillBackBuffer)(int xPos, int yPos); // 52
 	BOOL(__fastcall *ClearCaches)(); // 53

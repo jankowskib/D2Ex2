@@ -1,3 +1,23 @@
+/*==========================================================
+* D2Ex2
+* https://github.com/lolet/D2Ex2
+* ==========================================================
+* Copyright (c) 2011-2014 Bartosz Jankowski
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+* ==========================================================
+*/
+
 #include "stdafx.h"
 #include "ExImage.h"
 
@@ -5,17 +25,16 @@
 //TODO:
 //- Blocked RECT update
 
-
-ExImage::ExImage(int X, int Y, int Transp, unsigned int Frame, string szFile) : ExControl(X, Y, -1, -1, 0)
+ExImage::ExImage(int X, int Y, int Transp, unsigned int Frame, CellFile* CellFile) : ExControl(X, Y, -1, -1, 0)
 {
-
 	try
 	{
-		aCellFile = new ExCellFile(szFile);
+		aCellFile = new ExCellFile(CellFile);
 	}
 	catch (const CellLoadError&)
 	{
 		delete aCellFile;
+		if (!DontLeaveCS)
 		LeaveCriticalSection(&CON_CRITSECT);
 		D2EXERROR("Cannot create image because of missing or corrupted DC6 file!")
 	}
@@ -31,6 +50,36 @@ ExImage::ExImage(int X, int Y, int Transp, unsigned int Frame, string szFile) : 
 	//#ifdef _DEBUG
 	//Misc::Log("-->Stworzylem nowy klase ExImage (X=%d, Y=%d)!",X,Y);
 	//#endif
+	if (!DontLeaveCS)
+	LeaveCriticalSection(&CON_CRITSECT);
+}
+
+ExImage::ExImage(int X, int Y, int Transp, unsigned int Frame, string szFile) : ExControl(X, Y, -1, -1, 0)
+{
+	try
+	{
+		aCellFile = new ExCellFile(szFile);
+	}
+	catch (const CellLoadError&)
+	{
+		delete aCellFile;
+		if (!DontLeaveCS)
+		LeaveCriticalSection(&CON_CRITSECT);
+		D2EXERROR("Cannot create image because of missing or corrupted DC6 file!")
+	}
+
+	Hoover = L"";
+	aCellFile->SetFrame(Frame);
+	cWidth = aCellFile->GetCF()->cells[Frame]->width;
+	cHeight = aCellFile->GetCF()->cells[Frame]->height;
+	TransLvl = (Transp > 7) ? DRAW_MODE_NORMAL : Transp;
+	//aCellFile->Get()->nCellNo=(Frame>aCellFile->Get()->pCellFile->numcells) ? 0 : Frame;
+	ColorShift = 0;
+	MultiFrame = false;
+	//#ifdef _DEBUG
+	//Misc::Log("-->Stworzylem nowy klase ExImage (X=%d, Y=%d)!",X,Y);
+	//#endif
+	if (!DontLeaveCS)
 	LeaveCriticalSection(&CON_CRITSECT);
 }
 

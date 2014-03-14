@@ -1,3 +1,23 @@
+/*==========================================================
+* D2Ex2
+* https://github.com/lolet/D2Ex2
+* ==========================================================
+* Copyright (c) 2011-2014 Bartosz Jankowski
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+* ==========================================================
+*/
+
 #include "stdafx.h"
 #include "D2Ex2.h"
 
@@ -39,6 +59,7 @@
 #include "ExLagometer.h"
 #include "ExAim.h"
 #include "ExMultiRes.h"
+#include "ExChicken.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -132,6 +153,7 @@ unsigned int __stdcall Thread(void * Args)
 	VK_ATNext = GetPrivateProfileInt("Keys", "ATNext", VK_F5, ConfigIni.c_str());
 	VK_ATWP = GetPrivateProfileInt("Keys", "ATWP", VK_F6, ConfigIni.c_str());
 	VK_ATPrev = GetPrivateProfileInt("Keys", "ATPrev", VK_F7, ConfigIni.c_str());
+	VK_FastTP = GetPrivateProfileInt("Keys", "ATFastTP", VK_F1, ConfigIni.c_str());
 #endif
 	char sRes[50];
 	string strRes;
@@ -170,7 +192,9 @@ unsigned int __stdcall Thread(void * Args)
 	//PATCHES---TYPE-DEST_ADDRESS---------------WHAT_PATCH-------------------------SIZE---DESC-----
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x66D9C),(DWORD)D2Stubs::D2CLIENT_ScreenHook,5,"Screen Hook");
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x66AB1),(DWORD)ExEntryText::Draw,5,"Entry Text Fix");
+#ifndef D2EX_PVM_BUILD
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x7F709),(DWORD)ExPrecast::Do,5,"Trasmute button");
+#endif
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x91CA5),(DWORD)ExInput::GameInput_STUB,5,"Chat Input Wrapper");
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x910F3),(DWORD)ExInput::RealmInput,5,"Realm Input Wrapper");
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x76B66),(DWORD)D2Stubs::D2CLIENT_OnGetItemName,9,"Item Name Wrapper");
@@ -259,7 +283,9 @@ unsigned int __stdcall Thread(void * Args)
 	#elif defined VER_113D
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x1D78C),(DWORD)D2Stubs::D2CLIENT_ScreenHook,5,"Screen Hook"); // k
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x1D4A1),(DWORD)ExEntryText::Draw,5,"Entry Text Fix"); //k
+#ifndef D2EX_PVM_BUILD
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x9F5A9),(DWORD)ExPrecast::Do,5,"Trasmute button"); //k
+#endif
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0xB293D),(DWORD)ExInput::GameInput_STUB,5,"Chat Input Wrapper"); // k
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0xB1283),(DWORD)ExInput::RealmInput,5,"Realm Input Wrapper"); // k
 
@@ -327,6 +353,8 @@ unsigned int __stdcall Thread(void * Args)
 	Misc::Patch(CALL, GetDllOffset("D2Gfx.dll", 0x93E9), (DWORD)D2Stubs::D2GFX_LookUpFix_IV_STUB, 7, "LookUpYFix_IV");
 	Misc::Patch(CALL, GetDllOffset("D2Gfx.dll", 0xA680), (DWORD)D2Stubs::D2GFX_LookUpFix_V_STUB, 7, "LookUpYFix_V");
 	Misc::Patch(CALL, GetDllOffset("D2Gfx.dll", 0xA4F7), (DWORD)D2Stubs::D2GFX_LookUpFix_VI_STUB, 6, "LookUpYFix_VI");
+
+	Misc::Patch(JUMP, GetDllOffset("D2Gfx.dll", -10050), (DWORD)ExMultiRes::D2GFX_Finish, 5, "D2GFX_Finish");
 
 	//Res UI fixups
 	Misc::Patch(JUMP, GetDllOffset("D2Common.dll", -10689), (DWORD)ExMultiRes::GetBeltPos, 7, "D2COMMON_GetBeltPos");
@@ -435,7 +463,8 @@ unsigned int __stdcall Thread(void * Args)
 #if defined D2EX_EXAIM_ENABLED || defined D2EX_PVM_BUILD
 	HANDLE hAim = 0;
 	atomic_init(&gStopTeleport, false);
-	HANDLE hAimEvent = CreateEvent(NULL, TRUE, FALSE, "D2EX_TELEPORT");
+	atomic_init(&gFastTP, false);
+	HANDLE hAimEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 #endif
 	while (WaitForSingleObject(hEvent, 0) != WAIT_OBJECT_0) 
 	{
@@ -484,6 +513,14 @@ unsigned int __stdcall Thread(void * Args)
 					Sleep(2 * 1000); //2 sec test
 				}
 #endif
+#if defined D2EX_EXAIM_ENABLED || defined D2EX_PVM_BUILD
+				if (gFastTP.load())	
+				{
+					ExChicken::FastTP();
+					gFastTP.store(false);
+				}
+#endif
+
 				Sleep(50);
 			}
 			
@@ -541,7 +578,7 @@ DWORD WINAPI DllMain(HMODULE hModule, int dwReason, void* lpReserved)
 #endif
 
 #ifdef D2EX_MULTIRES
-			hPointersReadyEvent = CreateEvent(NULL, TRUE, FALSE, "D2EX_READY");
+			hPointersReadyEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 			ASSERT(hPointersReadyEvent);
 			Misc::Patch(JUMP, GetDllOffset("D2Gfx.dll", -10073), (DWORD)ExMultiRes::D2GFX_InitWindow, 7, "D2GFX_InitWindow");
 #endif

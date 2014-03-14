@@ -1,3 +1,23 @@
+/*==========================================================
+* D2Ex2
+* https://github.com/lolet/D2Ex2
+* ==========================================================
+* Copyright (c) 2011-2014 Bartosz Jankowski
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+* ==========================================================
+*/
+
 #include "stdafx.h"
 #include "ExOptions.h"
 
@@ -705,8 +725,12 @@ BOOL __fastcall ExOptions::Various(D2MenuEntry* ptEntry, StormMsg* pMsg)
 // Import from Scrap
 BOOL __fastcall ExOptions::KeyConfig(D2MenuEntry* ptEntry, StormMsg* pMsg)
 {
-	static D2Menu NewMenu = { 4, 28, 20, 37, 0, 0 };
-	static D2MenuEntry NewEntries[4] = { 0 };
+	static D2Menu NewMenu = { 5, 28, 20, 37, 0, 0 };
+	static D2MenuEntry NewEntries[5] = { 0 };
+
+#ifndef D2EX_PVM_BUILD
+	return false;
+#endif
 
 	if (!NewEntries[0].wItemName[0]) 
 	{
@@ -715,11 +739,13 @@ BOOL __fastcall ExOptions::KeyConfig(D2MenuEntry* ptEntry, StormMsg* pMsg)
 		NewEntries[1].Bind = (DWORD*)&VK_ATNext;
 		NewEntries[2].Bind = (DWORD*)&VK_ATWP;
 		NewEntries[3].Bind = (DWORD*)&VK_ATPrev;
+		NewEntries[4].Bind = (DWORD*)&VK_FastTP;
 
 		wcscpy_s(NewEntries[0].wItemName, 130, gLocaleId == LOCALE_POL ? L"KONFIG. KLAWISZY" : L"CONFIGURE CONTROLS");
 		wcscpy_s(NewEntries[1].wItemName, 130, gLocaleId == LOCALE_POL ? L"AutoTele do nast. lok." : L"AutoTele to next loc.");
 		wcscpy_s(NewEntries[2].wItemName, 130, gLocaleId == LOCALE_POL ? L"AutoTele do WP" : L"AutoTele to next WP");
 		wcscpy_s(NewEntries[3].wItemName, 130, gLocaleId == LOCALE_POL ? L"AutoTele do poprz. lok." : L"AutoTele to prev loc.");
+		wcscpy_s(NewEntries[4].wItemName, 130, gLocaleId == LOCALE_POL ? L"Szybkie TP" : L"Fast TP");
 	}
 
 	*D2Vars.D2CLIENT_SelectedMenu = 0;
@@ -731,8 +757,8 @@ BOOL __fastcall ExOptions::KeyConfig(D2MenuEntry* ptEntry, StormMsg* pMsg)
 
 BOOL __fastcall ExOptions::Options(D2MenuEntry* ptEntry, StormMsg* pMsg)
 {
-	static D2Menu NewMenu = { 0 };
-	static D2MenuEntry NewEntries[6] = { 0 };
+	static D2Menu NewMenu;
+	static D2MenuEntry NewEntries[6];
 
 
 	if (!NewMenu.dwEntriesNo)
@@ -749,13 +775,14 @@ BOOL __fastcall ExOptions::Options(D2MenuEntry* ptEntry, StormMsg* pMsg)
 		memcpy(NewEntries, (const void*)*&D2Vars.D2CLIENT_OptionsMenu, sizeof(D2MenuEntry)* 4);
 		memcpy(&NewEntries[5], (const void*)&D2Vars.D2CLIENT_OptionsMenu[4], sizeof(D2MenuEntry));
 
-		wcscpy_s((wchar_t*)&NewEntries[0].szCellFile, 130, gLocaleId == 10 ? L"OPCJE DèWI KOWE" : L"SOUND OPTIONS");
-		wcscpy_s((wchar_t*)&NewEntries[1].szCellFile, 130, gLocaleId == 10 ? L"OPCJE GRAFICZNE" : L"VIDEO OPTIONS");
-		wcscpy_s((wchar_t*)&NewEntries[2].szCellFile, 130, gLocaleId == 10 ? L"OPCJE AUTOMAPY" : L"AUTOMAP OPTIONS");
-		wcscpy_s((wchar_t*)&NewEntries[3].szCellFile, 130, gLocaleId == 10 ? L"KONFIGURACJA STEROWANIA" : L"CONFIGURE CONTROLS");
-		wcscpy_s((wchar_t*)&NewEntries[4].szCellFile, 130, gLocaleId == 10 ? L"USTAWIENIA D2EX" : L"D2EX SETTINGS");
-		wcscpy_s((wchar_t*)&NewEntries[5].szCellFile, 130, gLocaleId == 10 ? L"POPRZEDNIE MENU" : L"PREVIOUS MENU");
+		wcscpy_s(NewEntries[0].wItemName, 130, gLocaleId == 10 ? L"OPCJE DèWI KOWE" : L"SOUND OPTIONS");
+		wcscpy_s(NewEntries[1].wItemName, 130, gLocaleId == 10 ? L"OPCJE GRAFICZNE" : L"VIDEO OPTIONS");
+		wcscpy_s(NewEntries[2].wItemName, 130, gLocaleId == 10 ? L"OPCJE AUTOMAPY" : L"AUTOMAP OPTIONS");
+		wcscpy_s(NewEntries[3].wItemName, 130, gLocaleId == 10 ? L"KONFIGURACJA STEROWANIA" : L"CONFIGURE CONTROLS");
+		wcscpy_s(NewEntries[4].wItemName, 130, gLocaleId == 10 ? L"USTAWIENIA D2EX" : L"D2EX SETTINGS");
+		wcscpy_s(NewEntries[5].wItemName, 130, gLocaleId == 10 ? L"POPRZEDNIE MENU" : L"PREVIOUS MENU");
 
+		NewEntries[0].ptCellFile = NewEntries[1].ptCellFile = NewEntries[2].ptCellFile = NewEntries[3].ptCellFile = NewEntries[4].ptCellFile = NewEntries[5].ptCellFile = 0;
 		NewEntries[5].OnPress = &ExOptions::MainMenu;
 
 		NewEntries[4].dwCurrentValue = COL_ORANGE;
@@ -781,10 +808,10 @@ BOOL __fastcall ExOptions::D2ExOpts(D2MenuEntry* ptEntry, StormMsg* pMsg)
 		NewEntries[2].OnPress = &ExOptions::Various;
 		NewEntries[3].OnPress = &ExOptions::Options;
 
-		wcscpy_s((wchar_t*)&NewEntries[0].szCellFile, 130, gLocaleId == LOCALE_POL ? L"USTAWIENIA EFEKT”W" : L"CONFIGURE BUFFS");
-		wcscpy_s((wchar_t*)&NewEntries[1].szCellFile, 130, gLocaleId == LOCALE_POL ? L"USTAWIENIA KLAWISZY" : L"CONFIGURE CONTROLS");
-		wcscpy_s((wchar_t*)&NewEntries[2].szCellFile, 130, gLocaleId == LOCALE_POL ? L"R”ØNE USTAWIENIA" : L"MISC. SETTINGS");
-		wcscpy_s((wchar_t*)&NewEntries[3].szCellFile, 130, gLocaleId == LOCALE_POL ? L"POPRZEDNIE MENU" : L"PREVIOUS MENU");
+		wcscpy_s(NewEntries[0].wItemName, 130, gLocaleId == LOCALE_POL ? L"USTAWIENIA EFEKT”W" : L"CONFIGURE BUFFS");
+		wcscpy_s(NewEntries[1].wItemName, 130, gLocaleId == LOCALE_POL ? L"USTAWIENIA KLAWISZY" : L"CONFIGURE CONTROLS");
+		wcscpy_s(NewEntries[2].wItemName, 130, gLocaleId == LOCALE_POL ? L"R”ØNE USTAWIENIA" : L"MISC. SETTINGS");
+		wcscpy_s(NewEntries[3].wItemName, 130, gLocaleId == LOCALE_POL ? L"POPRZEDNIE MENU" : L"PREVIOUS MENU");
 	}
 
 	*D2Vars.D2CLIENT_SelectedMenu = 0;
@@ -801,8 +828,6 @@ BOOL __fastcall ExOptions::MainMenu(D2MenuEntry* ptEntry, StormMsg* pMsg)
 
 	if (!NewMenu.dwEntriesNo)
 	{
-		::memset(&NewMenu, 0, sizeof(NewMenu));
-		::memset(&NewEntries, 0, sizeof(NewEntries));
 		NewMenu.dwEntriesNo = 4;
 		NewMenu.dwInterline = 50;
 		NewMenu.dwTextHeight = 45;

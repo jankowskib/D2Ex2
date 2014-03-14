@@ -1,3 +1,23 @@
+/*==========================================================
+* D2Ex2
+* https://github.com/lolet/D2Ex2
+* ==========================================================
+* Copyright (c) 2011-2014 Bartosz Jankowski
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+* ==========================================================
+*/
+
 #include "stdAfx.h"
 #include "ExAutoTele.h"
 #include "ExMapReveal.h"
@@ -11,18 +31,15 @@ namespace ExAutoTele
 		if ((Msg->lParam & 0x40000000)) return;
 		if (D2Vars.D2CLIENT_UIModes[UI_CHAT]) return;
 	
+		gStopTeleport.store(true);
 		switch (ExParty::GetPlayerArea())
 		{
-			case 0x25:
-			{	
-				gStopTeleport.store(false);
-				gAutoTeleArgument = MAKELONG(22562, 9552);
-				gAutoTeleAction = 1;
-			}
-			break;
+			case 0x19:	{ gAutoTeleArgument = MAKELONG(12548, 11059);	gAutoTeleAction = 1; } break;
+			case 0x25:	{ gAutoTeleArgument = MAKELONG(22562, 9552);	gAutoTeleAction = 1; } break;
+			case 0x66:	{ gAutoTeleArgument = MAKELONG(17591, 8069);	gAutoTeleAction = 1; } break;
+			case 0x83:	{ gAutoTeleArgument = MAKELONG(15118, 5073);	gAutoTeleAction = 1; } break;
 			default:
 			{
-				gStopTeleport.store(false);
 				gAutoTeleArgument = ExParty::GetPlayerArea() + 1;
 				gAutoTeleAction = 3;
 			}
@@ -41,11 +58,12 @@ namespace ExAutoTele
 		if ((Msg->lParam & 0x40000000)) return;
 		if (D2Vars.D2CLIENT_UIModes[UI_CHAT]) return;
 
+		gStopTeleport.store(true);
+
 		switch (ExParty::GetPlayerArea())
 		{
 			default:
 			{
-				gStopTeleport.store(false);
 				gAutoTeleArgument = ExParty::GetPlayerArea() - 1;
 				gAutoTeleAction = 3;
 			}
@@ -60,43 +78,30 @@ namespace ExAutoTele
 
 	void __stdcall b_TeleportWP(StormMsg * Msg)
 	{
+		const int nWaypointId[] = { 119, 156, 157, 323, 288, 402, 324, 237, 238, 398, 496, 511, 494 };
+
 		if ((Msg->lParam & 0x40000000)) return;
 		if (D2Vars.D2CLIENT_UIModes[UI_CHAT]) return;
 
-		gStopTeleport.store(false);
+		gStopTeleport.store(true);
 		int nArea = ExParty::GetPlayerArea();
 		LevelsTxt* pTxt = &(*D2Vars.D2COMMON_sgptDataTables)->pLevelsTxt[nArea];
 		D2EXASSERT(pTxt, "Cannot find Levels.Txt pointer for %d", nArea);
 		if (pTxt->nWaypoint)
 		{
-			if (nArea < 0x1D)
-				gAutoTeleArgument = MAKELONG(nArea, 119);
-			else if (nArea < 0x28)
-				gAutoTeleArgument = MAKELONG(nArea, 157);
-			else if (nArea == 0x30) // SEWERS LVL 2
-				gAutoTeleArgument = MAKELONG(nArea, 323);
-			else if (nArea == 0x2A || nArea == 0x2B || nArea == 0x2C || nArea == 0x39)
-				gAutoTeleArgument = MAKELONG(nArea, 156);
-			else if (nArea == 0x34) // PALACE LVL 1
-				gAutoTeleArgument = MAKELONG(nArea, 288);
-			else if (nArea < 0x4B)
-				gAutoTeleArgument = MAKELONG(nArea, 402);
-			else if (nArea < 0x65)
-				gAutoTeleArgument = MAKELONG(nArea, 237);
-			else if (nArea == 0x65) // DURANCE OF HELL 2
-				gAutoTeleArgument = MAKELONG(nArea, 324);
-			else if (nArea < 0x6d)
-				gAutoTeleArgument = MAKELONG(nArea, 238);
-			else if (nArea < 0x6d)
-				gAutoTeleArgument = MAKELONG(nArea, 238);
-			else if (nArea == 0x6f || nArea == 0x70 || nArea == 0x75 || nArea == 0x7b)
-				gAutoTeleArgument = MAKELONG(nArea, 496);
-			else if (nArea == 0x71 || nArea == 0x73 || nArea == 0x76)
-				gAutoTeleArgument = MAKELONG(nArea, 511);
-			else if (nArea == 0x81)
-				gAutoTeleArgument = MAKELONG(nArea, 494);
+			COORDS xy;
+			for (int n = 0; n < sizeof(nWaypointId) / 4; ++n)
+			{
+				xy = ExMapReveal::FindPresetUnitXY(nArea, UNIT_OBJECT, nWaypointId[n]);
+				if (xy.x && xy.y)
+				{
+					gAutoTeleArgument = MAKELONG(xy.x, xy.y);
+					gAutoTeleAction = 1;
+					return;
+				}
 
-				gAutoTeleAction = 2;
+			}			
+			ExScreen::PrintTextEx(COL_RED, "Failed to find waypoint for %!", pTxt->szLevelName);
 		}
 		else
 		{
@@ -116,7 +121,7 @@ namespace ExAutoTele
 
 		if (!hMap.CreateMap(ExParty::GetPlayerArea()))
 		{
-			ExScreen::PrintTextEx(COL_RED, L"CreateMap failed!");
+			ExScreen::PrintTextEx(COL_RED, L"AT: CreateMap failed!");
 			return false;
 		}
 		LPLevelExit ExitArray[64];
@@ -124,22 +129,23 @@ namespace ExAutoTele
 
 		if (!ExitCount)
 		{
-			ExScreen::PrintTextEx(COL_RED, L"ERROR: Didn't find an level exit!");
+			ExScreen::PrintTextEx(COL_RED, L"AT: Didn't find an level exit!");
 			return false;
 		}
 
 
-		for (int i = 0; i<ExitCount; i++)//loop over evey exit to see if it matches our target
+		for (int i = 0; i<ExitCount; ++i)
 		{
 			if (ExitArray[i]->dwTargetLevel == nLevelId)
 			{
 				TeleportTo(nLevelId, ExitArray[i]->ptPos.x, ExitArray[i]->ptPos.y);
-				break;
+				return true;
 			}
 		}
+		ExScreen::PrintTextEx(COL_RED, L"AT: Didn't find a vector for this place!");
 
 
-		return true;
+		return false;
 	}
 
 	bool TeleportTo(int nLevelId, int dwObjectClassId)
@@ -150,6 +156,7 @@ namespace ExAutoTele
 
 	bool TeleportTo(int nLevelId, short mX, short mY)
 	{
+		gStopTeleport.store(false);
 		COORDS xy = { mX, mY };
 		DEBUGMSG("Trying to teleport @ %d,%d", mX, mY)
 
@@ -163,7 +170,7 @@ namespace ExAutoTele
 
 		if (!ExAim::FindTeleportPath(xy))
 		{
-			ExScreen::PrintTextEx(COL_RED, L"ERROR: Find teleport path failed"); 
+			ExScreen::PrintTextEx(COL_RED, L"AT: Find teleport path failed"); 
 			EnterCriticalSection(&TELE_CRITSECT);
 			TelePath.clear();
 			LeaveCriticalSection(&TELE_CRITSECT);
@@ -188,7 +195,7 @@ namespace ExAutoTele
 
 			if (gStopTeleport.load() || !ExParty::GetPlayerArea() || fails > 5)
 			{
-				DEBUGMSG("Stopping teleporting...")
+				ExScreen::PrintTextEx(COL_RED, "AT: Stopping teleporting...");
 				EnterCriticalSection(&TELE_CRITSECT);
 				TelePath.clear();
 				LeaveCriticalSection(&TELE_CRITSECT);

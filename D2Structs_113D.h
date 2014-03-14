@@ -1,3 +1,23 @@
+/*==========================================================
+* D2Ex2
+* https://github.com/lolet/D2Ex2
+* ==========================================================
+* Copyright (c) 2011-2014 Bartosz Jankowski
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+* ==========================================================
+*/
+
 #ifndef D2STRUCTS_H__
 #define D2STRUCTS_H__
 
@@ -671,39 +691,38 @@ struct BnetData // sizeof 0x3C8 name of this structure is a big mistake, but I w
 };
 #pragma pack(pop)
 
-struct GfxCell {
+struct GfxCell  // Size is 0x2C <- to be verified
+{
 	DWORD flags;					//0x00
 	DWORD width;					//0x04
 	DWORD height;					//0x08
-	DWORD xoffs;					//0x0C
-	DWORD yoffs;					//0x10
+	int xoffs;						//0x0C
+	int yoffs;						//0x10
 	DWORD _2;						//0x14
 	DWORD lpParent;					//0x18
 	DWORD length;					//0x1C
 	BYTE cols;						//0x20
 };
 
-struct CellFile {
-	DWORD dwVersion;				//0x00
-	struct {
-		WORD dwFlags; // 0x4 = CELFILE_24BIT
-		BYTE mylastcol;
-		BYTE mytabno:1;
-	};								//0x04
-	DWORD eFormat;					//0x08
-	DWORD termination;				//0x0C
-	DWORD numdirs;					//0x10
-	DWORD numcells;					//0x14
-	GfxCell *cells[255];			//0x18
-};
 
+/* To Find
+	BYTE nComponents;				//0x1D
+	struct
+		{
+		DWORD dwUnitToken;			//0x30
+		DWORD dwCompToken;			//0x34
+		DWORD dwSomeToken;			//0x38
+		DWORD _3;					//0x3C
+		DWORD dwWClassToken;		//0x40
+		} tUnitInfo;
+*/
 struct CellContext		//size 0x48
 {
 	DWORD nCellNo;					//0x00
 	DWORD _0a;						//0x04
-	DWORD _0;						//0x08
-	DWORD _1;						//0x0C
-	DWORD _2;						//0x10
+	DWORD dwUnit;					//0x08
+	DWORD dwClass;					//0x0C
+	DWORD dwMode;					//0x10
 	DWORD _3;						//0x14
 	DWORD _4;						//0x18
 	BYTE _5;						//0x1C
@@ -712,14 +731,15 @@ struct CellContext		//size 0x48
 	DWORD _7;						//0x20
 	DWORD _8;						//0x24
 	DWORD _9;						//0x28
-	DWORD _10;						//0x2C
+	char* szName;					//0x2C
 	DWORD _11;						//0x30
-	CellFile* pCellFile;			//0x34
+	CellFile* pCellFile;			//0x34 also pCellInit
 	DWORD _12;						//0x38
 	GfxCell* pGfxCells;				//0x3C
 	DWORD direction;				//0x40
 	DWORD _14;						//0x44
 };
+
 
 struct RosterInfo
 {
