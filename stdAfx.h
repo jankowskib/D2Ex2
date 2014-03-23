@@ -33,7 +33,7 @@
 
 //---------- ExMultiRes flags -------------
 #ifdef D2EX_MULTIRES
-#define D2EX_OPENGL "OpenGL|"				// Enables OpenGL render mode
+//#define D2EX_OPENGL "OpenGL|"				// Enables OpenGL render mode
 #define D2EX_ALLOWHIGHRES "Hi Res|"			// Enables support for 800x600+
 #endif
 //******************************************

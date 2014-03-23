@@ -40,6 +40,11 @@ using namespace std;
 #define GLOBAL(type, name) extern type name;
 
 #endif
+
+GLOBAL(BYTE, gTestColorRed)
+GLOBAL(BYTE, gTestColorGreen)
+GLOBAL(BYTE, gTestColorBlue)
+
 GLOBAL(int, gLocaleId)
 GLOBAL(HANDLE, hPointersReadyEvent)
 GLOBAL(HANDLE, hAutoTeleEvent)

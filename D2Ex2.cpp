@@ -41,7 +41,7 @@
 #include "Misc.h"
 #include "Offset.h"
 
-//-Program elemenets
+//-Program elements
 #include "ExInput.h"
 #include "ExParty.h"
 #include "ExEntryText.h"
@@ -60,6 +60,7 @@
 #include "ExAim.h"
 #include "ExMultiRes.h"
 #include "ExChicken.h"
+#include "ExDeathMessage.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -337,10 +338,13 @@ unsigned int __stdcall Thread(void * Args)
 
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x460C0),(DWORD)D2Stubs::D2CLIENT_SendJoinGame_STUB,5,"Join Game Override"); //k
 #endif
+
 	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0xB40D0), MAX_SOUND_TXT_ROWS, 4, "Extend Sound.Txt I"); //k
 	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x25342), MAX_SOUND_TXT_ROWS, 4, "Extend Sound.Txt II"); //k
 	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x1F47C), MAX_SOUND_TXT_ROWS, 4, "Extend Sound.Txt III"); //k
 
+	Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x1D7AA), (DWORD)ExDeathMessage::Draw, 5, "Death Message Draw");
+	
 	#ifdef D2EX_MULTIRES
 	//Res stuff
 	Misc::Patch(JUMP, GetDllOffset("D2Client.dll", 0x2C220), (DWORD)D2Stubs::D2CLIENT_SetResolution_STUB, 5, "Set Resolution Mode");

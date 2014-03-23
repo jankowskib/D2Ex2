@@ -239,6 +239,7 @@
     <ClCompile Include="ExAutoTele.cpp" />
     <ClCompile Include="ExCheckBox.cpp" />
     <ClCompile Include="ExChicken.cpp" />
+    <ClCompile Include="ExDeathMessage.cpp" />
     <ClCompile Include="ExMultiRes.cpp" />
     <ClCompile Include="ExOpenGL.cpp" />
     <ClCompile Include="Offset.cpp" />
@@ -283,6 +284,10 @@
     <ClCompile Include="CollisionMap.cpp" />
     <ClCompile Include="ExAim.cpp" />
     <ClCompile Include="TeleportPath.cpp" />
+    <ClCompile Include="xxhash\xxhash.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug 1.13d|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release 1.13d|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArrayEx.h" />
@@ -297,6 +302,7 @@
     <ClInclude Include="ExAutoTele.h" />
     <ClInclude Include="ExCheckBox.h" />
     <ClInclude Include="ExChicken.h" />
+    <ClInclude Include="ExDeathMessage.h" />
     <ClInclude Include="ExTexture.h" />
     <ClInclude Include="ExMultiRes.h" />
     <ClInclude Include="ExOpenGL.h" />
@@ -338,6 +344,7 @@
     <ClInclude Include="ExTextBox.h" />
     <ClInclude Include="ExWindow.h" />
     <ClInclude Include="Build.h" />
+    <ClInclude Include="xxhash\xxhash.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

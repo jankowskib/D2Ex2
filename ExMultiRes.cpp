@@ -160,6 +160,7 @@ namespace ExMultiRes
 		WndClass.cbSize = sizeof(WNDCLASSEX);
 		WndClass.lpfnWndProc = pWndProc;
 		WndClass.style = (nRenderMode == VIDEO_MODE_GLIDE || nRenderMode == VIDEO_MODE_OPENGL) ? CS_OWNDC : 0;
+		if (nRenderMode == VIDEO_MODE_OPENGL) WndClass.style |= CS_HREDRAW | CS_VREDRAW;
 		WndClass.cbClsExtra = 0;
 		WndClass.cbWndExtra = 0;
 		WndClass.hInstance = hInstance;
@@ -282,25 +283,18 @@ namespace ExMultiRes
 
 	bool enterFullscreen() 
 	{
-		DEVMODE fs;
-		bool isChangeSuccessful;
+		DEVMODE dmScreenSettings;                   // Device Mode
+		memset(&dmScreenSettings, 0, sizeof(dmScreenSettings));       // Makes Sure Memory's Cleared
+		dmScreenSettings.dmSize = sizeof(dmScreenSettings);       // Size Of The Devmode Structure
+		dmScreenSettings.dmPelsWidth = *D2Vars.D2GFX_Width;            // Selected Screen Width
+		dmScreenSettings.dmPelsHeight = *D2Vars.D2GFX_Height;           // Selected Screen Height
+		dmScreenSettings.dmBitsPerPel = 32;             // Selected Bits Per Pixel
+		dmScreenSettings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
 
-		EnumDisplaySettings(NULL, 0, &fs);
-		fs.dmPelsWidth = *D2Vars.D2GFX_Width;
-		fs.dmPelsHeight = *D2Vars.D2GFX_Height;
-		fs.dmBitsPerPel = 8;
-		fs.dmSize = sizeof(DEVMODE);
-		fs.dmFields = DM_PELSWIDTH |
-			DM_PELSHEIGHT |
-			DM_BITSPERPEL;
-
-		SetWindowLongPtr(D2Funcs.D2GFX_GetHwnd(), GWL_EXSTYLE, WS_EX_APPWINDOW | WS_EX_TOPMOST);
-		SetWindowLongPtr(D2Funcs.D2GFX_GetHwnd(), GWL_STYLE, WS_POPUP | WS_VISIBLE);
-		SetWindowPos(D2Funcs.D2GFX_GetHwnd(), HWND_TOPMOST, 0, 0, *D2Vars.D2GFX_Width, *D2Vars.D2GFX_Height, SWP_SHOWWINDOW);
-		isChangeSuccessful = ChangeDisplaySettings(&fs, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL;
+		bool isChangeSuccessful = ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL;
 		ShowWindow(D2Funcs.D2GFX_GetHwnd(), SW_MAXIMIZE);
 
-		(*D2Vars.D2LAUNCH_BnData)->bWindowMode = 0;
+	//	(*D2Vars.D2LAUNCH_BnData)->bWindowMode = 0;
 		*D2Vars.D2GFX_WindowMode = 0;
 
 		return isChangeSuccessful;
@@ -369,7 +363,25 @@ namespace ExMultiRes
 			}
 			BOOL res =(*D2Vars.D2GFX_pfnDriverCallback)->ResizeWin(D2Funcs.D2GFX_GetHwnd(), nMode);	 
 			D2GFX_SetStoredGammaAndContrast();
+
+			if (nMode < 2) // Legacy support
+			{
+				*D2Vars.D2CLIENT_UIPanelDrawXOffset = 0;
+				*D2Vars.D2CLIENT_UIPanelDrawYOffset = 0;
+			}
+			else if (nMode == 2)
+			{
+				*D2Vars.D2CLIENT_UIPanelDrawXOffset = 80;
+				*D2Vars.D2CLIENT_UIPanelDrawYOffset = -60;
+			}
+			else
+			{
+				*D2Vars.D2CLIENT_UIPanelDrawXOffset = 0;
+				*D2Vars.D2CLIENT_UIPanelDrawYOffset = -140; //TODO: Fix y pos
+			}
+
 			return res;
+
 		}
 		return TRUE;
 	}
@@ -537,7 +549,7 @@ namespace ExMultiRes
 
 
 		*D2Vars.D2GDI_Palette = CreatePalette((LOGPALETTE*)&plpal);
-		*D2Vars.D2GDI_hFont = CreateFont(12, 0, 0, 0, FW_LIGHT, NULL, NULL, NULL, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH, "Droid Sans");
+		*D2Vars.D2GDI_hFont = CreateFont(12, 0, 0, 0, FW_LIGHT, NULL, NULL, NULL, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH, "Droid Sans Mono");
 		if (!*D2Vars.D2GDI_hFont) // if my cool font isn't present on your PC :|
 			*D2Vars.D2GDI_hFont = CreateFont(12, 0, 0, 0, FW_LIGHT, NULL, NULL, NULL, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH, "Arial");
 		*D2Vars.D2GDI_Unk = 0;
@@ -791,23 +803,6 @@ namespace ExMultiRes
 			pOut->dwTop = xTop;
 			pOut->dwBottom = xBottom;
 		}
-
-		if (GFX_GetResolutionMode() < 2) // Legacy support
-		{
-			*D2Vars.D2CLIENT_UIPanelDrawXOffset = 0;
-			*D2Vars.D2CLIENT_UIPanelDrawYOffset = 0;
-		}
-		else if (GFX_GetResolutionMode() == 2)
-		{
-			*D2Vars.D2CLIENT_UIPanelDrawXOffset = 80;
-			*D2Vars.D2CLIENT_UIPanelDrawYOffset = -60;
-		}
-		else
-		{
-			*D2Vars.D2CLIENT_UIPanelDrawXOffset = 0;
-			*D2Vars.D2CLIENT_UIPanelDrawYOffset = -140; //TODO: Fix y pos
-		}
-
 	}
 
 	void __stdcall GetInventoryGrid(int nRecord, int nScreenMode, InventoryGrid *pOut) // Wrapper on D2Common.Ordinal10964

@@ -71,8 +71,21 @@ enum UICover
 enum D2Locales
 {
 	LOCALE_ENG = 0,
-	LOCALE_POL = 10
+	LOCALE_ESP = 1,
+	LOCALE_DEU = 2,
+	LOCALE_FRA = 3,
+	LOCALE_POR = 4,
+	LOCALE_ITA = 5,
+	LOCALE_JPN = 6,
+	LOCALE_KOR = 7,
+	LOCALE_SIN = 8,
+	LOCALE_CHI = 9,
+	LOCALE_POL = 10,
+	LOCALE_RUS = 11,
+	LOCALE_ENU = 12,
 };
+
+
 
 enum D2Classes
 {
@@ -350,6 +363,7 @@ enum D2Colors
 	COL_WHITE2 = 0xD,
 	COL_BLACK2 = 0xE,
 	COL_DARKWHITE = 0xF,
+	COL_LIGHTGREY = 0x10,
 };
 
 

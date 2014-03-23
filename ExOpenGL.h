@@ -24,6 +24,10 @@ extern fnRendererCallbacks gfnOpenGLRenderer;
 
 namespace ExOpenGL
 {
+	extern DWORD* hPaletteTable[72];
+	extern RGBQUAD gCurrentPalette[256];
+	DWORD* GetPalByDrawMode(int nDrawMode, DWORD * out);
+
 	BOOL __fastcall InitWindow(HINSTANCE); // 0
 	BOOL __fastcall InitPerspective(GFXSettings* pgfxSettings, GFXHelpers* pfnHelpers); // 1
 	BOOL __fastcall Release(); // 2
@@ -34,7 +38,7 @@ namespace ExOpenGL
 	BOOL __fastcall EndScene1(); // 7
 	BOOL __fastcall EndScene2(); // 8
 	BOOL __fastcall ResizeWin(HANDLE HWND, int bResolution); // 9
-	BOOL __fastcall GetBackBuffer(BYTE* pBuffer); // 10
+	BOOL __fastcall GetBackBuffer(D2RGB* pBuffer); // 10
 	BOOL __fastcall ActivateWindow(int Unk, int Contrast); // 11
 	BOOL __fastcall SetOption(int nOption, int nValue); // 12
 	BOOL __fastcall BeginCutscene(); // 13
@@ -56,21 +60,21 @@ namespace ExOpenGL
 	BOOL __fastcall SetPalettetable(BYTE** pPalette); // 29
 	BOOL __fastcall SetGlobalLight(BYTE nRed, BYTE nGreen, BYTE nBlue); // 30
 	BOOL __fastcall DrawGroundTile(TileContext* pTile, DWORD** pLight, int nXpos, int nYpos, int nWorldXpos, int nWorldYpos, BYTE nAlpha, int nScreenPanels, void* pTileData); // 31
-	BOOL __fastcall DrawPerspectiveImage(CellContext* pData, unsigned int nXpos, unsigned int nYpos, BYTE dwGamma, int nDrawMode, int nScreenMode, BYTE* pPalette); // 32
-	BOOL __fastcall DrawImage(CellContext* pData, unsigned int nXpos, unsigned int nYpos, BYTE dwGamma, int nDrawMode, BYTE* pPalette); // 33
-	BOOL __fastcall DrawShiftedImage(CellContext* pData, int nXpos, int nYpos, BYTE dwGamma, int nDrawMode, int nGlobalPaletteShift); // 34
-	BOOL __fastcall DrawVerticalCropImage(CellContext* pData, int nXpos, int nYpos, int nSkipLines, int nDrawLines, int nDrawMode); // 35
+	BOOL __fastcall DrawPerspectiveImage(CellContext* pData, unsigned int nXpos, unsigned int nYpos, BYTE dwGamma, D2DrawModes nDrawMode, int nScreenMode, BYTE* pPalette); // 32
+	BOOL __fastcall DrawImage(CellContext* pData, unsigned int nXpos, unsigned int nYpos, BYTE dwGamma, D2DrawModes nDrawMode, BYTE* pPalette); // 33
+	BOOL __fastcall DrawColouredImage(CellContext* pData, int nXpos, int nYpos, BYTE dwGamma, D2DrawModes nDrawMode, int nGlobalPaletteShift); // 34
+	BOOL __fastcall DrawVerticalCropImage(CellContext* pData, int nXpos, int nYpos, int nSkipLines, int nDrawLines, D2DrawModes nDrawMode); // 35
 	BOOL __fastcall DrawShadows(CellContext* pData, int nXpos, int nYpos); // 36
 	BOOL __fastcall DrawImageFast(CellContext* pData, int nXpos, int nYpos, BYTE nPaletteIndex); // 37
-	BOOL __fastcall DrawClippedImage(CellContext* pData, int nXpos, int nYpos, void* pCropRect, int nDrawMode); // 38
+	BOOL __fastcall DrawClippedImage(CellContext* pData, int nXpos, int nYpos, void* pCropRect, D2DrawModes nDrawMode); // 38
 	BOOL __fastcall DrawWallTile(TileContext* pTile, int nXpos, int nYpos, DWORD** pLight, int nScreenPanels); // 39
 	BOOL __fastcall DrawRoofTile(TileContext* pTile, int nXpos, int nYpos, DWORD** pLight, int nScreenPanels, BYTE nAlpha); // 40
-	BOOL __fastcall DrawVisTile(TileContext* pTile, int nXpos, int nYpos, int nDrawMode, int nScreenPanels); // 41
+	BOOL __fastcall DrawVisTile(TileContext* pTile, int nXpos, int nYpos, D2DrawModes nDrawMode, int nScreenPanels); // 41
 	BOOL __fastcall DrawRect(RECT *Prect, BYTE nPaletteIndex); // 42
 	BOOL __fastcall DrawRectEx(RECT *Prect, BYTE nPaletteIndex); // 43
 	BOOL __fastcall DrawSolidRect(RECT *Prect, BYTE nPaletteIndex); // 44
 	BOOL __fastcall DrawSquare(POINT *pos, int nSize, BYTE nColor); // 45
-	BOOL __fastcall DrawSolidRectEx(int nXStart, int nYStart, int nXEnd, int nYEnd, BYTE nColor, int nDrawMode); // 46
+	BOOL __fastcall DrawSolidRectEx(int nXStart, int nYStart, int nXEnd, int nYEnd, BYTE nColor, D2DrawModes nDrawMode); // 46
 	BOOL __fastcall DrawSolidRectAlpha(int nXStart, int nYStart, int nXEnd, int nYEnd, BYTE nColor, BYTE nAlpha); // 47
 	BOOL __fastcall DrawLine(int nXStart, int nYStart, int nXEnd, int nYEnd, BYTE nColor, BYTE nAlpha); // 48
 	BOOL __fastcall ClearScreen(BOOL bPartial); // 49

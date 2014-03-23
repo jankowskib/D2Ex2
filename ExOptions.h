@@ -45,6 +45,9 @@ namespace ExOptions
 	BOOL __fastcall KeyConfig(D2MenuEntry* ptEntry, StormMsg* pMsg);
 
 //Callbacks
+
+	BOOL __fastcall D2ExColorLab(D2MenuEntry* ptEntry, StormMsg* pMsg);
+
 	BOOL __fastcall PermLifeOpt(D2MenuEntry* ptEntry, StormMsg* pMsg);
 	BOOL __fastcall PermManaOpt(D2MenuEntry* ptEntry, StormMsg* pMsg);
 	BOOL __fastcall VisOpt(D2MenuEntry* ptEntry, StormMsg* pMsg);

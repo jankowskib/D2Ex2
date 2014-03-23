@@ -433,8 +433,8 @@ BOOL __fastcall ExOptions::RejoinCB(D2MenuEntry* ptEntry, StormMsg* pMsg)
 
 BOOL __fastcall ExOptions::ChangeHandle(D2MenuEntry* ptEntry, StormMsg* pMsg)
 {
-	wstring tmp = L"You set " + boost::lexical_cast<wstring>(ptEntry->dwCurrentValue);
-	D2Funcs.D2CLIENT_PrintPartyString(tmp.c_str(), COL_WHITE);
+//	wstring tmp = L"You set " + boost::lexical_cast<wstring>(ptEntry->dwCurrentValue);
+//	D2Funcs.D2CLIENT_PrintPartyString(tmp.c_str(), COL_WHITE);
 	wcscpy_s((wchar_t*)ptEntry->szCellFile, 130, boost::lexical_cast<wstring>(ptEntry->dwCurrentValue).c_str());
 	switch (*D2Vars.D2CLIENT_SelectedMenu)
 	{
@@ -453,6 +453,29 @@ BOOL __fastcall ExOptions::ChangeHandle(D2MenuEntry* ptEntry, StormMsg* pMsg)
 	}
 	return false;
 }
+
+
+/*
+BOOL __fastcall ExOptions::D2ExColorLab(D2MenuEntry* ptEntry, StormMsg* pMsg)
+{
+	//wstring tmp = L"You set " + boost::lexical_cast<wstring>(ptEntry->dwCurrentValue);
+	//D2Funcs.D2CLIENT_PrintPartyString(tmp.c_str(), COL_DARK_GOLD);
+	wcscpy_s((wchar_t*)ptEntry->szCellFile, 130, boost::lexical_cast<wstring>(ptEntry->dwCurrentValue).c_str());
+	switch (*D2Vars.D2CLIENT_SelectedMenu)
+	{
+	case 5:
+		gTestColorRed = (BYTE)ptEntry->dwCurrentValue;
+		break;
+	case 6:
+		gTestColorGreen = (BYTE)ptEntry->dwCurrentValue;
+		break;
+	case 7:
+		gTestColorBlue = (BYTE)ptEntry->dwCurrentValue;
+		break;
+	}
+	return false;
+}
+*/
 
 
 BOOL __fastcall ExOptions::BuffECheck(D2MenuEntry* ptEntry, DWORD ItemNo)
@@ -481,7 +504,7 @@ BOOL __fastcall ExOptions::BuffECheck(D2MenuEntry* ptEntry, DWORD ItemNo)
 BOOL __fastcall ExOptions::Buffs(D2MenuEntry* ptEntry, StormMsg *pMsg)
 {
 	static D2Menu NewMenu;
-	static D2MenuEntry NewEntries[9];
+	static D2MenuEntry NewEntries[5];
 
 	if (!NewMenu.dwEntriesNo)
 	{
@@ -499,7 +522,18 @@ BOOL __fastcall ExOptions::Buffs(D2MenuEntry* ptEntry, StormMsg *pMsg)
 	wcscpy_s((wchar_t*)&NewEntries[3].szSwitchCellFiles[0], 130, gLocaleId == 10 ? L"WY£." : L"OFF");
 	wcscpy_s((wchar_t*)&NewEntries[3].szSwitchCellFiles[1], 130, gLocaleId == 10 ? L"W£." : L"ON");
 	wcscpy_s((wchar_t*)&NewEntries[4].szCellFile, 130, D2Funcs.D2LANG_GetLocaleText(3409));
+	/*
+	wcscpy_s((wchar_t*)&NewEntries[5].szCellFile, 130, L"Red");
+	wcscpy_s((wchar_t*)&NewEntries[6].szCellFile, 130, L"Green");
+	wcscpy_s((wchar_t*)&NewEntries[7].szCellFile, 130, L"Blue");
 
+	NewEntries[5].OnPress = NewEntries[6].OnPress = NewEntries[7].OnPress = &ExOptions::D2ExColorLab;
+	NewEntries[5].dwCurrentSwitch = gTestColorRed;
+	NewEntries[6].dwCurrentSwitch = gTestColorGreen;
+	NewEntries[7].dwCurrentSwitch = gTestColorBlue;
+	NewEntries[5].dwMenuType = NewEntries[6].dwMenuType = NewEntries[7].dwMenuType = 2;
+	NewEntries[5].dwMaxValue = NewEntries[6].dwMaxValue = NewEntries[7].dwMaxValue = 255;
+	*/
 	NewEntries[4].OnPress = &ExOptions::D2ExOpts;
 	NewEntries[3].OnPress = &ExOptions::BuffsOpt;
 	NewEntries[3].dwMenuType = 1;
@@ -508,7 +542,7 @@ BOOL __fastcall ExOptions::Buffs(D2MenuEntry* ptEntry, StormMsg *pMsg)
 
 
 	NewEntries[0].EnableCheck = NewEntries[1].EnableCheck = NewEntries[2].EnableCheck = &ExOptions::BuffECheck;
-	NewEntries[0].dwMenuType = NewEntries[1].dwMenuType = NewEntries[2].dwMenuType =  2;
+	NewEntries[0].dwMenuType = NewEntries[1].dwMenuType = NewEntries[2].dwMenuType = 2;
 	NewEntries[0].OnPress = NewEntries[1].OnPress = NewEntries[2].OnPress = &ExOptions::ChangeHandle;
 
 	NewEntries[0].dwCurrentValue = BCLvl;
@@ -517,6 +551,7 @@ BOOL __fastcall ExOptions::Buffs(D2MenuEntry* ptEntry, StormMsg *pMsg)
 	NewEntries[1].dwMaxValue = 55;
 	NewEntries[2].dwCurrentValue = SMLvl;
 	NewEntries[2].dwMaxValue = 55;
+
 
 	*D2Vars.D2CLIENT_SelectedMenu = 0;
 	*D2Vars.D2CLIENT_D2Menu = &NewMenu;

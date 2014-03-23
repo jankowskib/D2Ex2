@@ -54,7 +54,7 @@ void ExEntryText::Draw()
    {
 	   int Trans = (Timer <= 30 ? TransTable[Timer/8] : 7 );
       wstring szLevelName = D2ASMFuncs::D2CLIENT_GetLevelName(LevelId);
-	  wstring szNameBuffer = (gLocaleId == 10 ? L"Wchodzisz do: " : L"Entering: ") + szLevelName ;
+	  wstring szNameBuffer = (gLocaleId == LOCALE_POL ? L"Wchodzisz do: " : L"Entering: ") + szLevelName;
 
 	  int old = D2Funcs.D2WIN_SetTextSize(EnteringFont);
 

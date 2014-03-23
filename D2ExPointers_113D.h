@@ -225,6 +225,7 @@ _d2f D2Funcs = {0}; void SetupD2Funcs() {
 		//D2LANG
 		EXFUNCPTR(D2LANG, GetLocaleText, wchar_t*, __fastcall, (short nLocaleTxtNo), -10004) //k
 		EXFUNCPTR(D2LANG, GetLocaleId, int, __fastcall, (), -10001) //k //ns
+		EXFUNCPTR(D2LANG, GetLocaleFolder, void, __stdcall, (char* out, int aZero), -10008)
 
 #ifndef __DEFINE_EXPTRS
 };
@@ -414,6 +415,11 @@ void SetupD2Vars() {
 		EXVARPTR(D2MULTI, GameName, EditBox*, 0x3A004) //k
 		EXVARPTR(D2MULTI, GamePass, EditBox*, 0x3A008) //k
 		EXVARPTR(D2CLIENT, InGame, DWORD, 0xF79E0) //  // k 1 - ingame 0 - oog
+
+		// Death Msg
+
+		EXVARPTR(D2CLIENT, CellDeathInst, CellFile*, 0x11D390)
+		EXVARPTR(D2CLIENT, CellDeathHC, CellFile*, 0x11D390 + 4)
 
 #ifndef __DEFINE_EXPTRS
 };

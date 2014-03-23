@@ -20,7 +20,6 @@
 
 #include "stdafx.h"
 #include "ExScreen.h"
-#include "Vars.h"
 #include <string>
 #include <sstream>
 #include <iomanip>
@@ -152,8 +151,8 @@ void ExScreen::DrawTextEx(int X, int Y, int Color, int Cent, int TransLvl, wchar
 	vswprintf_s(text,len,Msg,arguments);
 	va_end(arguments);
 
-	D2Funcs.D2WIN_DrawTextEx(text,X,Y,Color,Cent,TransLvl);
-
+	D2Funcs.D2WIN_DrawTextEx(text, X, Y, Color, Cent, TransLvl);
+	
 	delete[] text;
 }
 
@@ -169,7 +168,8 @@ void ExScreen::DrawTextEx(int X, int Y, int Color, int Cent, int TransLvl, char*
 
 	wchar_t* wtext = new wchar_t[len];
 	Misc::CharToWide(text,len,wtext,len);
-	D2Funcs.D2WIN_DrawTextEx(wtext,X,Y,Color,Cent,TransLvl);
+
+	D2Funcs.D2WIN_DrawTextEx(wtext, X, Y, Color, Cent, TransLvl);
 
 	delete[] text;
 	delete[] wtext;
@@ -193,15 +193,22 @@ void __stdcall ExScreen::Display()
 	wPool+=L" Mem taken:" + boost::lexical_cast<wstring>(ExMemory::GetMemUsage() /1024 / 1024);
 	wPool+=L" mb";
 	D2Funcs.D2WIN_DrawText(wPool.c_str(),10,20,11,0);*/
-	D2Funcs.D2WIN_SetTextSize(2);
-	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_NORMAL", 5, 40, COL_GOLD, 0, DRAW_MODE_NORMAL);
+#ifdef D2EX_OPENGL
+	D2Funcs.D2WIN_SetTextSize(5);
+	for (int c = 0; c < 19; ++c)
+	{
+		ExScreen::DrawTextEx(10, 40 + (c * 15), c, 0, DRAW_MODE_NORMAL, "Color %d", c);
+	}
+#endif
+/*	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_NORMAL", 5, 40, COL_GOLD, 0, DRAW_MODE_NORMAL);
 	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_ALPHA_25", 5, 60, COL_GOLD, 0, DRAW_MODE_ALPHA_25);
 	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_ALPHA_25_BRIGHT", 5, 80, COL_GOLD, 0, DRAW_MODE_ALPHA_25_BRIGHT);
 	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_ALPHA_50", 5, 100, COL_GOLD, 0, DRAW_MODE_ALPHA_50);
 	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_ALPHA_50_BRIGHT", 5, 120, COL_GOLD, 0, DRAW_MODE_ALPHA_50_BRIGHT);
 	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_ALPHA_75", 5, 140, COL_GOLD, 0, DRAW_MODE_ALPHA_75);
 	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_BRIGHT", 5, 160, COL_GOLD, 0, DRAW_MODE_BRIGHT);
-	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_INVERTED", 5, 180, COL_GOLD, 0, DRAW_MODE_INVERTED);
+	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_INVERTED", 5, 180, COL_GOLD, 0, DRAW_MODE_INVERTED);*/
+
 #endif
 	D2Funcs.D2WIN_SetTextSize(1);
 //	D2Funcs.D2WIN_DrawText(D2Vars.D2CLIENT_TempMessage,0,40,0,0);
@@ -585,38 +592,38 @@ void ExScreen::DrawBreakpoints()
 	UnitAny * ptUnit = D2Funcs.D2CLIENT_GetPlayer();
 	ASSERT(ptUnit)
 	D2Funcs.D2WIN_SetTextSize(6);
-	ExScreen::DrawTextEx(116, *D2Vars.D2CLIENT_ScreenHeight - 193, COL_WHITE, 0, 5, L"FCR");
-	ExScreen::DrawTextEx(116, *D2Vars.D2CLIENT_ScreenHeight - 169, COL_WHITE, 0, 5, L"FHR");
-	ExScreen::DrawTextEx(115, *D2Vars.D2CLIENT_ScreenHeight - 145, COL_WHITE, 0, 5, L"FRW");
-	ExScreen::DrawTextEx(118, *D2Vars.D2CLIENT_ScreenHeight - 121, COL_WHITE, 0, 5, L"IAS");
+	ExScreen::DrawTextEx(36 + *D2Vars.D2CLIENT_UIPanelDrawXOffset, *D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 132, COL_WHITE, 0, 5, L"FCR");
+	ExScreen::DrawTextEx(36 + *D2Vars.D2CLIENT_UIPanelDrawXOffset, *D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 108, COL_WHITE, 0, 5, L"FHR");
+	ExScreen::DrawTextEx(35 + *D2Vars.D2CLIENT_UIPanelDrawXOffset, *D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 84, COL_WHITE, 0, 5, L"FRW");
+	ExScreen::DrawTextEx(37 + *D2Vars.D2CLIENT_UIPanelDrawXOffset, *D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 60, COL_WHITE, 0, 5, L"IAS");
 
-	int nFCR = D2Funcs.D2COMMON_GetStatSigned(ptUnit,STAT_ITEM_FASTERCASTRATE,0);
-	int nFHR = D2Funcs.D2COMMON_GetStatSigned(ptUnit,STAT_ITEM_FASTERGETHITRATE,0);
-	int nFRW = D2Funcs.D2COMMON_GetStatSigned(ptUnit,STAT_ITEM_FASTERMOVEVELOCITY,0);
-	int nIAS = D2Funcs.D2COMMON_GetStatSigned(ptUnit,STAT_ITEM_FASTERATTACKRATE,0);
+	int nFCR = D2Funcs.D2COMMON_GetStatSigned(ptUnit, STAT_ITEM_FASTERCASTRATE, 0);
+	int nFHR = D2Funcs.D2COMMON_GetStatSigned(ptUnit, STAT_ITEM_FASTERGETHITRATE, 0);
+	int nFRW = D2Funcs.D2COMMON_GetStatSigned(ptUnit, STAT_ITEM_FASTERMOVEVELOCITY, 0);
+	int nIAS = D2Funcs.D2COMMON_GetStatSigned(ptUnit, STAT_ITEM_FASTERATTACKRATE, 0);
 
 	D2Funcs.D2WIN_SetTextSize(1);
 
 	wostringstream wTxt; 
 	wTxt << nFCR;
 	int nLen = ExScreen::GetTextWidth(wTxt.str().c_str());
-	int xPos = 177 - (nLen /2);
-	D2Funcs.D2WIN_DrawText(wTxt.str().c_str(), xPos, *D2Vars.D2CLIENT_ScreenHeight - 192, COL_DARK_GOLD, 0);
+	int xPos = 97 - (nLen / 2) + *D2Vars.D2CLIENT_UIPanelDrawXOffset;
+	D2Funcs.D2WIN_DrawText(wTxt.str().c_str(), xPos, *D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 132, COL_DARK_GOLD, 0);
 	wTxt.str(L"");
 	wTxt << nFHR;
 	nLen = ExScreen::GetTextWidth(wTxt.str().c_str());
-	xPos = 177 - (nLen /2);
-	D2Funcs.D2WIN_DrawText(wTxt.str().c_str(), xPos, *D2Vars.D2CLIENT_ScreenHeight - 168, COL_DARK_GOLD, 0);
+	xPos = 97 - (nLen / 2) + *D2Vars.D2CLIENT_UIPanelDrawXOffset;
+	D2Funcs.D2WIN_DrawText(wTxt.str().c_str(), xPos, *D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 108, COL_DARK_GOLD, 0);
 	wTxt.str(L"");
 	wTxt << nFRW;
 	nLen = ExScreen::GetTextWidth(wTxt.str().c_str());
-	xPos = 177 - (nLen /2);
-	D2Funcs.D2WIN_DrawText(wTxt.str().c_str(), xPos, *D2Vars.D2CLIENT_ScreenHeight - 144, COL_DARK_GOLD, 0);
+	xPos = 97 - (nLen / 2) + *D2Vars.D2CLIENT_UIPanelDrawXOffset;
+	D2Funcs.D2WIN_DrawText(wTxt.str().c_str(), xPos, *D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 84, COL_DARK_GOLD, 0);
 	wTxt.str(L"");
 	wTxt << nIAS;
 	nLen = ExScreen::GetTextWidth(wTxt.str().c_str());
-	xPos = 177 - (nLen /2);
-	D2Funcs.D2WIN_DrawText(wTxt.str().c_str(), xPos, *D2Vars.D2CLIENT_ScreenHeight - 120, COL_DARK_GOLD, 0);
+	xPos = 97 - (nLen / 2) + *D2Vars.D2CLIENT_UIPanelDrawXOffset;
+	D2Funcs.D2WIN_DrawText(wTxt.str().c_str(), xPos, *D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 60, COL_DARK_GOLD, 0);
 	D2Funcs.D2WIN_SetTextSize(0);
 
 
@@ -636,7 +643,7 @@ void ExScreen::DrawDmg()
 				BYTE *	pSkillTxt = D2ASMFuncs::D2CLIENT_GetSkillsTxt(ptSkill->pSkillsTxt->wSkillId);
 			ASSERT(pSkillTxt)
 
-			int sId		= D2Funcs.D2COMMON_GetSkillId(ptSkill,__FILE__,__LINE__);
+			int sId		= D2Funcs.D2COMMON_GetSkillId(ptSkill, __FILE__, __LINE__);
 			int sLvl	= D2Funcs.D2COMMON_GetSkillLevel(ptUnit,ptSkill,1);
 			int sBonus	= D2Funcs.D2COMMON_GetSkillDmgBonus(ptUnit,*((DWORD*)pSkillTxt+6),sId,sLvl);
 			int sBonusMax = 0;
@@ -759,31 +766,32 @@ void ExScreen::DrawCircle(int x0, int y0, int radius, int Color)
 
 void __fastcall ExScreen::DrawBlob(int X, int Y, int Color)
 {
-static int h = 6;
-static int r = h/3;
-static int a = (2*h)/ 2;
-static int R = 2*h/3;
+	static int h = 6;
+	static int r = h/3;
+	static int a = (2*h)/ 2;
+	static int R = 2*h/3;
 
-char szLines[][2] = {0,-2, 4,-4, 8,-2, 4,0, 8,2, 4,4, 0,2, -4,4, -8,2, -4,0, -8,-2, -4,-4, 0,-2};
+	char szLines[][2] = {0,-2, 4,-4, 8,-2, 4,0, 8,2, 4,4, 0,2, -4,4, -8,2, -4,0, -8,-2, -4,-4, 0,-2};
 
-  if(*D2Vars.D2CLIENT_MapType==1) // if SMALLMAP
-  {
-  X--;
-  Y+=5;
-  }
+	  if(*D2Vars.D2CLIENT_MapType==1) // if SMALLMAP
+	  {
+		  X--;
+		  Y+=5;
+	  }
 
-switch(BlobType)
-{
-case 0:
-   D2Funcs.D2GFX_DrawRectangle(X-1,Y-1,X+1,Y+1,Color,5);
-   break;
-case 1:
-DrawCircle(X,Y, 2, Color);
-break;
-default:
-for(int x = 0; x < 12; x++) D2Funcs.D2GFX_DrawLine(X + szLines[x][0], Y + szLines[x][1], X + szLines[x+1][0], Y + szLines[x+1][1], Color, -1);
-break;
-}
+	switch(BlobType)
+	{
+		case 0:
+		   D2Funcs.D2GFX_DrawRectangle(X-1,Y-1,X+1,Y+1,Color,5);
+		   break;
+		case 1:
+			DrawCircle(X,Y, 2, Color);
+		break;
+		default:
+			for(int x = 0; x < 12; x++) 
+				D2Funcs.D2GFX_DrawLine(X + szLines[x][0], Y + szLines[x][1], X + szLines[x+1][0], Y + szLines[x+1][1], Color, -1);
+		break;
+	}
 }
 
 BYTE * __stdcall ExScreen::DrawItem(UnitAny *ptPlayer, UnitAny* ptItem, BYTE* out, BOOL a4)
