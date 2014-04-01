@@ -121,15 +121,18 @@ const COORDS ExMapReveal::FindPresetUnitXY(int nLevel, DWORD dwType, DWORD dwCla
 
 void RevealRoom1(Room2* pRoom)
 {
-	D2Funcs.D2CLIENT_RevealAutomapRoom(pRoom->pRoom1, TRUE, (*D2Vars.D2CLIENT_AutomapLayer));
+	D2Funcs.D2CLIENT_RevealAutomapRoom(pRoom->pRoom1, TRUE, *D2Vars.D2CLIENT_AutomapLayer);
 
 	for(PresetUnit* pUnit = pRoom->pPreset; pUnit; pUnit = pUnit->pPresetNext)
 	{
 #ifndef D2EX_PVM_BUILD
 		int nCell = 0, nXOffset = 0, nYOffset = 0;
 
-		if(pUnit->dwType == UNIT_OBJECT)
+		if (pUnit->dwType == UNIT_OBJECT)
+		{
+			//DEBUGMSG("Parsing 0x%x cell", pUnit->dwClassId)
 			nCell = GetUnitCellNumber(pUnit->dwClassId, pRoom->pLevel->dwLevelNo);
+		}
 
 		if(nCell)
 		{

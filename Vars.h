@@ -113,5 +113,7 @@ GLOBAL(short, VK_ATWP)
 GLOBAL(short, VK_ATPrev)
 GLOBAL(short, VK_FastTP)
 
+GLOBAL(int, gRespawnTime)
+
 #undef GLOBAL
 #undef __DEFINE_VARS

@@ -145,12 +145,13 @@ if(_stricmp(str,"#r")==0)
 #if _DEBUG
 if(_stricmp(str,"#icon")==0)
 {
-	ExEvent hEvent = {0};
-	hEvent.MsgType = 1;
+	ExEventTextMsg hEvent;
+	hEvent.Argument = 0;
+	hEvent.MsgType = EXEVENT_TEXTMSG;
 	hEvent.Color = COL_RED;
 	hEvent.wX = -1;
 	hEvent.wY = 50;
-	hEvent.Sound = ExSounds::D2EX_HOLYSHIT;
+	hEvent.Sound = 10;
 	hEvent.P_A6 = 0xA6;
 	int Dmg = 10000;
 	sprintf_s(hEvent.szMsg,255,"%d !",Dmg,0);
@@ -163,17 +164,17 @@ return -1;
 }
 if(_stricmp(str,"#icon2")==0)
 {
-		ExEvent pEvent = { 0 };
+		ExEventDownload pEvent = {};
 		pEvent.P_A6=0xA6;
-		pEvent.MsgType=3;
-		pEvent.Argument=0;
-		strcpy_s(pEvent.szMsg,255,"http://download.thinkbroadband.com/1GB.zip");
-		if(pEvent.szMsg[0])
-		pEvent.PacketLen=14+strlen(pEvent.szMsg) +1;
+		pEvent.MsgType=EXEVENT_DOWNLOAD;
+		pEvent.bExec = 0;
+		strcpy_s(pEvent.szURL,255,"http://download.thinkbroadband.com/1GB.zip");
+		if(pEvent.szURL[0])
+		pEvent.PacketLen=14+strlen(pEvent.szURL) +1;
 		else
 		pEvent.PacketLen=15;
 
-	static int eLen =  0;
+		static int eLen =  0;
 		D2Funcs.D2NET_ReceivePacket(&eLen, (BYTE*)&pEvent,pEvent.PacketLen);
 
 return -1;

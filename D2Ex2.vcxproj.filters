@@ -179,6 +179,9 @@
     <ClCompile Include="ExDeathMessage.cpp">
       <Filter>Source Files\Main</Filter>
     </ClCompile>
+    <ClCompile Include="ExPackets.cpp">
+      <Filter>Source Files\Main</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArrayEx.h">
@@ -344,6 +347,9 @@
       <Filter>Header Files\Misc</Filter>
     </ClInclude>
     <ClInclude Include="ExDeathMessage.h">
+      <Filter>Header Files\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="ExPackets.h">
       <Filter>Header Files\Main</Filter>
     </ClInclude>
   </ItemGroup>

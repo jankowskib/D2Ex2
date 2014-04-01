@@ -24,53 +24,105 @@
 #include <string>
 
 #include "ExImage.h"
+#include "ExTextBox.h"
 
 using namespace std;
+
+struct EventText
+{
+	ExTextBox* Text;
+	short SoundId;
+};
+
+struct EventIcon
+{
+	ExImage* Image;
+	DWORD UnitId;
+};
 
 #pragma pack(push, 1)
 struct EventPacket
 {
-BYTE P_5A;		//0x00
-BYTE MsgType;	//0x01
-BYTE Color;		//0x02
-DWORD Param1; //0x03 nieiwem why dword bierze 5 bajtow
-BYTE Param2;	//0x07
-char Name1[16]; //0x08
-char Name2[16]; //0x18
+	BYTE P_5A;		//0x00
+	BYTE MsgType;	//0x01
+	BYTE Color;		//0x02
+	DWORD Param1; //0x03 nieiwem why dword bierze 5 bajtow
+	BYTE Param2;	//0x07
+	char Name1[16]; //0x08
+	char Name2[16]; //0x18
 };
+
+enum ExEventMsgs
+{
+	EXEVENT_TEXTMSG = 1,
+	EXEVENT_OVERHEAD = 2,
+	EXEVENT_DOWNLOAD = 3,
+	EXEVENT_MAPREVEAL = 4,
+	EXEVENT_OPTIONS = 5
+};
+
+enum ExEventOption
+{
+	EXOP_RESPAWNTIME = 1,
+};
+
+struct ExEvent //(size 0x3)
+{
+	BYTE P_A6;		//0x00
+	BYTE MsgType;	//0x01 ExEventMsgs
+	WORD PacketLen;	//0x02
+};
+
+struct ExEventTextMsg : ExEvent  //(size 0xD+strlen+1)
+{
+	BYTE Argument;	//0x04
+	BYTE Color;		//0x05
+	WORD wX;		//0x06
+	WORD wY;		//0x08
+	WORD Sound;		//0x0A
+	char szMsg[255];//0x0E
+};
+
+struct ExEventOverhead : ExEvent  //(size 0xD+strlen+1)
+{
+	BYTE Argument;			//0x04
+	BYTE Color;				//0x05
+	DWORD UnitId;			//0x06
+	WORD CellID;			//0x0A
+	char szCellPath[255];	//0x0E
+};
+
+struct ExEventDownload : ExEvent  //(size 0xD+strlen+1)
+{
+	BYTE bExec;		//0x04
+	BYTE _1;		//0x05 <- left for backward comp.
+	WORD _2;		//0x06
+	WORD _3;		//0x08
+	WORD _4;		//0x0A
+	char szURL[255];//0x0E
+};
+
+struct ExEventReveal : ExEvent  //(size 0x4)
+{
+	BYTE nLevel;	//0x04
+};
+
+struct ExEventGameOptions : ExEvent // size 0x8
+{
+	BYTE bOption;	//0x04 <- Option type check ExEventOption
+	DWORD nValue;	//0x05
+};
+
 #pragma pack(pop)
-
-struct ExEvent //(size 0xD+strlen+1)
-{
-BYTE P_A6;		//0x00
-BYTE MsgType;	//0x01
-WORD PacketLen;	//0x02
-BYTE Argument;	//0x04
-BYTE Color;		//0x05
-union {
-	struct {
-WORD wX;		//0x06
-WORD wY;		//0x08
-	};
-DWORD UnitId;
-};
-WORD Sound;		//0x0A // Also CellID
-char szMsg[255];//0x0E // Also CellPath
-};
-
-
-struct IconData
-{
-ExImage * pImage;
-DWORD UnitId;
-};
 
 namespace ExEvents
 {
-int __fastcall OnEvent(BYTE* aPacket);
-int __fastcall OnTextEvent(BYTE* aPacket);
-DWORD WINAPI TextFadeThread(void* Params);
-DWORD WINAPI IconFadeThread(void* Params);
-DWORD WINAPI KillCountEvent(void* Params);
+	int __fastcall OnEvent(BYTE* aPacket);
+	int __fastcall OnTextEvent(ExEvent *Dane);
+
+	DWORD WINAPI TextFadeThread(void* Params);
+	DWORD WINAPI IconFadeThread(void* Params);
+	DWORD WINAPI KillCountEvent(void* Params);
 }
+
 #endif

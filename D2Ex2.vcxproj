@@ -242,6 +242,7 @@
     <ClCompile Include="ExDeathMessage.cpp" />
     <ClCompile Include="ExMultiRes.cpp" />
     <ClCompile Include="ExOpenGL.cpp" />
+    <ClCompile Include="ExPackets.cpp" />
     <ClCompile Include="Offset.cpp" />
     <ClCompile Include="D2Ex2.cpp" />
     <ClCompile Include="ExBuffs.cpp" />
@@ -306,6 +307,7 @@
     <ClInclude Include="ExTexture.h" />
     <ClInclude Include="ExMultiRes.h" />
     <ClInclude Include="ExOpenGL.h" />
+    <ClInclude Include="ExPackets.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="SyncObj.h" />
     <ClInclude Include="TeleportPath.h" />

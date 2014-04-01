@@ -72,7 +72,7 @@ void ExDeathMessage::Draw()
 	nDrawYpos += 48;
 	if (!nRespawnTimer)
 	{
-		nRespawnTimer = GetTickCount() + 10 * 1000;
+		nRespawnTimer = GetTickCount() + gRespawnTime * 1000;
 	}
 
 	if (nRespawnTimer > GetTickCount())

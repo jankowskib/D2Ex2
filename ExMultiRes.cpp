@@ -283,21 +283,38 @@ namespace ExMultiRes
 
 	bool enterFullscreen() 
 	{
-		DEVMODE dmScreenSettings;                   // Device Mode
-		memset(&dmScreenSettings, 0, sizeof(dmScreenSettings));       // Makes Sure Memory's Cleared
-		dmScreenSettings.dmSize = sizeof(dmScreenSettings);       // Size Of The Devmode Structure
-		dmScreenSettings.dmPelsWidth = *D2Vars.D2GFX_Width;            // Selected Screen Width
-		dmScreenSettings.dmPelsHeight = *D2Vars.D2GFX_Height;           // Selected Screen Height
-		dmScreenSettings.dmBitsPerPel = 32;             // Selected Bits Per Pixel
+		DEVMODE dmScreenSettings = { 0 };
+		dmScreenSettings.dmSize = sizeof(dmScreenSettings);
+		dmScreenSettings.dmPelsWidth = *D2Vars.D2GFX_Width;
+		dmScreenSettings.dmPelsHeight = *D2Vars.D2GFX_Height;
+		dmScreenSettings.dmBitsPerPel = 32;
 		dmScreenSettings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
 
-		bool isChangeSuccessful = ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL;
-		ShowWindow(D2Funcs.D2GFX_GetHwnd(), SW_MAXIMIZE);
+		if (*D2Vars.D2GFX_WindowMode)
+		{
+			*D2Vars.D2GFX_WindowMode = 0;
+			if (ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL)
+			{
+				DEBUGMSG("DISP_CHANGE_SUCCESSFUL")
+				RECT newSize = { 0, 0, *D2Vars.D2GFX_Width, *D2Vars.D2GFX_Height };
+				AdjustWindowRectEx(&newSize, WS_POPUP, FALSE, WS_EX_APPWINDOW);
+				MoveWindow(D2Funcs.D2GFX_GetHwnd(), 0, 0, newSize.right, newSize.bottom, TRUE);
+				return true;
+			}
+		}
+		else
+		{
+			*D2Vars.D2GFX_WindowMode = 1;
+			RECT newSize = { 0, 0, *D2Vars.D2GFX_Width, *D2Vars.D2GFX_Height };
+			ChangeDisplaySettings(0, 0);
+			AdjustWindowRect(&newSize, WS_OVERLAPPEDWINDOW, FALSE);
+			return true;
+		}
+
+
 
 	//	(*D2Vars.D2LAUNCH_BnData)->bWindowMode = 0;
-		*D2Vars.D2GFX_WindowMode = 0;
-
-		return isChangeSuccessful;
+		return false;
 	}
 
 	// Only function for screen width to rule them all!
