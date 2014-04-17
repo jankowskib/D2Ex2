@@ -154,7 +154,7 @@ if(_stricmp(str,"#icon")==0)
 	hEvent.Sound = 10;
 	hEvent.P_A6 = 0xA6;
 	int Dmg = 10000;
-	sprintf_s(hEvent.szMsg,255,"%d !",Dmg,0);
+	sprintf_s(hEvent.szMsg,255,"%d !",Dmg);
 	hEvent.PacketLen = 0xE + strlen(hEvent.szMsg)+1;
 	
 	static int eLen =  0;

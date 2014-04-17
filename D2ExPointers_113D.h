@@ -288,15 +288,18 @@ void SetupD2Vars() {
 		EXVARPTR(D2CLIENT, MouseX, int, 0x11C950) //k
 		EXVARPTR(D2CLIENT, MouseY, int, 0x11C94C) //k
 		EXVARPTR(D2CLIENT, Offset, POINT, 0x11CF5C) // ns
-		EXVARPTR(D2CLIENT, Divisior, DWORD, 0xF34F8) //ns
+		EXVARPTR(D2CLIENT, Divisior, int, 0xF34F8) //ns
 		EXVARPTR(D2CLIENT, PlayerX, int, 0x106844) //k
 		EXVARPTR(D2CLIENT, PlayerY, int, 0x106840) //k
 		EXVARPTR(D2CLIENT, ScreenXShift, int, 0x11D074) //k
 		EXVARPTR(D2CLIENT, AutomapInfoY, int, 0x11CF80) //k
+		EXVARPTR(D2CLIENT, DrawAutomapParty, BOOL, 0xF3500)
+		EXVARPTR(D2CLIENT, DrawAutomapNames, BOOL, 0xF3500 + 4)
 		EXVARPTR(D2CLIENT, ServerDifficulty, int, 0x11D1D8)
 		EXVARPTR(D2CLIENT, isWeaponSwitch, int, 0x11CB84) //k
 		EXVARPTR(D2CLIENT, BlockScreen, BOOL, 0x11D580) //k
 		EXVARPTR(D2CLIENT, BlockedRect, RECT, 0x11C92C) //k
+		EXVARPTR(D2CLIENT, AutomapRect, RECT, 0x11CF8C)
 
 		EXVARPTR(D2CLIENT, UIModesCallTree, int, 0xF6A80) //k
 		EXVARPTR(D2CLIENT, MapType, int, 0x11CF14) // k

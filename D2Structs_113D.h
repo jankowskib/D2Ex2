@@ -66,18 +66,18 @@ struct CellContext;
 
 struct HoverText	//size 0x110
 {
-DWORD dwDisplayTime;	//0x00	8 * strlen + 125
-DWORD dwExpireTime;		//0x04	DisplayTime+CurrentTick;
-DWORD dwLangId;			//0x08
-DWORD _1;				//0x0C	Unused?
-char szMsg[255];		//0x10
+	DWORD dwDisplayTime;	//0x00	8 * strlen + 125
+	DWORD dwExpireTime;		//0x04	DisplayTime+CurrentTick;
+	DWORD dwLangId;			//0x08
+	DWORD _1;				//0x0C	Unused?
+	char szMsg[255];		//0x10
 };
 
 struct ChatMsg		//size 0x2C
 {
-wchar_t* wMsg;			//0x00
-void* _1;				//0x04
-//...
+	wchar_t* wMsg;			//0x00
+	void* _1;				//0x04
+	//...
 };
 
 struct Inventory
@@ -250,11 +250,11 @@ struct Level {
 	DWORD _5[6];			//0x1BC
 	DWORD dwLevelNo;		//0x1D0
 	DWORD _6[3];			//0x1D4
-	union {            
+	union {
 		DWORD RoomCenterX[9];
 		DWORD WarpX[9];
 	};						//0x1E0
-	union {            
+	union {
 		DWORD RoomCenterY[9];
 		DWORD WarpY[9];
 	};						//0x204
@@ -288,13 +288,13 @@ struct Path {
 
 struct StaticPath // size 0x20
 {
-  Room1 *pRoom1;		//0x00
-  DWORD xOffset;		//0x04
-  DWORD yOffset;		//0x08
-  DWORD xPos;			//0x0C
-  DWORD yPos;			//0x10
-  DWORD _1[2];			//0x14
-  DWORD dwFlags;		//0x1C
+	Room1 *pRoom1;		//0x00
+	DWORD xOffset;		//0x04
+	DWORD yOffset;		//0x08
+	DWORD xPos;			//0x0C
+	DWORD yPos;			//0x10
+	DWORD _1[2];			//0x14
+	DWORD dwFlags;		//0x1C
 };
 
 
@@ -339,20 +339,20 @@ struct ObjectData
 
 struct AiGeneral
 {
-  DWORD SpecialState;										  //0x00 - stuff like terror, confusion goes here
-  void* ( __fastcall * fpAiFunction)(Game*,UnitAny*,DWORD*);  //0x04 - the primary ai function to call
-  DWORD AiFlags;											  //0x08
-  DWORD OwnerGUID;											  //0x0C- the global unique identifier of the boss or minion owner
-  DWORD eOwnerType;											  //0x10 - the unit type of the boss or minion owner
-  DWORD dwArgs[3];											  //0x14 - three dwords holding custom data used by ai func to store counters (etc)
-  DWORD* pCmdCurrent;										  //0x20
-  DWORD *pCmdLast;											  //0x24
-  Game* pGame;												  //0x28
-  DWORD OwnerGUIDEq;										  //0x2C - the same as +008
-  DWORD eOwnerTypeEq;										  //0x30 - the same as +00C
-  DWORD* pMinionList;										  //0x34 - list of all minions, for boss units (SetBoss in MonStats, Unique, SuperUnique etc)
-  DWORD _1;													  //0x38
-  DWORD eTrapNo;											  //0x3C - used by shadows for summoning traps (so they stick to one type usually)
+	DWORD SpecialState;										  //0x00 - stuff like terror, confusion goes here
+	void* (__fastcall * fpAiFunction)(Game*, UnitAny*, DWORD*);  //0x04 - the primary ai function to call
+	DWORD AiFlags;											  //0x08
+	DWORD OwnerGUID;											  //0x0C- the global unique identifier of the boss or minion owner
+	DWORD eOwnerType;											  //0x10 - the unit type of the boss or minion owner
+	DWORD dwArgs[3];											  //0x14 - three dwords holding custom data used by ai func to store counters (etc)
+	DWORD* pCmdCurrent;										  //0x20
+	DWORD *pCmdLast;											  //0x24
+	Game* pGame;												  //0x28
+	DWORD OwnerGUIDEq;										  //0x2C - the same as +008
+	DWORD eOwnerTypeEq;										  //0x30 - the same as +00C
+	DWORD* pMinionList;										  //0x34 - list of all minions, for boss units (SetBoss in MonStats, Unique, SuperUnique etc)
+	DWORD _1;													  //0x38
+	DWORD eTrapNo;											  //0x3C - used by shadows for summoning traps (so they stick to one type usually)
 };
 
 struct MonsterData {
@@ -443,14 +443,14 @@ struct GfxDrawOffset
 	DWORD zPos;						//0x0C
 	struct
 	{
-	DWORD xOffset;				//0x00
-	DWORD yOffset;				//0x04
-	DWORD zOffset;				//0x08
+		DWORD xOffset;				//0x00
+		DWORD yOffset;				//0x04
+		DWORD zOffset;				//0x08
 	} Offsets[3];					//0x10
 };
 
 struct GfxInfo
-{	
+{
 	DWORD _1;						//0x00
 	DWORD _2;						//0x04
 	DWORD _3;						//0x08
@@ -708,14 +708,14 @@ struct GfxCell  // Size is 0x2C <- to be verified
 /* To Find
 	BYTE nComponents;				//0x1D
 	struct
-		{
-		DWORD dwUnitToken;			//0x30
-		DWORD dwCompToken;			//0x34
-		DWORD dwSomeToken;			//0x38
-		DWORD _3;					//0x3C
-		DWORD dwWClassToken;		//0x40
-		} tUnitInfo;
-*/
+	{
+	DWORD dwUnitToken;			//0x30
+	DWORD dwCompToken;			//0x34
+	DWORD dwSomeToken;			//0x38
+	DWORD _3;					//0x3C
+	DWORD dwWClassToken;		//0x40
+	} tUnitInfo;
+	*/
 struct CellContext		//size 0x48
 {
 	DWORD nCellNo;					//0x00
@@ -743,9 +743,9 @@ struct CellContext		//size 0x48
 
 struct RosterInfo
 {
-DWORD dwUnitId;
-DWORD dwPartyFlags;  //0x02 - ignore, 0x04 - squelch, 0x08 hostile
-RosterInfo *ptNext;
+	DWORD dwUnitId;
+	DWORD dwPartyFlags;  //0x02 - ignore, 0x04 - squelch, 0x08 hostile
+	RosterInfo *ptNext;
 };
 
 struct RosterPet //size 0x34
@@ -767,8 +767,8 @@ struct RosterPet //size 0x34
 
 struct RosterBody
 {
-DWORD CorpseId;
-RosterBody *ptPrevCorpse;
+	DWORD CorpseId;
+	RosterBody *ptPrevCorpse;
 };
 
 struct RosterUnit {

@@ -21,25 +21,32 @@
 #define WIN32_LEAN_AND_MEAN
 //Build flags
 //--------- General Flags ----------------
-//#define D2EX_CLOSED_BNET "Closed Bnet|" // Copy&Paste from SCRAP, didn't test yet
-//#define D2EX_SCRAP_HACKS "Scrap Hacks|" // - || -
-#define D2EX_MULTIRES "Multi Res|" // Enables high resolution settings
-//#define D2EX_ARGOLD "AR Gold|" // Enables client support for virutal gold service [Needs serverside dll to work]
-#define D2EX_PVPGN_EXT "PvPGN Extensions|" // Enables serverside stuff like kill counter, spectator mode etc [Needs serverside dll to work]
-//#define D2EX_EXAIM_ENABLED "ExAim|" // Experimental -- never finished | may not work --
-//#define D2EX_PVM_BUILD "PvM|" // Enables Maphack with monsters on the map, autotele, etc.
-#define MAX_SOUND_TXT_ROWS 4954 // Maximum rows in Sound.txt
+//#define D2EX_CLOSED_BNET "Closed Bnet|"		// Copy&Paste from SCRAP, didn't test yet
+//#define D2EX_SCRAP_HACKS "Scrap Hacks|"		// - || -
+#define D2EX_MULTIRES "Multi Res|"				// Enables high resolution settings
+//#define D2EX_ARGOLD "AR Gold|"				// Enables client support for virutal gold service [Needs serverside dll to work]
+#define D2EX_PVPGN_EXT "PvPGN Extensions|"		// Enables serverside stuff like kill counter, spectator mode etc [Needs serverside dll to work]
+//#define D2EX_EXAIM_ENABLED "ExAim|"			// Experimental -- never finished | may not work --
+//#define D2EX_PVM_BUILD "PvM|"					// Enables Maphack with monsters on the map, autotele, etc.
+#define MAX_SOUND_TXT_ROWS 4954					// Maximum rows in Sound.txt
 //*******************************************
 
 //---------- ExMultiRes flags -------------
 #ifdef D2EX_MULTIRES
-//#define D2EX_OPENGL "OpenGL|"				// Enables OpenGL render mode
-#define D2EX_ALLOWHIGHRES "Hi Res|"			// Enables support for 800x600+
+//#define D2EX_OPENGL "OpenGL|"					// Enables OpenGL render mode
+#define D2EX_ALLOWHIGHRES "Hi Res|"				// Enables support for 800x600+
+#endif
+//******************************************
+
+//--------- PvPGN Extension flags ----------
+#ifdef D2EX_PVPGN_EXT
+//#define D2EX_PVPGN_GIVEUP						// Adds `Give up` to ESC menu
+#define D2EX_SPECATATOR
 #endif
 //******************************************
 
 //-------------- ExAim Flags ----------------
-#define TP_RANGE	32		// Maximum teleport range
+#define TP_RANGE	32							// Maximum teleport range
 //*******************************************
 
 #if defined VER_111B && defined VER_113D

@@ -18,26 +18,23 @@
 * ==========================================================
 */
 
-#include "stdafx.h"
-#include "ExSpectator.h"
+#ifndef _EXMAPREV_H__
+#define _EXMAPREV_H__
 
-#ifdef D2EX_SPECATATOR
-int __fastcall ExSpec::OnMousePacket(BYTE* aPacket)
+using namespace std;
+
+namespace ExAutomap
 {
-	WORD mX = *(WORD*)&aPacket[1];
-	WORD mY = *(WORD*)&aPacket[3];
-	if(!mX && !mY) return 0;
+	void __stdcall DrawOutRangeRosterUnit(RosterUnit* pRoster);
+	void __stdcall DrawRangePlayerUnit(UnitAny* pUnit, int nX, int nY, int nColor);
 
-		/*	INPUT inp;
-			::memset(&inp,0,sizeof(INPUT));
-			inp.type = INPUT_MOUSE;
-			inp.mi.dx=p->Coords.x;
-			inp.mi.dy=p->Coords.y;
-			SendInput(1, &inp, sizeof(INPUT));*/
-	*D2Vars.D2CLIENT_MouseX=mX;
-	*D2Vars.D2CLIENT_MouseY=mY;
-	return 0;
+	void RevealLevel(int LvlId);
+	void OnMapDraw();
+	const COORDS FindPresetUnitXY(int nLevel, DWORD dwType, DWORD dwClassId);
+
+	Level* GetLevelPointer(ActMisc *pActMisc, int nLevel);
+	void DrawCircle(int x0, int y0, int radius, int Color);
+	void __fastcall DrawBlob(int X, int Y, int Color);
 }
-
 
 #endif

@@ -126,6 +126,47 @@ struct D2PacketTable
 };
 
 
+// Packet definitions
+
+#pragma pack(push, 1)
+
+/*
+	Global message event
+*/
+struct px5a
+{
+	BYTE P_5A;		//0x00
+	BYTE MsgType;	//0x01
+	BYTE Color;		//0x02
+	DWORD Param1;	//0x03
+	BYTE Param2;	//0x07
+	char Name1[16]; //0x08
+	char Name2[16]; //0x18
+};
+
+/*
+	Request players chat relation change
+*/
+struct px5d
+{
+	BYTE P_5D;		//0x00
+	BYTE nButton;	//0x01
+	BYTE nState;	//0x02
+	DWORD dwUnitId; //0x03
+};
+
+/*
+	Request party relation change
+*/
+struct px5e
+{
+	BYTE P_5E;		//0x00
+	BYTE nButton;	//0x01
+	DWORD dwUnitId; //0x02
+};
+#pragma pack(pop)
+
+
 struct UiCallArray
 {
 	void(__cdecl *OnKeyDown)();

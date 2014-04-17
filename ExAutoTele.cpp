@@ -20,7 +20,7 @@
 
 #include "stdAfx.h"
 #include "ExAutoTele.h"
-#include "ExMapReveal.h"
+#include "ExAutomap.h"
 #include "ExAim.h"
 #include "CollisionMap.h"
 
@@ -92,7 +92,7 @@ namespace ExAutoTele
 			COORDS xy;
 			for (int n = 0; n < sizeof(nWaypointId) / 4; ++n)
 			{
-				xy = ExMapReveal::FindPresetUnitXY(nArea, UNIT_OBJECT, nWaypointId[n]);
+				xy = ExAutomap::FindPresetUnitXY(nArea, UNIT_OBJECT, nWaypointId[n]);
 				if (xy.x && xy.y)
 				{
 					gAutoTeleArgument = MAKELONG(xy.x, xy.y);
@@ -150,7 +150,7 @@ namespace ExAutoTele
 
 	bool TeleportTo(int nLevelId, int dwObjectClassId)
 	{
-		COORDS xy = ExMapReveal::FindPresetUnitXY(nLevelId, UNIT_OBJECT, dwObjectClassId);
+		COORDS xy = ExAutomap::FindPresetUnitXY(nLevelId, UNIT_OBJECT, dwObjectClassId);
 		return TeleportTo(nLevelId, xy.x, xy.y);
 	}
 

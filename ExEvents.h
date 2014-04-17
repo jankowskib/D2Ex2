@@ -41,16 +41,6 @@ struct EventIcon
 };
 
 #pragma pack(push, 1)
-struct EventPacket
-{
-	BYTE P_5A;		//0x00
-	BYTE MsgType;	//0x01
-	BYTE Color;		//0x02
-	DWORD Param1; //0x03 nieiwem why dword bierze 5 bajtow
-	BYTE Param2;	//0x07
-	char Name1[16]; //0x08
-	char Name2[16]; //0x18
-};
 
 enum ExEventMsgs
 {
@@ -66,7 +56,7 @@ enum ExEventOption
 	EXOP_RESPAWNTIME = 1,
 };
 
-struct ExEvent //(size 0x3)
+struct ExEvent //(size 0x4)
 {
 	BYTE P_A6;		//0x00
 	BYTE MsgType;	//0x01 ExEventMsgs
@@ -102,12 +92,12 @@ struct ExEventDownload : ExEvent  //(size 0xD+strlen+1)
 	char szURL[255];//0x0E
 };
 
-struct ExEventReveal : ExEvent  //(size 0x4)
+struct ExEventReveal : ExEvent  //(size 0x5)
 {
 	BYTE nLevel;	//0x04
 };
 
-struct ExEventGameOptions : ExEvent // size 0x8
+struct ExEventGameOptions : ExEvent // size 0x9
 {
 	BYTE bOption;	//0x04 <- Option type check ExEventOption
 	DWORD nValue;	//0x05

@@ -300,7 +300,7 @@ void SetupD2Vars() {
 		EXVARPTR(D2CLIENT, MouseX, int, 0x11B418)
 		EXVARPTR(D2CLIENT, MouseY, int, 0x11B414)
 		EXVARPTR(D2CLIENT, Offset, POINT, 0x11C188)
-		EXVARPTR(D2CLIENT, Divisior, DWORD, 0xF13F0)
+		EXVARPTR(D2CLIENT, Divisior, int, 0xF13F0)
 		EXVARPTR(D2CLIENT, PlayerX, int, 0x11B678)
 		EXVARPTR(D2CLIENT, PlayerY, int, 0x11B674)
 		EXVARPTR(D2CLIENT, ScreenXShift, int, 0x11C3E8)
@@ -309,6 +309,8 @@ void SetupD2Vars() {
 		EXVARPTR(D2CLIENT, pCellBorders, CellFile*, 0x104098) //unused
 		EXVARPTR(D2CLIENT, BlockScreen, BOOL, 0x11C338)
 		EXVARPTR(D2CLIENT, BlockedRect, RECT, 0x11A3FC)
+		EXVARPTR(D2CLIENT, DrawAutomapParty, BOOL, 0xF13F8)
+		EXVARPTR(D2CLIENT, DrawAutomapNames, BOOL, 0xF13F8 + 4)
 		EXVARPTR(D2CLIENT, UIModesCallTree, int, 0xED5E0)
 		EXVARPTR(D2CLIENT, isWeaponSwitch, int, 0x11BC38)
 		EXVARPTR(D2CLIENT, MapType, int, 0x11C140)
@@ -320,6 +322,8 @@ void SetupD2Vars() {
 		EXVARPTR(D2CLIENT, PetBarColorYellow, BYTE, 0x11BED9)
 		EXVARPTR(D2CLIENT, PetBarColorRed, BYTE, 0x11BEDA)
 		EXVARPTR(D2CLIENT, ServerDifficulty, int, 0x11C2A8)
+		EXVARPTR(D2CLIENT, AutomapRect, RECT, 0x11C1B8) // ns
+
 		//-----Paket things
 		EXVARPTR(D2NET, PacketLenTable, int, 0xA900)
 		EXVARPTR(D2NET, SrvPacketLenTable, int, 0xABD8)

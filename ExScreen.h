@@ -37,7 +37,9 @@ wstring GetColorCode(int ColNo);
 
 void ScreenToAutomap(POINT* ptPos, int x, int y);
 void AutomapToScreen(POINT* ptPos, int x, int y);
-void DrawCircle(int x0, int y0, int radius, int Color);
+void AutomapToScreen(POINT* ptPos);
+void WorldToAutomap(POINT* ptPos);
+
 
 BOOL __fastcall OnTradeData(BYTE* aPacket);
 BOOL __fastcall OnTradeButton(BYTE* aPacket);
@@ -47,7 +49,7 @@ void __stdcall Display();
 void DrawAutoMapVer();
 void DrawLifeManaTxt();
 void __fastcall DrawAutoMapInfo(int OldTextSize);
-void __fastcall DrawBlob(int X, int Y, int Color);
+
 void DrawResInfo();
 void DrawDmg();
 void DrawBreakpoints();

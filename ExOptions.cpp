@@ -869,29 +869,35 @@ BOOL __fastcall ExOptions::MainMenu(D2MenuEntry* ptEntry, StormMsg* pMsg)
 		NewMenu.dwMenuOffset = 51;
 
 
+
 		memcpy(NewEntries, (const void*)*&D2Vars.D2CLIENT_OldMenu, sizeof(D2MenuEntry));
 		memcpy(&NewEntries[2], (const void*)&D2Vars.D2CLIENT_OldMenu[1], sizeof(D2MenuEntry)* 2);
-#ifdef D2EX_PVPGN_EXT
-		NewEntries[1].OnPress = &ExOptions::GiveUpCB;
-		NewEntries[1].EnableCheck = &ExOptions::GiveUpCheck;
-#else
-		NewEntries[1].OnPress = &ExOptions::RejoinCB;
-		NewEntries[1].EnableCheck = 0;
-#endif
-		NewEntries[0].OnPress = &ExOptions::Options;
-		NewEntries[0].ptCellFile = NewEntries[2].ptCellFile = NewEntries[3].ptCellFile = 0;
 
-		NewEntries[2].OnPress = &ExOOG::LeaveGame;
+		NewEntries[0].ptCellFile = NewEntries[2].ptCellFile = NewEntries[3].ptCellFile = 0;
 
 		int i = 0;
 		wcscpy_s((wchar_t*)&NewEntries[i].szCellFile, 130, gLocaleId == 10 ? L"OPCJE" : L"OPTIONS");
+		NewEntries[i].OnPress = &ExOptions::Options;
+		
 #ifdef D2EX_PVPGN_EXT
+	#ifdef D2EX_PVPGN_GIVEUP
 		wcscpy_s((wchar_t*)&NewEntries[++i].szCellFile,130,gLocaleId == 10 ? L"PODDAJ SIÊ" : L"GIVE UP");
+		NewEntries[i].OnPress = &ExOptions::GiveUpCB;
+		NewEntries[i].EnableCheck = &ExOptions::GiveUpCheck;
+	#else
+		NewMenu.dwEntriesNo = 3;
+
+	#endif
 #else
 		wcscpy_s((wchar_t*)&NewEntries[++i].szCellFile, 130, gLocaleId == 10 ? L"SZYBKI POWRÓT" : L"QUICK REJOIN");
+		NewEntries[i].OnPress = &ExOptions::RejoinCB;
+		NewEntries[i].EnableCheck = 0;
 #endif
 		wcscpy_s((wchar_t*)&NewEntries[++i].szCellFile, 130, gLocaleId == 10 ? L"ZAPIS I WYJŒCIE Z GRY" : L"SAVE AND EXIT GAME");
+		NewEntries[i].OnPress = &ExOOG::LeaveGame;
+
 		wcscpy_s((wchar_t*)&NewEntries[++i].szCellFile, 130, gLocaleId == 10 ? L"POWRÓT DO GRY" : L"RETURN TO GAME");
+		NewEntries[i].OnPress = *D2Vars.D2CLIENT_OldMenu[2].OnPress;
 	}
 
 	*D2Vars.D2CLIENT_SelectedMenu = 1;

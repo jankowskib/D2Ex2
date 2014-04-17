@@ -23,7 +23,7 @@
 #include "ExLoading.h"
 #include "ExOOG.h"
 #include "ExMultiRes.h"
-
+#include "ExAutomap.h"
 
 __declspec(naked) int __fastcall D2ASMFuncs::D2CLIENT_DiffuseStat(int nStat)
 {
@@ -228,7 +228,7 @@ void __declspec(naked) __fastcall D2Stubs::D2CLIENT_BlobHook()
 	push edx
 	mov edx,eax
 	push [esp+8]
-	call ExScreen::DrawBlob
+	call ExAutomap::DrawBlob
 	pop edx
 	ret 4
 	}
@@ -240,7 +240,7 @@ void __declspec(naked) __fastcall D2Stubs::D2CLIENT_BlobHook2()
 	{
 	push edx
 	mov edx,eax
-	call ExScreen::DrawBlob
+	call ExAutomap::DrawBlob
 	ret
 	}
 }
@@ -249,12 +249,12 @@ __declspec(naked) void* __stdcall D2ASMFuncs::D2WIN_LoadMpq(DWORD OrderFlag, con
 {
 	__asm
 	{
-      push [esp+0x18]
-      push [esp+0x18]
-      push [esp+0x18]
-      push [esp+0x18]
-      push [esp+0x18]
-      mov eax,[esp+0x18]
+	  push [esp+0x18]
+	  push [esp+0x18]
+	  push [esp+0x18]
+	  push [esp+0x18]
+	  push [esp+0x18]
+	  mov eax,[esp+0x18]
 	  call D2Ptrs.D2WIN_LoadMpq_I
 	  ret 0x18
 	}
@@ -410,6 +410,41 @@ __declspec(naked) void D2Stubs::D2GFX_LookUpFix_VI_STUB()
 	}
 }
 
+__declspec(naked) void D2Stubs::D2CLIENT_RosterRangeBlobDraw() // EBX = X, EDI = Y, ESP+0x10 = COL, ESI = pUnit -> (UnitAny* pUnit, int nX, int nY, int nColor)
+{
+	__asm
+	{
+		push [esp+0x10]
+		push ebx
+		push edi
+		push esi
+
+		call ExAutomap::DrawRangePlayerUnit
+
+		//fallback
+
+		pop edi
+		pop ebx
+		pop esi
+		pop ebp
+
+		add esp, 0x10
+		retn
+	}
+}
+
+__declspec(naked) void D2Stubs::D2CLIENT_RosterOutRangeBlobDraw() //AUTOMAP_DrawRosterUnit_6FB21670<eax>(RosterUnit *pRoster<edi>)
+{
+	__asm
+	{
+		push edi
+		
+		call ExAutomap::DrawOutRangeRosterUnit
+	
+		retn
+	}
+}
+
 
 // -- Funcs
 
@@ -469,27 +504,41 @@ __declspec(naked) wchar_t* __fastcall D2ASMFuncs::D2CLIENT_GetLevelName(int Leve
 {
 	__asm
 	{
-	push esi
-	mov  esi,ecx
-	call D2Ptrs.D2CLIENT_GetLevelName_I
-	pop esi
-	ret
+		push esi
+		mov  esi,ecx
+		call D2Ptrs.D2CLIENT_GetLevelName_I
+		pop esi
+		ret
 	}
 }
 
+/*
 void __stdcall D2ASMFuncs::D2CLIENT_DrawGZBox(int X1, int Y1, int X2, int Y2)
 {
 	RECT * r = new RECT;
-	r->left=X1;
-	r->top=Y1;
-	r->right=X2;
-	r->bottom=Y2;
+	r->left = X1;
+	r->top = Y1;
+	r->right = X2;
+	r->bottom = Y2;
 	__asm
 	{
 		mov eax, [r]
 		call D2Ptrs.D2CLIENT_DrawGZBOX_I
 	}
 	delete r;
+}
+
+//	God what did I think when I've wrote this^
+*/
+
+__declspec(naked) void __stdcall D2ASMFuncs::D2CLIENT_DrawGZBox(int X1, int Y1, int X2, int Y2)
+{
+	__asm
+	{
+		lea eax, [esp + 4]
+		call D2Ptrs.D2CLIENT_DrawGZBOX_I
+		ret 16;
+	}
 }
 
 //__declspec(naked) int __fastcall ExScreen::GetTextWidth(const wchar_t* wStr)
@@ -506,15 +555,15 @@ __declspec(naked) void __fastcall D2ASMFuncs::D2CLIENT_PlaySound(int SoundNo)
 {
 	__asm
 	{
-	push ebx
-	mov ebx, ecx
-	push 0
-	push 0
-	push 0
-	push 0
-	call D2Ptrs.D2CLIENT_PlaySoundNo_I
-	pop ebx;
-	ret
+		push ebx
+		mov ebx, ecx
+		push 0
+		push 0
+		push 0
+		push 0
+		call D2Ptrs.D2CLIENT_PlaySoundNo_I
+		pop ebx;
+		ret
 	}
 }
 

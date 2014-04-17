@@ -43,6 +43,8 @@ namespace D2ASMFuncs
 
 namespace D2Stubs
 {
+	void D2CLIENT_RosterRangeBlobDraw();
+	void D2CLIENT_RosterOutRangeBlobDraw();
 	void D2CLIENT_FixHostilePic();
 	void D2LAUNCH_OnMainMenuCreate();
 	void D2CLIENT_HideItem_STUB();

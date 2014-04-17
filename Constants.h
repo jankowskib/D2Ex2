@@ -868,6 +868,20 @@ enum UpdateClient
 };
 
 
+enum PartyButtons
+{
+	PB_LOOT = 1,
+	PB_MUTE = 2,
+	PB_SQUELCH = 3,
+	PB_HOSTILE = 4,
+	PB_INVITE_PLAYER = 6,
+	PB_INVITE_CANCEL = 7,
+	PB_INVITE_ACCEPT = 8,
+	PB_LEAVE_PARTY = 9,
+// -- my addtion below
+	PB_SPECATE = 10,
+};
+
 #endif
 
 

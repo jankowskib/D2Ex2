@@ -34,6 +34,7 @@ struct PlayerTable;
 namespace ExParty
 {
 	void ClearScreenHandle();
+	void Spectate(ExControl* ptControl);
 	void Squelch(ExControl* ptControl);
 	void Loot(ExControl* ptControl);
 	void Host(ExControl* ptControl);

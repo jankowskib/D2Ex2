@@ -21,7 +21,7 @@
 #include "stdafx.h"
 #include "ExEntryText.h"
 #include "ExParty.h"
-#include "ExMapReveal.h"
+#include "ExAutomap.h"
 #include "Vars.h"
 
 /* Credits go to Nefarius
@@ -47,7 +47,7 @@ void ExEntryText::Draw()
       LevelId = lvlNo;
 	  Timer = 120;
 	  ExParty::Update();
-	  if(Maphack) ExMapReveal::RevealLevel(LevelId);
+	  if(Maphack) ExAutomap::RevealLevel(LevelId);
    }
 
    if (Timer > 0)

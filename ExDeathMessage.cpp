@@ -31,7 +31,7 @@
 */
 void ExDeathMessage::Draw()
 {
-	static DWORD nRespawnTimer;
+	static DWORD nRespawnTimer = 0;
 	static char gLocaleFolder[5];
 
 	UnitAny* pPlayerUnit = D2Funcs.D2CLIENT_GetPlayer();
@@ -72,14 +72,16 @@ void ExDeathMessage::Draw()
 	nDrawYpos += 48;
 	if (!nRespawnTimer)
 	{
-		nRespawnTimer = GetTickCount() + gRespawnTime * 1000;
+		DEBUGMSG("Setting Respawn time on %d s", gRespawnTime)
+
+		nRespawnTimer = GetTickCount() + (gRespawnTime * 1000);
 	}
 
 	if (nRespawnTimer > GetTickCount())
 	{
 		D2Funcs.D2WIN_SetTextSize(2);
 		wostringstream wTimerStr;
-		int nTime = (nRespawnTimer - GetTickCount()) / 1000;
+		unsigned int nTime = (nRespawnTimer - GetTickCount()) / 1000;
 		wTimerStr << "Time to respawn: " << nTime;
 		int xPosTimer = *D2Vars.D2CLIENT_ScreenViewWidth / 2 - D2Funcs.D2WIN_GetTextWidth(wTimerStr.str().c_str()) / 2;
 		D2Funcs.D2WIN_DrawText(wTimerStr.str().c_str(), xPosTimer, nDrawYpos, COL_RED, 1);

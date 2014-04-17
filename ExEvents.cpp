@@ -21,7 +21,7 @@
 #include "stdafx.h"
 #include "ExEvents.h"
 #include "ExParty.h"
-#include "ExMapReveal.h"
+#include "ExAutomap.h"
 #include "ExDownload.h"
 
 static HANDLE TH, SH;
@@ -91,7 +91,7 @@ int __fastcall ExEvents::OnTextEvent(ExEvent *Dane) //0xA6
 			ExEventReveal *msg = (ExEventReveal*)Dane;
 			int aLevel = msg->nLevel;
 			if (!ExParty::GetPlayerArea()) break;
-			ExMapReveal::RevealLevel(aLevel);
+			ExAutomap::RevealLevel(aLevel);
 		}
 		break;
 		case EXEVENT_OPTIONS:
@@ -102,6 +102,7 @@ int __fastcall ExEvents::OnTextEvent(ExEvent *Dane) //0xA6
 				case EXOP_RESPAWNTIME:
 				{
 					gRespawnTime = msg->nValue;
+					DEBUGMSG("Received Respawn time: %d s", gRespawnTime)
 				}
 				break;
 			}
@@ -118,7 +119,7 @@ int __fastcall ExEvents::OnTextEvent(ExEvent *Dane) //0xA6
 int __fastcall ExEvents::OnEvent(BYTE* aPacket)
 {
 	ExTextBox * Text = 0;
-	EventPacket * Dane = (EventPacket*)aPacket;
+	px5a * Dane = (px5a*)aPacket;
 	switch (Dane->MsgType)
 	{
 	case 0: //"%Name1(%Name2) dropped due to time out."

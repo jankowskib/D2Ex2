@@ -20,12 +20,11 @@
 
 #include "stdafx.h"
 #include "ExScreen.h"
-#include <string>
 #include <sstream>
 #include <iomanip>
 #include <math.h>
 #include "ExEditBox.h"
-#include "ExMapReveal.h"
+#include "ExAutomap.h"
 #include "ExAim.h"
 #include "ExMultiRes.h"
 
@@ -33,19 +32,35 @@
 
 void ExScreen::ScreenToAutomap(POINT* ptPos, int x, int y)  //BHHack, converts Real path XY to AutoMap
 {
-        x *= 32; y *= 32;
-		ptPos->x = ((x - y)/2/(*(INT*)D2Vars.D2CLIENT_Divisior))-(*D2Vars.D2CLIENT_Offset).x+8; 
-        ptPos->y = ((x + y)/4/(*(INT*)D2Vars.D2CLIENT_Divisior))-(*D2Vars.D2CLIENT_Offset).y-8; 
-		if(*D2Vars.D2CLIENT_MapType) { 
-                --ptPos->x; 
-                ptPos->y += 5; 
-        }
+	x*= 32; y*= 32;
+	ptPos->x = ((x - y)/2/(*(INT*)D2Vars.D2CLIENT_Divisior))-(*D2Vars.D2CLIENT_Offset).x+8; 
+	ptPos->y = ((x + y)/4/(*(INT*)D2Vars.D2CLIENT_Divisior))-(*D2Vars.D2CLIENT_Offset).y-8; 
+	
+	if(*D2Vars.D2CLIENT_MapType) 
+	{ 
+		--ptPos->x; 
+		ptPos->y += 5; 
+	}
 }
-        
+		
 void ExScreen::AutomapToScreen(POINT* ptPos, int x, int y) //BHHack, converts AutoMap XY to Screen XY
 {
-        ptPos->x = x; ptPos->y = y;
-		D2Funcs.D2COMMON_MapToAbsScreen(&ptPos->x, &ptPos->y);
+	ptPos->x = x; ptPos->y = y;
+	D2Funcs.D2COMMON_MapToAbsScreen(&ptPos->x, &ptPos->y);
+}
+
+void ExScreen::AutomapToScreen(POINT* ptPos) //BHHack, converts AutoMap XY to Screen XY
+{
+	D2Funcs.D2COMMON_MapToAbsScreen(&ptPos->x, &ptPos->y);
+}
+
+void ExScreen::WorldToAutomap(POINT* ptPos) // D2COMMON.10115 @ 1.13d
+{
+	LONG xpos = 16 * (ptPos->x - ptPos->y);
+	LONG ypos = 8 * (ptPos->x + ptPos->y);
+
+	ptPos->x = xpos / *D2Vars.D2CLIENT_Divisior - D2Vars.D2CLIENT_Offset->x + 8;
+	ptPos->y = ypos / *D2Vars.D2CLIENT_Divisior - D2Vars.D2CLIENT_Offset->y - 8;
 }
 
 int ExScreen::GetTextWidth(const wchar_t *wText)
@@ -179,7 +194,8 @@ void __stdcall ExScreen::Display()
 {
 #ifdef _DEBUG
 	wostringstream wStr;
-	wStr << "X: " << *D2Vars.D2CLIENT_MouseX << " Y:" << *D2Vars.D2CLIENT_MouseY;
+	wStr << "mX: " << *D2Vars.D2CLIENT_MouseX << " mY:" << *D2Vars.D2CLIENT_MouseY;
+	wStr << " [" << dec << ExAim::GetUnitX(D2Funcs.D2CLIENT_GetPlayer()) << "," << dec << ExAim::GetUnitY(D2Funcs.D2CLIENT_GetPlayer()) << "]";
 	if(D2Funcs.D2CLIENT_GetSelectedUnit())
 	{
 		wStr << " UnitId: " << hex << D2Funcs.D2CLIENT_GetSelectedUnit()->dwUnitId;
@@ -193,13 +209,13 @@ void __stdcall ExScreen::Display()
 	wPool+=L" Mem taken:" + boost::lexical_cast<wstring>(ExMemory::GetMemUsage() /1024 / 1024);
 	wPool+=L" mb";
 	D2Funcs.D2WIN_DrawText(wPool.c_str(),10,20,11,0);*/
-#ifdef D2EX_OPENGL
+	#ifdef D2EX_OPENGL
 	D2Funcs.D2WIN_SetTextSize(5);
 	for (int c = 0; c < 19; ++c)
 	{
 		ExScreen::DrawTextEx(10, 40 + (c * 15), c, 0, DRAW_MODE_NORMAL, "Color %d", c);
 	}
-#endif
+
 /*	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_NORMAL", 5, 40, COL_GOLD, 0, DRAW_MODE_NORMAL);
 	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_ALPHA_25", 5, 60, COL_GOLD, 0, DRAW_MODE_ALPHA_25);
 	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_ALPHA_25_BRIGHT", 5, 80, COL_GOLD, 0, DRAW_MODE_ALPHA_25_BRIGHT);
@@ -208,6 +224,7 @@ void __stdcall ExScreen::Display()
 	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_ALPHA_75", 5, 140, COL_GOLD, 0, DRAW_MODE_ALPHA_75);
 	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_BRIGHT", 5, 160, COL_GOLD, 0, DRAW_MODE_BRIGHT);
 	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_INVERTED", 5, 180, COL_GOLD, 0, DRAW_MODE_INVERTED);*/
+	#endif
 
 #endif
 	D2Funcs.D2WIN_SetTextSize(1);
@@ -224,7 +241,7 @@ __forceinline wstring ExScreen::GetColorCode(int ColNo)
 {
 //wchar_t Result[4];
 wchar_t* pCol = D2Funcs.D2LANG_GetLocaleText(3994);
-if(!pCol) DEBUGMSG("Get Col code fail!");
+//if(!pCol) DEBUGMSG("Get Col code fail!");
 //if(!pCol) return L"";
 //swprintf_s(Result,4,L"%s%c",pCol, (char)(ColNo + '0'));
 wostringstream Result;
@@ -236,21 +253,25 @@ return Result.str();
 
 void OnGoldChange(ExEditBox* pControl)
 {
-BYTE Packet[18];
-Packet[0] = 0x2C;
-string aPass;
-if(pControl->Text.empty()) return;
-if(pControl->Text.length()>16) return;
-Misc::WideToChar(aPass,pControl->Text.c_str());
-strcpy_s((char*)&Packet[1],16,aPass.c_str());
-Packet[17] = 0; 
-D2Funcs.D2NET_SendPacket(18, 0, (BYTE*)&Packet);
+	BYTE Packet[18];
+	Packet[0] = 0x2C;
+	string aPass;
+	if(pControl->Text.empty() || pControl->Text.length()>16) 
+		return;
+	Misc::WideToChar(aPass,pControl->Text.c_str());
+	strcpy_s((char*)&Packet[1],16,aPass.c_str());
+	Packet[17] = 0; 
+	D2Funcs.D2NET_SendPacket(18, 0, (BYTE*)&Packet);
 }
 
 
 BOOL __fastcall ExScreen::OnTradeData(BYTE* aPacket)
 {
-	if(GoldBox) {delete GoldBox; GoldBox = 0; }
+	if(GoldBox) 
+	{
+		delete GoldBox; 
+		GoldBox = 0;
+	}
 
 	GoldBox = new ExEditBox(100,475,5,5,16,0,D2Funcs.D2LANG_GetLocaleId() == 10 ? L"Podaj has³o AR Gold" : L"Enter AR Gold Password :",CellFiles::EDITBOX);
 	GoldBox->SetHashed(true);
@@ -262,7 +283,11 @@ BOOL __fastcall ExScreen::OnTradeData(BYTE* aPacket)
 BOOL __fastcall ExScreen::OnTradeButton(BYTE* aPacket)
 {
 	if(aPacket[1] == UPDATE_CLOSE_TRADE || aPacket[1] == UPDATE_TRADE_DONE)
-	if(GoldBox) {delete GoldBox; GoldBox = 0; }
+	if(GoldBox) 
+	{
+		delete GoldBox; 
+		GoldBox = 0; 
+	}
 
 	return D2Funcs.D2CLIENT_TradeButton_I(aPacket);
 }
@@ -334,7 +359,15 @@ void ExScreen::DrawAutoMapVer()
 void __fastcall ExScreen::DrawAutoMapInfo(int OldTextSize)
 {
 
-	ExMapReveal::OnMapDraw();
+	ExAutomap::OnMapDraw();
+
+	/* testing drawing on automap
+	int x = D2Funcs.D2CLIENT_GetPlayer()->pPath->xPos;
+	int y = D2Funcs.D2CLIENT_GetPlayer()->pPath->yPos;
+	POINT p = {x, y};
+
+	WorldToAutomap(&p);
+	*/
 
 #ifdef D2EX_PVM_BUILD		
 		unsigned int CExp = D2Funcs.D2COMMON_GetStatSigned(D2Funcs.D2CLIENT_GetPlayer(), STAT_EXPERIENCE, 0);
@@ -724,74 +757,6 @@ void ExScreen::DrawDmg()
 					D2Funcs.D2WIN_DrawRectangledText(wInfo.str().c_str(), 242, *D2Vars.D2CLIENT_ScreenHeight - 437, 0, 2, COL_WHITE);
 				}
 			}
-}
-
-void ExScreen::DrawCircle(int x0, int y0, int radius, int Color)
-{
-  int f = 1 - radius;
-  int ddF_x = 1;
-  int ddF_y = -2 * radius;
-  int x = 0;
-  int y = radius;
- 
-  D2Funcs.D2GFX_DrawLine(x0, y0 + radius,x0, y0 - radius,Color,-1);
-  //D2Funcs.D2GFX_DrawLine(x0, y0 - radius,x0, y0 - radius,Color,-1);
-  D2Funcs.D2GFX_DrawLine(x0 + radius, y0, x0 - radius, y0, Color, -1);
- // D2Funcs.D2GFX_DrawLine(x0 - radius, y0, x0 - radius, y0, Color, -1);
- 
-  while(x < y)
-  {
-    // ddF_x == 2 * x + 1;
-    // ddF_y == -2 * y;
-    // f == x*x + y*y - radius*radius + 2*x - y + 1;
-    if(f >= 0) 
-    {
-      y--;
-      ddF_y += 2;
-      f += ddF_y;
-    }
-    x++;
-    ddF_x += 2;
-    f += ddF_x;    
-    D2Funcs.D2GFX_DrawLine(x0 + x, y0 + y,x0 - x, y0 + y, Color,-1);
-    //D2Funcs.D2GFX_DrawLine(x0 - x, y0 + y,x0 - x, y0 + y, Color,-1);
-    D2Funcs.D2GFX_DrawLine(x0 + x, y0 - y,x0 - x, y0 - y, Color,-1);
-    //D2Funcs.D2GFX_DrawLine(x0 - x, y0 - y,x0 - x, y0 - y, Color,-1);
-    D2Funcs.D2GFX_DrawLine(x0 + y, y0 + x,x0 - y, y0 + x, Color,-1);
-    //D2Funcs.D2GFX_DrawLine(x0 - y, y0 + x,x0 - y, y0 + x, Color,-1);
-    D2Funcs.D2GFX_DrawLine(x0 + y, y0 - x,x0 - y, y0 - x, Color,-1);
-    //D2Funcs.D2GFX_DrawLine(x0 - y, y0 - x,x0 - y, y0 - x, Color,-1);
-  }
-}
-
-void __fastcall ExScreen::DrawBlob(int X, int Y, int Color)
-{
-	static int h = 6;
-	static int r = h/3;
-	static int a = (2*h)/ 2;
-	static int R = 2*h/3;
-
-	char szLines[][2] = {0,-2, 4,-4, 8,-2, 4,0, 8,2, 4,4, 0,2, -4,4, -8,2, -4,0, -8,-2, -4,-4, 0,-2};
-
-	  if(*D2Vars.D2CLIENT_MapType==1) // if SMALLMAP
-	  {
-		  X--;
-		  Y+=5;
-	  }
-
-	switch(BlobType)
-	{
-		case 0:
-		   D2Funcs.D2GFX_DrawRectangle(X-1,Y-1,X+1,Y+1,Color,5);
-		   break;
-		case 1:
-			DrawCircle(X,Y, 2, Color);
-		break;
-		default:
-			for(int x = 0; x < 12; x++) 
-				D2Funcs.D2GFX_DrawLine(X + szLines[x][0], Y + szLines[x][1], X + szLines[x+1][0], Y + szLines[x+1][1], Color, -1);
-		break;
-	}
 }
 
 BYTE * __stdcall ExScreen::DrawItem(UnitAny *ptPlayer, UnitAny* ptItem, BYTE* out, BOOL a4)

@@ -18,21 +18,13 @@
 * ==========================================================
 */
 
-#ifndef _EXMAPREV_H__
-#define _EXMAPREV_H__
+#ifndef __D2EX_H__
+#define __D2EX_H__
 
-#include "Misc.h"
-#include "Vars.h"
-#include "ExScreen.h"
-#include "ExParty.h"
 
-using namespace std;
-
-namespace ExMapReveal
+namespace D2Ex
 {
-	void RevealLevel(int LvlId);
-	void OnMapDraw();
-	const COORDS FindPresetUnitXY(int nLevel, DWORD dwType, DWORD dwClassId);
+	void CleanUp();
 }
 
 #endif

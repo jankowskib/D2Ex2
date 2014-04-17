@@ -21,6 +21,7 @@
 #include "stdafx.h"
 #include "ExParty.h"
 #include "ExInput.h"
+#include "ExSpectator.h"
 
 //=====================
 #include "ExScreen.h"
@@ -55,7 +56,8 @@ struct PlayerTable
 	ExButton* Host;
 	ExButton* Loot;
 	ExButton* Squelch;
-	
+	ExButton* Spectate;
+
 };
 
 struct AccountBase
@@ -104,43 +106,65 @@ void ExParty::OnScroll(ExControl* ptControl)
 	ExParty::Refresh();
 }
 
+void ExParty::Spectate(ExControl* ptControl)
+{
+	list<PlayerTable>::const_iterator Player = PlayerList.end();
+	DWORD PlayerId = 0;
+	DWORD Flaga = 0;
+	for (list<PlayerTable>::const_iterator i = PlayerList.begin(); i != PlayerList.end(); i++)
+	{
+		if (i->Spectate == ptControl) { Player = i; PlayerId = i->UnitId; break; }
+	}
+	if (Player == PlayerList.end()) return;
+
+	px5e aPacket;
+	aPacket.P_5E = 0x5E;
+	aPacket.nButton = PB_SPECATE;
+	aPacket.dwUnitId = PlayerId;
+
+	D2Funcs.D2NET_SendPacket(sizeof(px5e), 1, (BYTE*)&aPacket);
+
+	*D2Vars.D2CLIENT_SentBytes += sizeof(px5e);
+	*D2Vars.D2CLIENT_SentPackets++;
+}
+
 void ExParty::Squelch(ExControl* ptControl)
 {
 	list<PlayerTable>::const_iterator Player = PlayerList.end();
 	DWORD PlayerId = 0;
 	DWORD Flaga = 0;
-	for(list<PlayerTable>::const_iterator i = PlayerList.begin() ; i != PlayerList.end() ; i++)
+	for (list<PlayerTable>::const_iterator i = PlayerList.begin(); i != PlayerList.end(); i++)
 	{
-		if(i->Squelch==ptControl) {Player = i; PlayerId = i->UnitId; break;}
+		if (i->Squelch == ptControl) { Player = i; PlayerId = i->UnitId; break; }
 	}
-	if(Player == PlayerList.end()) return;
-	
+	if (Player == PlayerList.end()) return;
+
 	RosterUnit * ptRoster = ExParty::GetRosterById(PlayerId);
-	if(!ptRoster){ ExParty::Update(); return;}
-	
-	for(RosterInfo* pInfo = *(*D2Vars.D2CLIENT_Roster)->ptInfo ; pInfo ; pInfo = pInfo->ptNext)
+	if (!ptRoster){ ExParty::Update(); return; }
+
+	for (RosterInfo* pInfo = *(*D2Vars.D2CLIENT_Roster)->ptInfo; pInfo; pInfo = pInfo->ptNext)
 	{
-		if(PlayerId==pInfo->dwUnitId) {Flaga = pInfo->dwPartyFlags; break;}
+		if (PlayerId == pInfo->dwUnitId) { Flaga = pInfo->dwPartyFlags; break; }
 	}
-	if(Flaga & 4)
+	if (Flaga & 4)
 	{
-	BYTE aPacket[7];
-	aPacket[0]  = 0x5D;
-	aPacket[1]  = 0x03;
-	aPacket[2]  = 0x00; //Disallow Sq
-	*(DWORD*)&aPacket[3] = PlayerId;
-	D2Funcs.D2NET_SendPacket(7, 1, aPacket);
+		BYTE aPacket[7];
+		aPacket[0] = 0x5D;
+		aPacket[1] = PB_SQUELCH;
+		aPacket[2] = 0x00; //Disallow Sq
+		*(DWORD*)&aPacket[3] = PlayerId;
+		D2Funcs.D2NET_SendPacket(7, 1, aPacket);
 	}
 	else
-	{ 
-	BYTE aPacket[7];
-	aPacket[0]  = 0x5D;
-	aPacket[1]  = 0x03;
-	aPacket[2]  = 0x01; //Allow Sq
-	*(DWORD*)&aPacket[3] = PlayerId;
-	D2Funcs.D2NET_SendPacket(7, 1, aPacket);
+	{
+		BYTE aPacket[7];
+		aPacket[0] = 0x5D;
+		aPacket[1] = PB_SQUELCH;
+		aPacket[2] = 0x01; //Allow Sq
+		*(DWORD*)&aPacket[3] = PlayerId;
+		D2Funcs.D2NET_SendPacket(7, 1, aPacket);
 	}
-	*D2Vars.D2CLIENT_SentBytes+=7;
+	*D2Vars.D2CLIENT_SentBytes += 7;
 	*D2Vars.D2CLIENT_SentPackets++;
 }
 
@@ -149,39 +173,39 @@ void ExParty::Loot(ExControl* ptControl)
 	list<PlayerTable>::iterator Player = PlayerList.end();;
 	DWORD PlayerId = 0;
 	DWORD Flaga = 0;
-	for(list<PlayerTable>::iterator i = PlayerList.begin() ; i != PlayerList.end() ; i++)
+	for (list<PlayerTable>::iterator i = PlayerList.begin(); i != PlayerList.end(); i++)
 	{
-	if(i->Loot==ptControl) {Player = i; PlayerId = i->UnitId; break;}
+		if (i->Loot == ptControl) { Player = i; PlayerId = i->UnitId; break; }
 	}
-	if(Player == PlayerList.end()) return;
+	if (Player == PlayerList.end()) return;
 
 	RosterUnit * ptRoster = ExParty::GetRosterById(PlayerId);
-	if(!ptRoster){ ExParty::Update(); return;}
-	
-	for(RosterInfo* pInfo = *(*D2Vars.D2CLIENT_Roster)->ptInfo ; pInfo ; pInfo = pInfo->ptNext)
+	if (!ptRoster){ ExParty::Update(); return; }
+
+	for (RosterInfo* pInfo = *(*D2Vars.D2CLIENT_Roster)->ptInfo; pInfo; pInfo = pInfo->ptNext)
 	{
-		if(PlayerId==pInfo->dwUnitId) {Flaga = pInfo->dwPartyFlags; break;}
+		if (PlayerId == pInfo->dwUnitId) { Flaga = pInfo->dwPartyFlags; break; }
 	}
 
-	if(Flaga & 1)
+	if (Flaga & 1)
 	{
-	BYTE aPacket[7];
-	aPacket[0]  = 0x5D;
-	aPacket[1]  = 0x01;
-	aPacket[2]  = 0x00; //Disallow Loot
-	*(DWORD*)&aPacket[3] = PlayerId;
-	D2Funcs.D2NET_SendPacket(7, 1, aPacket);
+		BYTE aPacket[7];
+		aPacket[0] = 0x5D;
+		aPacket[1] = PB_LOOT;
+		aPacket[2] = 0x00; //Disallow Loot
+		*(DWORD*)&aPacket[3] = PlayerId;
+		D2Funcs.D2NET_SendPacket(7, 1, aPacket);
 	}
 	else
 	{
-	BYTE aPacket[7];
-	aPacket[0]  = 0x5D;
-	aPacket[1]  = 0x01;
-	aPacket[2]  = 0x01; //Allow Loot
-	*(DWORD*)&aPacket[3] = PlayerId;
-	D2Funcs.D2NET_SendPacket(7, 1, aPacket);
+		BYTE aPacket[7];
+		aPacket[0] = 0x5D;
+		aPacket[1] = PB_LOOT;
+		aPacket[2] = 0x01; //Allow Loot
+		*(DWORD*)&aPacket[3] = PlayerId;
+		D2Funcs.D2NET_SendPacket(7, 1, aPacket);
 	}
-	*D2Vars.D2CLIENT_SentBytes+=7;
+	*D2Vars.D2CLIENT_SentBytes += 7;
 	*D2Vars.D2CLIENT_SentPackets++;
 }
 
@@ -192,38 +216,40 @@ void ExParty::Host(ExControl* ptControl)
 	list<PlayerTable>::iterator Player = PlayerList.end();
 	DWORD PlayerId = 0;
 	string szName;
-	for(list<PlayerTable>::iterator i = PlayerList.begin() ; i != PlayerList.end() ; i++)
+	for (list<PlayerTable>::iterator i = PlayerList.begin(); i != PlayerList.end(); i++)
 	{
-	if(i->Host==ptControl) {Player = i; break;}
+		if (i->Host == ptControl) { Player = i; break; }
 	}
-	if(Player == PlayerList.end()) return;
+	if (Player == PlayerList.end()) return;
 	PlayerId = Player->UnitId;
+#ifndef D2EX_PVPGN_EXT // Remove check because of 9 lvl requirement removal
 	if(_wtoi(Player->Level->GetText().c_str())<9) return;
-	if(ExParty::isTownLvl())
+#endif
+	if (ExParty::isTownLvl())
 	{
-	DWORD Flaga = ExParty::GetPvpFlags(PlayerId);
-	if (!(Flaga & PVP_HOSTILED_BY_YOU))
-	{
-	BYTE aPacket[7];
-	aPacket[0]  = 0x5D;
-	aPacket[1]  = 0x04;
-	aPacket[2]  = 0x01;
-	*(DWORD*)&aPacket[3] = PlayerId;
-	D2Funcs.D2NET_SendPacket(7, 1, aPacket);
+		DWORD Flaga = ExParty::GetPvpFlags(PlayerId);
+		if (!(Flaga & PVP_HOSTILED_BY_YOU))
+		{
+			BYTE aPacket[7];
+			aPacket[0] = 0x5D;
+			aPacket[1] = PB_HOSTILE;
+			aPacket[2] = 0x01;
+			*(DWORD*)&aPacket[3] = PlayerId;
+			D2Funcs.D2NET_SendPacket(7, 1, aPacket);
+		}
+		else
+		{
+			BYTE aPacket[7];
+			aPacket[0] = 0x5D;
+			aPacket[1] = PB_HOSTILE;
+			aPacket[2] = 0x00;
+			*(DWORD*)&aPacket[3] = PlayerId;
+			D2Funcs.D2NET_SendPacket(7, 1, aPacket);
+		}
+		*D2Vars.D2CLIENT_SentBytes += 7;
+		*D2Vars.D2CLIENT_SentPackets++;
 	}
-	else
-	{
-	BYTE aPacket[7];
-	aPacket[0]  = 0x5D;
-	aPacket[1]  = 0x04;
-	aPacket[2]  = 0x00;
-	*(DWORD*)&aPacket[3] = PlayerId;
-	D2Funcs.D2NET_SendPacket(7, 1, aPacket);
-	}
-	*D2Vars.D2CLIENT_SentBytes+=7;
-	*D2Vars.D2CLIENT_SentPackets++;
-	}
-	else 	D2Funcs.D2CLIENT_PrintPartyString(wStrTown.c_str(),1);
+	else 	D2Funcs.D2CLIENT_PrintPartyString(wStrTown.c_str(), 1);
 }
 
 
@@ -232,96 +258,96 @@ void ExParty::Invite(ExControl* ptControl)
 	list<PlayerTable>::iterator Player = PlayerList.end();;
 	DWORD PlayerId = 0;
 	string szName;
-	for(list<PlayerTable>::iterator i = PlayerList.begin() ; i != PlayerList.end() ; i++)
+	for (list<PlayerTable>::iterator i = PlayerList.begin(); i != PlayerList.end(); i++)
 	{
-	if(i->Invite==ptControl) {Player = i; break;}
+		if (i->Invite == ptControl) { Player = i; break; }
 	}
-	if(Player == PlayerList.end()) return;
+	if (Player == PlayerList.end()) return;
 	PlayerId = Player->UnitId;
 	DWORD Flaga = ExParty::GetPvpFlags(PlayerId);
 
-	if(!(Flaga & PVP_INVITED_BY_YOU) && !(Flaga & PVP_INVITED_YOU))
+	if (!(Flaga & PVP_INVITED_BY_YOU) && !(Flaga & PVP_INVITED_YOU))
 	{
-	BYTE aPacket[6];
-	aPacket[0]  = 0x5E;
-	aPacket[1]  = 0x06;
-	*(DWORD*)&aPacket[2] = PlayerId;
-	D2Funcs.D2NET_SendPacket(6, 1, aPacket);
+		BYTE aPacket[6];
+		aPacket[0] = 0x5E;
+		aPacket[1] = PB_INVITE_PLAYER;
+		*(DWORD*)&aPacket[2] = PlayerId;
+		D2Funcs.D2NET_SendPacket(6, 1, aPacket);
 	}
-	else if(Flaga & PVP_INVITED_BY_YOU)
+	else if (Flaga & PVP_INVITED_BY_YOU)
 	{
-	BYTE aPacket[6];
-	aPacket[0]  = 0x5E;
-	aPacket[1]  = 0x07;
-	*(DWORD*)&aPacket[2] = PlayerId;
-	D2Funcs.D2NET_SendPacket(6, 1, aPacket);
+		BYTE aPacket[6];
+		aPacket[0] = 0x5E;
+		aPacket[1] = PB_INVITE_CANCEL;
+		*(DWORD*)&aPacket[2] = PlayerId;
+		D2Funcs.D2NET_SendPacket(6, 1, aPacket);
 	}
-	else  if(Flaga & PVP_INVITED_YOU)
+	else  if (Flaga & PVP_INVITED_YOU)
 	{
-	BYTE aPacket[6];
-	aPacket[0]  = 0x5E;
-	aPacket[1]  = 0x08;
-	*(DWORD*)&aPacket[2] = PlayerId;
-	D2Funcs.D2NET_SendPacket(6, 1, aPacket);
+		BYTE aPacket[6];
+		aPacket[0] = 0x5E;
+		aPacket[1] = PB_INVITE_ACCEPT;
+		*(DWORD*)&aPacket[2] = PlayerId;
+		D2Funcs.D2NET_SendPacket(6, 1, aPacket);
 	}
-	*D2Vars.D2CLIENT_SentBytes+=6;
+	*D2Vars.D2CLIENT_SentBytes += 6;
 	*D2Vars.D2CLIENT_SentPackets++;
 }
 
 int ExParty::GetPlayerArea(UnitAny* ptUnit)
 {
-	if(ptUnit)
-		if(ptUnit->pPath)
-			if(ptUnit->pPath->pRoom1)
-				if(ptUnit->pPath->pRoom1->pRoom2)
-					if(ptUnit->pPath->pRoom1->pRoom2->pLevel) 
+	if (ptUnit)
+		if (ptUnit->pPath)
+			if (ptUnit->pPath->pRoom1)
+				if (ptUnit->pPath->pRoom1->pRoom2)
+					if (ptUnit->pPath->pRoom1->pRoom2->pLevel)
 						return ptUnit->pPath->pRoom1->pRoom2->pLevel->dwLevelNo;
 	return 0;
 }
 
 
 bool ExParty::isTownLvl(UnitAny* ptUnit)
-{	
-	if(!ptUnit) return false;
-	if(ExParty::GetPlayerArea(ptUnit) == D2Funcs.D2COMMON_GetTownLevel(ptUnit->dwAct)) return true;
+{
+	if (!ptUnit) return false;
+	if (ExParty::GetPlayerArea(ptUnit) == D2Funcs.D2COMMON_GetTownLevel(ptUnit->dwAct)) return true;
 	return false;
 }
 
 void ExParty::SharePing(ExControl * tt)
 {
-	ExInput::Say(gLocaleId == 10 ? "Moj ping : %d ms / %d fps" : "My ping : %d ms / %d fps",*D2Vars.D2CLIENT_Ping,*D2Vars.D2CLIENT_FPS);
+	ExInput::Say(gLocaleId == 10 ? "Moj ping : %d ms / %d fps" : "My ping : %d ms / %d fps", *D2Vars.D2CLIENT_Ping, *D2Vars.D2CLIENT_FPS);
 }
 
 void ExParty::Leave(ExControl * tt)
-{	
+{
 	BYTE aPacket[6];
-	aPacket[0]  = 0x5E;
-	aPacket[1]  = 0x09;
+	aPacket[0] = 0x5E;
+	aPacket[1] = PB_LEAVE_PARTY;
 	*(DWORD*)&aPacket[2] = D2Funcs.D2CLIENT_GetPlayer()->dwUnitId;
-	D2Funcs.D2NET_SendPacket(6,1,aPacket);
-	*D2Vars.D2CLIENT_SentBytes+=6;
+	D2Funcs.D2NET_SendPacket(6, 1, aPacket);
+	*D2Vars.D2CLIENT_SentBytes += 6;
 	*D2Vars.D2CLIENT_SentPackets++;
-	(*D2Vars.D2CLIENT_Roster)->wPartyId=-1;
+	(*D2Vars.D2CLIENT_Roster)->wPartyId = -1;
 	ExParty::Refresh();
 }
 
 
 RosterUnit * ExParty::GetRosterById(DWORD dwUnitId)
 {
-	for(RosterUnit* pRoster = *D2Vars.D2CLIENT_Roster; pRoster; pRoster = pRoster->pNext)
+	for (RosterUnit* pRoster = *D2Vars.D2CLIENT_Roster; pRoster; pRoster = pRoster->pNext)
 	{
-	if(pRoster->dwUnitId==dwUnitId) return pRoster;
+		if (pRoster->dwUnitId == dwUnitId) return pRoster;
 	}
-return 0;
+	return 0;
 }
 
 RosterUnit * ExParty::GetRosterByName(const char* szName)
 {
-for(RosterUnit* pRoster = *D2Vars.D2CLIENT_Roster; pRoster; pRoster = pRoster->pNext)
+	for (RosterUnit* pRoster = *D2Vars.D2CLIENT_Roster; pRoster; pRoster = pRoster->pNext)
 	{
-	if(!strcmp(pRoster->szName,szName)) return pRoster;
+		if (!strcmp(pRoster->szName, szName)) return pRoster;
 	}
-return 0;
+	return 0;
 }
 
 /*
@@ -330,7 +356,7 @@ return 0;
 bool ExParty::IsInPartyWithClass(UnitAny* pPlayer, DWORD dwClassId)
 {
 	D2EXASSERT(pPlayer, "IsInPartyWithClass: Unit not exist!")
-	RosterUnit* pMe = ExParty::GetRosterById(pPlayer->dwUnitId);
+		RosterUnit* pMe = ExParty::GetRosterById(pPlayer->dwUnitId);
 	if (!pMe)
 		return false;
 	for (RosterUnit* pRoster = *D2Vars.D2CLIENT_Roster; pRoster; pRoster = pRoster->pNext)
@@ -344,9 +370,9 @@ bool ExParty::IsInPartyWithClass(UnitAny* pPlayer, DWORD dwClassId)
 
 list<PlayerTable>::iterator ExParty::GetPartyListEntry(DWORD UnitID)
 {
-	for(list<PlayerTable>::iterator i = PlayerList.begin() ; i != PlayerList.end() ; ++i)
+	for (list<PlayerTable>::iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
 	{
-	if(i->UnitId == UnitID) return i;
+		if (i->UnitId == UnitID) return i;
 	}
 	return PlayerList.end();
 }
@@ -356,7 +382,7 @@ BOOL __fastcall ExParty::OnPartyUpdate(BYTE *aPacket) //0x8C Relationship update
 {
 	D2Funcs.D2CLIENT_PartyUpdate_I(aPacket);
 
-	if(!isOpen()) return 0;
+	if (!isOpen()) return 0;
 	ExParty::Resort();
 	ExParty::Update();
 	return 0;
@@ -365,7 +391,7 @@ BOOL __fastcall ExParty::OnPartyUpdate(BYTE *aPacket) //0x8C Relationship update
 BOOL __fastcall ExParty::OnPartyUpdate2(BYTE *aPacket) //0x8b Player Relationship (Wants to party etc)
 {
 	D2Funcs.D2CLIENT_PartyUpdate_II(aPacket);
-	if(!isOpen()) return 0;
+	if (!isOpen()) return 0;
 	ExParty::Update();
 	return 0;
 }
@@ -374,7 +400,7 @@ BOOL __fastcall ExParty::OnPartyUpdate3(BYTE *aPacket)  //0x8D Assign To Party
 {
 	D2Funcs.D2CLIENT_PartyUpdate_IV(aPacket);
 
-	if(!isOpen()) return 0;
+	if (!isOpen()) return 0;
 	ExParty::Resort();
 	ExParty::Update();
 	return 0;
@@ -408,7 +434,8 @@ BOOL __fastcall ExParty::GetRoster(BYTE* aPacket) //0x66 HANDLE SRV->CLT
 
 wstring GetLvlNameEx(int LvlNo, int strlen)
 {
-	if (LvlNo == 0) return L"N/A";
+	if (LvlNo == 0)
+		return L"N/A";
 	wstring wTxt = D2ASMFuncs::D2CLIENT_GetLevelName(LvlNo);
 	int alen = 0;
 	do {
@@ -417,7 +444,8 @@ wstring GetLvlNameEx(int LvlNo, int strlen)
 		int z = (wTxt.length() / 2) - 4;
 		wTxt.erase(z, 4);
 		wTxt.insert(z, L"...");
-		if (alen == 0) break;
+		if (alen == 0)
+			break;
 	} while (alen > strlen);
 	return wTxt;
 }
@@ -442,7 +470,10 @@ BOOL __fastcall ExParty::OnLocationUpdate(BYTE* aPacket) //0x7F HANDLE SRV->CLT
 	{
 		if (i->UnitId == pData->UnitId)
 		{
-			i->Location->SetText(GetLvlNameEx(pData->Location, i->Invite ? (i->Invite->GetX() - i->Location->GetX()) : 120));
+			if (i->Location)
+			{
+				i->Location->SetText(GetLvlNameEx(pData->Location, i->Invite ? (i->Invite->GetX() - i->Location->GetX()) : 120));
+			}
 			break;
 		}
 	}
@@ -451,8 +482,8 @@ BOOL __fastcall ExParty::OnLocationUpdate(BYTE* aPacket) //0x7F HANDLE SRV->CLT
 
 bool ExParty::isOpen()
 {
-if(PartyScreen) return true;
-return false;
+	if (PartyScreen) return true;
+	return false;
 }
 
 bool ListCompare(const PlayerTable & first, const PlayerTable & second)
@@ -477,51 +508,51 @@ bool ListCompare(const PlayerTable & first, const PlayerTable & second)
 #else
 	if (pRost1->wPartyId == pRost2->wPartyId)
 	{
-			wstring f = first.Name->GetText();
-			wstring s = second.Name->GetText();
-			return f > s ? false : true;
+		wstring f = first.Name->GetText();
+		wstring s = second.Name->GetText();
+		return f > s ? false : true;
 	}
 #endif
 	return pRost1->wPartyId > pRost2->wPartyId ? false : true;
 }
 
-bool AccUnique (const AccountBase & first, const AccountBase & second)
+bool AccUnique(const AccountBase & first, const AccountBase & second)
 {
 	string f = first.Name;
 	string s = second.Name;
-	transform(f.begin(),f.end(),f.begin(),tolower);
-	transform(s.begin(),s.end(),s.begin(),tolower);
-	
-	return (f==s /*&& ( first.Account.empty() || first.Account=="N/A")*/) ? true : false;
+	transform(f.begin(), f.end(), f.begin(), tolower);
+	transform(s.begin(), s.end(), s.begin(), tolower);
+
+	return (f == s /*&& ( first.Account.empty() || first.Account=="N/A")*/) ? true : false;
 }
 
 
 void ExParty::AddAccount(string szName, string szAccount)
 {
-AccountBase Base;
-Base.Name=szName;
-Base.Account=szAccount;
-Base.Kills = 0;
-Base.Deaths =0;
-Base.Assists =0;
-AccBase.push_back(Base);
-AccBase.unique(&AccUnique);
+	AccountBase Base;
+	Base.Name = szName;
+	Base.Account = szAccount;
+	Base.Kills = 0;
+	Base.Deaths = 0;
+	Base.Assists = 0;
+	AccBase.push_back(Base);
+	AccBase.unique(&AccUnique);
 }
 
 void ExParty::RequestAccount(string szName)
 {
-if(!*D2Vars.BNCLIENT_BnSocket) return;
-if(D2Funcs.D2CLIENT_GetPlayer())
-	if(szName == D2Funcs.D2CLIENT_GetPlayer()->pPlayerData->szName) return;
+	if (!*D2Vars.BNCLIENT_BnSocket) return;
+	if (D2Funcs.D2CLIENT_GetPlayer())
+		if (szName == D2Funcs.D2CLIENT_GetPlayer()->pPlayerData->szName) return;
 
-string sReq = "/whois " + szName;
+	string sReq = "/whois " + szName;
 #ifdef D2EX_CLOSED_BNET
-EnterCriticalSection(&EX_CRITSECT);
-if(BNQuene.size()<8) BNQuene.push_back(sReq);
-LeaveCriticalSection(&EX_CRITSECT);
+	EnterCriticalSection(&EX_CRITSECT);
+	if(BNQuene.size()<8) BNQuene.push_back(sReq);
+	LeaveCriticalSection(&EX_CRITSECT);
 #else
-Request++;
-D2Funcs.BNCLIENT_SendBNMessage(sReq.c_str());
+	Request++;
+	D2Funcs.BNCLIENT_SendBNMessage(sReq.c_str());
 #endif
 }
 
@@ -542,7 +573,7 @@ string ExParty::FindClan(string szName)
 	for (list<AccountBase>::iterator i = AccBase.begin(); i != AccBase.end(); i++)
 	{
 		if (i->Name == szName && !i->Account.empty())
-		{ 
+		{
 			GetPrivateProfileString("D2ExClans", i->Account.c_str(), "N/A", szReturn, 5, ClansIni.c_str());
 			break;
 		}
@@ -552,37 +583,37 @@ string ExParty::FindClan(string szName)
 
 int ExParty::FindRoster(string szName, int Type)
 {
-for(list<AccountBase>::iterator i = AccBase.begin() ; i != AccBase.end() ; ++i)
-{
-if (i->Name == szName) 
+	for (list<AccountBase>::iterator i = AccBase.begin(); i != AccBase.end(); ++i)
 	{
-		switch(Type) 
+		if (i->Name == szName)
 		{
-		case 3: return i->Assists;
-		case 2: return i->Deaths;
-		case 0:
-		case 1: return i->Kills;
+			switch (Type)
+			{
+			case 3: return i->Assists;
+			case 2: return i->Deaths;
+			case 0:
+			case 1: return i->Kills;
+			}
 		}
 	}
-}
-return 0;
+	return 0;
 }
 
 
 void ExParty::ClearRoster()
 {
-	for(list<AccountBase>::iterator i = AccBase.begin() ; i != AccBase.end() ; ++i)
+	for (list<AccountBase>::iterator i = AccBase.begin(); i != AccBase.end(); ++i)
 	{
-		i->Deaths=0;
-		i->Kills=0;
+		i->Deaths = 0;
+		i->Kills = 0;
 	}
 }
 
 
 void ExParty::Clear()
 {
-//	EnterCriticalSection(&EX_CRITSECT);
-	for(list<PlayerTable>::iterator i = PlayerList.begin() ; i != PlayerList.end() ; ++i)
+	//	EnterCriticalSection(&EX_CRITSECT);
+	for (list<PlayerTable>::iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
 	{
 		delete i->Frame;
 		delete i->Level;
@@ -598,18 +629,19 @@ void ExParty::Clear()
 		delete i->Host;
 		delete i->Loot;
 		delete i->Squelch;
+		delete i->Spectate;
 	}
-	for(vector<ExTextBox*>::iterator i = Group.begin(); i!= Group.end(); ++i) delete (*i);
+	for (vector<ExTextBox*>::iterator i = Group.begin(); i != Group.end(); ++i) delete (*i);
 	Group.clear();
 	PlayerList.clear();
-//	LeaveCriticalSection(&EX_CRITSECT);
+	//	LeaveCriticalSection(&EX_CRITSECT);
 }
 
 UnitAny* ExParty::GetUnitByName(const char* szName)
 {
 	for (RosterUnit* pUnit = *D2Vars.D2CLIENT_Roster; pUnit; pUnit = pUnit->pNext)
 	{
-		if (strcmp(pUnit->szName, szName) == 0) 
+		if (strcmp(pUnit->szName, szName) == 0)
 			return D2Funcs.D2CLIENT_GetUnitById(pUnit->dwUnitId, 0);
 	}
 	return 0;
@@ -628,7 +660,8 @@ bool ExParty::isPlayerNear(const char * szName)
 int	ExParty::GetPlayerCount()
 {
 	int i = 0;
-	for (RosterUnit * pRoster = *D2Vars.D2CLIENT_Roster; pRoster; pRoster = pRoster->pNext) i++;
+	for (RosterUnit * pRoster = *D2Vars.D2CLIENT_Roster; pRoster; pRoster = pRoster->pNext)
+		++i;
 	return i;
 }
 
@@ -681,7 +714,7 @@ int ExParty::GetFrameColor(DWORD dwUnitId)
 
 void ExParty::Close(ExControl* ct)
 {
-ExParty::ShowHide();
+	ExParty::ShowHide();
 }
 
 wstring ExParty::GetClassById(int ClassId)
@@ -723,111 +756,127 @@ wstring ExParty::GetPartyCount(ExTextBox* pTextBox)
 
 void ExParty::Update()
 {
-if(!PartyScreen) return;
-//=====================Strings part===============================
+	if (!PartyScreen) return;
+	//=====================Strings part===============================
 	static wstring wStrHost1 = D2Funcs.D2LANG_GetLocaleText(4106);
 	static wstring wStrHost2 = D2Funcs.D2LANG_GetLocaleText(4108);
 
 	static wstring wStrInv1 = D2Funcs.D2LANG_GetLocaleText(4100); //Invite
 	static wstring wStrInv2 = D2Funcs.D2LANG_GetLocaleText(4104); //Cancel invite
 	static wstring wStrInv3;
-	if(wStrInv3.empty()) {wStrInv3 = D2Funcs.D2LANG_GetLocaleText(4102);wStrInv3+= D2Funcs.D2LANG_GetLocaleText(4103);}
+	if (wStrInv3.empty()) { wStrInv3 = D2Funcs.D2LANG_GetLocaleText(4102); wStrInv3 += D2Funcs.D2LANG_GetLocaleText(4103); }
 	static wstring wStrLoot1; //Click To Allow Loot
-	if(wStrLoot1.empty()) {wStrLoot1 = D2Funcs.D2LANG_GetLocaleText(4110);wStrLoot1+=L" ";wStrLoot1+=D2Funcs.D2LANG_GetLocaleText(4111);}
+	if (wStrLoot1.empty()) { wStrLoot1 = D2Funcs.D2LANG_GetLocaleText(4110); wStrLoot1 += L" "; wStrLoot1 += D2Funcs.D2LANG_GetLocaleText(4111); }
 	static wstring wStrLoot2; //Click To Disallow Loot
-	if(wStrLoot2.empty()) {wStrLoot2 = D2Funcs.D2LANG_GetLocaleText(4112);wStrLoot2+=L" ";wStrLoot2+=D2Funcs.D2LANG_GetLocaleText(4113);}
-	
+	if (wStrLoot2.empty()) { wStrLoot2 = D2Funcs.D2LANG_GetLocaleText(4112); wStrLoot2 += L" "; wStrLoot2 += D2Funcs.D2LANG_GetLocaleText(4113); }
+
 	static wstring wStrSquelch1 = D2Funcs.D2LANG_GetLocaleText(4118);
 	static wstring wStrSquelch2 = D2Funcs.D2LANG_GetLocaleText(4119);
-//================================================================
+	//================================================================
 
-	for(list<PlayerTable>::iterator i = PlayerList.begin() ; i != PlayerList.end() ; i++)
+	for (list<PlayerTable>::iterator i = PlayerList.begin(); i != PlayerList.end(); i++)
 	{
-	RosterUnit* ptRoster = ExParty::GetRosterById(i->UnitId);
-	if(!ptRoster) 
-	{ 
-		ExParty::Refresh();
-		return;
-	}
-
-	i->Frame->aColor = ExParty::GetFrameColor(ptRoster->dwUnitId);
-	i->Level->SetText(boost::lexical_cast<wstring>(ptRoster->wLevel));
-	i->Clan->SetText(boost::lexical_cast<wstring>(ExParty::FindClan(ptRoster->szName).c_str()));
-	i->Acc->SetText(ExParty::FindAccount(ptRoster->szName));
-#ifndef D2EX_PVPGN_EXT
-	i->Location->SetText(GetLvlNameEx(ptRoster->dwUnitId == D2Funcs.D2CLIENT_GetPlayer()->dwUnitId ? ExParty::GetPlayerArea() : ptRoster->dwLevelId,
-		i->Invite ? (i->Invite->GetX() - i->Location->GetX()) : 100 ));
-#else
-	i->Kills->SetText(boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName,1)));
-	i->Deaths->SetText(boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName,2)));
-	i->Assists->SetText(boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName,3)));
-#endif
-	DWORD Flaga = ExParty::GetPvpFlags(ptRoster->dwUnitId);
-	// Class Hover Info 
-	wostringstream Info;
-	Info << D2Funcs.D2LANG_GetLocaleText(3368) << L' ' << ptRoster->wLevel << '\n';
-
-	if(Flaga & PVP_ALLIED_WITH_YOU)
-	{
-		if(ptRoster->dwUnitId==D2Funcs.D2CLIENT_GetPlayer()->dwUnitId)
-			Info << D2ASMFuncs::D2CLIENT_GetLevelName(ExParty::GetPlayerArea());
-		else
-			Info << D2ASMFuncs::D2CLIENT_GetLevelName(ptRoster->dwLevelId);
-		Info << '\n';
-	}
-
-	Info << ExScreen::GetColorCode(COL_LIGHTGREEN) << ExParty::GetClassById(ptRoster->dwClassId);
-	i->Class->Hoover=Info.str();
-	//========================
-
-
-	if(i->Host) 
-	{
-		if(ExParty::isTownLvl()) i->Host->cState=i->Host->VISIBLE; else i->Host->cState=i->Host->DISABLED;
-		if(Flaga & PVP_HOSTILED_BY_YOU){ i->Host->SetHoover(wStrHost2); i->Host->aFrame=6;} else {i->Host->SetHoover(wStrHost1); i->Host->aFrame=4;}
-	}
-
-	if(i->Invite)
-	{
-		if(Flaga & PVP_ALLIED || Flaga & PVP_ALLIED_WITH_YOU) i->Invite->cState=i->Invite->INVISIBLE; else i->Invite->cState=i->Invite->VISIBLE;
-		if(!(Flaga & PVP_INVITED_BY_YOU) && !(Flaga & PVP_INVITED_YOU)) { i->Invite->SetHoover(wStrInv1); i->Invite->SetColor(COL_WHITE);}
-		else if(Flaga & PVP_INVITED_BY_YOU) { i->Invite->SetHoover(wStrInv2); i->Invite->SetColor(COL_DARKGREEN);}
-		else if(Flaga & PVP_INVITED_YOU) {i->Invite->SetHoover(wStrInv3); i->Invite->SetColor(COL_LIGHTGREEN);}
-	}
-
-	if(i->Loot)
-	{
-		for(RosterInfo* pInfo = *(*D2Vars.D2CLIENT_Roster)->ptInfo ; pInfo ; pInfo = pInfo->ptNext)
+		RosterUnit* ptRoster = ExParty::GetRosterById(i->UnitId);
+		if (!ptRoster)
 		{
-			if(ptRoster->dwUnitId==pInfo->dwUnitId) {Flaga = pInfo->dwPartyFlags; break;}
+			ExParty::Refresh();
+			return;
 		}
-		if(Flaga & 1){i->Loot->SetHoover(wStrLoot2); i->Loot->aFrame=14;}
-		else {i->Loot->SetHoover(wStrLoot1); i->Loot->aFrame=12;}
-	}
 
-	if(i->Squelch)
-	{
-	for(RosterInfo* pInfo = *(*D2Vars.D2CLIENT_Roster)->ptInfo ; pInfo ; pInfo = pInfo->ptNext)
-	{
-		if(ptRoster->dwUnitId==pInfo->dwUnitId) {Flaga = pInfo->dwPartyFlags; break;}
-	}
-	if(Flaga & 4){i->Squelch->SetHoover(wStrSquelch2); i->Squelch->aFrame=10;}
-	else {i->Squelch->SetHoover(wStrSquelch1); i->Squelch->aFrame=8;}
-	}
+		i->Frame->aColor = ExParty::GetFrameColor(ptRoster->dwUnitId);
+		i->Level->SetText(boost::lexical_cast<wstring>(ptRoster->wLevel));
+		i->Clan->SetText(boost::lexical_cast<wstring>(ExParty::FindClan(ptRoster->szName).c_str()));
+		i->Acc->SetText(ExParty::FindAccount(ptRoster->szName));
+#ifndef D2EX_PVPGN_EXT
+		i->Location->SetText(GetLvlNameEx(ptRoster->dwUnitId == D2Funcs.D2CLIENT_GetPlayer()->dwUnitId ? ExParty::GetPlayerArea() : ptRoster->dwLevelId,
+			i->Invite ? (i->Invite->GetX() - i->Location->GetX()) : 100 ));
+#else
+		i->Kills->SetText(boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName, 1)));
+		i->Deaths->SetText(boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName, 2)));
+		i->Assists->SetText(boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName, 3)));
+		if (i->Spectate)
+			i->Spectate->SetHoover(L"Click to observe a player");
+#endif
+		DWORD Flaga = ExParty::GetPvpFlags(ptRoster->dwUnitId);
+		// Class Hover Info 
+		wostringstream Info;
+		Info << D2Funcs.D2LANG_GetLocaleText(3368) << L' ' << ptRoster->wLevel << '\n';
 
+		if (Flaga & PVP_ALLIED_WITH_YOU)
+		{
+			if (ptRoster->dwUnitId == D2Funcs.D2CLIENT_GetPlayer()->dwUnitId)
+				Info << D2ASMFuncs::D2CLIENT_GetLevelName(ExParty::GetPlayerArea());
+			else
+				Info << D2ASMFuncs::D2CLIENT_GetLevelName(ptRoster->dwLevelId);
+			Info << '\n';
+		}
+
+		Info << ExScreen::GetColorCode(COL_LIGHTGREEN) << ExParty::GetClassById(ptRoster->dwClassId);
+		i->Class->Hoover = Info.str();
+		//========================
+
+
+		if (i->Host)
+		{
+			if (ExParty::isTownLvl()) i->Host->cState = i->Host->VISIBLE; else i->Host->cState = i->Host->DISABLED;
+			if (Flaga & PVP_HOSTILED_BY_YOU){ i->Host->SetHoover(wStrHost2); i->Host->aFrame = 6; }
+			else { i->Host->SetHoover(wStrHost1); i->Host->aFrame = 4; }
+		}
+
+		if (i->Invite)
+		{
+			if (Flaga & PVP_ALLIED || Flaga & PVP_ALLIED_WITH_YOU) i->Invite->cState = i->Invite->INVISIBLE; else i->Invite->cState = i->Invite->VISIBLE;
+			if (!(Flaga & PVP_INVITED_BY_YOU) && !(Flaga & PVP_INVITED_YOU)) { i->Invite->SetHoover(wStrInv1); i->Invite->SetColor(COL_WHITE); }
+			else if (Flaga & PVP_INVITED_BY_YOU) { i->Invite->SetHoover(wStrInv2); i->Invite->SetColor(COL_DARKGREEN); }
+			else if (Flaga & PVP_INVITED_YOU) { i->Invite->SetHoover(wStrInv3); i->Invite->SetColor(COL_LIGHTGREEN); }
+		}
+
+		if (i->Loot)
+		{
+			for (RosterInfo* pInfo = *(*D2Vars.D2CLIENT_Roster)->ptInfo; pInfo; pInfo = pInfo->ptNext)
+			{
+				if (ptRoster->dwUnitId == pInfo->dwUnitId) { Flaga = pInfo->dwPartyFlags; break; }
+			}
+			if (Flaga & 1){ i->Loot->SetHoover(wStrLoot2); i->Loot->aFrame = 14; }
+			else { i->Loot->SetHoover(wStrLoot1); i->Loot->aFrame = 12; }
+		}
+
+		if (i->Squelch)
+		{
+			for (RosterInfo* pInfo = *(*D2Vars.D2CLIENT_Roster)->ptInfo; pInfo; pInfo = pInfo->ptNext)
+			{
+				if (ptRoster->dwUnitId == pInfo->dwUnitId) { Flaga = pInfo->dwPartyFlags; break; }
+			}
+			if (Flaga & 4){ i->Squelch->SetHoover(wStrSquelch2); i->Squelch->aFrame = 10; }
+			else { i->Squelch->SetHoover(wStrSquelch1); i->Squelch->aFrame = 8; }
+		}
+
+#ifdef D2EX_PVPGN_EXT
+		if (i->Spectate)
+		{
+			if (gSpecing)
+			{
+				i->Spectate->SetState(i->Spectate->DISABLED);
+			}
+			else
+			{
+				i->Spectate->SetState(i->Spectate->VISIBLE);
+			}
+		}
+#endif
 	}
-	if(LeaveB)
+	if (LeaveB)
 	{
-		if(ExParty::GetRosterById(D2Funcs.D2CLIENT_GetPlayer()->dwUnitId)->wPartyId==0xFFFF)
-		LeaveB->SetState(LeaveB->INVISIBLE);
+		if (ExParty::GetRosterById(D2Funcs.D2CLIENT_GetPlayer()->dwUnitId)->wPartyId == 0xFFFF)
+			LeaveB->SetState(LeaveB->INVISIBLE);
 		else
-		LeaveB->SetState(LeaveB->VISIBLE);
+			LeaveB->SetState(LeaveB->VISIBLE);
 	}
 }
 
 void ExParty::Refresh(char * szSkip)
 {
-	if(!PartyScreen) return;
+	if (!PartyScreen) return;
 	ExParty::Fill(szSkip);
 }
 
@@ -838,15 +887,21 @@ void ExParty::Resort(char *szSkip)
 	int z = 1, LastTeamId = 0;
 	TeamOffset = 0;
 
-	for(vector<ExTextBox*>::iterator i = Group.begin(); i!= Group.end(); ++i) {PartyScreen->DeleteChild(*i); delete (*i);}
+	for (vector<ExTextBox*>::iterator i = Group.begin(); i != Group.end(); ++i) 
+	{ 
+		PartyScreen->DeleteChild(*i); 
+		delete (*i);
+	
+	}
 	Group.clear();
-	//Posortuj
-	if(PlayerList.size() > 1) PlayerList.sort(&ListCompare);
+	//Sort up thangs
+	if (PlayerList.size() > 1)
+		PlayerList.sort(&ListCompare);
 
 	int j = 1;
-	for(list<PlayerTable>::iterator i = PlayerList.begin() ; i != PlayerList.end();	++j)
+	for (list<PlayerTable>::iterator i = PlayerList.begin(); i != PlayerList.end(); ++j)
 	{
-		if(j-1<pOffset) {
+		if (j - 1 < pOffset) {
 			delete i->Frame;
 			delete i->Level;
 			delete i->Name;
@@ -861,10 +916,11 @@ void ExParty::Resort(char *szSkip)
 			delete i->Host;
 			delete i->Loot;
 			delete i->Squelch;
+			delete i->Spectate;
 			i = PlayerList.erase(i);
 			continue;
 		}
-		if(j-pOffset>15) { 
+		if (j - pOffset > 15) {
 			delete i->Frame;
 			delete i->Level;
 			delete i->Name;
@@ -879,6 +935,7 @@ void ExParty::Resort(char *szSkip)
 			delete i->Host;
 			delete i->Loot;
 			delete i->Squelch;
+			delete i->Spectate;
 			i = PlayerList.erase(i);
 			continue;
 		}
@@ -886,21 +943,21 @@ void ExParty::Resort(char *szSkip)
 		++i;
 	}
 
-	for(list<PlayerTable>::iterator i = PlayerList.begin() ; i != PlayerList.end();++i)
+	for (list<PlayerTable>::iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
 	{
 		RosterUnit * ptRoster = ExParty::GetRosterById(i->UnitId);
-		if(!ptRoster) continue;
+		if (!ptRoster) continue;
 
 		int TextFont = 0;
 		//Stworz grupe
 
-		if(!LastTeamId || LastTeamId!=ptRoster->wPartyId) 
+		if (!LastTeamId || LastTeamId != ptRoster->wPartyId)
 		{
-			LastTeamId=ptRoster->wPartyId;
-			TeamOffset+=20;
+			LastTeamId = ptRoster->wPartyId;
+			TeamOffset += 20;
 			wstring TeamId;
-			wchar_t tt = (int)(64 + (TeamOffset/20));
-			if(LastTeamId!=0xFFFF) {TeamId= D2Funcs.D2LANG_GetLocaleText(4016); TeamId.erase(TeamId.length()-1); TeamId+=tt;}
+			wchar_t tt = (int)(64 + (TeamOffset / 20));
+			if (LastTeamId != 0xFFFF) { TeamId = D2Funcs.D2LANG_GetLocaleText(4016); TeamId.erase(TeamId.length() - 1); TeamId += tt; }
 			else TeamId = D2Funcs.D2LANG_GetLocaleText(4015);
 			ExTextBox * ptGrp = new ExTextBox(i->Frame->GetX() + 5, 80 + (z * 25) + TeamOffset, 0, 0, TeamId, 0, 0);
 			PartyScreen->AddChild(ptGrp);
@@ -909,10 +966,10 @@ void ExParty::Resort(char *szSkip)
 
 		D2Funcs.D2WIN_SetTextSize(TextFont);
 
-		int yPos = 100+(z*25) + TeamOffset;
-		int TextPos = ((yPos*2)-20 + D2Funcs.D2WIN_GetFontHeight()) / 2;
+		int yPos = 100 + (z * 25) + TeamOffset;
+		int TextPos = ((yPos * 2) - 20 + D2Funcs.D2WIN_GetFontHeight()) / 2;
 
-		i->Frame->SetY(yPos-20);
+		i->Frame->SetY(yPos - 20);
 		i->Level->SetY(TextPos);
 		i->Name->SetY(TextPos);
 		i->Clan->SetY(TextPos);
@@ -924,24 +981,28 @@ void ExParty::Resort(char *szSkip)
 		i->Deaths->SetY(TextPos);
 		i->Assists->SetY(TextPos);
 		i->Kills->SetY(TextPos);
+	#ifdef D2EX_SPECATATOR
+		if(i->Spectate)
+			i->Spectate->SetY(yPos);
+	#endif
 #endif
 
-		if(i->Invite) i->Invite->SetY(yPos);
-		if(i->Host) i->Host->SetY(yPos);
-		if(i->Loot) i->Loot->SetY(yPos);
-		if(i->Squelch) i->Squelch->SetY(yPos);
+		if (i->Invite) i->Invite->SetY(yPos);
+		if (i->Host) i->Host->SetY(yPos);
+		if (i->Loot) i->Loot->SetY(yPos);
+		if (i->Squelch) i->Squelch->SetY(yPos);
 		z++;
 	}
-	
-	if(PartyScreen) 
-	{
-		PartyScreen->Resize(PartyScreen->GetWidth(), ((75+(PlayerList.size() * 25)+TeamOffset)));
 
-		if(GetPlayerCount()>15)
+	if (PartyScreen)
+	{
+		PartyScreen->Resize(PartyScreen->GetWidth(), ((75 + (PlayerList.size() * 25) + TeamOffset)));
+
+		if (GetPlayerCount() > 15)
 		{
 			Scroll->SetState(Scroll->VISIBLE);
 			Scroll->SetHeight(PartyScreen->GetHeight());
-			if(Scroll->sMax != GetPlayerCount() - 15) 
+			if (Scroll->sMax != GetPlayerCount() - 15)
 				pOffset = 0;
 			Scroll->sMax = GetPlayerCount() - 15;
 		}
@@ -956,70 +1017,82 @@ void ExParty::Fill(char *szSkip)
 {
 	ExParty::Clear();
 	int i = 1;
-//	int off = 0;
+	//	int off = 0;
 	string szName(szSkip ? szSkip : "");
 
-	for(RosterUnit *ptRoster = *D2Vars.D2CLIENT_Roster; ptRoster; ptRoster = ptRoster->pNext, ++i)
+	for (RosterUnit *ptRoster = *D2Vars.D2CLIENT_Roster; ptRoster; ptRoster = ptRoster->pNext, ++i)
 	{
-	if(szName == ptRoster->szName) {--i; continue;}
-//	if(i == 17) break;
-//	if(off<pOffset) {--i; continue;}
-	
-	PlayerTable Tbl = {0};
-	int TextFont = 0;
-	D2Funcs.D2WIN_SetTextSize(TextFont);
-    int yPos = 100+(i*25);
-	int TextPos = ((yPos*2)-20 + D2Funcs.D2WIN_GetFontHeight()) / 2;
-	
-	Tbl.UnitId = ptRoster->dwUnitId;
+		if (szName == ptRoster->szName) { --i; continue; }
+		//	if(i == 17) break;
+		//	if(off<pOffset) {--i; continue;}
+
+		PlayerTable Tbl = { 0 };
+		int TextFont = 0;
+		D2Funcs.D2WIN_SetTextSize(TextFont);
+		int yPos = 100 + (i * 25);
+		int TextPos = ((yPos * 2) - 20 + D2Funcs.D2WIN_GetFontHeight()) / 2;
+
+		Tbl.UnitId = ptRoster->dwUnitId;
 #ifdef D2EX_PVPGN_EXT
-	Tbl.Frame = new ExBox(0,yPos,480,22,ExParty::GetFrameColor(ptRoster->dwUnitId),2);Tbl.Frame->SetAlign(Tbl.Frame->CENTER,Tbl.Frame->NONE);
+		Tbl.Frame = new ExBox(0, yPos, 480, 22, ExParty::GetFrameColor(ptRoster->dwUnitId), 2); Tbl.Frame->SetAlign(Tbl.Frame->CENTER, Tbl.Frame->NONE);
 #else
-	Tbl.Frame = new ExBox(0, yPos, 520, 22, ExParty::GetFrameColor(ptRoster->dwUnitId), 2); Tbl.Frame->SetAlign(Tbl.Frame->CENTER, Tbl.Frame->NONE);
+		Tbl.Frame = new ExBox(0, yPos, 520, 22, ExParty::GetFrameColor(ptRoster->dwUnitId), 2); Tbl.Frame->SetAlign(Tbl.Frame->CENTER, Tbl.Frame->NONE);
 #endif
-	Tbl.Name = new ExTextBox(Tbl.Frame->GetX()+10,TextPos,0,TextFont,ptRoster->szName,0,0);
-	Tbl.Class = new ExImage(Tbl.Frame->GetX()+150,yPos,5,ptRoster->dwClassId,"data\\D2Ex\\SmallClass");
-	Tbl.Class->Hoover=ExParty::GetClassById(ptRoster->dwClassId);
-	Tbl.Level = new ExTextBox(Tbl.Frame->GetX()+175,TextPos,9,TextFont,boost::lexical_cast<wstring>(ptRoster->wLevel),0,0);
-	Tbl.Clan = new ExTextBox(Tbl.Frame->GetX()+195,TextPos,0,TextFont,boost::lexical_cast<wstring>(ExParty::FindClan(ptRoster->szName).c_str()),0,0);
-	Tbl.Acc = new ExTextBox(Tbl.Frame->GetX()+230,TextPos,0,TextFont,ExParty::FindAccount(ptRoster->szName),0,0);
+		Tbl.Name = new ExTextBox(Tbl.Frame->GetX() + 10, TextPos, 0, TextFont, ptRoster->szName, 0, 0);
+		Tbl.Class = new ExImage(Tbl.Frame->GetX() + 150, yPos, 5, ptRoster->dwClassId, "data\\D2Ex\\SmallClass");
+		Tbl.Class->Hoover = ExParty::GetClassById(ptRoster->dwClassId);
+		Tbl.Level = new ExTextBox(Tbl.Frame->GetX() + 175, TextPos, 9, TextFont, boost::lexical_cast<wstring>(ptRoster->wLevel), 0, 0);
+		Tbl.Clan = new ExTextBox(Tbl.Frame->GetX() + 195, TextPos, 0, TextFont, boost::lexical_cast<wstring>(ExParty::FindClan(ptRoster->szName).c_str()), 0, 0);
+		Tbl.Acc = new ExTextBox(Tbl.Frame->GetX() + 230, TextPos, 0, TextFont, ExParty::FindAccount(ptRoster->szName), 0, 0);
 #ifndef D2EX_PVPGN_EXT
-	Tbl.Location = new ExTextBox(Tbl.Frame->GetX()+337,TextPos,COL_YELLOW,TextFont,GetLvlNameEx(ptRoster->dwUnitId==D2Funcs.D2CLIENT_GetPlayer()->dwUnitId ? ExParty::GetPlayerArea() : ptRoster->dwLevelId,120),0,0);
+		Tbl.Location = new ExTextBox(Tbl.Frame->GetX()+337,TextPos,COL_YELLOW,TextFont,GetLvlNameEx(ptRoster->dwUnitId==D2Funcs.D2CLIENT_GetPlayer()->dwUnitId ? ExParty::GetPlayerArea() : ptRoster->dwLevelId,120),0,0);
 #else
-	Tbl.Kills = new ExTextBox(Tbl.Frame->GetX()+337,TextPos,COL_WHITE,TextFont,boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName,1)),0,0);
-	Tbl.Assists = new ExTextBox(Tbl.Frame->GetX()+357,TextPos,COL_WHITE,TextFont,boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName,3)),0,0);
-	Tbl.Deaths = new ExTextBox(Tbl.Frame->GetX()+377,TextPos,COL_WHITE,TextFont,boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName,2)),0,0);
+		Tbl.Kills = new ExTextBox(Tbl.Frame->GetX() + 337, TextPos, COL_WHITE, TextFont, boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName, 1)), 0, 0);
+		Tbl.Assists = new ExTextBox(Tbl.Frame->GetX() + 357, TextPos, COL_WHITE, TextFont, boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName, 3)), 0, 0);
+		Tbl.Deaths = new ExTextBox(Tbl.Frame->GetX() + 377, TextPos, COL_WHITE, TextFont, boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName, 2)), 0, 0);
 #endif
-	PartyScreen->AddChild(Tbl.Frame);
-	PartyScreen->AddChild(Tbl.Name);
-	PartyScreen->AddChild(Tbl.Class);
-	PartyScreen->AddChild(Tbl.Level);
-	PartyScreen->AddChild(Tbl.Clan);
-	PartyScreen->AddChild(Tbl.Acc);
+		PartyScreen->AddChild(Tbl.Frame);
+		PartyScreen->AddChild(Tbl.Name);
+		PartyScreen->AddChild(Tbl.Class);
+		PartyScreen->AddChild(Tbl.Level);
+		PartyScreen->AddChild(Tbl.Clan);
+		PartyScreen->AddChild(Tbl.Acc);
 #ifndef D2EX_PVPGN_EXT
-	PartyScreen->AddChild(Tbl.Location);
+		PartyScreen->AddChild(Tbl.Location);
 #else
-	PartyScreen->AddChild(Tbl.Kills);
-	PartyScreen->AddChild(Tbl.Assists);
-	PartyScreen->AddChild(Tbl.Deaths); 
+		PartyScreen->AddChild(Tbl.Kills);
+		PartyScreen->AddChild(Tbl.Assists);
+		PartyScreen->AddChild(Tbl.Deaths);
 #endif
-	if(ptRoster->dwUnitId!=D2Funcs.D2CLIENT_GetPlayer()->dwUnitId)
-	{
-			Tbl.Invite = new ExButton(Tbl.Frame->GetX() + Tbl.Frame->GetWidth() - 83, yPos, 0, 18, L"", CellFiles::PARTY, &ExParty::Invite, 0);
-			Tbl.Host = new ExButton(Tbl.Frame->GetX() + Tbl.Frame->GetWidth() - 62, yPos, 0, 6, L"", CellFiles::PARTY, &ExParty::Host, 0);
-			PartyScreen->AddChild(Tbl.Invite);
-			PartyScreen->AddChild(Tbl.Host);
-			if((*D2Vars.D2LAUNCH_BnData)->CharFlags & 4)
-			{
-				Tbl.Loot = new ExButton(Tbl.Frame->GetX() + Tbl.Frame->GetWidth() - 41, yPos, 0, 14, L"", CellFiles::PARTY, &ExParty::Loot, 0);
-				PartyScreen->AddChild(Tbl.Loot);
-			}
-			Tbl.Squelch = new ExButton(Tbl.Frame->GetX() + Tbl.Frame->GetWidth() - 20, yPos, 0, 8, L"", CellFiles::PARTY, &ExParty::Squelch, 0);
+		if (ptRoster->dwUnitId != D2Funcs.D2CLIENT_GetPlayer()->dwUnitId)
+		{
+			int bOffset = Tbl.Frame->GetX() + Tbl.Frame->GetWidth() - 20;
+#ifdef D2EX_SPECATATOR
+			Tbl.Spectate = new ExButton(bOffset, yPos, 0, 20, L"", CellFiles::PARTY, &ExParty::Spectate, 0); // TODO: Add func
+			PartyScreen->AddChild(Tbl.Spectate);
+			bOffset -= 21;
+#endif
+			Tbl.Squelch = new ExButton(bOffset, yPos, 0, 8, L"", CellFiles::PARTY, &ExParty::Squelch, 0);
 			PartyScreen->AddChild(Tbl.Squelch);
-	} 
+			bOffset -= 21;
+
+			if ((*D2Vars.D2LAUNCH_BnData)->CharFlags & 4)
+			{
+				Tbl.Loot = new ExButton(bOffset, yPos, 0, 14, L"", CellFiles::PARTY, &ExParty::Loot, 0);
+				PartyScreen->AddChild(Tbl.Loot);
+				bOffset -= 21;
+			}
+
+			Tbl.Host = new ExButton(bOffset, yPos, 0, 6, L"", CellFiles::PARTY, &ExParty::Host, 0);
+			PartyScreen->AddChild(Tbl.Host);
+			bOffset -= 21;
+
+			Tbl.Invite = new ExButton(bOffset, yPos, 0, 18, L"", CellFiles::PARTY, &ExParty::Invite, 0);
+			PartyScreen->AddChild(Tbl.Invite);
+		}
 #ifndef D2EX_PVPGN_EXT
-	else
-		Tbl.Location->SetText(GetLvlNameEx(ExParty::GetPlayerArea(), 120 ));
+		else
+			Tbl.Location->SetText(GetLvlNameEx(ExParty::GetPlayerArea(), 120 ));
 #endif
 		PlayerList.push_back(Tbl);
 	}
@@ -1041,27 +1114,27 @@ void ExParty::ShowHide()
 	static ExImage * Deaths;
 
 
-	if(!PartyScreen)
+	if (!PartyScreen)
 	{
 		pOffset = 0;
 		ExParty::ClearScreen();
 		//Load Strings
 		static wstring wPartyStr, wClassStr, wCharStr, wAccStr;
-		if(!wPartyStr.length()) wPartyStr = D2Funcs.D2LANG_GetLocaleText(3926);
-		if(!wClassStr.length()) wClassStr = D2Funcs.D2LANG_GetLocaleText(5322);
-		if(!wCharStr.length()) wCharStr = D2Funcs.D2LANG_GetLocaleText(5287);
-		if(!wAccStr.length()) wAccStr = D2Funcs.D2LANG_GetLocaleText(5224);
+		if (!wPartyStr.length()) wPartyStr = D2Funcs.D2LANG_GetLocaleText(3926);
+		if (!wClassStr.length()) wClassStr = D2Funcs.D2LANG_GetLocaleText(5322);
+		if (!wCharStr.length()) wCharStr = D2Funcs.D2LANG_GetLocaleText(5287);
+		if (!wAccStr.length()) wAccStr = D2Funcs.D2LANG_GetLocaleText(5224);
 
 #ifdef D2EX_PVPGN_EXT
-		PartyScreen = new ExWindow(0,50,510,85+(ExParty::GetPlayerCount()*25)+TeamOffset,false,wPartyStr);PartyScreen->SetAlign(PartyScreen->CENTER,PartyScreen->NONE);
+		PartyScreen = new ExWindow(0, 50, 510, 85 + (ExParty::GetPlayerCount() * 25) + TeamOffset, false, wPartyStr); PartyScreen->SetAlign(PartyScreen->CENTER, PartyScreen->NONE);
 #else
 		PartyScreen = new ExWindow(0, 50, 550, 85 + (ExParty::GetPlayerCount() * 25) + TeamOffset, false, wPartyStr); PartyScreen->SetAlign(PartyScreen->CENTER, PartyScreen->NONE);
 #endif
-		PlayerCount = new ExTextBox(PartyScreen->GetX()+5,101,11,0,&ExParty::GetPartyCount,0,0);
-		Charname = new ExTextBox(PartyScreen->GetX()+28,105,0,0,wCharStr,0,0);
-		Class = new ExTextBox(PartyScreen->GetX()+154,105,0,0,wClassStr,0,0);
-		Clan = new ExTextBox(PartyScreen->GetX()+201,105,0,0, gLocaleId == 10 ? L"Klan" : L"Clan",0,0);
-		Acc = new ExTextBox(PartyScreen->GetX()+237,105,0,0,wAccStr,0,0);
+		PlayerCount = new ExTextBox(PartyScreen->GetX() + 5, 101, 11, 0, &ExParty::GetPartyCount, 0, 0);
+		Charname = new ExTextBox(PartyScreen->GetX() + 28, 105, 0, 0, wCharStr, 0, 0);
+		Class = new ExTextBox(PartyScreen->GetX() + 154, 105, 0, 0, wClassStr, 0, 0);
+		Clan = new ExTextBox(PartyScreen->GetX() + 201, 105, 0, 0, gLocaleId == 10 ? L"Klan" : L"Clan", 0, 0);
+		Acc = new ExTextBox(PartyScreen->GetX() + 237, 105, 0, 0, wAccStr, 0, 0);
 #ifdef D2EX_PVPGN_EXT
 		Kills = new ExImage(PartyScreen->GetX() + 346, 105, 5, 1, CellFiles::MONINDICATOR); Kills->Hoover = gLocaleId == 10 ? L"Zabójstwa" : L"Kills";
 		Assists = new ExImage(PartyScreen->GetX() + 366, 105, 5, 2, CellFiles::MONINDICATOR);  Assists->Hoover = gLocaleId == 10 ? L"Asysty" : L"Assists";
@@ -1069,13 +1142,13 @@ void ExParty::ShowHide()
 #else
 		Location = new ExTextBox(PartyScreen->GetX()+346,105,0,0, gLocaleId == 10 ? L"Lokacja" : L"Location",0,0);
 #endif
-		Ping  = new ExTextBox(PartyScreen->GetX()+10,64,0,0,&ExParty::GetPingFps,&ExParty::SharePing,0);
+		Ping = new ExTextBox(PartyScreen->GetX() + 10, 64, 0, 0, &ExParty::GetPingFps, &ExParty::SharePing, 0);
 		Ping->SetHoverable(false);
-		LeaveB = new ExButton(PartyScreen->GetX()+PartyScreen->GetWidth()-80,105,2,0,D2Funcs.D2LANG_GetLocaleText(4152),CellFiles::PARTYBUTTON,&ExParty::Leave,0);
-		if(ExParty::GetRosterById(D2Funcs.D2CLIENT_GetPlayer()->dwUnitId)->wPartyId==0xFFFF)  
+		LeaveB = new ExButton(PartyScreen->GetX() + PartyScreen->GetWidth() - 80, 105, 2, 0, D2Funcs.D2LANG_GetLocaleText(4152), CellFiles::PARTYBUTTON, &ExParty::Leave, 0);
+		if (ExParty::GetRosterById(D2Funcs.D2CLIENT_GetPlayer()->dwUnitId)->wPartyId == 0xFFFF)
 			LeaveB->SetState(LeaveB->INVISIBLE);
 		Scroll = new ExScrollBar(PartyScreen->GetX() + PartyScreen->GetWidth(), PartyScreen->GetY(), 0, GetPlayerCount() - 15, PartyScreen->GetHeight(), &pOffset, &ExParty::OnScroll);
-		if(GetPlayerCount()<15) 
+		if (GetPlayerCount() < 15)
 			Scroll->SetState(Scroll->INVISIBLE);
 		PartyScreen->AddChild(PlayerCount);
 		PartyScreen->AddChild(Charname);
@@ -1098,7 +1171,7 @@ void ExParty::ShowHide()
 	{
 		delete Scroll;
 		delete LeaveB;
-		delete Ping; 
+		delete Ping;
 		delete Deaths;
 		delete Assists;
 		delete Kills;
@@ -1110,10 +1183,10 @@ void ExParty::ShowHide()
 		delete PlayerCount;
 		ExParty::Clear();
 		delete PartyScreen;
-		PartyScreen =  0;
+		PartyScreen = 0;
 		Scroll = 0;
 		LeaveB = 0;
 	}
-	D2Vars.D2CLIENT_UIModes[UI_PARTY]=PartyScreen ? 1 : 0;
+	D2Vars.D2CLIENT_UIModes[UI_PARTY] = PartyScreen ? 1 : 0;
 
 }
