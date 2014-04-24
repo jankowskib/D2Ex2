@@ -20,9 +20,12 @@
 
 #include "stdafx.h"
 #include "ExScreen.h"
+
 #include <sstream>
 #include <iomanip>
 #include <math.h>
+#include <boost/lexical_cast.hpp>
+
 #include "ExEditBox.h"
 #include "ExAutomap.h"
 #include "ExAim.h"
@@ -198,8 +201,8 @@ void __stdcall ExScreen::Display()
 	wStr << " [" << dec << ExAim::GetUnitX(D2Funcs.D2CLIENT_GetPlayer()) << "," << dec << ExAim::GetUnitY(D2Funcs.D2CLIENT_GetPlayer()) << "]";
 	if(D2Funcs.D2CLIENT_GetSelectedUnit())
 	{
-		wStr << " UnitId: " << hex << D2Funcs.D2CLIENT_GetSelectedUnit()->dwUnitId;
-		wStr << " ClassId: " << hex << D2Funcs.D2CLIENT_GetSelectedUnit()->dwClassId;
+		wStr << " UnitId: " << dec << D2Funcs.D2CLIENT_GetSelectedUnit()->dwUnitId;
+		wStr << " ClassId: " << dec << D2Funcs.D2CLIENT_GetSelectedUnit()->dwClassId;
 		wStr << " [" << dec << ExAim::GetUnitX(D2Funcs.D2CLIENT_GetSelectedUnit()) << "," << dec <<  ExAim::GetUnitY(D2Funcs.D2CLIENT_GetSelectedUnit()) << "]";
 	}
 	int aLen =ExScreen::GetTextWidth(wStr.str().c_str());
@@ -233,6 +236,17 @@ void __stdcall ExScreen::Display()
 	EnterCriticalSection(&CON_CRITSECT);
 	for(auto i = Controls.cbegin(); i!=Controls.cend(); ++i) (*i)->Draw();
 	LeaveCriticalSection(&CON_CRITSECT);
+
+#ifdef D2EX_SPECATATOR
+	if (gSpecing == true && !gszSpectator.empty())
+	{
+		D2Funcs.D2WIN_SetTextSize(8);
+		wostringstream wSpecStr;
+		wSpecStr << L"Watching: " << boost::lexical_cast<wstring>(gszSpectator.c_str());
+		int aLen = ExScreen::GetTextWidth(wSpecStr.str().c_str());
+		D2Funcs.D2WIN_DrawText(wSpecStr.str().c_str(), (*D2Vars.D2CLIENT_ScreenWidth / 2)- aLen / 2, 40, COL_YELLOW, 0);
+	}
+#endif
 
 	D2Funcs.D2WIN_SetTextSize(1);
 }
@@ -401,7 +415,7 @@ void __fastcall ExScreen::DrawAutoMapInfo(int OldTextSize)
  
 void __fastcall ExScreen::ColorItems(wchar_t* szName, UnitAny* ptItem)
 {
-	static wchar_t iTxt[64] = L""; 
+	static wchar_t iTxt[128] = L""; 
 
 	ItemsTxt* pTxt = D2Funcs.D2COMMON_GetItemText(ptItem->dwClassId);
 	wchar_t* wName = szName;// D2Funcs.D2LANG_GetLocaleText(pTxt->wnamestr);
@@ -441,7 +455,7 @@ void __fastcall ExScreen::ColorItems(wchar_t* szName, UnitAny* ptItem)
 
 	for(vector<ItemConfig>::iterator i = ItemArray.begin(); i!=ItemArray.end(); i++)
 	{
-		if(i->Code==pTxt->dwcode)
+		if(i->Code == pTxt->dwcode)
 		{
 			if(i->Quality==ptItem->pItemData->QualityNo || i->Quality == 0)
 			{
@@ -452,11 +466,11 @@ void __fastcall ExScreen::ColorItems(wchar_t* szName, UnitAny* ptItem)
 	}
 
 	if(SockNo) 
-	swprintf_s(iTxt,64,L"%s%s%s (%d)",GetColorCode(ColNo).c_str(),wName,isEth ? L"[ETH]" : L"" ,SockNo);
+		swprintf_s(iTxt, 128, L"%s%s%s (%d)", GetColorCode(ColNo).c_str(), wName, isEth ? L"[ETH]" : L"", SockNo);
 	else
-	swprintf_s(iTxt,64,L"%s%s%s",GetColorCode(ColNo).c_str(),wName,isEth ? L"[ETH]" : L"");
+		swprintf_s(iTxt, 128, L"%s%s%s", GetColorCode(ColNo).c_str(), wName, isEth ? L"[ETH]" : L"");
 
-	wcscpy_s(szName,64,iTxt);
+	wcscpy_s(szName, 128, iTxt);
 }
 
 

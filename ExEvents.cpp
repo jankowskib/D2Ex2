@@ -109,6 +109,22 @@ int __fastcall ExEvents::OnTextEvent(ExEvent *Dane) //0xA6
 
 		}
 		break;
+		case EXEVENT_SPECTATOR_START:
+		{
+			ExEventSpecatorStart * msg = (ExEventSpecatorStart*)Dane;
+			UnitAny* u = D2Funcs.D2CLIENT_GetUnitById(msg->UnitId, UNIT_PLAYER);
+			if (u)
+			{
+				gszSpectator = u->pPlayerData->szName;
+				gSpecing = true;
+			}
+		}
+		break;
+		case EXEVENT_SPECTATOR_END:
+		{
+				gSpecing = false;
+		}
+		break;
 		default:
 		ExScreen::PrintTextEx(COL_PURPLE, "D2EX: Unrecognized ExEvent packet type. Please update D2Ex to new version");
 	};

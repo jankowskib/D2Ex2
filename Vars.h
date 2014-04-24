@@ -54,6 +54,7 @@ GLOBAL(DWORD, gAutoTeleArgument)
 GLOBAL(atomic<bool>, gStopTeleport)
 GLOBAL(atomic<bool>, gFastTP)
 GLOBAL(atomic<bool>, gSpecing)
+GLOBAL(string, gszSpectator)
 
 GLOBAL(DWORD, AimTarget)
 GLOBAL(deque<COORDS>, HistoryPos) // Last 2 Coords

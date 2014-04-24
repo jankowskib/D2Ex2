@@ -29,6 +29,7 @@
 //#define D2EX_EXAIM_ENABLED "ExAim|"			// Experimental -- never finished | may not work --
 //#define D2EX_PVM_BUILD "PvM|"					// Enables Maphack with monsters on the map, autotele, etc.
 #define MAX_SOUND_TXT_ROWS 4954					// Maximum rows in Sound.txt
+#define	D2EX_I_NEED_CUBE						// Define if you need transmute button
 //*******************************************
 
 //---------- ExMultiRes flags -------------

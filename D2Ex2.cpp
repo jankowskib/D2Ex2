@@ -196,7 +196,7 @@ unsigned int __stdcall Thread(void * Args)
 	//PATCHES---TYPE-DEST_ADDRESS---------------WHAT_PATCH-------------------------SIZE---DESC-----
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x66D9C),(DWORD)D2Stubs::D2CLIENT_ScreenHook,5,"Screen Hook");
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x66AB1),(DWORD)ExEntryText::Draw,5,"Entry Text Fix");
-#ifndef D2EX_PVM_BUILD
+#if !defined(D2EX_PVM_BUILD) && !defined(D2EX_I_NEED_CUBE)
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x7F709),(DWORD)ExPrecast::Do,5,"Trasmute button");
 #endif
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x91CA5),(DWORD)ExInput::GameInput_STUB,5,"Chat Input Wrapper");
@@ -291,7 +291,7 @@ unsigned int __stdcall Thread(void * Args)
 	#elif defined VER_113D
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x1D78C),(DWORD)D2Stubs::D2CLIENT_ScreenHook,5,"Screen Hook"); // k
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x1D4A1),(DWORD)ExEntryText::Draw,5,"Entry Text Fix"); //k
-#ifndef D2EX_PVM_BUILD
+#if !defined(D2EX_PVM_BUILD) && !defined(D2EX_I_NEED_CUBE)
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x9F5A9),(DWORD)ExPrecast::Do,5,"Trasmute button"); //k
 #endif
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0xB293D),(DWORD)ExInput::GameInput_STUB,5,"Chat Input Wrapper"); // k
@@ -483,7 +483,9 @@ unsigned int __stdcall Thread(void * Args)
 #endif
 	atomic_init(&DontLeaveCS, false);
 	atomic_init(&DontEnterCS, false);
+#ifdef D2EX_SPECATATOR
 	atomic_init(&gSpecing, false);
+#endif
 
 	while (WaitForSingleObject(hEvent, 0) != WAIT_OBJECT_0) 
 	{
@@ -505,6 +507,10 @@ unsigned int __stdcall Thread(void * Args)
 			//	D2EXERROR("Cannot set resolution %dx%d. Please correct your setting in D2Ex.ini", cResModeX, cResModeY);
 #endif
 
+#ifdef D2EX_SPECATATOR
+			gSpecing = false;
+			gszSpectator.clear();
+#endif
 #if defined D2EX_EXAIM_ENABLED || defined D2EX_PVM_BUILD
 			ResetEvent(hAimEvent);
 

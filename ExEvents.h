@@ -48,7 +48,9 @@ enum ExEventMsgs
 	EXEVENT_OVERHEAD = 2,
 	EXEVENT_DOWNLOAD = 3,
 	EXEVENT_MAPREVEAL = 4,
-	EXEVENT_OPTIONS = 5
+	EXEVENT_OPTIONS = 5,
+	EXEVENT_SPECTATOR_START = 6,
+	EXEVENT_SPECTATOR_END = 7,
 };
 
 enum ExEventOption
@@ -61,6 +63,15 @@ struct ExEvent //(size 0x4)
 	BYTE P_A6;		//0x00
 	BYTE MsgType;	//0x01 ExEventMsgs
 	WORD PacketLen;	//0x02
+};
+
+struct ExEventSpecatorStart : ExEvent // (size 0x8)
+{
+	DWORD UnitId;		//0x04
+};
+
+struct ExEventSpecatorEnd : ExEvent // (size 0x4)
+{
 };
 
 struct ExEventTextMsg : ExEvent  //(size 0xD+strlen+1)
