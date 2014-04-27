@@ -56,6 +56,9 @@ void DrawBreakpoints();
 void __fastcall ColorItems(wchar_t* szName, UnitAny* ptItem);
 BYTE * __stdcall DrawItem(UnitAny *ptPlayer, UnitAny* ptItem, BYTE* out, BOOL a4);
 BOOL __stdcall OnALTDraw(UnitAny *ptItem);
+
+
+void SetView(D2RECT* view);
 }
 
 

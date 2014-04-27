@@ -262,13 +262,13 @@ struct Level {
 };
 
 struct Path {
-	WORD xOffset;					//0x00
-	WORD xPos;						//0x02
-	WORD yOffset;					//0x04
-	WORD yPos;						//0x06
+	short xOffset;					//0x00
+	short xPos;						//0x02
+	short yOffset;					//0x04
+	short yPos;						//0x06
 	DWORD _1[2];					//0x08
-	WORD xTarget;					//0x10
-	WORD yTarget;					//0x12
+	short xTarget;					//0x10
+	short yTarget;					//0x12
 	DWORD _2[2];					//0x14
 	Room1 *pRoom1;					//0x1C
 	Room1 *pRoomUnk;				//0x20

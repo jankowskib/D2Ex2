@@ -64,7 +64,7 @@ BOOL CTeleportPath::MakeDistanceTable()
 /////////////////////////////////////////////////////////////////////
 BOOL CTeleportPath::GetBestMove(COORDS& pos, int nAdjust)
 {	
-	if(ExAim::CalculateDistance(m_ptEnd, pos) <= TP_RANGE)
+	if(ExAim::CalculateDistance(m_ptEnd, pos) <= D2EX_TP_RANGE)
 	{
 		pos = m_ptEnd;
 		return PATH_REACHED; // we reached the destination
@@ -78,14 +78,14 @@ BOOL CTeleportPath::GetBestMove(COORDS& pos, int nAdjust)
 	COORDS p, best;
 	int value = RANGE_INVALID;
 
-	for (p.x = pos.x - TP_RANGE; p.x <= pos.x + TP_RANGE; p.x++)
+	for (p.x = pos.x - D2EX_TP_RANGE; p.x <= pos.x + D2EX_TP_RANGE; p.x++)
 	{
-		for (p.y = pos.y - TP_RANGE; p.y <= pos.y + TP_RANGE; p.y++)
+		for (p.y = pos.y - D2EX_TP_RANGE; p.y <= pos.y + D2EX_TP_RANGE; p.y++)
 		{			
 			if (!IsValidIndex(p.x, p.y))
 				continue;
 		
-			if (m_ppTable[p.x][p.y] < value && ExAim::CalculateDistance(p, pos) <= TP_RANGE)
+			if (m_ppTable[p.x][p.y] < value && ExAim::CalculateDistance(p, pos) <= D2EX_TP_RANGE)
 			{				
 				value = m_ppTable[p.x][p.y];
 				best = p;					
@@ -132,12 +132,12 @@ vector<COORDS> CTeleportPath::FindTeleportPath(COORDS ptStart, COORDS ptEnd)
 			continue;
 		}
 
-		if (ExAim::CalculateDistance(v_Output.back(), pos) > TP_RANGE)
+		if (ExAim::CalculateDistance(v_Output.back(), pos) > D2EX_TP_RANGE)
 		{
 			prevpos.x--;
 			prevpos.y--;
 			pos = prevpos;
-			ExScreen::PrintPartyTextEx(COL_RED, "AT: Calculated distance is > %d", TP_RANGE);
+			ExScreen::PrintPartyTextEx(COL_RED, "AT: Calculated distance is > %d", D2EX_TP_RANGE);
 			continue;
 		}
 		

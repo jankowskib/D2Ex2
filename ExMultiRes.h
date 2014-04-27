@@ -49,9 +49,16 @@ namespace ExMultiRes
 	BOOL __stdcall  D2GFX_SetResolution(int nMode, BOOL bUpdate);
 	void __stdcall  D2GFX_SetStoredGammaAndContrast();
 	void __fastcall D2GFX_FillYBufferTable(void *ppvBits, int nWidth, int nHeight, int aZero);
+
+	//Getters
 	int __stdcall GFX_GetResolutionMode();
 	int __stdcall GFX_GetRenderType();
+	int __stdcall GFX_GetScreenHeight();
+	int __stdcall GFX_GetScreenWidth();	
+	//Setters
 	void __stdcall GFX_SetResolutionMode(int nMode);
+
+	//Cleaners
 	void D2GFX_WindowCleanUp(); 
 	void D2GFX_Finish();
 
@@ -61,6 +68,10 @@ namespace ExMultiRes
 	void __stdcall GetInventorySize(int nRecord, int nScreenMode, InventorySize *pOutRect);
 	void __stdcall GetInventoryGrid(int nRecord, int nScreenMode, InventoryGrid *pOut);
 	void __stdcall GetInventoryField(int nRecord, int nScreenMode, InventoryLayout *pOut, int nField);
+	
+	// GFX fixups
+	void __stdcall DrawControlPanel();
+	void DrawMissingPieces();
 
 	//Driver handlers
 	BOOL __fastcall GDI_ResizeWindow(HANDLE HWND, int nMode);

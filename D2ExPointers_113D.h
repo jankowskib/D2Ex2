@@ -69,6 +69,8 @@ _d2f D2Funcs = {0}; void SetupD2Funcs() {
 		EXFUNCPTR(D2CLIENT, UpdateAutoMap, void, __fastcall, (BOOL bUpdate), 0x71FC0)
 		EXFUNCPTR(D2CLIENT, ClearScreen4, void, __fastcall, (), 0x1CA90)
 
+		EXFUNCPTR(D2CLIENT, CalcShake, void, __stdcall, (int* xShake, int* yShake), 0xB5EE0)
+
 		//D2COMMON
 		//Skill Funcs
 		EXFUNCPTR(D2COMMON, GetSkillById, Skill*, __fastcall, (UnitAny *ptUnit, int SkillId, int SkillFlags), -10984) //k
@@ -423,6 +425,13 @@ void SetupD2Vars() {
 
 		EXVARPTR(D2CLIENT, CellDeathInst, CellFile*, 0x11D390)
 		EXVARPTR(D2CLIENT, CellDeathHC, CellFile*, 0x11D390 + 4)
+
+		//Specatator
+
+		EXVARPTR(D2CLIENT, EnableShake, BOOL, 0x11CA68)
+		EXVARPTR(D2CLIENT, ShakeX, int, 0x11CA6C)
+		EXVARPTR(D2CLIENT, ShakeY, int, 0xFC3DC)
+
 
 #ifndef __DEFINE_EXPTRS
 };

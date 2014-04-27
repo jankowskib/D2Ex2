@@ -419,7 +419,7 @@ bool ExAim::FindTeleportPath(const COORDS TargetPos)
 			err % 2 ? cTarget.x++ : cTarget.y--;
 		else
 			err % 2 ? cTarget.x-- : cTarget.y++;
-		if (CalculateDistance(cMyPos, cTarget) > TP_RANGE)
+		if (CalculateDistance(cMyPos, cTarget) > D2EX_TP_RANGE)
 		{
 			cTarget.x += err;
 			cTarget.y -= err;

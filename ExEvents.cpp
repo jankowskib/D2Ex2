@@ -117,12 +117,17 @@ int __fastcall ExEvents::OnTextEvent(ExEvent *Dane) //0xA6
 			{
 				gszSpectator = u->pPlayerData->szName;
 				gSpecing = true;
+				*D2Vars.D2CLIENT_EnableShake = 1;
+				gSpectatorTarget = u->dwUnitId;
 			}
 		}
 		break;
 		case EXEVENT_SPECTATOR_END:
 		{
 				gSpecing = false;
+				*D2Vars.D2CLIENT_EnableShake = 0;
+				gSpectatorTarget = 0;
+				gszSpectator = "";
 		}
 		break;
 		default:
@@ -192,7 +197,7 @@ DWORD WINAPI ExEvents::IconFadeThread(void* Params)
 
 		for (int Timer = 120; Timer; Timer--)
 		{
-			UnitAny * pUnit = D2Funcs.D2CLIENT_GetUnitById(UnitId, 0);
+			UnitAny * pUnit = D2Funcs.D2CLIENT_GetUnitById(UnitId, UNIT_PLAYER);
 			if (!pUnit) break;
 
 			POINT pPos = { D2Funcs.D2COMMON_GetUnitXOffset(pUnit), D2Funcs.D2COMMON_GetUnitYOffset(pUnit) };

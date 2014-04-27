@@ -25,6 +25,7 @@
 namespace ExSpec
 {
 	int __fastcall OnMousePacket(BYTE* aPacket);
+	void __stdcall OnShake(int* xShake, int * yShake);
 }
 
 #endif

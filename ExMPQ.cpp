@@ -38,15 +38,14 @@ Misc::Log("Loaded D2Ex.MPQ file...");
 
 void ExMpq::UnloadMPQ()
 {
-	//Skipping this function because archive is already closed when don't use D2Loader.
-	//Seems the same things appears on 1.11b
-	return;
-	if (MPQHandle) {
-		D2Funcs.STORM_CloseArchive((DWORD *)MPQHandle);
+	if (MPQHandle)
+	{
+		if (*(HANDLE*)MPQHandle)
+		{
+			D2Funcs.STORM_CloseArchive(*(HANDLE*)MPQHandle);
+		}
 		D2Funcs.FOG_FreeMemory(MPQHandle, __FILE__, __LINE__, 0);
 		MPQHandle = 0;
+		DEBUGMSG("Freed memory of D2Ex.MPQ file!");
 	}
-#ifdef _DEBUG
-	Misc::Log("Freed memory of D2Ex.MPQ file!");
-#endif
 }

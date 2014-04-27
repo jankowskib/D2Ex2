@@ -23,6 +23,7 @@
 #include "ExMultiRes.h"
 #include "ExCellFile.h"
 #include "ExBuffs.h"
+#include "ExMPQ.h"
 #ifdef D2EX_OPENGL
 #include "ExOpenGL.h"
 #endif
@@ -38,30 +39,12 @@
 namespace ExMultiRes
 {
 
-	struct sResList
-	{
-		ExCellFile* cD2MRChooseResolutionBack;
-		ExCellFile* cD2MRFancyBorderBottom;
-		ExCellFile* cD2MRFancyBorderCorner;
-		ExCellFile* cD2MRFancyBorderInterfaceLeft;
-		ExCellFile* cD2MRFancyBorderInterfaceRight;
-		ExCellFile* cD2MRFancyBorderLeft;
-		ExCellFile* cD2MRFancyBorderRight;
-		ExCellFile* cD2MRFancyBorderTop;
-		ExCellFile* cD2MRFancyHorizontalBar;
-		ExCellFile* cD2MRFancyPanelBar;
-		ExCellFile* cD2MRFancyPanelLeft;
-		ExCellFile* cD2MRFancyPanelRight;
-		ExCellFile* cD2MRFancyVerticalBar;
-		ExCellFile* cD2MRHorizontalBlackBar;
-		ExCellFile* cD2MRHorizontalBorder;
-		ExCellFile* cD2MRStoneBack;
-		ExCellFile* cD2MRVerticalBlackBar;
-		ExCellFile* cD2MRVerticalBorder;
-	} static ResFiles;
+	static ExCellFile* cExMultiResResources;
+	static ExCellFile* cControlPanel;
+	static ExCellFile* cControlPanel800;
 
 	vector<ResMode> lResModes;
-    int *gptBufferXLookUpTable;
+	int *gptBufferXLookUpTable;
 //	int gBufferXLookUpTable[GDI_MAXY + 1] = { 0 };
 	static HMODULE gRendererModule;
 
@@ -174,7 +157,7 @@ namespace ExMultiRes
 		{
 			int err  = GetLastError();
 			D2EXERROR("RegisterClass ERROR (%d)!", err)
-			//TODO: GFX_Error_6FA87AA0((char *)v5);
+			//TODO: GFX_Error_6FA87AA0((char *)cc);
 			return FALSE;
 		}
 		D2Funcs.D2GFX_InitGouraudCache();
@@ -394,8 +377,8 @@ namespace ExMultiRes
 			else
 			{
 				*D2Vars.D2CLIENT_UIPanelDrawXOffset = 0;
-				*D2Vars.D2CLIENT_UIPanelDrawYOffset = -140; //TODO: Fix y pos
-			}
+				*D2Vars.D2CLIENT_UIPanelDrawYOffset = -(GFX_GetScreenHeight() / 2) + 213 + 48;
+			}	
 
 			return res;
 
@@ -509,10 +492,9 @@ namespace ExMultiRes
 		 *D2Vars.D2GFX_GfxMode = nMode;
 	}
 
-	int __stdcall GFX_GetRenderType() 
-	{
-		return *D2Vars.D2GFX_DriverType;
-	}
+	int __stdcall GFX_GetRenderType() {	return *D2Vars.D2GFX_DriverType; }
+	int __stdcall GFX_GetScreenHeight() { return *D2Vars.D2CLIENT_ScreenHeight; }
+	int __stdcall GFX_GetScreenWidth() { return *D2Vars.D2CLIENT_ScreenWidth; }
 
 // D2GDI.dll recons
 	void __fastcall GDI_CreateDIBSection(int nMode) // Wrapper on D2GDI.6F877B50
@@ -607,6 +589,10 @@ namespace ExMultiRes
 			delete[] gptBufferXLookUpTable;
 			gptBufferXLookUpTable = 0;
 		}
+
+		ExMultiRes::FreeImages();
+		ExMpq::UnloadMPQ();
+
 		return TRUE;
 	}
 
@@ -756,9 +742,9 @@ namespace ExMultiRes
 			panelsize = 470;
 		}
 		/*[         Width        ]
-		         [   310  ]
+				 [   310  ]
 		  ( ) *  =====....=  * ( )
-		      xpos + panelsize / 2
+			  xpos + panelsize / 2
 		*/
 		out->dwBoxLeft = ((w / 2) - (panelsize / 2) + xpos) + (31 * (nBox % 4));
 		out->dwBoxRight = out->dwBoxLeft + 29;
@@ -923,28 +909,81 @@ namespace ExMultiRes
 
 	}
 
+	void __stdcall DrawControlPanel()
+	{
+		CellContext cc = { 0 };
+
+		int nDDrawFixup = 0;
+
+		if (GFX_GetRenderType() == VIDEO_MODE_DDRAW)
+			nDDrawFixup = 1;
+
+		int w = GFX_GetScreenWidth();
+		int h = GFX_GetScreenHeight();
+
+		if (GFX_GetResolutionMode()) // 800x600 +
+		{
+			//Calculate space
+			int space = (w - 165 + 470 + 165) / 2;
+			if (space > 0)
+			{
+				int p = space / 207 + space % 207;
+				cc.pCellFile = cExMultiResResources->GetCF();
+				cc.nCellNo = 1;
+				for (int i = 0; i < p; ++i)
+				{
+					D2Funcs.D2GFX_DrawCellContext(&cc, 165 + (i * 207), h - nDDrawFixup, -1, 5, 0);
+					D2Funcs.D2GFX_DrawCellContext(&cc, w / 2 + 149 + 84 + (i * 207), h - nDDrawFixup, -1, 5, 0);
+				}
+			}
+			
+			cc.pCellFile = cControlPanel800->GetCF();
+			cc.nCellNo = 0; // HP orb overlay
+			D2Funcs.D2GFX_DrawCellContext(&cc, 0, h - nDDrawFixup, -1, 5, 0);
+
+			cc.nCellNo = 1;
+			D2Funcs.D2GFX_DrawCellContext(&cc, w / 2 - 235, h, -1, 5, 0);
+			cc.nCellNo = 2;
+			D2Funcs.D2GFX_DrawCellContext(&cc, w / 2 - 107, h, -1, 5, 0);
+			cc.nCellNo = 3;
+			D2Funcs.D2GFX_DrawCellContext(&cc, w / 2 + 21, h, -1, 5, 0);
+			cc.nCellNo = 4;
+			D2Funcs.D2GFX_DrawCellContext(&cc, w / 2 + 149, h, -1, 5, 0);
+
+			cc.nCellNo = 5; // Mana orb overlay
+			D2Funcs.D2GFX_DrawCellContext(&cc, w - 117, h - nDDrawFixup, -1, 5, 0);
+		}
+		else // 640x480
+		{
+			cc.pCellFile = cControlPanel->GetCF();
+			cc.nCellNo = 0;
+			D2Funcs.D2GFX_DrawCellContext(&cc, 0, h - nDDrawFixup, -1, 5, 0);
+			cc.nCellNo = 1;
+			D2Funcs.D2GFX_DrawCellContext(&cc, w / 2 - 155, h, -1, 5, 0);
+			cc.nCellNo = 2;
+			D2Funcs.D2GFX_DrawCellContext(&cc, w / 2 - 27, h, -1, 5, 0);
+			cc.nCellNo = 3;
+			D2Funcs.D2GFX_DrawCellContext(&cc, w / 2 + 101, h, -1, 5, 0);
+			cc.nCellNo = 4;
+			D2Funcs.D2GFX_DrawCellContext(&cc, w - 117, h - nDDrawFixup, -1, 5, 0);
+		}
+	}
+
+	void DrawMissingPieces()
+	{
+		if (GFX_GetScreenWidth() > 800)
+		{
+			//TODO: Add body
+		}
+	}
+
 	bool InitImages()
 	{
 		try
 		{
-			ResFiles.cD2MRChooseResolutionBack = new ExCellFile(ResImages::D2MRChooseResolutionBack);
-			ResFiles.cD2MRFancyBorderBottom = new ExCellFile(ResImages::D2MRFancyBorderBottom);
-			ResFiles.cD2MRFancyBorderCorner = new ExCellFile(ResImages::D2MRFancyBorderCorner);
-			ResFiles.cD2MRFancyBorderInterfaceLeft = new ExCellFile(ResImages::D2MRFancyBorderInterfaceLeft);
-			ResFiles.cD2MRFancyBorderInterfaceRight = new ExCellFile(ResImages::D2MRFancyBorderInterfaceRight);
-			ResFiles.cD2MRFancyBorderLeft = new ExCellFile(ResImages::D2MRFancyBorderLeft);
-			ResFiles.cD2MRFancyBorderRight = new ExCellFile(ResImages::D2MRFancyBorderRight);
-			ResFiles.cD2MRFancyBorderTop = new ExCellFile(ResImages::D2MRFancyBorderTop);
-			ResFiles.cD2MRFancyHorizontalBar = new ExCellFile(ResImages::D2MRFancyHorizontalBar);
-			ResFiles.cD2MRFancyPanelBar = new ExCellFile(ResImages::D2MRFancyPanelBar);
-			ResFiles.cD2MRFancyPanelLeft = new ExCellFile(ResImages::D2MRFancyPanelLeft);
-			ResFiles.cD2MRFancyPanelRight = new ExCellFile(ResImages::D2MRFancyPanelRight);
-			ResFiles.cD2MRFancyVerticalBar = new ExCellFile(ResImages::D2MRFancyVerticalBar);
-			ResFiles.cD2MRHorizontalBlackBar = new ExCellFile(ResImages::D2MRHorizontalBlackBar);
-			ResFiles.cD2MRHorizontalBorder = new ExCellFile(ResImages::D2MRHorizontalBorder);
-			ResFiles.cD2MRStoneBack = new ExCellFile(ResImages::D2MRStoneBack);
-			ResFiles.cD2MRVerticalBlackBar = new ExCellFile(ResImages::D2MRVerticalBlackBar);
-			ResFiles.cD2MRVerticalBorder = new ExCellFile(ResImages::D2MRVerticalBorder);
+			cExMultiResResources = new ExCellFile(CellFiles::MULTIRES);
+			cControlPanel = new ExCellFile(CellFiles::CONTROLPANEL);
+			cControlPanel800  = new ExCellFile(CellFiles::CONTROLPANEL800);
 		}
 		catch (const CellLoadError&)
 		{
@@ -956,16 +995,12 @@ namespace ExMultiRes
 
 	void FreeImages()
 	{
-		DWORD** r = reinterpret_cast<DWORD**>(&ResFiles);
-
-		if (!r[0]) return;
 		DEBUGMSG("Freeing ExMultiRes resources...");
-		for (int i = 0; i < (sizeof(ResFiles) / 4); ++i)
-		{
-			if (!r[i]) break;
-			delete *(ExCellFile**)&(r[i]);
-			r[i] = 0;
-		}
+		delete cExMultiResResources;
+		delete cControlPanel;
+		delete cControlPanel800;
+		cControlPanel = 0;
+		cExMultiResResources = 0;
 	}
 
 	int FindDisplayMode(int Width, int Height)

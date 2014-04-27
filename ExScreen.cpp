@@ -195,6 +195,10 @@ void ExScreen::DrawTextEx(int X, int Y, int Color, int Cent, int TransLvl, char*
 
 void __stdcall ExScreen::Display()
 {
+#ifdef D2EX_MULTIRES
+	ExMultiRes::DrawMissingPieces();
+#endif
+
 #ifdef _DEBUG
 	wostringstream wStr;
 	wStr << "mX: " << *D2Vars.D2CLIENT_MouseX << " mY:" << *D2Vars.D2CLIENT_MouseY;
@@ -203,10 +207,12 @@ void __stdcall ExScreen::Display()
 	{
 		wStr << " UnitId: " << dec << D2Funcs.D2CLIENT_GetSelectedUnit()->dwUnitId;
 		wStr << " ClassId: " << dec << D2Funcs.D2CLIENT_GetSelectedUnit()->dwClassId;
-		wStr << " [" << dec << ExAim::GetUnitX(D2Funcs.D2CLIENT_GetSelectedUnit()) << "," << dec <<  ExAim::GetUnitY(D2Funcs.D2CLIENT_GetSelectedUnit()) << "]";
+		wStr << " [" << dec << ExAim::GetUnitX(D2Funcs.D2CLIENT_GetSelectedUnit()) << "," << dec << ExAim::GetUnitY(D2Funcs.D2CLIENT_GetSelectedUnit()) << "]";
 	}
-	int aLen =ExScreen::GetTextWidth(wStr.str().c_str());
-	D2Funcs.D2WIN_DrawText(wStr.str().c_str(), *D2Vars.D2CLIENT_ScreenWidth - aLen - 10, *D2Vars.D2CLIENT_ScreenHeight - 10, 11, 0);
+	wStr << " Shake = [" << *D2Vars.D2CLIENT_ShakeX << "," << *D2Vars.D2CLIENT_ShakeY << "]";
+	D2Funcs.D2WIN_SetTextSize(12);
+	int aLen = ExScreen::GetTextWidth(wStr.str().c_str());
+	D2Funcs.D2WIN_DrawText(wStr.str().c_str(), *D2Vars.D2CLIENT_ScreenWidth - aLen - 10, *D2Vars.D2CLIENT_ScreenHeight - 10, COL_WHITE, 0);
 	
 	/*wstring wPool = L"Pools: " + boost::lexical_cast<wstring>(ExMemory::GetPoolsCount());
 	wPool+=L" Mem taken:" + boost::lexical_cast<wstring>(ExMemory::GetMemUsage() /1024 / 1024);
@@ -594,40 +600,40 @@ void ExScreen::DrawResInfo()
 		else if(*D2Vars.D2CLIENT_ServerDifficulty == 2) nRes = -100;
 	}
 
-	if(mX>256 && mX<391 && mY>395 && mY<412)  //Fire Res
+	if (mX>175 + *D2Vars.D2CLIENT_UIPanelDrawXOffset && mX< 316 + *D2Vars.D2CLIENT_UIPanelDrawXOffset && mY>*D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 147 && mY< *D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 122)  //Fire Res
 	{ 
 		nRes+= D2Funcs.D2COMMON_GetStatSigned(ptUnit,STAT_FIRERESIST,0);
 		wostringstream wInfo;
 		wInfo << (gLocaleId == 10? L"Ca³kowita odpornoœæ: " : L"Stacked resistance: ") << GetColorCode(COL_RED) << nRes ; 
 		D2Funcs.D2WIN_SetTextSize(0);
-		D2Funcs.D2WIN_DrawRectangledText(wInfo.str().c_str(),252,390,0,2,COL_WHITE);
+		D2Funcs.D2WIN_DrawRectangledText(wInfo.str().c_str(), 160 + *D2Vars.D2CLIENT_UIPanelDrawXOffset, *D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 150, 0, 2, COL_WHITE);
 	}
 	else
-	if(mX>256 && mX<391 && mY>418 && mY<435)  //Cold Res
+		if (mX>175 + *D2Vars.D2CLIENT_UIPanelDrawXOffset && mX< 316 + *D2Vars.D2CLIENT_UIPanelDrawXOffset && mY>*D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 123 && mY< *D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 98)  //Cold Res
 	{ 
 		nRes+= D2Funcs.D2COMMON_GetStatSigned(ptUnit,STAT_COLDRESIST,0);
 		wostringstream wInfo;
 		wInfo << (gLocaleId == 10? L"Ca³kowita odpornoœæ: " : L"Stacked resistance: ") << GetColorCode(COL_BLUE) << nRes ; 
 		D2Funcs.D2WIN_SetTextSize(0);
-		D2Funcs.D2WIN_DrawRectangledText(wInfo.str().c_str(),252,390,0,2,COL_WHITE);
+		D2Funcs.D2WIN_DrawRectangledText(wInfo.str().c_str(), 160 + *D2Vars.D2CLIENT_UIPanelDrawXOffset, *D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 150, 0, 2, COL_WHITE);
 	}
 	else
-	if(mX>256 && mX<391 && mY>442 && mY<460)  //Light Res
+		if (mX>175 + *D2Vars.D2CLIENT_UIPanelDrawXOffset && mX< 316 + *D2Vars.D2CLIENT_UIPanelDrawXOffset && mY>*D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 99 && mY< *D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 74)  //Light Res
 	{
 		nRes+= D2Funcs.D2COMMON_GetStatSigned(ptUnit,STAT_LIGHTRESIST,0);
 		wostringstream wInfo;
 		wInfo << (gLocaleId == 10? L"Ca³kowita odpornoœæ: " : L"Stacked resistance: ") << GetColorCode(COL_YELLOW) << nRes ; 
 		D2Funcs.D2WIN_SetTextSize(0);
-		D2Funcs.D2WIN_DrawRectangledText(wInfo.str().c_str(),252,390,0,2,COL_WHITE);
+		D2Funcs.D2WIN_DrawRectangledText(wInfo.str().c_str(), 160 + *D2Vars.D2CLIENT_UIPanelDrawXOffset, *D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 150, 0, 2, COL_WHITE);
 	}
 	else
-	if(mX>256 && mX<391 && mY>465 && mY<482)  //Poison Res
+		if (mX>175 + *D2Vars.D2CLIENT_UIPanelDrawXOffset && mX< 316 + *D2Vars.D2CLIENT_UIPanelDrawXOffset && mY>*D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 75 && mY< *D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 50)  //Poison Res
 	{ 
 		nRes+= D2Funcs.D2COMMON_GetStatSigned(ptUnit,STAT_POISONRESIST,0);
 		wostringstream wInfo;
 		wInfo << (gLocaleId == 10? L"Ca³kowita odpornoœæ: " : L"Stacked resistance: ") << GetColorCode(COL_LIGHTGREEN) << nRes ; 
 		D2Funcs.D2WIN_SetTextSize(0);
-		D2Funcs.D2WIN_DrawRectangledText(wInfo.str().c_str(),252,390,0,2,COL_WHITE);
+		D2Funcs.D2WIN_DrawRectangledText(wInfo.str().c_str(), 160 + *D2Vars.D2CLIENT_UIPanelDrawXOffset, *D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 150, 0, 2, COL_WHITE);
 	}
 ExScreen::DrawDmg();
 }
@@ -802,4 +808,10 @@ BOOL __stdcall ExScreen::OnALTDraw(UnitAny *ptItem)
 	if(HideCrap && (ptItem->pItemData->QualityNo==ITEM_NORMAL || ptItem->pItemData->QualityNo==ITEM_LOW) && !pTxt->bquest) return FALSE;
 
 	return TRUE;
+}
+
+void ExScreen::SetView(D2RECT* view)
+{
+	//TODO :Add body
+	D2Funcs.D2GFX_SetScreenShift(1);
 }

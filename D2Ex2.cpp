@@ -266,9 +266,9 @@ unsigned int __stdcall Thread(void * Args)
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x337B0),(DWORD)D2Stubs::D2CLIENT_SendJoinGame_STUB,5,"Join Game Override");
 #endif
 
-	Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x254C0),MAX_SOUND_TXT_ROWS,4,"Extend Sound.Txt I");
-	Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x532B2),MAX_SOUND_TXT_ROWS,4,"Extend Sound.Txt II");
-	Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x6E63C),MAX_SOUND_TXT_ROWS,4,"Extend Sound.Txt III");
+	Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x254C0),D2EX_MAX_SND_TXT_ROWS,4,"Extend Sound.Txt I");
+	Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x532B2),D2EX_MAX_SND_TXT_ROWS,4,"Extend Sound.Txt II");
+	Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x6E63C),D2EX_MAX_SND_TXT_ROWS,4,"Extend Sound.Txt III");
 	//Misc::Patch(JUMP,GetDllOffset("BNClient.dll",0xB3A0),(DWORD)D2Stubs::BNCLIENT_OverrideVersion_STUB,6,"Override version");
 
 	//Misc::Patch(JUMP,GetDllOffset("D2Launch.dll",0x17999),(DWORD)D2Stubs::D2LAUNCH_OnMainMenuCreate,7,"Add Main Menu Controls");
@@ -348,11 +348,15 @@ unsigned int __stdcall Thread(void * Args)
 	Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x889B8),MaxPlayers,1,"Player Count Set VII"); //k
 
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x460C0),(DWORD)D2Stubs::D2CLIENT_SendJoinGame_STUB,5,"Join Game Override"); //k
+
+	#ifdef D2EX_SPECATATOR
+	Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x452F2), (DWORD)ExSpec::OnShake, 5, "Screen Shake override"); 
+	#endif
 #endif
 
-	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0xB40D0), MAX_SOUND_TXT_ROWS, 4, "Extend Sound.Txt I"); //k
-	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x25342), MAX_SOUND_TXT_ROWS, 4, "Extend Sound.Txt II"); //k
-	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x1F47C), MAX_SOUND_TXT_ROWS, 4, "Extend Sound.Txt III"); //k
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0xB40D0), D2EX_MAX_SND_TXT_ROWS, 4, "Extend Sound.Txt I"); //k
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x25342), D2EX_MAX_SND_TXT_ROWS, 4, "Extend Sound.Txt II"); //k
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x1F47C), D2EX_MAX_SND_TXT_ROWS, 4, "Extend Sound.Txt III"); //k
 
 	Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x1D7AA), (DWORD)ExDeathMessage::Draw, 5, "Death Message Draw");
 	
@@ -379,6 +383,7 @@ unsigned int __stdcall Thread(void * Args)
 	Misc::Patch(JUMP, GetDllOffset("D2Common.dll", -10441), (DWORD)ExMultiRes::GetInventoryField, 8, "D2COMMON_GetInventoryField");
 	Misc::Patch(NOP, GetDllOffset("D2Client.dll", 0x1D3F1), 0x90909090, 44, "Nullify UI panels draw offset set");
 
+	Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x6F344), (DWORD)ExMultiRes::DrawControlPanel, 5, "GFX_DrawControlPanel");
 
 	Misc::WriteDword((DWORD*)&((GFXHelpers*)GetDllOffset("D2Gfx.dll", 0x10BFC))->FillYBufferTable, (DWORD)&ExMultiRes::D2GFX_FillYBufferTable);
 
@@ -620,14 +625,13 @@ DWORD WINAPI DllMain(HMODULE hModule, int dwReason, void* lpReserved)
 		break;
 		case DLL_PROCESS_DETACH:
 		{
+			DEBUGMSG("Finishing...")
 			ExBuffs::Clear();
 			for(auto i = 0; (unsigned int)i < Controls.size(); ++i) delete Controls.at(i); 
 
-			//ExMultiRes::FreeImages();
-			ExMpq::UnloadMPQ();
-
 			if(CellBox) delete CellBox;
 			if(CellButton) delete CellButton;
+
 			DeleteCriticalSection(&EX_CRITSECT);
 			DeleteCriticalSection(&BUFF_CRITSECT);
 			DeleteCriticalSection(&CON_CRITSECT);

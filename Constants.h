@@ -811,6 +811,9 @@ namespace CellFiles
 	char * const PATCHBALL = "data\\global\\ui\\FrontEnd\\DownloadPatchBall2";
 	char * const PATCHBCKG = "data\\global\\ui\\FrontEnd\\DownloadPatchBckg";
 	char * const POPUP = "data\\global\\ui\\FrontEnd\\PopUpOKCancel2";
+	char * const MULTIRES = "data\\D2Ex\\ExMultiRes";
+	char * const CONTROLPANEL = "data\\global\\ui\\PANEL\\CtrlPnl7";
+	char * const CONTROLPANEL800 = "data\\global\\ui\\PANEL\\800CtrlPnl7";
 }
 
 namespace ResImages

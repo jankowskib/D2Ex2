@@ -214,8 +214,8 @@ struct D2RGB
 struct GameView // size 0xEABC
 {
 	DWORD dwFlags; // 0x00
-	RECT ViewRadius; // 0x04
-	RECT ToCheck; // 0x14
+	D2RECT ViewRadius; // 0x04
+	D2RECT ToCheck; // 0x14
 	DWORD _1; // 0x24
 	DWORD _2; // 0x28
 	DWORD* pGouraudTblX; // 0x2C
