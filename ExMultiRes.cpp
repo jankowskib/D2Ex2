@@ -50,6 +50,12 @@ namespace ExMultiRes
 
 //D2Client funcs
 
+	void __stdcall OnResolutionSet()
+	{
+		int res = Misc::RegReadDword("SOFTWARE\\Blizzard Entertainment\\Diablo II", "Resolution", 2);
+		D2CLIENT_SetResolution(res);
+	}
+
 	void __fastcall D2CLIENT_SetResolution(int nMode) // Wrapper on D2CLIENT.0x2C220
 	{
 		DEBUGMSG("Changing window resolution to %d mode", nMode);
@@ -58,7 +64,7 @@ namespace ExMultiRes
 			return;
 
 		D2GFX_GetModeParams(nMode, D2Vars.D2CLIENT_ScreenWidth, D2Vars.D2CLIENT_ScreenHeight);
-		*D2Vars.D2CLIENT_ScreenMode = (nMode == 2 ? 1 : nMode);
+		*D2Vars.D2CLIENT_ScreenMode = (nMode == 1 ? 2 : nMode);
 
 		*D2Vars.D2CLIENT_ScreenViewWidth = *D2Vars.D2CLIENT_ScreenWidth;
 		*D2Vars.D2CLIENT_ScreenViewHeight = *D2Vars.D2CLIENT_ScreenHeight - 40;
@@ -165,6 +171,9 @@ namespace ExMultiRes
 		atexit(&D2GFX_WindowCleanUp);
 		*D2Vars.D2GFX_DriverType = nRenderMode;
 		*D2Vars.D2GFX_WindowMode = bWindowed;
+
+		EnumDisplayModes();
+		
 		fnRendererCallbacks * fns;
 		if (nRenderMode != VIDEO_MODE_OPENGL)
 		{
@@ -388,7 +397,7 @@ namespace ExMultiRes
 
 	void __stdcall D2GFX_SetStoredGammaAndContrast() // Wrapper on D2GFX.6FA8BA20
 	{
-		int c = Misc::RegReadDword("SOFTWARE\\Blizzard Entertainment\\Diablo II", "Constrast", 100);
+		int c = Misc::RegReadDword("SOFTWARE\\Blizzard Entertainment\\Diablo II", "Contrast", 100);
 		int g = Misc::RegReadDword("SOFTWARE\\Blizzard Entertainment\\Diablo II", "Gamma", 155);
 		(*D2Vars.D2GFX_pfnDriverCallback)->SetOption(11, c);
 		(*D2Vars.D2GFX_pfnDriverCallback)->SetGamma(g);
@@ -513,7 +522,7 @@ namespace ExMultiRes
 
 		bm.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 		bm.bmiHeader.biWidth = *D2Vars.D2GDI_BitmapWidth;
-		bm.bmiHeader.biHeight = -(*D2Vars.D2GDI_BitmapHeight);
+		bm.bmiHeader.biHeight = -((signed int)*D2Vars.D2GDI_BitmapHeight);
 		bm.bmiHeader.biPlanes = 1;
 		bm.bmiHeader.biBitCount = 8;
 		bm.bmiHeader.biCompression = BI_RGB;
@@ -596,6 +605,9 @@ namespace ExMultiRes
 		return TRUE;
 	}
 
+/*
+	Stuff for GLIDE renderer
+*/
 
 	BOOL __fastcall GLIDE_SetRes(HANDLE hWND, int nMode) // Wrapper on D2GLIDE.6F85D5A0<eax>(int nResolution<eax>, HANDLE hWnd<edi>)
 	{
@@ -724,6 +736,11 @@ namespace ExMultiRes
 		return TRUE;
 	}
 
+
+/*
+	UI fixes	
+*/
+
 	void __stdcall GetBeltPos(int nIndex, int nMode, BeltBox *out, int nBox) // Wrapper on D2Common.Ordinal10689
 	{
 		unsigned int w, h, panelsize, xpos;
@@ -770,8 +787,11 @@ namespace ExMultiRes
 	void __stdcall GetInventorySize(int nRecord, int nScreenMode, InventorySize *pOut) // Wrapper on D2Common.Ordinal10770
 	{
 		int xBottom, xTop;
-		if (nScreenMode < 2) // Legacy support
+		if (nScreenMode < 3) // Legacy support
 		{
+			if (nScreenMode == 2)
+				nScreenMode = 1;
+
 			InventoryTxt* pTxt = &(*D2Vars.D2COMMON_InventoryTxt)[nRecord + (nScreenMode * 16)];
 			D2EXASSERT(pTxt, "Error in Inventory.txt. Record #%d doesn't exist", nRecord + (nScreenMode * 16));
 
@@ -810,8 +830,11 @@ namespace ExMultiRes
 
 	void __stdcall GetInventoryGrid(int nRecord, int nScreenMode, InventoryGrid *pOut) // Wrapper on D2Common.Ordinal10964
 	{
-		if (nScreenMode < 2) // Legacy support
+		if (nScreenMode < 3) // Legacy support
 		{
+			if (nScreenMode == 2)
+				nScreenMode = 1;
+
 			InventoryTxt* pTxt = &(*D2Vars.D2COMMON_InventoryTxt)[nRecord + (nScreenMode * 16)];
 			D2EXASSERT(pTxt, "Error in Inventory.txt. Record #%d doesn't exist", nRecord + (nScreenMode * 16));
 
@@ -862,8 +885,10 @@ namespace ExMultiRes
 
 	void __stdcall GetInventoryField(int nRecord, int nScreenMode, InventoryLayout *pOut, int nField) // Wrapper on D2Common.Ordinal10441
 	{
-		if (nScreenMode < 2) // Legacy support
+		if (nScreenMode < 3) // Legacy support
 		{
+			if (nScreenMode == 2)
+				nScreenMode = 1;
 			InventoryTxt* pTxt = &(*D2Vars.D2COMMON_InventoryTxt)[nRecord + (nScreenMode * 16)];
 			D2EXASSERT(pTxt, "Error in Inventory.txt. Record #%d doesn't exist", nRecord + (nScreenMode * 16));
 			InventoryLayout * pLayout = &pTxt->hItem[nField];
@@ -1015,13 +1040,19 @@ namespace ExMultiRes
 		return 0;
 	}
 
-	bool EnumDisplayModes()
+	/*
+		Check available display modes. Returns number of found modes.
+	*/
+	int EnumDisplayModes()
 	{
 		DEVMODE d = { 0 };
 		d.dmSize = sizeof(DEVMODE);
 
 		for (int i = 0; EnumDisplaySettings(NULL, i, &d); ++i)
 		{
+			int w = d.dmPelsWidth;
+			int h = d.dmPelsHeight;
+
 			bool bAdd = true;
 			for (auto m = lResModes.cbegin(); m != lResModes.cend(); ++m)
 			{
@@ -1031,9 +1062,21 @@ namespace ExMultiRes
 					break;
 				}
 			}
-			if (d.dmPelsWidth <= 800 || d.dmPelsHeight <= 600)
+
+			if (GFX_GetRenderType() == VIDEO_MODE_GLIDE)
+			{
+
+				if (!((w == 1600 && h == 1200) ||
+					(w == 1280 && h == 1024) ||
+					(w == 1024 && h == 768) ||
+					(w == 800 && h == 600) ||
+					(w == 640 && h == 480)))
+					continue;
+
+			}
+			if (w <= 800 || h <= 600)
 				continue;
-			if (d.dmPelsWidth == 1366 || d.dmPelsHeight <= 768) // messes up screen
+			if (w == 1366 && h == 768) // messes up screen
 				continue;
 
 			if (bAdd)
@@ -1045,8 +1088,8 @@ namespace ExMultiRes
 			}
 		}
 		Misc::Log("Found %d display modes", lResModes.size());
-		if (lResModes.empty()) return false;
-		return true;
+		if (lResModes.empty()) return 0;
+		return lResModes.size();
 	}
 
 }

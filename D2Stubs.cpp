@@ -459,7 +459,7 @@ __declspec(naked) void __fastcall D2ASMFuncs::D2GFX_UpdateResizeVars(int nWidth,
 
 #endif
 
-__declspec(naked) BYTE* __fastcall D2ASMFuncs::D2CLIENT_GetSkillsTxt(int SkillId)
+__declspec(naked) SkillDescTxt* __fastcall D2ASMFuncs::D2CLIENT_GetSkillDescTxt(int SkillId)
 {
 	__asm
 	{

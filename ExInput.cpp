@@ -327,26 +327,23 @@ LONG WINAPI ExInput::GameWindowEvent(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM
 		break;
 		//CASE 'NEXTMSG'
 	};
-#ifdef D2EX_MULTIRES
+#if defined(D2EX_MULTIRES) && defined(_DEBUG)
 	if (uMsg == WM_MOUSEWHEEL && (GET_KEYSTATE_WPARAM(wParam) & MK_CONTROL))
 	{
 		if (GET_WHEEL_DELTA_WPARAM(wParam) < 0)
 		{
 			if (*D2Vars.D2GFX_GfxMode > 0)
 			{
-				EnterCriticalSection(&CON_CRITSECT);
 				unsigned int x, y;
 				ExMultiRes::D2GFX_GetModeParams(*D2Vars.D2GFX_GfxMode - 1, &x, &y);
 				DEBUGMSG("Changing resolution to %dx%d", x, y);
 				ExMultiRes::D2CLIENT_SetResolution((*D2Vars.D2GFX_GfxMode) - 1);
-				LeaveCriticalSection(&CON_CRITSECT);
 			}
 		}
 		else if (GET_WHEEL_DELTA_WPARAM(wParam) > 0)
 		{
 			if ((unsigned int)*D2Vars.D2GFX_GfxMode < ExMultiRes::lResModes.size() + 2)
 			{
-				EnterCriticalSection(&CON_CRITSECT);
 				unsigned int x, y, r;
 				if (ExMultiRes::GFX_GetRenderType() == VIDEO_MODE_GLIDE)
 				{
@@ -372,7 +369,6 @@ LONG WINAPI ExInput::GameWindowEvent(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM
 
 				DEBUGMSG("Changing resolution to %dx%d", x, y);
 				ExMultiRes::D2CLIENT_SetResolution(r);
-				LeaveCriticalSection(&CON_CRITSECT);
 			}
 		}
 		return 0;

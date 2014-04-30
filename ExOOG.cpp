@@ -69,7 +69,7 @@ BOOL __stdcall PortAccept(Control* pButton)
 	wcscpy_s(pPortOK->wText, 256, L"OK");
 
 
-	D2Funcs.D2WIN_SetTextBoxText(pPortText, gLocaleId == 10 ? L"Zmien port Battle.Net :" : L"Change Battle.Net Port :");
+	D2Funcs.D2WIN_SetTextBoxText(pPortText, gLocaleId == LOCALE_POL ? L"Zmien port Battle.Net :" : L"Change Battle.Net Port :");
 
 	pPortBox->dwMaxLength = 5;
 	wostringstream wPort; wPort << Port;

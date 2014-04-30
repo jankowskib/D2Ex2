@@ -120,7 +120,7 @@ void ExParty::Spectate(ExControl* ptControl)
 	px5e aPacket;
 	aPacket.P_5E = 0x5E;
 	aPacket.nButton = PB_SPECATE;
-	aPacket.dwUnitId = PlayerId;
+	aPacket.dwUnitId = gSpecing ? D2Funcs.D2CLIENT_GetPlayer()->dwUnitId : PlayerId;
 
 	D2Funcs.D2NET_SendPacket(sizeof(px5e), 1, (BYTE*)&aPacket);
 
@@ -166,6 +166,7 @@ void ExParty::Squelch(ExControl* ptControl)
 	}
 	*D2Vars.D2CLIENT_SentBytes += 7;
 	*D2Vars.D2CLIENT_SentPackets++;
+
 }
 
 void ExParty::Loot(ExControl* ptControl)
@@ -315,7 +316,7 @@ bool ExParty::isTownLvl(UnitAny* ptUnit)
 
 void ExParty::SharePing(ExControl * tt)
 {
-	ExInput::Say(gLocaleId == 10 ? "Moj ping : %d ms / %d fps" : "My ping : %d ms / %d fps", *D2Vars.D2CLIENT_Ping, *D2Vars.D2CLIENT_FPS);
+	ExInput::Say(gLocaleId == LOCALE_POL ? "Moj ping : %d ms / %d fps" : "My ping : %d ms / %d fps", *D2Vars.D2CLIENT_Ping, *D2Vars.D2CLIENT_FPS);
 }
 
 void ExParty::Leave(ExControl * tt)
@@ -794,8 +795,15 @@ void ExParty::Update()
 		i->Kills->SetText(boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName, 1)));
 		i->Deaths->SetText(boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName, 2)));
 		i->Assists->SetText(boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName, 3)));
+	#ifdef D2EX_SPECATATOR
 		if (i->Spectate)
+		{
+			if (gSpecing)
+			i->Spectate->SetHoover(L"Click to leave spectator mode");
+			else
 			i->Spectate->SetHoover(L"Click to observe a player");
+		}
+	#endif
 #endif
 		DWORD Flaga = ExParty::GetPvpFlags(ptRoster->dwUnitId);
 		// Class Hover Info 
@@ -856,10 +864,14 @@ void ExParty::Update()
 		{
 			if (gSpecing)
 			{
-				i->Spectate->SetState(i->Spectate->DISABLED);
+				if (gSpectatorTarget == i->UnitId)
+					i->Spectate->SetColor(COL_PURPLE);
+				else
+					i->Spectate->SetState(i->Spectate->INVISIBLE);
 			}
-			else
+			else 
 			{
+				i->Spectate->SetColor(COL_WHITE);
 				i->Spectate->SetState(i->Spectate->VISIBLE);
 			}
 		}
@@ -1068,7 +1080,7 @@ void ExParty::Fill(char *szSkip)
 		{
 			int bOffset = Tbl.Frame->GetX() + Tbl.Frame->GetWidth() - 20;
 #ifdef D2EX_SPECATATOR
-			Tbl.Spectate = new ExButton(bOffset, yPos, 0, 20, L"", CellFiles::PARTY, &ExParty::Spectate, 0); // TODO: Add func
+			Tbl.Spectate = new ExButton(bOffset, yPos, 0, 20, L"", CellFiles::PARTY, &ExParty::Spectate, 0); 
 			PartyScreen->AddChild(Tbl.Spectate);
 			bOffset -= 21;
 #endif
@@ -1133,14 +1145,14 @@ void ExParty::ShowHide()
 		PlayerCount = new ExTextBox(PartyScreen->GetX() + 5, 101, 11, 0, &ExParty::GetPartyCount, 0, 0);
 		Charname = new ExTextBox(PartyScreen->GetX() + 28, 105, 0, 0, wCharStr, 0, 0);
 		Class = new ExTextBox(PartyScreen->GetX() + 154, 105, 0, 0, wClassStr, 0, 0);
-		Clan = new ExTextBox(PartyScreen->GetX() + 201, 105, 0, 0, gLocaleId == 10 ? L"Klan" : L"Clan", 0, 0);
+		Clan = new ExTextBox(PartyScreen->GetX() + 201, 105, 0, 0, gLocaleId == LOCALE_POL ? L"Klan" : L"Clan", 0, 0);
 		Acc = new ExTextBox(PartyScreen->GetX() + 237, 105, 0, 0, wAccStr, 0, 0);
 #ifdef D2EX_PVPGN_EXT
-		Kills = new ExImage(PartyScreen->GetX() + 346, 105, 5, 1, CellFiles::MONINDICATOR); Kills->Hoover = gLocaleId == 10 ? L"Zabójstwa" : L"Kills";
-		Assists = new ExImage(PartyScreen->GetX() + 366, 105, 5, 2, CellFiles::MONINDICATOR);  Assists->Hoover = gLocaleId == 10 ? L"Asysty" : L"Assists";
-		Deaths = new ExImage(PartyScreen->GetX() + 386, 105, 5, 0, CellFiles::MONINDICATOR);  Deaths->Hoover = gLocaleId == 10 ? L"Œmierci" : L"Deaths";
+		Kills = new ExImage(PartyScreen->GetX() + 346, 105, 5, 1, CellFiles::MONINDICATOR); Kills->Hoover = gLocaleId == LOCALE_POL ? L"Zabójstwa" : L"Kills";
+		Assists = new ExImage(PartyScreen->GetX() + 366, 105, 5, 2, CellFiles::MONINDICATOR);  Assists->Hoover = gLocaleId == LOCALE_POL ? L"Asysty" : L"Assists";
+		Deaths = new ExImage(PartyScreen->GetX() + 386, 105, 5, 0, CellFiles::MONINDICATOR);  Deaths->Hoover = gLocaleId == LOCALE_POL ? L"Œmierci" : L"Deaths";
 #else
-		Location = new ExTextBox(PartyScreen->GetX()+346,105,0,0, gLocaleId == 10 ? L"Lokacja" : L"Location",0,0);
+		Location = new ExTextBox(PartyScreen->GetX()+346,105,0,0, gLocaleId == LOCALE_POL ? L"Lokacja" : L"Location",0,0);
 #endif
 		Ping = new ExTextBox(PartyScreen->GetX() + 10, 64, 0, 0, &ExParty::GetPingFps, &ExParty::SharePing, 0);
 		Ping->SetHoverable(false);

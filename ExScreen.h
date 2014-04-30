@@ -59,6 +59,8 @@ BOOL __stdcall OnALTDraw(UnitAny *ptItem);
 
 
 void SetView(D2RECT* view);
+void SetView(int xLeft, int xTop, int xRight, int xBottom);
+
 }
 
 

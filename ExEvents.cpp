@@ -112,22 +112,26 @@ int __fastcall ExEvents::OnTextEvent(ExEvent *Dane) //0xA6
 		case EXEVENT_SPECTATOR_START:
 		{
 			ExEventSpecatorStart * msg = (ExEventSpecatorStart*)Dane;
-			UnitAny* u = D2Funcs.D2CLIENT_GetUnitById(msg->UnitId, UNIT_PLAYER);
+			RosterUnit* u = ExParty::GetRosterById(msg->UnitId);
 			if (u)
 			{
-				gszSpectator = u->pPlayerData->szName;
-				gSpecing = true;
+				DEBUGMSG("Entering specator mode")
+				gszSpectator = u->szName;
 				*D2Vars.D2CLIENT_EnableShake = 1;
 				gSpectatorTarget = u->dwUnitId;
+				ExParty::ClearScreenHandle();
+				gSpecing = true;
 			}
 		}
 		break;
 		case EXEVENT_SPECTATOR_END:
 		{
+				DEBUGMSG("Leaving specator mode")
 				gSpecing = false;
 				*D2Vars.D2CLIENT_EnableShake = 0;
 				gSpectatorTarget = 0;
-				gszSpectator = "";
+				gszSpectator.clear();
+				ExParty::ClearScreenHandle();
 		}
 		break;
 		default:

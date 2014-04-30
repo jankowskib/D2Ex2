@@ -20,8 +20,6 @@
 
 #ifndef _EXEVENTS_H__
 #define _EXEVENTS_H__
-#include <cstdio>
-#include <string>
 
 #include "ExImage.h"
 #include "ExTextBox.h"

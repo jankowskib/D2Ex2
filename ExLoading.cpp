@@ -195,7 +195,7 @@ Room1* cRoom = 0 ;
 	cRoom = D2Funcs.D2COMMON_GetRoomByXY(*D2Vars.D2CLIENT_Act,xPos,yPos);
 		if(!cRoom) 
 		{
- 		Misc::Log("Nie znalazlem miejsca na obiekt (%d, %d, Act =%d)",xPos,yPos,(*D2Vars.D2CLIENT_Act)->dwAct + 1);
+		Misc::Log("Nie znalazlem miejsca na obiekt (%d, %d, Act =%d)",xPos,yPos,(*D2Vars.D2CLIENT_Act)->dwAct + 1);
 		}
 	}
 	return cRoom;

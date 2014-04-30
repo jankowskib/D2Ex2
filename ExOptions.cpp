@@ -26,6 +26,7 @@
 #include "ExBuffs.h"
 #include "ExScreen.h"
 #include "ExOOG.h"
+#include "ExMultiRes.h"
 
 #include "Build.h"
 
@@ -89,13 +90,27 @@ void ExOptions::OnClick(StormMsg * Msg)
 	D2MenuEntry * Entries = *D2Vars.D2CLIENT_D2MenuEntries;
 
 	if (Entries[nMenu].EnableCheck)
-		if (!Entries[nMenu].EnableCheck(&Entries[nMenu], nMenu)) return;
+		if (!Entries[nMenu].EnableCheck(&Entries[nMenu], nMenu)) 
+			return;
+
+	if (Msg->wParam & MK_RBUTTON && (Entries[nMenu].dwMenuType != D2MENU_SWITCHEX || Entries[nMenu].dwMenuType != D2MENU_SWITCH))
+		return;
+	if (Msg->wParam & MK_MBUTTON)
+		return;
+
 	switch (Entries[nMenu].dwMenuType) {
+	case D2MENU_SWITCHEX:
 	case D2MENU_SWITCH:
 	{
+		if (Msg->wParam & MK_RBUTTON)
+		Entries[nMenu].dwCurrentSwitch--;
+		else
 		Entries[nMenu].dwCurrentSwitch++;
 		if (Entries[nMenu].dwCurrentSwitch > Entries[nMenu].dwSwitchesNo - 1)
 			Entries[nMenu].dwCurrentSwitch = 0;
+		if (Entries[nMenu].dwCurrentSwitch < 0)
+			Entries[nMenu].dwCurrentSwitch = Entries[nMenu].dwSwitchesNo;
+
 		if (Entries[nMenu].OnPress)
 			Entries[nMenu].OnPress(&Entries[nMenu], Msg);
 		D2ASMFuncs::D2CLIENT_PlaySound(1);
@@ -318,7 +333,7 @@ void ExOptions::DrawMenuRecon()
 		{
 			if (!Entries[eNo].EnableCheck || (dwTrans = Entries[eNo].EnableCheck(&Entries[eNo], eNo)) != 0) dwTrans = 1;
 			dwTrans = (4 * dwTrans) + 1;
-			if (Entries[eNo].ChangeHandle) Entries[eNo].ChangeHandle(&Entries[eNo]);
+			if (Entries[eNo].ValidateCheck) Entries[eNo].ValidateCheck(&Entries[eNo]);
 			int MenuPosY = MenuStartY + eNo * Menu->dwInterline;
 			int MenuTextY = MenuPosY + Menu->dwTextHeight;
 			Entries[eNo].dwYOffset = MenuPosY;
@@ -379,6 +394,17 @@ void ExOptions::DrawMenuRecon()
 					}
 				}
 				break;
+			case D2MENU_SWITCHEX: // Switch++ Entry
+				D2Funcs.D2WIN_SetTextSize(Entries[eNo].dwFontType ? Entries[eNo].dwFontType : 2);
+				if (Entries[eNo].wItemName[0])
+				{
+					int Tw = D2Funcs.D2WIN_GetTextWidth(Entries[eNo].wItemName);
+					D2Funcs.D2WIN_DrawTextEx(Entries[eNo].wItemName, (*D2Vars.D2CLIENT_ScreenWidth) / 2 - 250, MenuTextY, 0, 0, dwTrans);
+
+					Tw = D2Funcs.D2WIN_GetTextWidth(Entries[eNo].wSwitches[Entries[eNo].dwCurrentValue]->c_str());
+					D2Funcs.D2WIN_DrawTextEx(Entries[eNo].wSwitches[Entries[eNo].dwCurrentValue]->c_str(), (*D2Vars.D2CLIENT_ScreenWidth - Tw) / 2 + 230, MenuTextY, 0, 0, dwTrans);
+				}
+				break;
 			}
 		}
 	}
@@ -431,7 +457,7 @@ BOOL __fastcall ExOptions::RejoinCB(D2MenuEntry* ptEntry, StormMsg* pMsg)
 }
 
 
-BOOL __fastcall ExOptions::ChangeHandle(D2MenuEntry* ptEntry, StormMsg* pMsg)
+BOOL __fastcall ExOptions::ValidateCheck(D2MenuEntry* ptEntry, StormMsg* pMsg)
 {
 //	wstring tmp = L"You set " + boost::lexical_cast<wstring>(ptEntry->dwCurrentValue);
 //	D2Funcs.D2CLIENT_PrintPartyString(tmp.c_str(), COL_WHITE);
@@ -518,9 +544,9 @@ BOOL __fastcall ExOptions::Buffs(D2MenuEntry* ptEntry, StormMsg *pMsg)
 	wcscpy_s(NewEntries[0].wItemName, 130, ExBuffs::GetSkillName(155));
 	wcscpy_s(NewEntries[1].wItemName, 130, ExBuffs::GetSkillName(66));
 	wcscpy_s(NewEntries[2].wItemName, 130, ExBuffs::GetSkillName(17));
-	wcscpy_s((wchar_t*)&NewEntries[3].szCellFile, 130, gLocaleId == 10 ? L"W£ACZ EFEKTY" : L"ENABLE BUFF DISPLAY");
-	wcscpy_s((wchar_t*)&NewEntries[3].szSwitchCellFiles[0], 130, gLocaleId == 10 ? L"WY£." : L"OFF");
-	wcscpy_s((wchar_t*)&NewEntries[3].szSwitchCellFiles[1], 130, gLocaleId == 10 ? L"W£." : L"ON");
+	wcscpy_s((wchar_t*)&NewEntries[3].szCellFile, 130, gLocaleId == LOCALE_POL ? L"W£ACZ EFEKTY" : L"ENABLE BUFF DISPLAY");
+	wcscpy_s((wchar_t*)&NewEntries[3].szSwitchCellFiles[0], 130, gLocaleId == LOCALE_POL ? L"WY£." : L"OFF");
+	wcscpy_s((wchar_t*)&NewEntries[3].szSwitchCellFiles[1], 130, gLocaleId == LOCALE_POL ? L"W£." : L"ON");
 	wcscpy_s((wchar_t*)&NewEntries[4].szCellFile, 130, D2Funcs.D2LANG_GetLocaleText(3409));
 	/*
 	wcscpy_s((wchar_t*)&NewEntries[5].szCellFile, 130, L"Red");
@@ -531,19 +557,19 @@ BOOL __fastcall ExOptions::Buffs(D2MenuEntry* ptEntry, StormMsg *pMsg)
 	NewEntries[5].dwCurrentSwitch = gTestColorRed;
 	NewEntries[6].dwCurrentSwitch = gTestColorGreen;
 	NewEntries[7].dwCurrentSwitch = gTestColorBlue;
-	NewEntries[5].dwMenuType = NewEntries[6].dwMenuType = NewEntries[7].dwMenuType = 2;
+	NewEntries[5].dwMenuType = NewEntries[6].dwMenuType = NewEntries[7].dwMenuType = D2MENU_BAR;
 	NewEntries[5].dwMaxValue = NewEntries[6].dwMaxValue = NewEntries[7].dwMaxValue = 255;
 	*/
 	NewEntries[4].OnPress = &ExOptions::D2ExOpts;
 	NewEntries[3].OnPress = &ExOptions::BuffsOpt;
-	NewEntries[3].dwMenuType = 1;
+	NewEntries[3].dwMenuType = D2MENU_SWITCH;
 	NewEntries[3].dwSwitchesNo = 2;
 	NewEntries[3].dwCurrentSwitch = BuffsEnabled;
 
 
 	NewEntries[0].EnableCheck = NewEntries[1].EnableCheck = NewEntries[2].EnableCheck = &ExOptions::BuffECheck;
-	NewEntries[0].dwMenuType = NewEntries[1].dwMenuType = NewEntries[2].dwMenuType = 2;
-	NewEntries[0].OnPress = NewEntries[1].OnPress = NewEntries[2].OnPress = &ExOptions::ChangeHandle;
+	NewEntries[0].dwMenuType = NewEntries[1].dwMenuType = NewEntries[2].dwMenuType = D2MENU_BAR;
+	NewEntries[0].OnPress = NewEntries[1].OnPress = NewEntries[2].OnPress = &ExOptions::ValidateCheck;
 
 	NewEntries[0].dwCurrentValue = BCLvl;
 	NewEntries[0].dwMaxValue = 55;
@@ -650,6 +676,45 @@ BOOL __fastcall ExOptions::EnteringOpt(D2MenuEntry* ptEntry, StormMsg* pMsg)
 	return false;
 }
 
+BOOL __fastcall ExOptions::ResolutionOpt(D2MenuEntry* ptEntry, StormMsg* pMsg)
+{
+#ifdef D2EX_MULTIRES
+	unsigned int x, y;
+	unsigned int r = ptEntry->dwCurrentSwitch;
+	if (r == 1) 
+	{
+		r++;
+		ptEntry->dwCurrentSwitch = r;
+	}
+	if (r > ExMultiRes::lResModes.size() + 3)
+		r = 0;
+
+	ExMultiRes::D2GFX_GetModeParams(r, &x, &y);
+	DEBUGMSG("Changing resolution to %dx%d", x, y);
+	ExMultiRes::D2CLIENT_SetResolution(r);
+	Misc::RegWriteDword("SOFTWARE\\Blizzard Entertainment\\Diablo II", "Resolution", r);
+
+#endif
+
+	return true;
+}
+
+/*
+BOOL __fastcall ExOptions::ResolutionChangedOpt(D2MenuEntry* ptEntry)
+{
+#ifdef D2EX_MULTIRES
+	unsigned int x, y;
+	int r = ptEntry->dwCurrentSwitch + 1;
+	if (r == 1) r++;
+	if (r > ExMultiRes::lResModes.size() + 3)
+		r = 0;
+	ptEntry->dwCurrentSwitch = r;
+#endif
+
+	return true;
+}
+*/
+
 BOOL __fastcall ExOptions::EntECheck(D2MenuEntry* ptEntry, DWORD ItemNo)
 {
 	if (!*D2Vars.D2CLIENT_isMenuClick && *D2Vars.D2CLIENT_SelectedMenu == ItemNo)
@@ -658,6 +723,12 @@ BOOL __fastcall ExOptions::EntECheck(D2MenuEntry* ptEntry, DWORD ItemNo)
 	return true;
 }
 
+BOOL __fastcall ExOptions::Disable(D2MenuEntry* ptEntry, DWORD ItemNo)
+{
+	return false;
+}
+
+
 BOOL __fastcall ExOptions::Various(D2MenuEntry* ptEntry, StormMsg* pMsg)
 {
 	static D2Menu NewMenu;
@@ -665,25 +736,24 @@ BOOL __fastcall ExOptions::Various(D2MenuEntry* ptEntry, StormMsg* pMsg)
 
 	if (!NewMenu.dwEntriesNo)
 	{
-		::memset(&NewEntries, 0, sizeof(NewEntries));
 		NewMenu.dwEntriesNo = 11;
 		NewMenu.dwInterline = 40;
 		NewMenu.dwTextHeight = 35;
 		NewMenu.dwMenuOffset = 46;
 		NewMenu.dwBarHeight = 32;
 
-		NewEntries[0].dwMenuType = 1;
+		NewEntries[0].dwMenuType = D2MENU_SWITCH; 
 		NewEntries[0].dwSwitchesNo = 3;
 		NewEntries[0].OnPress = &ExOptions::AutoMapOpt;
 		NewEntries[0].dwCurrentSwitch = BlobType;
 
-		NewEntries[1].dwMenuType = 2;
+		NewEntries[1].dwMenuType = D2MENU_BAR; 
 		NewEntries[1].dwMaxValue = 13;
 		NewEntries[1].dwCurrentValue = EnteringFont;
 		NewEntries[1].OnPress = &ExOptions::EnteringOpt;
 		NewEntries[1].EnableCheck = &ExOptions::EntECheck;
 
-		NewEntries[2].dwMenuType = NewEntries[3].dwMenuType = NewEntries[4].dwMenuType = NewEntries[5].dwMenuType = NewEntries[6].dwMenuType = NewEntries[7].dwMenuType = NewEntries[8].dwMenuType = NewEntries[9].dwMenuType = 1;
+		NewEntries[2].dwMenuType = NewEntries[3].dwMenuType = NewEntries[4].dwMenuType = NewEntries[5].dwMenuType = NewEntries[6].dwMenuType = NewEntries[7].dwMenuType = NewEntries[8].dwMenuType = NewEntries[9].dwMenuType = D2MENU_SWITCH;
 		NewEntries[2].dwSwitchesNo = NewEntries[3].dwSwitchesNo = NewEntries[4].dwSwitchesNo = NewEntries[5].dwSwitchesNo = NewEntries[6].dwSwitchesNo = NewEntries[7].dwSwitchesNo = NewEntries[8].dwSwitchesNo = NewEntries[9].dwSwitchesNo = 2;
 
 		NewEntries[2].dwCurrentSwitch = PermShowLife;
@@ -691,7 +761,10 @@ BOOL __fastcall ExOptions::Various(D2MenuEntry* ptEntry, StormMsg* pMsg)
 
 		NewEntries[3].dwCurrentSwitch = PermShowMana;
 		NewEntries[3].OnPress = &ExOptions::PermManaOpt;
-
+#ifdef VER_113D
+		NewEntries[2].EnableCheck = &ExOptions::Disable;
+		NewEntries[3].EnableCheck = &ExOptions::Disable;
+#endif
 		NewEntries[4].dwCurrentSwitch = FullVisibility;
 		NewEntries[4].OnPress = &ExOptions::VisOpt;
 
@@ -712,41 +785,39 @@ BOOL __fastcall ExOptions::Various(D2MenuEntry* ptEntry, StormMsg* pMsg)
 
 		NewEntries[10].OnPress = &ExOptions::D2ExOpts;
 
+		wcscpy_s((wchar_t*)&NewEntries[0].szCellFile, 130, gLocaleId == LOCALE_POL ? L"WSKAØNIK AUTOMAPY" : L"AUTOMAP BLOB");
+		wcscpy_s((wchar_t*)&NewEntries[0].szSwitchCellFiles[0], 130, gLocaleId == LOCALE_POL ? L"KROPKA" : L"DOT");
+		wcscpy_s((wchar_t*)&NewEntries[0].szSwitchCellFiles[1], 130, gLocaleId == LOCALE_POL ? L"K”£KO" : L"CIRCLE");
+		wcscpy_s((wchar_t*)&NewEntries[0].szSwitchCellFiles[2], 130, gLocaleId == LOCALE_POL ? L"KRZYØYK" : L"CROSS");
 
-
-		wcscpy_s((wchar_t*)&NewEntries[0].szCellFile, 130, gLocaleId == 10 ? L"WSKAØNIK AUTOMAPY" : L"AUTOMAP BLOB");
-		wcscpy_s((wchar_t*)&NewEntries[0].szSwitchCellFiles[0], 130, gLocaleId == 10 ? L"KROPKA" : L"DOT");
-		wcscpy_s((wchar_t*)&NewEntries[0].szSwitchCellFiles[1], 130, gLocaleId == 10 ? L"K”£KO" : L"CIRCLE");
-		wcscpy_s((wchar_t*)&NewEntries[0].szSwitchCellFiles[2], 130, gLocaleId == 10 ? L"KRZYØYK" : L"CROSS");
-
-		wcscpy_s((wchar_t*)&NewEntries[1].szCellFile, 130, gLocaleId == 10 ? L"CZCIONKA NAZWY POZIOMU" : L"ENTERING LVL TEXT FONT");
-		wcscpy_s((wchar_t*)&NewEntries[2].szCellFile, 130, gLocaleId == 10 ? L"ZAWSZE POKAZUJ ØYCIE" : L"ALWAYS SHOW LIFE");
-		wcscpy_s((wchar_t*)&NewEntries[2].szSwitchCellFiles[0], 130, gLocaleId == 10 ? L"WY£." : L"OFF");
-		wcscpy_s((wchar_t*)&NewEntries[2].szSwitchCellFiles[1], 130, gLocaleId == 10 ? L"W£." : L"ON");
-		wcscpy_s((wchar_t*)&NewEntries[3].szCellFile, 130, gLocaleId == 10 ? L"ZAWSZE POKAZUJ MANE" : L"ALWAYS SHOW MANA");
-		wcscpy_s((wchar_t*)&NewEntries[3].szSwitchCellFiles[0], 130, gLocaleId == 10 ? L"WY£." : L"OFF");
-		wcscpy_s((wchar_t*)&NewEntries[3].szSwitchCellFiles[1], 130, gLocaleId == 10 ? L"W£." : L"ON");
-		wcscpy_s((wchar_t*)&NewEntries[4].szCellFile, 130, gLocaleId == 10 ? L"PE£NA WIDOCZNOå∆" : L"FULL VISIBILITY");
-		wcscpy_s((wchar_t*)&NewEntries[4].szSwitchCellFiles[0], 130, gLocaleId == 10 ? L"WY£." : L"OFF");
-		wcscpy_s((wchar_t*)&NewEntries[4].szSwitchCellFiles[1], 130, gLocaleId == 10 ? L"W£." : L"ON");
-		wcscpy_s((wchar_t*)&NewEntries[5].szCellFile, 130, gLocaleId == 10 ? L"AUTOM. W£•CZ MAP " : L"AUTO. TURN ON THE MAP");
-		wcscpy_s((wchar_t*)&NewEntries[5].szSwitchCellFiles[0], 130, gLocaleId == 10 ? L"WY£." : L"OFF");
-		wcscpy_s((wchar_t*)&NewEntries[5].szSwitchCellFiles[1], 130, gLocaleId == 10 ? L"W£." : L"ON");
+		wcscpy_s((wchar_t*)&NewEntries[1].szCellFile, 130, gLocaleId == LOCALE_POL ? L"CZCIONKA NAZWY POZIOMU" : L"ENTERING LVL TEXT FONT");
+		wcscpy_s((wchar_t*)&NewEntries[2].szCellFile, 130, gLocaleId == LOCALE_POL ? L"ZAWSZE POKAZUJ ØYCIE" : L"ALWAYS SHOW LIFE");
+		wcscpy_s((wchar_t*)&NewEntries[2].szSwitchCellFiles[0], 130, gLocaleId == LOCALE_POL ? L"WY£." : L"OFF");
+		wcscpy_s((wchar_t*)&NewEntries[2].szSwitchCellFiles[1], 130, gLocaleId == LOCALE_POL ? L"W£." : L"ON");
+		wcscpy_s((wchar_t*)&NewEntries[3].szCellFile, 130, gLocaleId == LOCALE_POL ? L"ZAWSZE POKAZUJ MANE" : L"ALWAYS SHOW MANA");
+		wcscpy_s((wchar_t*)&NewEntries[3].szSwitchCellFiles[0], 130, gLocaleId == LOCALE_POL ? L"WY£." : L"OFF");
+		wcscpy_s((wchar_t*)&NewEntries[3].szSwitchCellFiles[1], 130, gLocaleId == LOCALE_POL ? L"W£." : L"ON");
+		wcscpy_s((wchar_t*)&NewEntries[4].szCellFile, 130, gLocaleId == LOCALE_POL ? L"PE£NA WIDOCZNOå∆" : L"FULL VISIBILITY");
+		wcscpy_s((wchar_t*)&NewEntries[4].szSwitchCellFiles[0], 130, gLocaleId == LOCALE_POL ? L"WY£." : L"OFF");
+		wcscpy_s((wchar_t*)&NewEntries[4].szSwitchCellFiles[1], 130, gLocaleId == LOCALE_POL ? L"W£." : L"ON");
+		wcscpy_s((wchar_t*)&NewEntries[5].szCellFile, 130, gLocaleId == LOCALE_POL ? L"AUTOM. W£•CZ MAP " : L"AUTO. TURN ON THE MAP");
+		wcscpy_s((wchar_t*)&NewEntries[5].szSwitchCellFiles[0], 130, gLocaleId == LOCALE_POL ? L"WY£." : L"OFF");
+		wcscpy_s((wchar_t*)&NewEntries[5].szSwitchCellFiles[1], 130, gLocaleId == LOCALE_POL ? L"W£." : L"ON");
 		wcscpy_s((wchar_t*)&NewEntries[6].szCellFile, 130, L"MAPHACK");
-		wcscpy_s((wchar_t*)&NewEntries[6].szSwitchCellFiles[0], 130, gLocaleId == 10 ? L"WY£." : L"OFF");
-		wcscpy_s((wchar_t*)&NewEntries[6].szSwitchCellFiles[1], 130, gLocaleId == 10 ? L"W£." : L"ON");
-		wcscpy_s((wchar_t*)&NewEntries[7].szCellFile, 130, gLocaleId == 10 ? L"UKRYJ Z£OTO NA ZIEMI" : L"HIDE GOLD ON THE GROUND");
-		wcscpy_s((wchar_t*)&NewEntries[7].szSwitchCellFiles[0], 130, gLocaleId == 10 ? L"WY£." : L"OFF");
-		wcscpy_s((wchar_t*)&NewEntries[7].szSwitchCellFiles[1], 130, gLocaleId == 10 ? L"W£." : L"ON");
-		wcscpy_s((wchar_t*)&NewEntries[8].szCellFile, 130, gLocaleId == 10 ? L"UKRYJ åMIECI NA ZIEMI" : L"HIDE CRAP ON THE GROUND");
-		wcscpy_s((wchar_t*)&NewEntries[8].szSwitchCellFiles[0], 130, gLocaleId == 10 ? L"WY£." : L"OFF");
-		wcscpy_s((wchar_t*)&NewEntries[8].szSwitchCellFiles[1], 130, gLocaleId == 10 ? L"W£." : L"ON");
-		wcscpy_s((wchar_t*)&NewEntries[9].szCellFile, 130, gLocaleId == 10 ? L"LAGOMETR" : L"LAGOMETER");
-		wcscpy_s((wchar_t*)&NewEntries[9].szSwitchCellFiles[0], 130, gLocaleId == 10 ? L"WY£." : L"OFF");
-		wcscpy_s((wchar_t*)&NewEntries[9].szSwitchCellFiles[1], 130, gLocaleId == 10 ? L"W£." : L"ON");
+		wcscpy_s((wchar_t*)&NewEntries[6].szSwitchCellFiles[0], 130, gLocaleId == LOCALE_POL ? L"WY£." : L"OFF");
+		wcscpy_s((wchar_t*)&NewEntries[6].szSwitchCellFiles[1], 130, gLocaleId == LOCALE_POL ? L"W£." : L"ON");
+		wcscpy_s((wchar_t*)&NewEntries[7].szCellFile, 130, gLocaleId == LOCALE_POL ? L"UKRYJ Z£OTO NA ZIEMI" : L"HIDE GOLD ON THE GROUND");
+		wcscpy_s((wchar_t*)&NewEntries[7].szSwitchCellFiles[0], 130, gLocaleId == LOCALE_POL ? L"WY£." : L"OFF");
+		wcscpy_s((wchar_t*)&NewEntries[7].szSwitchCellFiles[1], 130, gLocaleId == LOCALE_POL ? L"W£." : L"ON");
+		wcscpy_s((wchar_t*)&NewEntries[8].szCellFile, 130, gLocaleId == LOCALE_POL ? L"UKRYJ åMIECI NA ZIEMI" : L"HIDE CRAP ON THE GROUND");
+		wcscpy_s((wchar_t*)&NewEntries[8].szSwitchCellFiles[0], 130, gLocaleId == LOCALE_POL ? L"WY£." : L"OFF");
+		wcscpy_s((wchar_t*)&NewEntries[8].szSwitchCellFiles[1], 130, gLocaleId == LOCALE_POL ? L"W£." : L"ON");
+		wcscpy_s((wchar_t*)&NewEntries[9].szCellFile, 130, gLocaleId == LOCALE_POL ? L"LAGOMETR" : L"LAGOMETER");
+		wcscpy_s((wchar_t*)&NewEntries[9].szSwitchCellFiles[0], 130, gLocaleId == LOCALE_POL ? L"WY£." : L"OFF");
+		wcscpy_s((wchar_t*)&NewEntries[9].szSwitchCellFiles[1], 130, gLocaleId == LOCALE_POL ? L"W£." : L"ON");
 
 
-		wcscpy_s((wchar_t*)&NewEntries[10].szCellFile, 130, gLocaleId == 10 ? L"POPRZEDNIE MENU" : L"PREVIOUS MENU");
+		wcscpy_s((wchar_t*)&NewEntries[10].szCellFile, 130, gLocaleId == LOCALE_POL ? L"POPRZEDNIE MENU" : L"PREVIOUS MENU");
 
 	}
 
@@ -790,6 +861,67 @@ BOOL __fastcall ExOptions::KeyConfig(D2MenuEntry* ptEntry, StormMsg* pMsg)
 
 }
 
+BOOL __fastcall ExOptions::VideoOptions(D2MenuEntry* ptEntry, StormMsg* pMsg)
+{
+	static D2Menu NewMenu;
+	static D2MenuEntry NewEntries[8];
+
+	if (!NewMenu.dwEntriesNo)
+	{
+		//8, 45, 34, 49, 36, 0
+		NewMenu.dwEntriesNo = 8;
+		NewMenu.dwInterline = 50;
+		NewMenu.dwTextHeight = 34;
+		NewMenu.dwMenuOffset = 49;
+		NewMenu.dwBarHeight = 36;
+
+		memcpy(&NewEntries[0], (const void*)&D2Vars.D2CLIENT_VidOptionsMenu[0], sizeof(D2MenuEntry)* 8);
+
+		wcscpy_s(NewEntries[0].wItemName, 130, L"VIDEO OPTIONS");
+		wcscpy_s(NewEntries[1].wItemName, 130, L"RESOLUTION");
+		wcscpy_s(NewEntries[2].wItemName, 130, L"LIGHTING QUALITY");
+		wcscpy_s(NewEntries[3].wItemName, 130, L"BLENDED SHADOWS");
+		wcscpy_s(NewEntries[4].wItemName, 130, L"PERSPECTIVE");
+		wcscpy_s(NewEntries[5].wItemName, 130, L"GAMMA");
+		wcscpy_s(NewEntries[6].wItemName, 130, L"CONTRAST");
+		wcscpy_s(NewEntries[7].wItemName, 130, L"PREVIOUS MENU");
+
+		NewEntries[0].ptCellFile = NewEntries[1].ptCellFile = NewEntries[2].ptCellFile = NewEntries[3].ptCellFile =
+		NewEntries[4].ptCellFile = NewEntries[5].ptCellFile =	NewEntries[6].ptCellFile = NewEntries[7].ptCellFile = 0;
+
+#ifdef D2EX_MULTIRES
+		NewEntries[1].dwMenuType = D2MENU_SWITCHEX;
+
+		NewEntries[1].dwSwitchesNo = ExMultiRes::lResModes.size() + 3;
+		NewEntries[1].dwCurrentSwitch = ExMultiRes::GFX_GetResolutionMode();
+		NewEntries[1].OnPress = &ExOptions::ResolutionOpt;
+		NewEntries[1].OnChange = 0;
+		NewEntries[1].wSwitches[0] = new wstring(L"640x480");
+		NewEntries[1].wSwitches[2] = NewEntries[1].wSwitches[1] = new wstring(L"800x600");
+		int z = 3;
+		for (auto i = ExMultiRes::lResModes.begin(); i != ExMultiRes::lResModes.end(); ++i)
+		{
+			wostringstream wstream;
+			wstream << i->nWidth << "x" << i->nHeight;
+			wstring * w = new wstring(wstream.str());
+			NewEntries[1].wSwitches[z] = w;		// TODO: Consider where to free memory of these strings
+			++z;
+		}
+
+		NewEntries[1].dwFontType = 2;
+#endif
+
+		NewEntries[5].dwFontType = NewEntries[6].dwFontType = 2;
+
+	}
+
+	*D2Vars.D2CLIENT_SelectedMenu = 0;
+	*D2Vars.D2CLIENT_D2Menu = &NewMenu;
+	*D2Vars.D2CLIENT_D2MenuEntries = &NewEntries[0];
+
+	return TRUE; 
+}
+
 BOOL __fastcall ExOptions::Options(D2MenuEntry* ptEntry, StormMsg* pMsg)
 {
 	static D2Menu NewMenu;
@@ -807,21 +939,25 @@ BOOL __fastcall ExOptions::Options(D2MenuEntry* ptEntry, StormMsg* pMsg)
 		D2Vars.D2CLIENT_VidOptionsMenu[7].OnPress = &ExOptions::Options;
 		D2Vars.D2CLIENT_MapOptionsMenu[6].OnPress = &ExOptions::Options;
 
-		memcpy(NewEntries, (const void*)*&D2Vars.D2CLIENT_OptionsMenu, sizeof(D2MenuEntry)* 4);
-		memcpy(&NewEntries[5], (const void*)&D2Vars.D2CLIENT_OptionsMenu[4], sizeof(D2MenuEntry));
+		memcpy(NewEntries, (const void*)*&D2Vars.D2CLIENT_OptionsMenu, sizeof(D2MenuEntry)); // cpy Sound opt
+		memcpy(&NewEntries[2], (const void*)&D2Vars.D2CLIENT_OptionsMenu[2], sizeof(D2MenuEntry) * 2); // Automap, Controls
+		memcpy(&NewEntries[5], (const void*)&D2Vars.D2CLIENT_OptionsMenu[4], sizeof(D2MenuEntry)); // Prev menu
 
-		wcscpy_s(NewEntries[0].wItemName, 130, gLocaleId == 10 ? L"OPCJE DèWI KOWE" : L"SOUND OPTIONS");
-		wcscpy_s(NewEntries[1].wItemName, 130, gLocaleId == 10 ? L"OPCJE GRAFICZNE" : L"VIDEO OPTIONS");
-		wcscpy_s(NewEntries[2].wItemName, 130, gLocaleId == 10 ? L"OPCJE AUTOMAPY" : L"AUTOMAP OPTIONS");
-		wcscpy_s(NewEntries[3].wItemName, 130, gLocaleId == 10 ? L"KONFIGURACJA STEROWANIA" : L"CONFIGURE CONTROLS");
-		wcscpy_s(NewEntries[4].wItemName, 130, gLocaleId == 10 ? L"USTAWIENIA D2EX" : L"D2EX SETTINGS");
-		wcscpy_s(NewEntries[5].wItemName, 130, gLocaleId == 10 ? L"POPRZEDNIE MENU" : L"PREVIOUS MENU");
+		wcscpy_s(NewEntries[0].wItemName, 130, gLocaleId == LOCALE_POL ? L"OPCJE DèWI KOWE" : L"SOUND OPTIONS");
+		wcscpy_s(NewEntries[1].wItemName, 130, gLocaleId == LOCALE_POL ? L"OPCJE GRAFICZNE" : L"VIDEO OPTIONS");
+		wcscpy_s(NewEntries[2].wItemName, 130, gLocaleId == LOCALE_POL ? L"OPCJE AUTOMAPY" : L"AUTOMAP OPTIONS");
+		wcscpy_s(NewEntries[3].wItemName, 130, gLocaleId == LOCALE_POL ? L"KONFIGURACJA STEROWANIA" : L"CONFIGURE CONTROLS");
+		wcscpy_s(NewEntries[4].wItemName, 130, gLocaleId == LOCALE_POL ? L"USTAWIENIA D2EX" : L"D2EX SETTINGS");
+		wcscpy_s(NewEntries[5].wItemName, 130, gLocaleId == LOCALE_POL ? L"POPRZEDNIE MENU" : L"PREVIOUS MENU");
 
 		NewEntries[0].ptCellFile = NewEntries[1].ptCellFile = NewEntries[2].ptCellFile = NewEntries[3].ptCellFile = NewEntries[4].ptCellFile = NewEntries[5].ptCellFile = 0;
-		NewEntries[5].OnPress = &ExOptions::MainMenu;
+
+		NewEntries[1].OnPress = &ExOptions::VideoOptions;
 
 		NewEntries[4].dwCurrentValue = COL_ORANGE;
 		NewEntries[4].OnPress = &ExOptions::D2ExOpts;
+
+		NewEntries[5].OnPress = &ExOptions::MainMenu;
 	}
 
 	*D2Vars.D2CLIENT_SelectedMenu = 0;
@@ -876,12 +1012,12 @@ BOOL __fastcall ExOptions::MainMenu(D2MenuEntry* ptEntry, StormMsg* pMsg)
 		NewEntries[0].ptCellFile = NewEntries[2].ptCellFile = NewEntries[3].ptCellFile = 0;
 
 		int i = 0;
-		wcscpy_s((wchar_t*)&NewEntries[i].szCellFile, 130, gLocaleId == 10 ? L"OPCJE" : L"OPTIONS");
+		wcscpy_s((wchar_t*)&NewEntries[i].szCellFile, 130, gLocaleId == LOCALE_POL ? L"OPCJE" : L"OPTIONS");
 		NewEntries[i].OnPress = &ExOptions::Options;
 		
 #ifdef D2EX_PVPGN_EXT
 	#ifdef D2EX_PVPGN_GIVEUP
-		wcscpy_s((wchar_t*)&NewEntries[++i].szCellFile,130,gLocaleId == 10 ? L"PODDAJ SI " : L"GIVE UP");
+		wcscpy_s((wchar_t*)&NewEntries[++i].szCellFile,130,gLocaleId == LOCALE_POL ? L"PODDAJ SI " : L"GIVE UP");
 		NewEntries[i].OnPress = &ExOptions::GiveUpCB;
 		NewEntries[i].EnableCheck = &ExOptions::GiveUpCheck;
 	#else
@@ -889,14 +1025,14 @@ BOOL __fastcall ExOptions::MainMenu(D2MenuEntry* ptEntry, StormMsg* pMsg)
 
 	#endif
 #else
-		wcscpy_s((wchar_t*)&NewEntries[++i].szCellFile, 130, gLocaleId == 10 ? L"SZYBKI POWR”T" : L"QUICK REJOIN");
+		wcscpy_s((wchar_t*)&NewEntries[++i].szCellFile, 130, gLocaleId == LOCALE_POL ? L"SZYBKI POWR”T" : L"QUICK REJOIN");
 		NewEntries[i].OnPress = &ExOptions::RejoinCB;
 		NewEntries[i].EnableCheck = 0;
 #endif
-		wcscpy_s((wchar_t*)&NewEntries[++i].szCellFile, 130, gLocaleId == 10 ? L"ZAPIS I WYJåCIE Z GRY" : L"SAVE AND EXIT GAME");
+		wcscpy_s((wchar_t*)&NewEntries[++i].szCellFile, 130, gLocaleId == LOCALE_POL ? L"ZAPIS I WYJåCIE Z GRY" : L"SAVE AND EXIT GAME");
 		NewEntries[i].OnPress = &ExOOG::LeaveGame;
 
-		wcscpy_s((wchar_t*)&NewEntries[++i].szCellFile, 130, gLocaleId == 10 ? L"POWR”T DO GRY" : L"RETURN TO GAME");
+		wcscpy_s((wchar_t*)&NewEntries[++i].szCellFile, 130, gLocaleId == LOCALE_POL ? L"POWR”T DO GRY" : L"RETURN TO GAME");
 		NewEntries[i].OnPress = *D2Vars.D2CLIENT_OldMenu[2].OnPress;
 	}
 

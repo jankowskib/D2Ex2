@@ -37,7 +37,7 @@ namespace D2ASMFuncs
 	//int __fastcall D2WIN_GetTextWidth(const wchar_t* wStr);
 	wchar_t* __fastcall D2CLIENT_GetLevelName(int LevelNo);
 	int __fastcall D2CLIENT_GetSelectedMenu(int MouseY);
-	BYTE* __fastcall D2CLIENT_GetSkillsTxt(int SkillId);
+	SkillDescTxt* __fastcall D2CLIENT_GetSkillDescTxt(int SkillId);
 	BOOL __fastcall D2CLIENT_GetMeleeDmg(UnitAny* ptUnit, int SkillMinBonus, int* OutMin, int* OutMax, int* OutCol, int SkillMaxBonus, Skill* ptSkill, int a128, int a9, int a10);
 }
 

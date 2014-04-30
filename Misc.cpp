@@ -40,7 +40,7 @@ string Misc::DrawModeToString(int nDrawMode)
 }
 
 
-int Misc::RegReadDword(const char * key, const char* value, const int default)
+int Misc::RegReadDword(const char * key, const char* value, const DWORD default)
 {
 	HKEY hKey = { 0 };
 	int result;
@@ -49,12 +49,26 @@ int Misc::RegReadDword(const char * key, const char* value, const int default)
 		RegOpenKeyEx(HKEY_LOCAL_MACHINE, key, 0, KEY_QUERY_VALUE, &hKey) == ERROR_SUCCESS)
 	{
 		DWORD nSize = 4;
-		if (RegQueryValueEx(hKey, key, NULL, NULL, (BYTE*)&result, &nSize) == ERROR_SUCCESS)
+		if (RegQueryValueEx(hKey, value, NULL, NULL, (BYTE*)&result, &nSize) == ERROR_SUCCESS)
 		{
+			RegCloseKey(hKey);
 			return result;
 		}
 	}
 	return default;
+}
+
+
+void Misc::RegWriteDword(const char * key, const char* name, const DWORD value)
+{
+	HKEY hKey = { 0 };
+
+	if (RegOpenKeyEx(HKEY_CURRENT_USER, key, 0, KEY_WRITE, &hKey) == ERROR_SUCCESS ||
+		RegOpenKeyEx(HKEY_LOCAL_MACHINE, key, 0, KEY_WRITE, &hKey) == ERROR_SUCCESS)
+	{
+		RegSetKeyValue(hKey, NULL, name, REG_DWORD, &value, sizeof(DWORD));
+		RegCloseKey(hKey);
+	}
 }
 
 wstring Misc::ConvertTickToTime(DWORD nTick)

@@ -40,7 +40,7 @@ namespace ExOptions
 	BOOL __fastcall GiveUpCB(D2MenuEntry* ptEntry, StormMsg* pMsg);
 	BOOL __fastcall RejoinCB(D2MenuEntry* ptEntry, StormMsg* pMsg);
 	BOOL __fastcall BuffECheck(D2MenuEntry* ptEntry, DWORD ItemNo);
-	BOOL __fastcall ChangeHandle(D2MenuEntry* ptEntry, StormMsg* pMsg);
+	BOOL __fastcall ValidateCheck(D2MenuEntry* ptEntry, StormMsg* pMsg);
 	BOOL __fastcall Buffs(D2MenuEntry* ptEntry, StormMsg* pMsg);
 	BOOL __fastcall KeyConfig(D2MenuEntry* ptEntry, StormMsg* pMsg);
 
@@ -63,6 +63,11 @@ namespace ExOptions
 	BOOL __fastcall AutoMapOpt(D2MenuEntry* ptEntry, StormMsg* pMsg);
 	BOOL __fastcall EnteringOpt(D2MenuEntry* ptEntry, StormMsg* pMsg);
 	BOOL __fastcall EntECheck(D2MenuEntry* ptEntry, DWORD ItemNo);
+	BOOL __fastcall Disable(D2MenuEntry* ptEntry, DWORD ItemNo);
+	BOOL __fastcall ResolutionOpt(D2MenuEntry* ptEntry, StormMsg* pMsg);
+	BOOL __fastcall ResolutionChangedOpt(D2MenuEntry* ptEntry);
+	
+	BOOL __fastcall VideoOptions(D2MenuEntry* ptEntry, StormMsg* pMsg);
 	BOOL __fastcall Options(D2MenuEntry* ptEntry, StormMsg* pMsg);
 	BOOL __fastcall MainMenu(D2MenuEntry* ptEntry, StormMsg* pMsg);
 }

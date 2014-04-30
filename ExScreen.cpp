@@ -426,7 +426,7 @@ void __fastcall ExScreen::ColorItems(wchar_t* szName, UnitAny* ptItem)
 	ItemsTxt* pTxt = D2Funcs.D2COMMON_GetItemText(ptItem->dwClassId);
 	wchar_t* wName = szName;// D2Funcs.D2LANG_GetLocaleText(pTxt->wnamestr);
 	BYTE ColNo = 0;
-	int SockNo = D2Funcs.D2COMMON_GetItemFlag(ptItem,ITEMFLAG_SOCKETED,__LINE__,__FILE__) ? D2Funcs.D2COMMON_GetStatSigned(ptItem, STAT_ITEM_NUMSOCKETS, 0) : 0 ;
+	int SockNo = D2Funcs.D2COMMON_GetItemFlag(ptItem, ITEMFLAG_SOCKETED,__LINE__,__FILE__) ? D2Funcs.D2COMMON_GetStatSigned(ptItem, STAT_ITEM_NUMSOCKETS, 0) : 0 ;
 	switch(ptItem->pItemData->QualityNo)
 	{
 	case ITEM_LOW:
@@ -490,7 +490,7 @@ wchar_t* GetMonsterName(unsigned int MonIdx)
 wchar_t* GetDyeCol(int Col)
 {
 
-if(gLocaleId==10)
+if(gLocaleId == LOCALE_POL)
 {
 	switch(Col)
 	{
@@ -546,29 +546,29 @@ void __stdcall ExScreen::DrawProperties(wchar_t *wTxt)
 	//if(ptItem->pItemData->QualityNo == ItemQ::Set) return;
 	int iLvl = ptItem->pItemData->ItemLevel;
 	int aLen =  0;
-	int aCol = D2Funcs.D2COMMON_GetStatSigned(ptItem,183,0);
+	int aCol = D2Funcs.D2COMMON_GetStatSigned(ptItem, D2EX_COLOR_STAT, 0);
 	if(aCol)
 	{
-	aLen = wcslen(wTxt);
-	if(1024-aLen>20)
-	{
-	if(gLocaleId==10)
-	swprintf_s(wTxt+aLen,1024-aLen,L"%sKolor: %s\n",GetColorCode(COL_PURPLE).c_str(),GetDyeCol(aCol));
-	else
-	swprintf_s(wTxt+aLen,1024-aLen,L"%sColor: %s\n",GetColorCode(COL_PURPLE).c_str(),GetDyeCol(aCol));
+		aLen = wcslen(wTxt);
+		if(1024-aLen>20)
+		{
+			if(gLocaleId==10)
+			swprintf_s(wTxt+aLen,1024-aLen,L"%sKolor: %s\n",GetColorCode(COL_PURPLE).c_str(),GetDyeCol(aCol));
+			else
+			swprintf_s(wTxt+aLen,1024-aLen,L"%sColor: %s\n",GetColorCode(COL_PURPLE).c_str(),GetDyeCol(aCol));
+		}
 	}
-	}
-	int aLvl = D2Funcs.D2COMMON_GetStatSigned(ptItem,184,0);
+	int aLvl = D2Funcs.D2COMMON_GetStatSigned(ptItem, D2EX_LOOTED_STAT, 0);
 	if(aLvl)
 	{
 	aLen = wcslen(wTxt);
-	if(1024-aLen>20)
-	{
-	if(gLocaleId==10)
-	swprintf_s(wTxt+aLen,1024-aLen,L"%sWypad³o z: %s\n",GetColorCode(COL_PURPLE).c_str(),GetMonsterName(aLvl));
-	else
-	swprintf_s(wTxt+aLen,1024-aLen,L"%Looted from: %s\n",GetColorCode(COL_PURPLE).c_str(),GetMonsterName(aLvl));
-	}
+		if(1024-aLen>20)
+		{
+			if(gLocaleId==10)
+			swprintf_s(wTxt+aLen,1024-aLen,L"%sWypad³o z: %s\n",GetColorCode(COL_PURPLE).c_str(),GetMonsterName(aLvl));
+			else
+			swprintf_s(wTxt+aLen,1024-aLen,L"%Looted from: %s\n",GetColorCode(COL_PURPLE).c_str(),GetMonsterName(aLvl));
+		}
 	}
 
 	aLen = wcslen(wTxt);
@@ -600,40 +600,41 @@ void ExScreen::DrawResInfo()
 		else if(*D2Vars.D2CLIENT_ServerDifficulty == 2) nRes = -100;
 	}
 
-	if (mX>175 + *D2Vars.D2CLIENT_UIPanelDrawXOffset && mX< 316 + *D2Vars.D2CLIENT_UIPanelDrawXOffset && mY>*D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 147 && mY< *D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 122)  //Fire Res
+	signed int h = (signed int)*D2Vars.D2CLIENT_ScreenHeight;
+	if (mX>175 + *D2Vars.D2CLIENT_UIPanelDrawXOffset && mX< 316 + *D2Vars.D2CLIENT_UIPanelDrawXOffset && mY>h + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 147 && mY< h + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 122)  //Fire Res
 	{ 
 		nRes+= D2Funcs.D2COMMON_GetStatSigned(ptUnit,STAT_FIRERESIST,0);
 		wostringstream wInfo;
-		wInfo << (gLocaleId == 10? L"Ca³kowita odpornoœæ: " : L"Stacked resistance: ") << GetColorCode(COL_RED) << nRes ; 
+		wInfo << (gLocaleId == LOCALE_POL? L"Ca³kowita odpornoœæ: " : L"Stacked resistance: ") << GetColorCode(COL_RED) << nRes ; 
 		D2Funcs.D2WIN_SetTextSize(0);
-		D2Funcs.D2WIN_DrawRectangledText(wInfo.str().c_str(), 160 + *D2Vars.D2CLIENT_UIPanelDrawXOffset, *D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 150, 0, 2, COL_WHITE);
+		D2Funcs.D2WIN_DrawRectangledText(wInfo.str().c_str(), 160 + *D2Vars.D2CLIENT_UIPanelDrawXOffset, h + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 150, 0, 2, COL_WHITE);
 	}
 	else
-		if (mX>175 + *D2Vars.D2CLIENT_UIPanelDrawXOffset && mX< 316 + *D2Vars.D2CLIENT_UIPanelDrawXOffset && mY>*D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 123 && mY< *D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 98)  //Cold Res
+		if (mX>175 + *D2Vars.D2CLIENT_UIPanelDrawXOffset && mX< 316 + *D2Vars.D2CLIENT_UIPanelDrawXOffset && mY>h + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 123 && mY< h + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 98)  //Cold Res
 	{ 
 		nRes+= D2Funcs.D2COMMON_GetStatSigned(ptUnit,STAT_COLDRESIST,0);
 		wostringstream wInfo;
-		wInfo << (gLocaleId == 10? L"Ca³kowita odpornoœæ: " : L"Stacked resistance: ") << GetColorCode(COL_BLUE) << nRes ; 
+		wInfo << (gLocaleId == LOCALE_POL? L"Ca³kowita odpornoœæ: " : L"Stacked resistance: ") << GetColorCode(COL_BLUE) << nRes ; 
 		D2Funcs.D2WIN_SetTextSize(0);
-		D2Funcs.D2WIN_DrawRectangledText(wInfo.str().c_str(), 160 + *D2Vars.D2CLIENT_UIPanelDrawXOffset, *D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 150, 0, 2, COL_WHITE);
+		D2Funcs.D2WIN_DrawRectangledText(wInfo.str().c_str(), 160 + *D2Vars.D2CLIENT_UIPanelDrawXOffset, h + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 150, 0, 2, COL_WHITE);
 	}
 	else
-		if (mX>175 + *D2Vars.D2CLIENT_UIPanelDrawXOffset && mX< 316 + *D2Vars.D2CLIENT_UIPanelDrawXOffset && mY>*D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 99 && mY< *D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 74)  //Light Res
+		if (mX>175 + *D2Vars.D2CLIENT_UIPanelDrawXOffset && mX< 316 + *D2Vars.D2CLIENT_UIPanelDrawXOffset && mY>h + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 99 && mY< h + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 74)  //Light Res
 	{
 		nRes+= D2Funcs.D2COMMON_GetStatSigned(ptUnit,STAT_LIGHTRESIST,0);
 		wostringstream wInfo;
-		wInfo << (gLocaleId == 10? L"Ca³kowita odpornoœæ: " : L"Stacked resistance: ") << GetColorCode(COL_YELLOW) << nRes ; 
+		wInfo << (gLocaleId == LOCALE_POL? L"Ca³kowita odpornoœæ: " : L"Stacked resistance: ") << GetColorCode(COL_YELLOW) << nRes ; 
 		D2Funcs.D2WIN_SetTextSize(0);
-		D2Funcs.D2WIN_DrawRectangledText(wInfo.str().c_str(), 160 + *D2Vars.D2CLIENT_UIPanelDrawXOffset, *D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 150, 0, 2, COL_WHITE);
+		D2Funcs.D2WIN_DrawRectangledText(wInfo.str().c_str(), 160 + *D2Vars.D2CLIENT_UIPanelDrawXOffset, h + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 150, 0, 2, COL_WHITE);
 	}
 	else
-		if (mX>175 + *D2Vars.D2CLIENT_UIPanelDrawXOffset && mX< 316 + *D2Vars.D2CLIENT_UIPanelDrawXOffset && mY>*D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 75 && mY< *D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 50)  //Poison Res
+		if (mX>175 + *D2Vars.D2CLIENT_UIPanelDrawXOffset && mX< 316 + *D2Vars.D2CLIENT_UIPanelDrawXOffset && mY>h + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 75 && mY< h + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 50)  //Poison Res
 	{ 
 		nRes+= D2Funcs.D2COMMON_GetStatSigned(ptUnit,STAT_POISONRESIST,0);
 		wostringstream wInfo;
-		wInfo << (gLocaleId == 10? L"Ca³kowita odpornoœæ: " : L"Stacked resistance: ") << GetColorCode(COL_LIGHTGREEN) << nRes ; 
+		wInfo << (gLocaleId == LOCALE_POL? L"Ca³kowita odpornoœæ: " : L"Stacked resistance: ") << GetColorCode(COL_LIGHTGREEN) << nRes ; 
 		D2Funcs.D2WIN_SetTextSize(0);
-		D2Funcs.D2WIN_DrawRectangledText(wInfo.str().c_str(), 160 + *D2Vars.D2CLIENT_UIPanelDrawXOffset, *D2Vars.D2CLIENT_ScreenHeight + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 150, 0, 2, COL_WHITE);
+		D2Funcs.D2WIN_DrawRectangledText(wInfo.str().c_str(), 160 + *D2Vars.D2CLIENT_UIPanelDrawXOffset, h + *D2Vars.D2CLIENT_UIPanelDrawYOffset - 150, 0, 2, COL_WHITE);
 	}
 ExScreen::DrawDmg();
 }
@@ -684,104 +685,105 @@ void ExScreen::DrawBreakpoints()
 
 void ExScreen::DrawDmg()
 {
+	//TODO: Make usage of UIPanelDrawXOffset for ExMultitRes
 	unsigned int mX = *D2Vars.D2CLIENT_MouseX;
 	unsigned int mY = *D2Vars.D2CLIENT_MouseY;
 	UnitAny * ptUnit = D2Funcs.D2CLIENT_GetPlayer();
 	ASSERT(ptUnit)
 	if (mX > 240 && mX < 394 && mY > (*D2Vars.D2CLIENT_ScreenHeight - 455) && mY < (*D2Vars.D2CLIENT_ScreenHeight - 435))
-		{ 
+	{
 
-			Skill * ptSkill = D2Funcs.D2COMMON_GetLeftSkill(ptUnit);
-			ASSERT(ptSkill)
-				BYTE *	pSkillTxt = D2ASMFuncs::D2CLIENT_GetSkillsTxt(ptSkill->pSkillsTxt->wSkillId);
-			ASSERT(pSkillTxt)
+		Skill * ptSkill = D2Funcs.D2COMMON_GetLeftSkill(ptUnit);
+		ASSERT(ptSkill)
+			SkillDescTxt *	pSkillTxt = D2ASMFuncs::D2CLIENT_GetSkillDescTxt(ptSkill->pSkillsTxt->wSkillId);
+		ASSERT(pSkillTxt)
 
-			int sId		= D2Funcs.D2COMMON_GetSkillId(ptSkill, __FILE__, __LINE__);
-			int sLvl	= D2Funcs.D2COMMON_GetSkillLevel(ptUnit,ptSkill,1);
-			int sBonus	= D2Funcs.D2COMMON_GetSkillDmgBonus(ptUnit,*((DWORD*)pSkillTxt+6),sId,sLvl);
-			int sBonusMax = 0;
+			int sId = D2Funcs.D2COMMON_GetSkillId(ptSkill, __FILE__, __LINE__);
+		int sLvl = D2Funcs.D2COMMON_GetSkillLevel(ptUnit, ptSkill, 1);
+		int sBonus = D2Funcs.D2COMMON_GetSkillDmgBonus(ptUnit, pSkillTxt->dwProgDmgMin[0], sId, sLvl);
+		int sBonusMax = 0;
 
-			int MinDmg = 0;
-			int MaxDmg = 0;
-			int Col = 0;
-			if(sId==0 || sId==22 || sId ==10 || sId == 151 || sId == 152 || sId == 144)
-			{
-				D2ASMFuncs::D2CLIENT_GetMeleeDmg(ptUnit,sBonus,&MinDmg,&MaxDmg,&Col,0,ptSkill,0,0,0);
-				D2Funcs.D2CLIENT_GetItemEleDmg(ptUnit,&MinDmg,&MaxDmg,&Col,ptSkill);
-			}
-			else
-			{
-				MinDmg = D2Funcs.D2COMMON_GetPhysMinDmg(ptUnit,sId,sLvl,0) >> 8;
-				MaxDmg = D2Funcs.D2COMMON_GetPhysMaxDmg(ptUnit,sId,sLvl,0) >> 8;
+		int MinDmg = 0;
+		int MaxDmg = 0;
+		int Col = 0;
+		if (sId == 0 || sId == 22 || sId == 10 || sId == 151 || sId == 152 || sId == 144)
+		{
+			D2ASMFuncs::D2CLIENT_GetMeleeDmg(ptUnit, sBonus, &MinDmg, &MaxDmg, &Col, 0, ptSkill, 0, 0, 0);
+			D2Funcs.D2CLIENT_GetItemEleDmg(ptUnit, &MinDmg, &MaxDmg, &Col, ptSkill);
+		}
+		else
+		{
+			MinDmg = D2Funcs.D2COMMON_GetPhysMinDmg(ptUnit, sId, sLvl, 0) >> 8;
+			MaxDmg = D2Funcs.D2COMMON_GetPhysMaxDmg(ptUnit, sId, sLvl, 0) >> 8;
 
-				int pEleMin = D2Funcs.D2COMMON_GetEleMinDmg(ptUnit,sId,sLvl,1) >>8;
-				int pEleMax = D2Funcs.D2COMMON_GetEleMaxDmg(ptUnit,sId,sLvl,1) >>8;
+			int pEleMin = D2Funcs.D2COMMON_GetEleMinDmg(ptUnit, sId, sLvl, 1) >> 8;
+			int pEleMax = D2Funcs.D2COMMON_GetEleMaxDmg(ptUnit, sId, sLvl, 1) >> 8;
 
-				MinDmg+=pEleMin;
-				MaxDmg+=pEleMax;
-			}
+			MinDmg += pEleMin;
+			MaxDmg += pEleMax;
+		}
 
-			float AvgDmg = (MaxDmg+MinDmg)/2.0f;
+		float AvgDmg = (MaxDmg + MinDmg) / 2.0f;
 
-			//	ExScreen::DrawTextEx(100,420,1,0,5,L"Min %d, Max %d, B %d, BMax %d, sId %d",MinDmg,MaxDmg,sBonus, sBonusMax,sId);
+		//	ExScreen::DrawTextEx(100,420,1,0,5,L"Min %d, Max %d, B %d, BMax %d, sId %d",MinDmg,MaxDmg,sBonus, sBonusMax,sId);
 
-				if(AvgDmg)
-				{
-					wostringstream wInfo;
-					wInfo <<  (gLocaleId == 10? L"Œrednie Obra¿enia: " :L"Average Damage: ") << GetColorCode(COL_YELLOW) << AvgDmg; 
-					D2Funcs.D2WIN_SetTextSize(0);
-					D2Funcs.D2WIN_DrawRectangledText(wInfo.str().c_str(), 242, *D2Vars.D2CLIENT_ScreenHeight - 458, 0, 2, COL_WHITE);
-				}
-			}
-			else if (mX>240 && mX<394 && mY>(*D2Vars.D2CLIENT_ScreenHeight - 430) && mY<(*D2Vars.D2CLIENT_ScreenHeight - 410))
-			{	
-				Skill * ptSkill = D2Funcs.D2COMMON_GetRightSkill(ptUnit);
-				ASSERT(ptSkill)
-				BYTE *	pSkillTxt = D2ASMFuncs::D2CLIENT_GetSkillsTxt(ptSkill->pSkillsTxt->wSkillId);
-				ASSERT(pSkillTxt)
+		if (AvgDmg)
+		{
+			wostringstream wInfo;
+			wInfo << (gLocaleId == LOCALE_POL ? L"Œrednie Obra¿enia: " : L"Average Damage: ") << GetColorCode(COL_YELLOW) << AvgDmg;
+			D2Funcs.D2WIN_SetTextSize(0);
+			D2Funcs.D2WIN_DrawRectangledText(wInfo.str().c_str(), 242, *D2Vars.D2CLIENT_ScreenHeight - 458, 0, 2, COL_WHITE);
+		}
+	}
+	else if (mX > 240 && mX<394 && mY>(*D2Vars.D2CLIENT_ScreenHeight - 430) && mY < (*D2Vars.D2CLIENT_ScreenHeight - 410))
+	{
+		Skill * ptSkill = D2Funcs.D2COMMON_GetRightSkill(ptUnit);
+		ASSERT(ptSkill)
+			SkillDescTxt *	pSkillTxt = D2ASMFuncs::D2CLIENT_GetSkillDescTxt(ptSkill->pSkillsTxt->wSkillId);
+		ASSERT(pSkillTxt)
 
-				int sId		= D2Funcs.D2COMMON_GetSkillId(ptSkill,__FILE__,__LINE__);
-				int sLvl	= D2Funcs.D2COMMON_GetSkillLevel(ptUnit,ptSkill,1);
-				int sBonus	= D2Funcs.D2COMMON_GetSkillDmgBonus(ptUnit,*((DWORD*)pSkillTxt+6),sId,sLvl);
-				int sBonusMax = 0;
+			int sId = D2Funcs.D2COMMON_GetSkillId(ptSkill, __FILE__, __LINE__);
+		int sLvl = D2Funcs.D2COMMON_GetSkillLevel(ptUnit, ptSkill, 1);
+		int sBonus = D2Funcs.D2COMMON_GetSkillDmgBonus(ptUnit, pSkillTxt->dwProgDmgMin[0], sId, sLvl);
+		int sBonusMax = 0;
 
-				int MinDmg = 0;
-				int MaxDmg = 0;
-				int Col = 0;
-				if(sId==0 || sId==22 || sId ==10 || sId == 151 || sId == 152 || sId == 144)
-				{
-					D2ASMFuncs::D2CLIENT_GetMeleeDmg(ptUnit,sBonus,&MinDmg,&MaxDmg,&Col,0,ptSkill,0,0,0);
-					D2Funcs.D2CLIENT_GetItemEleDmg(ptUnit,&MinDmg,&MaxDmg,&Col,ptSkill);
-				}
-				else
-				{
-					MinDmg = D2Funcs.D2COMMON_GetPhysMinDmg(ptUnit,sId,sLvl,0) >> 8;
-					MaxDmg = D2Funcs.D2COMMON_GetPhysMaxDmg(ptUnit,sId,sLvl,0) >> 8;
+		int MinDmg = 0;
+		int MaxDmg = 0;
+		int Col = 0;
+		if (sId == 0 || sId == 22 || sId == 10 || sId == 151 || sId == 152 || sId == 144)
+		{
+			D2ASMFuncs::D2CLIENT_GetMeleeDmg(ptUnit, sBonus, &MinDmg, &MaxDmg, &Col, 0, ptSkill, 0, 0, 0);
+			D2Funcs.D2CLIENT_GetItemEleDmg(ptUnit, &MinDmg, &MaxDmg, &Col, ptSkill);
+		}
+		else
+		{
+			MinDmg = D2Funcs.D2COMMON_GetPhysMinDmg(ptUnit, sId, sLvl, 0) >> 8;
+			MaxDmg = D2Funcs.D2COMMON_GetPhysMaxDmg(ptUnit, sId, sLvl, 0) >> 8;
 
-					int pEleMin = D2Funcs.D2COMMON_GetEleMinDmg(ptUnit,sId,sLvl,1) >>8;
-					int pEleMax = D2Funcs.D2COMMON_GetEleMaxDmg(ptUnit,sId,sLvl,1) >>8;
+			int pEleMin = D2Funcs.D2COMMON_GetEleMinDmg(ptUnit, sId, sLvl, 1) >> 8;
+			int pEleMax = D2Funcs.D2COMMON_GetEleMaxDmg(ptUnit, sId, sLvl, 1) >> 8;
 
-					MinDmg+=pEleMin;
-					MaxDmg+=pEleMax;
-				}
+			MinDmg += pEleMin;
+			MaxDmg += pEleMax;
+		}
 
-				float AvgDmg = (MaxDmg+MinDmg)/2.0f;
+		float AvgDmg = (MaxDmg + MinDmg) / 2.0f;
 
-				//	ExScreen::DrawTextEx(100,420,1,0,5,L"Min %d, Max %d, B %d, BMax %d, sId %d",MinDmg,MaxDmg,sBonus, sBonusMax,sId);
+		//	ExScreen::DrawTextEx(100,420,1,0,5,L"Min %d, Max %d, B %d, BMax %d, sId %d",MinDmg,MaxDmg,sBonus, sBonusMax,sId);
 
-				if(AvgDmg)
-				{
-					wostringstream wInfo;
-					wInfo <<  (gLocaleId == 10? L"Œrednie Obra¿enia: " :L"Average Damage: ") << GetColorCode(COL_YELLOW) << AvgDmg; 
-					D2Funcs.D2WIN_SetTextSize(0);
-					D2Funcs.D2WIN_DrawRectangledText(wInfo.str().c_str(), 242, *D2Vars.D2CLIENT_ScreenHeight - 437, 0, 2, COL_WHITE);
-				}
-			}
+		if (AvgDmg)
+		{
+			wostringstream wInfo;
+			wInfo << (gLocaleId == LOCALE_POL ? L"Œrednie Obra¿enia: " : L"Average Damage: ") << GetColorCode(COL_YELLOW) << AvgDmg;
+			D2Funcs.D2WIN_SetTextSize(0);
+			D2Funcs.D2WIN_DrawRectangledText(wInfo.str().c_str(), 242, *D2Vars.D2CLIENT_ScreenHeight - 437, 0, 2, COL_WHITE);
+		}
+	}
 }
 
 BYTE * __stdcall ExScreen::DrawItem(UnitAny *ptPlayer, UnitAny* ptItem, BYTE* out, BOOL a4)
 {
-	int col = D2Funcs.D2COMMON_GetStatSigned(ptItem,183,0);
+	int col = D2Funcs.D2COMMON_GetStatSigned(ptItem, D2EX_COLOR_STAT, 0);
 
 	if(col)
 	{
@@ -812,6 +814,25 @@ BOOL __stdcall ExScreen::OnALTDraw(UnitAny *ptItem)
 
 void ExScreen::SetView(D2RECT* view)
 {
-	//TODO :Add body
-	D2Funcs.D2GFX_SetScreenShift(1);
+	GameView* pView = *D2Vars.D2CLIENT_GameView;
+	if (pView)
+	{
+		SetRect((RECT*)&pView->ViewRadius, view->left, view->top, view->right, view->bottom);
+		SetRect((RECT*)&pView->ToCheck, -80, -80, *D2Vars.D2CLIENT_ScreenWidth - 80, *D2Vars.D2CLIENT_ScreenHeight - 47);
+
+		if ((*D2Vars.D2GFX_Settings).bPerspectiveCapable)
+		{
+			pView->ToCheck.top -= 30;
+			pView->ToCheck.left -= 45;
+			pView->ToCheck.right += 30;
+		}
+
+		pView->dwFlags |= 1;
+	}
+}
+
+void ExScreen::SetView(int xLeft, int xTop, int xRight, int xBottom)
+{
+	D2RECT r = { xLeft, xTop, xRight, xBottom };
+	SetView(&r);
 }

@@ -21,9 +21,6 @@
 #ifndef __EXSCROLLBAR_H__
 #define __EXSCROLLBAR_H__
 
-
-#include <cstdio>
-#include <string>
 #include "ExControl.h"
 #include "ExButton.h"
 #include "ExRectangle.h"

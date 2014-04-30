@@ -43,6 +43,8 @@
 #ifdef D2EX_PVPGN_EXT
 //#define D2EX_PVPGN_GIVEUP						// Adds `Give up` to ESC menu
 #define D2EX_SPECATATOR
+#define D2EX_COLOR_STAT		189					// ItemStatCost.Txt record which stores item color value
+#define D2EX_LOOTED_STAT	190					// ItemStatCost.Txt record which stores monster id which gave the item
 #endif
 //******************************************
 
@@ -54,7 +56,10 @@
 #error "Only one version can be defined at once!"
 #endif
 
+using namespace std;
+
 #include <Windows.h>
+#include <string>
 #include "Constants.h"
 #include "CommonStructs.h"
 #include <glide.h>

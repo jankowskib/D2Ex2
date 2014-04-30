@@ -22,7 +22,6 @@
 #include "D2Ex2.h"
 
 #include <sstream>
-#include <string>
 #include <process.h>
 
 //-Must be
@@ -158,6 +157,7 @@ unsigned int __stdcall Thread(void * Args)
 	VK_ATPrev = GetPrivateProfileInt("Keys", "ATPrev", VK_F7, ConfigIni.c_str());
 	VK_FastTP = GetPrivateProfileInt("Keys", "ATFastTP", VK_F1, ConfigIni.c_str());
 #endif
+	/*
 	char sRes[50];
 	string strRes;
 	GetPrivateProfileString("D2Ex", "Resolution", "800x600", sRes, 50, ConfigIni.c_str());
@@ -174,6 +174,7 @@ unsigned int __stdcall Thread(void * Args)
 		cResModeX = boost::lexical_cast<short>(strRes.substr(0, x));
 		cResModeY = boost::lexical_cast<short>(strRes.substr(++x));
 	}
+	*/
 
 	#ifdef D2EX_SCRAP_HACKS
 	StillSwitch = GetPrivateProfileInt("D2Ex","StillWSG",1,ConfigIni.c_str());
@@ -182,9 +183,6 @@ unsigned int __stdcall Thread(void * Args)
 	LoadItemConfig();
 	gLocaleId = D2Funcs.D2LANG_GetLocaleId();
 	Misc::Log("Locale ID is %d", gLocaleId);
-	#ifdef D2EX_MULTIRES
-	ExMultiRes::EnumDisplayModes();
-	#endif
 
 	//BEFORE START...
 	#define CALL 0xE8
@@ -384,7 +382,10 @@ unsigned int __stdcall Thread(void * Args)
 	Misc::Patch(NOP, GetDllOffset("D2Client.dll", 0x1D3F1), 0x90909090, 44, "Nullify UI panels draw offset set");
 
 	Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x6F344), (DWORD)ExMultiRes::DrawControlPanel, 5, "GFX_DrawControlPanel");
-
+	Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x4549F), (DWORD)ExMultiRes::OnResolutionSet, 40, "OnGameLoad resolution set");
+	Misc::Patch(JUMP, GetDllOffset("D2Client.dll", 0xC4510), (DWORD)ExMultiRes::OnResolutionSet, 8, "OnGameLoad resolution set (menu entry)");
+	
+	
 	Misc::WriteDword((DWORD*)&((GFXHelpers*)GetDllOffset("D2Gfx.dll", 0x10BFC))->FillYBufferTable, (DWORD)&ExMultiRes::D2GFX_FillYBufferTable);
 
 	#endif
@@ -547,7 +548,7 @@ unsigned int __stdcall Thread(void * Args)
 				if (gFastTP.load())	
 				{
 					ExChicken::FastTP();
-					gFastTP.store(false);
+					gFastTP = false;
 				}
 #endif
 
@@ -557,7 +558,7 @@ unsigned int __stdcall Thread(void * Args)
 			D2Ex::CleanUp();
 #if defined D2EX_EXAIM_ENABLED || defined D2EX_PVM_BUILD
 			SetEvent(hAimEvent);
-			gStopTeleport.store(true);
+			gStopTeleport = true;
 #endif
 		}
 

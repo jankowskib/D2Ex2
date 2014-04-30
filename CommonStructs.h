@@ -30,7 +30,6 @@ struct ScrollBar;
 struct TileContext;
 struct GfxCell;
 
-
 #pragma pack(push, 1)
 
 struct InventorySize // sizeof 0x10
@@ -197,10 +196,10 @@ struct COORDS
 
 struct D2RECT
 {
-	DWORD left;
-	DWORD top;
-	DWORD right;
-	DWORD bottom;
+	signed int left;
+	signed int top;
+	signed int right;
+	signed int bottom;
 };
 
 struct D2RGB
@@ -545,7 +544,7 @@ struct D2Menu // size 0x18
 
 struct D2MenuEntry //size 0x550
 {
-	DWORD dwMenuType;									 //0x00  //-1 - static text, 0 -selectable, 1- switchbar , 2- with bar, 3 - key config (added)
+	DWORD dwMenuType;									 //0x00  //-1 - static text, 0 -selectable, 1- switchbar , 2- with bar, 3 - key config (added), 4 - switch bar ex (added)
 	DWORD dwExpansion;									 //0x04  //if set, shows only in d2exp
 	DWORD dwYOffset;									 //0x08  //generated dynamicaly
 	union {
@@ -554,11 +553,11 @@ struct D2MenuEntry //size 0x550
 	};
 	BOOL(__fastcall* EnableCheck)(D2MenuEntry*, DWORD ItemNo); //0x110 if return false, its disabled
 	BOOL(__fastcall* OnPress)(D2MenuEntry*, StormMsg*);		 //0x114 28.12.11 - added StormMsg*
-	BOOL(__fastcall* OptionHandle)(D2MenuEntry*);			 //0x118 called when option value is changed
-	BOOL(__fastcall* ChangeHandle)(D2MenuEntry*);			 //0x11C if return true OnPress is called, and option gfx is switched
+	BOOL(__fastcall* OnChange)(D2MenuEntry*);				 //0x118 called when option value is changed (renamed from OptionHandle) also sets default value for switch on init
+	BOOL(__fastcall* ValidateCheck)(D2MenuEntry*);			 //0x11C if return true OnPress is called, and option gfx is switched (renamed from ChangeHandle)
 	union {
 		DWORD dwMaxValue;									 //0x120
-		DWORD dwSwitchesNo;									 //0x120  (max 4)
+		DWORD dwSwitchesNo;									 //0x120  (max 4 for switchbar, 260 for switchbarex)
 		DWORD* Bind;										 //0x120 -> KeyConfig (my add)
 	};
 	union {
@@ -571,8 +570,9 @@ struct D2MenuEntry //size 0x550
 		DWORD dwFontType;									 //my add valid for all
 	};
 	union {
-		char szSwitchCellFiles[4][260];						 //0x12C DATA\\LOCAL\\UI\\LANG\\%s used only in LoadMenu Func
-		wchar_t wSwitchItemName[4][130];					 //my addition
+		char szSwitchCellFiles[4][260];						//0x12C DATA\\LOCAL\\UI\\LANG\\%s used only in LoadMenu Func
+		wchar_t wSwitchItemName[4][130];					//my addition
+		wstring* wSwitches[260];							//my addition for menu type = 4
 	};
 	CellFile* ptCellFile;								 //0x53C
 	CellFile* ptSwitchCellFile[4];						 //0x540
