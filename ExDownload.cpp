@@ -25,7 +25,7 @@
 static ExWindow * DownScreen;
 static ExRectangle * Progress;
 static ExTextBox * File;
-//static ExTextBox * Percent;
+static ExTextBox * Percent;
 static ExTextBox * Cancel;
 static ExDownload::Callbacks Callback;
 
@@ -49,9 +49,9 @@ switch(ulStatusCode)
 {
 case BINDSTATUS_CONNECTING:
 	{
-	//	if(File) {
-	//File->SetTextSimple(L"Connecting...");
-	//	}
+		if(File) {
+	File->SetTextSimple(L"Connecting...");
+		}
 	}
 	break;
 case BINDSTATUS_DOWNLOADINGDATA:
@@ -64,9 +64,9 @@ case BINDSTATUS_DOWNLOADINGDATA:
 	int x = (int)( (a * 298) / b);
 	int y = (int)( (a * 100) / b);
 	Progress->SetWidth( x ? x : 1);
-	//wostringstream wstr;
-	//wstr <<  L'(' << y << L"%)";
-	//Percent->SetText(wstr.str());
+	wostringstream wstr;
+	wstr <<  L'(' << y << L"%)";
+	Percent->SetText(wstr.str());
 	}
 
 	if(File && !txt)
@@ -80,10 +80,10 @@ case BINDSTATUS_DOWNLOADINGDATA:
 case BINDSTATUS_ENDDOWNLOADDATA:
 	{
 	if(Progress)	Progress->SetWidth(298);
-	//wostringstream wstr;
-	//wstr <<  L'(' << 100 << L"%)";
-	//Percent->SetText(wstr.str());
-//	if(File) File->SetTextSimple(L"Downloading complete!");
+	wostringstream wstr;
+	wstr <<  L'(' << 100 << L"%)";
+	Percent->SetText(wstr.str());
+	if(File) File->SetTextSimple(L"Downloading complete!");
 	}
 	break;
 }
@@ -170,23 +170,23 @@ DownScreen->SetAlign(DownScreen->CENTER,DownScreen->CENTER);
 
 Bckg = new ExBox(DownScreen->GetX()+50,DownScreen->GetY()+90,300,20,0x98,0);
 Progress = new ExRectangle(DownScreen->GetX()+52,DownScreen->GetY()+92,1,16,0x97,2);
-//File = new ExTextBox(DownScreen->GetX()+10,DownScreen->GetY()+50,13,6,L"Resolving server...",0,DownScreen);
-//Percent = new ExTextBox(-1,-1,7,0,L"0%",0,Bckg);
-//Percent->SetAlign(Percent->CENTER,Percent->CENTER);
-//Cancel = new ExTextBox(-1,DownScreen->GetY()+DownScreen->GetHeight()-10,8,0,CancelStr,&Terminate,DownScreen);
-//Cancel->SetAlign(Cancel->CENTER,Cancel->NONE);
+File = new ExTextBox(DownScreen->GetX()+10,DownScreen->GetY()+50,13,6,L"Resolving server...",0,DownScreen);
+Percent = new ExTextBox(-1,-1,7,0,L"0%",0,Bckg);
+Percent->SetAlign(Percent->CENTER,Percent->CENTER);
+Cancel = new ExTextBox(-1,DownScreen->GetY()+DownScreen->GetHeight()-10,8,0,CancelStr,&Terminate,DownScreen);
+Cancel->SetAlign(Cancel->CENTER,Cancel->NONE);
 
 DownScreen->AddChild(Bckg);
 DownScreen->AddChild(Progress);
-//DownScreen->AddChild(File);
-//DownScreen->AddChild(Percent);
-//DownScreen->AddChild(Cancel);
+DownScreen->AddChild(File);
+DownScreen->AddChild(Percent);
+DownScreen->AddChild(Cancel);
 }
 else
 {
-//delete Cancel;
-//delete Percent;
-//delete File;
+delete Cancel;
+delete Percent;
+delete File;
 delete Progress;
 delete Bckg;
 delete DownScreen;

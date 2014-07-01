@@ -261,12 +261,14 @@ struct Level {
 	DWORD dwRoomEntries;	//0x228
 };
 
-struct Path {
+struct Path	//sizeof 0x200
+{
 	short xOffset;					//0x00
 	short xPos;						//0x02
 	short yOffset;					//0x04
 	short yPos;						//0x06
-	DWORD _1[2];					//0x08
+	DWORD xUnknown;					//0x08  16 * (wInitX - wInitY) <- Mby AutomapX
+	DWORD yUnknown;					//0x0C  8 * (wInitX + wInitY + 1) <- Mby AutoampY
 	short xTarget;					//0x10
 	short yTarget;					//0x12
 	DWORD _2[2];					//0x14
@@ -279,7 +281,9 @@ struct Path {
 	DWORD dwPathType;				//0x3C
 	DWORD dwPrevPathType;			//0x40
 	DWORD dwUnitSize;				//0x44
-	DWORD _5[4];					//0x48
+	DWORD _5[2];					//0x48
+	DWORD dwCollisionFlag;			//0x50  0x1804 <- bFlying, 0x3401 <- bOpenDoors, 0x3C01 <- Cannot Open Doors, 0x804 <- Ghost, 0x1C09 <- Player
+	DWORD _5d;						//0x54
 	UnitAny *pTargetUnit;			//0x58
 	DWORD dwTargetType;				//0x5C
 	DWORD dwTargetId;				//0x60
@@ -417,7 +421,7 @@ struct StatListEx  //size 0x64
 	Game* ptGame;					//0x60
 };
 
-struct StatList { //size 0x3C
+struct StatList { //size 0x40
 	void* pMemPool;					//0x00
 	UnitAny* pUnit;					//0x04
 	DWORD dwOwnerType;				//0x08

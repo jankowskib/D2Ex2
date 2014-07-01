@@ -130,6 +130,19 @@ struct D2PacketTable
 #pragma pack(push, 1)
 
 /*
+	Refresh unit packet
+*/
+struct px15
+{
+	BYTE P_15;
+	BYTE UnitType;
+	DWORD UnitId;
+	WORD wX;
+	WORD wY;
+	BYTE bFlash;
+};
+
+/*
 	Global message event
 */
 struct px5a
@@ -253,7 +266,7 @@ struct GFXHelpers
 };
 
 
-struct TileContext
+struct TileContext // *.dt1
 {	
 	// (...)
 	DWORD dwSize;					//0x4C
@@ -263,7 +276,7 @@ struct TileContext
 	void *ptBlock;					//0x5C
 };
 
-struct CellFile 
+struct CellFile // *.dc6
 {
 	DWORD dwVersion;				//0x00
 	struct {
@@ -336,15 +349,38 @@ struct fnRendererCallbacks
 	BOOL(__fastcall *ClearCaches)(); // 53
 };
 
+/*
+	Needs additional research. Start point should be on D2CLIENT.6FAF9A90 (1.13d)
+	Soon to be renamed to MissileCmdStrc
+*/
 struct SpellStrc	//size 0x1C  // Valid for 22 -> on target & 21 -> on xy
 {
 	DWORD SkillId;	//0x00
 	DWORD UnitId;		//0x04
-	DWORD xPos;		//0x08 //Also TargetType
-	DWORD yPos;		//0x0C //Also TargetId
+	union
+	{
+		struct 
+		{
+			DWORD xPos;		//0x08
+			DWORD yPos;		//0x0C
+		};
+		struct 
+		{
+			DWORD TargetType;	//0x08
+			DWORD TargetId;		//0x0C 
+		};
+
+	};
 	DWORD _1;			//0x10
 	DWORD _2;			//0x14
 	DWORD _3;			//0x18
+};
+
+struct PlayerCmdStrc	//size 0xC // Valid for 9 (send on PLAYER_MODE_DEAD), and probably 1-20, 23-25
+{
+	DWORD xPos;					//0x00
+	DWORD yPos;					//0x04
+	DWORD dwLastHitClass;		//0x08 usually 0
 };
 
 struct BitBuffer // Taken from Nefarius @PhrozenKeep, thx

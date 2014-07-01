@@ -121,6 +121,7 @@ _d2f D2Funcs = {0}; void SetupD2Funcs() {
 		EXFUNCPTR(D2COMMON, GetItemByBodyLoc, UnitAny*, __stdcall, (Inventory * pInventory, int aLoc), -10292) //k
 		EXFUNCPTR(D2COMMON, GetItemFlag, BOOL, __stdcall, (UnitAny *item, DWORD flagmask, DWORD lineno, char *filename), -10458) //k
 		EXFUNCPTR(D2COMMON, GetItemColor, BYTE*, __stdcall, (UnitAny *ptPlayer, UnitAny* ptItem, BYTE* out, BOOL a4), -11062) //k
+		EXFUNCPTR(D2COMMON, GetItemCost, int, __stdcall, (UnitAny *pPlayer, UnitAny *ptItem, int DiffLvl, QuestFlags *pQuestFlags, int NpcClassId, int InvPage), -10186)
 
 		//D2NET
 		EXFUNCPTR(D2NET, SendPacket, bool, __stdcall, (int PacketLen, int _1, BYTE *aPacket), -10015) // k
@@ -210,6 +211,7 @@ _d2f D2Funcs = {0}; void SetupD2Funcs() {
 
 
 		EXFUNCPTR(D2CLIENT, RemoveObject_I, BOOL, __fastcall, (BYTE* aPacket), 0x83730) // k 0x0A
+		EXFUNCPTR(D2CLIENT, ReassignUnit_I, BOOL, __fastcall, (BYTE* aPacket), 0x85B40) // 0x15
 		EXFUNCPTR(D2CLIENT, GameChat_I, BOOL, __fastcall, (BYTE* aPacket), 0x85E80) // k 0x26
 		EXFUNCPTR(D2CLIENT, UnitCastedXY_I, BOOL, __fastcall, (UnitAny* pUnit, BYTE* aPacket), 0x85660)  //0x4D
 		EXFUNCPTR(D2CLIENT, EventMsg_I, BOOL, __fastcall, (BYTE* aPacket), 0x83BD0) // k 0x5A
@@ -248,7 +250,7 @@ void SetupD2Pointers() {
 	EXASMPTR(D2CLIENT, GetLevelName_I, 0x18250) //k
 	EXASMPTR(D2CLIENT, DrawGZBOX_I, 0x17D10) // k
 	EXASMPTR(D2CLIENT, Screen_Call, 0x77810)  // 1.13d
-	EXASMPTR(D2CLIENT, TestPvpFlag_I, 0x6A720) // k
+	EXASMPTR(D2CLIENT, TestRosterFlag_I, 0x6A720) // k
 	EXASMPTR(D2WIN, LoadMpq_I, 0x7E50) //k
 	EXASMPTR(D2CLIENT, MenuFunc_I, 0xC2480) // k
 	EXASMPTR(D2CLIENT, CharInfo_I, 0xBF090) //k
@@ -431,7 +433,8 @@ void SetupD2Vars() {
 		EXVARPTR(D2CLIENT, EnableShake, BOOL, 0x11CA68)
 		EXVARPTR(D2CLIENT, ShakeX, int, 0x11CA6C)
 		EXVARPTR(D2CLIENT, ShakeY, int, 0xFC3DC)
-
+		EXVARPTR(D2CLIENT, StatesOnSetFuncTable, DWORD, 0xF35C0) //void (__fastcall *gStateSetFuncs_6FBA35C0[])(UnitAny *pUnit, int nState) 1-19 are in use, but 20-32 are free:)
+		EXVARPTR(D2CLIENT, StatesOnRemoveFuncTable, DWORD, 0xF3640) //void (__fastcall *gStateRemFuncs_6FBA3640[])(UnitAny *pUnit, int nState) 13-30 are free
 
 #ifndef __DEFINE_EXPTRS
 };

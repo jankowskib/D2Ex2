@@ -192,7 +192,8 @@ DWORD __fastcall ExInput::GameInput(wchar_t* wMsg)
 		str = strtok_s(NULL, " ", &tok);
 		BYTE data[512];
 		static int eLen = 0;
-		int length = Misc::ConvertHexStringToBytes(str, data, 512);
+		if (strlen(str) == 0) return 0;
+		int length = Misc::ConvertHexStringToBytes(Misc::decomma(str), data, 512);
 		D2Funcs.D2NET_ReceivePacket(&eLen, data, length);
 		/*	wchar_t a[2000] = {9};
 			static char astr[3*512];
@@ -201,6 +202,11 @@ DWORD __fastcall ExInput::GameInput(wchar_t* wMsg)
 		//Misc::CharToWide(astr,strlen(astr)+1,wdata,strlen(astr)+1);
 		//	swprintf(a,L"[%d,%d] : %s",eLen,length, wdata);
 		//D2Funcs.D2CLIENT_PrintGameString(a,1);
+		char astr[2048];
+		Misc::ConvertBytesToHexString(data, length, astr, 2047, ',');
+		wostringstream wdata;
+		wdata << "Received " << astr;
+		D2Funcs.D2CLIENT_PrintGameString(wdata.str().c_str(), 1);
 		return -1;
 	}
 	if (_stricmp(str, "#send") == 0)
@@ -211,7 +217,8 @@ DWORD __fastcall ExInput::GameInput(wchar_t* wMsg)
 		char* str2 = strtok_s(NULL, " ", &tok);
 		if (str2) i = atoi(str2);
 		BYTE data[512];
-		int length = Misc::ConvertHexStringToBytes(str, data, sizeof(data));
+		if (strlen(str) == 0) return 0;
+		int length = Misc::ConvertHexStringToBytes(Misc::decomma(str), data, sizeof(data));
 		for (int z = 0; z < i; z++)
 		{
 			D2Funcs.D2NET_SendPacket(length, 0, data);
@@ -229,8 +236,66 @@ DWORD __fastcall ExInput::GameInput(wchar_t* wMsg)
 		D2Funcs.D2CLIENT_PrintGameString(n.str().c_str(), 1);
 		return -1;
 	}
+	if (_stricmp(str, "#blocked") == 0)
+	{
+		wostringstream wdata;
+		wdata << "Currently blocked packets (C->S): ";
+		for (auto it = BlockedPackets.begin(); it != BlockedPackets.end(); ++it)
+		{
+			wdata << hex << *it << ", ";
+		}
+		D2Funcs.D2CLIENT_PrintGameString(wdata.str().c_str(), 1);
+
+		return -1;
+	}
+	if (_stricmp(str, "#block") == 0)
+	{
+		int blocked;
+		char* str2 = strtok_s(NULL, " ", &tok);
+		if (!str2) 
+			return 0;
+		BYTE data[512];
+		int length = Misc::ConvertHexStringToBytes(str2, data, sizeof(data));
+
+		blocked = data[0];
+		if (blocked == 0 || blocked > 255)
+			return 0;
+		for (auto it = BlockedPackets.begin(); it != BlockedPackets.end(); ++it)
+		{
+			if (*it == (BYTE)blocked)
+			{
+				wostringstream wdata;
+				wdata << "Packet 0x" << hex << *it << " has been unblocked!";
+				D2Funcs.D2CLIENT_PrintGameString(wdata.str().c_str(), 1);
+
+				BlockedPackets.erase(it);
+				return -1;
+			}
+		}
+		BlockedPackets.push_back((BYTE)blocked);
+		wostringstream wdata;
+		wdata << "Packet 0x" << hex << blocked << " has been blocked!";
+		D2Funcs.D2CLIENT_PrintGameString(wdata.str().c_str(), 1);
+		return -1;
+	}
 #endif
 	return 0;
+}
+
+DWORD __stdcall ExInput::PacketOutput(int PacketLen, int _1, BYTE *aPacket)
+{
+
+	for (auto it = BlockedPackets.begin(); it != BlockedPackets.end(); ++it)
+	{
+		if (*it == aPacket[0])
+		{
+			wostringstream wdata;
+			wdata << "Packet 0x" << hex << *it << " has been just blocked!";
+			D2Funcs.D2CLIENT_PrintGameString(wdata.str().c_str(), 1);
+			return 0;
+		}
+	}
+	return D2Funcs.D2NET_SendPacket(PacketLen, _1, aPacket);
 }
 
 DWORD __fastcall ExInput::PacketInput(BYTE* aPacket, int aLen) //CODE UNSAFE FOR WARDEN

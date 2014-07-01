@@ -147,7 +147,7 @@ void __fastcall ExLoading::SendJoinGame(WORD SessionToken, DWORD SessionKey) //P
 	Packet.VerByte = 13; 
 #endif
 #else
-	Packet.VerByte = 16; //  GetVersion change 11 -> 16
+	Packet.VerByte = gVerCode; //  GetVersion change 11 -> 16
 #endif
 	Packet.Unk1 = (D2Funcs.FOG_isExpansion() != 0) ? 0xED5DCC50 : 0x2185EDD6;
 	Packet.Unk2 = 0x91A519B6;

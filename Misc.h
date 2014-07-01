@@ -31,6 +31,7 @@ using namespace std;
 
 namespace Misc
 {
+	char * decomma(char *str);
 	string DrawModeToString(int nDrawMode);
 	void RegWriteDword(const char * key, const char* name, const DWORD value);
 	int RegReadDword(const char * key, const char* value, const DWORD default);

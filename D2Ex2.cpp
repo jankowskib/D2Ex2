@@ -127,7 +127,8 @@ unsigned int __stdcall Thread(void * Args)
 
 	ConfigIni = (D2ExDir + "D2Ex.ini");
 	ClansIni = (D2ExDir + "Clans.ini");
-
+	string VerIni = (D2ExDir + "D2ExVer.ini");
+	gVerCode = GetPrivateProfileInt("D2Ex", "D2ExVersion", 16, VerIni.c_str());
 	bLagometer=GetPrivateProfileInt("D2Ex","Lagometer",0,ConfigIni.c_str());
 	HideCrap=GetPrivateProfileInt("D2Ex","HideCrap",0,ConfigIni.c_str());
 	HideGold=GetPrivateProfileInt("D2Ex","HideGold",0,ConfigIni.c_str());
@@ -299,6 +300,10 @@ unsigned int __stdcall Thread(void * Args)
 	// <- Removed Life/Mana patch cause 1.13d supports it natively
 	Misc::Patch(JUMP,GetDllOffset("D2Client.dll",0x2E3FC),(DWORD)D2Stubs::D2CLIENT_Properties,6,"New Properties");  //k
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x233A7),(DWORD)D2Stubs::D2CLIENT_Lighting_STUB,6,"Lighting Patch"); //k
+	//!!!!!!!!!!!!!!!!!! CODE UNSAFE FOR WARDEN !!!!!!!!!!!!!!!!!!!!!!
+	//Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x83301), (DWORD)ExInput::PacketInput_STUB, 5, "Realm Input Wrapper");
+	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	Misc::Patch(JUMP, GetDllOffset("D2Client.dll", 0xD13C), (DWORD)ExInput::PacketOutput, 6, "Realm Output Wrapper");
 	// <- Removed Minimalize button patch cause 1.13d supports it natively
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x6E91B),(DWORD)D2Stubs::D2CLIENT_FixHostilePic,5,"Move Hostile Button"); //k
 	Misc::Patch(CUSTOM,GetDllOffset("D2Client.dll",0x6415C),0x26,1,"RandTrans.dat Fix"); //k
@@ -347,8 +352,17 @@ unsigned int __stdcall Thread(void * Args)
 
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x460C0),(DWORD)D2Stubs::D2CLIENT_SendJoinGame_STUB,5,"Join Game Override"); //k
 
-	#ifdef D2EX_SPECATATOR
-	Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x452F2), (DWORD)ExSpec::OnShake, 5, "Screen Shake override"); 
+	#ifdef D2EX_SPECTATOR
+	Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x452F2), (DWORD)ExSpec::OnShake, 5, "Screen Shake override");
+	Misc::Patch(JUMP, GetDllOffset("D2Client.dll", 0x619D0), (DWORD)D2Stubs::D2GAME_IsUnitDead_STUB, 10, "Is Unit dead Override"); // Needs the same patch on D2Game.dll
+	Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x62BF1), (DWORD)D2Stubs::D2GAME_IsHostileMissile_STUB, 5, "Hostility test fix for missiles");
+	
+	Misc::WriteDword((DWORD*)&D2Vars.D2CLIENT_StatesOnSetFuncTable[20], (DWORD)&ExSpec::OnStateSet);
+	Misc::WriteDword((DWORD*)&D2Vars.D2CLIENT_StatesOnRemoveFuncTable[13], (DWORD)&ExSpec::OnStateRemove);
+	#endif
+
+	#ifdef D2EX_FORUMGOLD
+	Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x7936D), (DWORD)D2Stubs::D2COMMON_GetItemCost, 5, "Item Cost Stub I");
 	#endif
 #endif
 
@@ -381,9 +395,36 @@ unsigned int __stdcall Thread(void * Args)
 	Misc::Patch(JUMP, GetDllOffset("D2Common.dll", -10441), (DWORD)ExMultiRes::GetInventoryField, 8, "D2COMMON_GetInventoryField");
 	Misc::Patch(NOP, GetDllOffset("D2Client.dll", 0x1D3F1), 0x90909090, 44, "Nullify UI panels draw offset set");
 
+	// NEW Skill // NEW Stats Button fixes
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x2109C), 0x82, 1, "New Stats (Inactive) Button Fixture");
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x20DAC), 0x82, 1, "New Skills (Inactive) Button Fixture");
+
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x20E71), 0x73, 1, "New Stats (Active) Button Fixture I check");
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x20F14), 0x73, 1, "New Stats (Active) Button Fixture II check");
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x20F95), 0x73, 1, "New Stats (Active) Button Fixture III check");
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x20FF0), 0x73, 1, "New Stats (Active) Button Fixture IV check");
+
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x216AA), 0x72, 1, "Button OnUp Callback Fixture I (Left Side)");
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x216CC), 0x8D, 1, "Button OnUp Callback Fixture II (Left Side)");
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x21297), 0x72, 1, "Button OnDown Callback Fixture I (Left Side)");
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x212B5), 0x7D, 1, "Button OnDown Callback Fixture II (Left Side)");
+
+
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x20B81), 0x73, 1, "New Skills (Active) Button Fixture I check");
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x20C1D), 0x73, 1, "New Skills (Active) Button Fixture II check");
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x20C99), 0x73, 1, "New Skills (Active) Button Fixture III check");
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x20CF8), 0x73, 1, "New Skills (Active) Button Fixture IV check");
+
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x2134A), 0x72, 1, "Button OnUp Callback Fixture I (Right Side)");
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x2136C), 0x8D, 1, "Button OnUp Callback Fixture II (Right Side)");
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x211E7), 0x72, 1, "Button OnDown Callback Fixture I (Right Side)");
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x21201), 0x7D, 1, "Button OnDown Callback Fixture II (Right Side)");
+
+
+
 	Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x6F344), (DWORD)ExMultiRes::DrawControlPanel, 5, "GFX_DrawControlPanel");
-	Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x4549F), (DWORD)ExMultiRes::OnResolutionSet, 40, "OnGameLoad resolution set");
-	Misc::Patch(JUMP, GetDllOffset("D2Client.dll", 0xC4510), (DWORD)ExMultiRes::OnResolutionSet, 8, "OnGameLoad resolution set (menu entry)");
+	Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x4549F), (DWORD)ExMultiRes::D2CLIENT_OnResolutionSet, 40, "OnGameLoad resolution set");
+	Misc::Patch(JUMP, GetDllOffset("D2Client.dll", 0xC4510), (DWORD)ExMultiRes::D2CLIENT_OnResolutionSet, 8, "OnGameLoad resolution set (menu entry)");
 	
 	
 	Misc::WriteDword((DWORD*)&((GFXHelpers*)GetDllOffset("D2Gfx.dll", 0x10BFC))->FillYBufferTable, (DWORD)&ExMultiRes::D2GFX_FillYBufferTable);
@@ -446,8 +487,9 @@ unsigned int __stdcall Thread(void * Args)
 #ifdef D2EX_PVPGN_EXT
 	Misc::WriteDword((DWORD*)&D2Vars.D2CLIENT_PacketHandler[0xA6].CallBack, (DWORD)&ExEvents::OnTextEvent);
 	//ExSpectator
-#ifdef D2EX_SPECATATOR
+#ifdef D2EX_SPECTATOR
 	Misc::WriteDword((DWORD*)&D2Vars.D2CLIENT_PacketHandler[0x7E].CallBack, (DWORD)&ExSpec::OnMousePacket);
+	Misc::WriteDword((DWORD*)&D2Vars.D2CLIENT_PacketHandler[0x15].CallBack, (DWORD)&ExSpec::OnReassign);
 #endif
 	//0x2C SERVER HELLO -- deprecated -- 
 	//Misc::WriteDword((DWORD*)&D2Vars.D2NET_SrvPacketLenTable[0x2C], 18);
@@ -489,7 +531,7 @@ unsigned int __stdcall Thread(void * Args)
 #endif
 	atomic_init(&DontLeaveCS, false);
 	atomic_init(&DontEnterCS, false);
-#ifdef D2EX_SPECATATOR
+#ifdef D2EX_SPECTATOR
 	atomic_init(&gSpecing, false);
 #endif
 
@@ -513,7 +555,7 @@ unsigned int __stdcall Thread(void * Args)
 			//	D2EXERROR("Cannot set resolution %dx%d. Please correct your setting in D2Ex.ini", cResModeX, cResModeY);
 #endif
 
-#ifdef D2EX_SPECATATOR
+#ifdef D2EX_SPECTATOR
 			gSpecing = false;
 			gszSpectator.clear();
 #endif
@@ -522,7 +564,7 @@ unsigned int __stdcall Thread(void * Args)
 
 			hAim = (HANDLE)_beginthreadex(0, 0, &ExAim::TeleportWatchThread, &hAimEvent, 0, 0);
 #endif
-			if(!lagometer && bLagometer)	
+			if(!lagometer && bLagometer)	//TODO: Set location based on resolution
 				lagometer = new ExLagometer(273,571);
 			ExpAtJoin = D2Funcs.D2COMMON_GetStatSigned(D2Funcs.D2CLIENT_GetPlayer(),STAT_EXPERIENCE,0);
 			TickAtJoin = GetTickCount();

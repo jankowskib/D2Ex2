@@ -24,6 +24,7 @@
 #include "ExOOG.h"
 #include "ExMultiRes.h"
 #include "ExAutomap.h"
+#include "ExSpectator.h"
 
 __declspec(naked) int __fastcall D2ASMFuncs::D2CLIENT_DiffuseStat(int nStat)
 {
@@ -76,6 +77,63 @@ __declspec(naked) BOOL __fastcall D2ASMFuncs::D2CLIENT_IsMuted(RosterUnit* pRost
 		ret
 	}
 }
+
+#ifdef D2EX_FORUMGOLD
+
+int __stdcall D2Stubs::D2COMMON_GetItemCost(UnitAny *pPlayer, UnitAny *ptItem, int DiffLvl, QuestFlags *pQuestFlags, int NpcClassId, int InvPage)
+{
+	//if(pPlayer->pGame, pPlayer->pGame->dwGameState!=1)
+	int ret = D2Funcs.D2COMMON_GetItemCost(pPlayer, ptItem, DiffLvl, pQuestFlags, NpcClassId, InvPage);
+	if (ret == 1)
+		return 0;
+	return ret;
+}
+#endif
+
+#ifdef D2EX_SPECTATOR
+/*
+BOOL __userpurge PARTY_TestRosterFlag_6FB1A720<eax>(DWORD UnitId1<edx>, int UnitId2<esi>, int dwFlag)
+*/
+__declspec(naked) void D2Stubs::D2GAME_IsHostileMissile_STUB()
+{
+	__asm
+	{
+		push[esp + 4] // dwFlag
+		push esi	 // UnitId2
+		push edx	// UnitId1
+
+		call ExSpec::IsHostileMissile
+
+		ret 4
+	}
+}
+
+/*
+BOOL __usercall isUnitDead_6FB119D0<eax>(UnitAny *pUnit<eax>)
+*/
+__declspec(naked) void D2Stubs::D2GAME_IsUnitDead_STUB()
+{
+	__asm
+	{
+		push ecx
+		push edx 
+		push ebp
+		push esi
+		push edi
+
+		mov ecx, eax
+		call ExSpec::IsUnitDead
+		
+		pop edi
+		pop esi
+		pop ebp
+		pop edx
+		pop ecx
+		ret
+	}
+}
+
+#endif
 
 __declspec(naked) void D2Stubs::D2CLIENT_FixHostilePic()
 {
@@ -487,7 +545,7 @@ __asm
 	}
 }
 
-__declspec(naked) DWORD __fastcall D2ASMFuncs::D2CLIENT_TestPvpFlag(DWORD dwUnitId1, DWORD dwUnitId2, DWORD dwFlagMask)
+__declspec(naked) DWORD __fastcall D2ASMFuncs::D2CLIENT_TestRosterFlag(DWORD dwUnitId1, DWORD dwUnitId2, DWORD dwFlagMask)
 {
 	__asm
 	{
@@ -495,7 +553,7 @@ __declspec(naked) DWORD __fastcall D2ASMFuncs::D2CLIENT_TestPvpFlag(DWORD dwUnit
 		push [esp + 8];
 		mov esi, edx;
 		mov edx, ecx;
-		call D2Ptrs.D2CLIENT_TestPvpFlag_I
+		call D2Ptrs.D2CLIENT_TestRosterFlag_I
 		pop esi;
 		ret 4;
 	}

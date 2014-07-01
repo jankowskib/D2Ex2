@@ -16,14 +16,18 @@ Features
 - ExBuffs module let see you states, auras and remaining time
 - [WIP] High resolution support for GDI / GLIDE video modes.
 
+Configuration
+-------------
+You can set build flags in stdAfx.h. However flags related to D2EX_PVPGN_EXT won't work for you unless you have serverside DLL which i won't make public.
+
 Installation
 -------------
 Compile Release build (select configuration for your version) using Visual Studio 2008+, ~~(2012 is supported if you select xp vcl libs in project setup)~~
-~~Visual Studio 2013 is not supported because it's messing with function order and pointers are not defined correctly even without optimizations.~~ <- Now compiles correctly on VS 2013 too :)
+~~Visual Studio 2013 is not supported because it's messing with function order and pointers are not defined correctly even without optimizations.~~ <- Now compiles correctly on VS 2013
 
 or
 
-Copy everything from files directory to your Diablo II directory, D2Win.dll is a loader for D2Ex2.dll. If you use prebuild D2Ex2.dll, then you need to install this: http://www.microsoft.com/en-us/download/details.aspx?id=40784
+Copy everything from files directory to your Diablo II directory, D2Win.dll is a loader for D2Ex2.dll. If you use prebuilt D2Ex2.dll, then you need to install this: http://www.microsoft.com/en-us/download/details.aspx?id=40784
 
 Thanks to
 ----------

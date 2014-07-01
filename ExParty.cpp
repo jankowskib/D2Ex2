@@ -666,6 +666,7 @@ int	ExParty::GetPlayerCount()
 	return i;
 }
 
+
 DWORD ExParty::GetPvpFlags(DWORD dwUnitId)
 {
 	DWORD dwFlags = 0;
@@ -681,10 +682,10 @@ DWORD ExParty::GetPvpFlags(DWORD dwUnitId)
 			dwFlags |= PVP_ALLIED_WITH_YOU;
 		return dwFlags;
 	}
-	if (D2ASMFuncs::D2CLIENT_TestPvpFlag(dwUnitId, Me->dwUnitId, 8))
+	if (D2ASMFuncs::D2CLIENT_TestRosterFlag(dwUnitId, Me->dwUnitId, 8))
 		dwFlags |= PVP_HOSTILED_YOU;
 
-	if (D2ASMFuncs::D2CLIENT_TestPvpFlag(Me->dwUnitId, dwUnitId, 8))
+	if (D2ASMFuncs::D2CLIENT_TestRosterFlag(Me->dwUnitId, dwUnitId, 8))
 		dwFlags |= PVP_HOSTILED_BY_YOU;
 
 	if (ptPlayer->dwPartyFlags & 2)
@@ -795,7 +796,7 @@ void ExParty::Update()
 		i->Kills->SetText(boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName, 1)));
 		i->Deaths->SetText(boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName, 2)));
 		i->Assists->SetText(boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName, 3)));
-	#ifdef D2EX_SPECATATOR
+	#ifdef D2EX_SPECTATOR
 		if (i->Spectate)
 		{
 			if (gSpecing)
@@ -993,7 +994,7 @@ void ExParty::Resort(char *szSkip)
 		i->Deaths->SetY(TextPos);
 		i->Assists->SetY(TextPos);
 		i->Kills->SetY(TextPos);
-	#ifdef D2EX_SPECATATOR
+	#ifdef D2EX_SPECTATOR
 		if(i->Spectate)
 			i->Spectate->SetY(yPos);
 	#endif
@@ -1079,7 +1080,7 @@ void ExParty::Fill(char *szSkip)
 		if (ptRoster->dwUnitId != D2Funcs.D2CLIENT_GetPlayer()->dwUnitId)
 		{
 			int bOffset = Tbl.Frame->GetX() + Tbl.Frame->GetWidth() - 20;
-#ifdef D2EX_SPECATATOR
+#ifdef D2EX_SPECTATOR
 			Tbl.Spectate = new ExButton(bOffset, yPos, 0, 20, L"", CellFiles::PARTY, &ExParty::Spectate, 0); 
 			PartyScreen->AddChild(Tbl.Spectate);
 			bOffset -= 21;

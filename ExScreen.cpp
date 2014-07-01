@@ -205,7 +205,7 @@ void __stdcall ExScreen::Display()
 	wStr << " [" << dec << ExAim::GetUnitX(D2Funcs.D2CLIENT_GetPlayer()) << "," << dec << ExAim::GetUnitY(D2Funcs.D2CLIENT_GetPlayer()) << "]";
 	if(D2Funcs.D2CLIENT_GetSelectedUnit())
 	{
-		wStr << " UnitId: " << dec << D2Funcs.D2CLIENT_GetSelectedUnit()->dwUnitId;
+		wStr << " UnitId: 0x" << hex << D2Funcs.D2CLIENT_GetSelectedUnit()->dwUnitId;
 		wStr << " ClassId: " << dec << D2Funcs.D2CLIENT_GetSelectedUnit()->dwClassId;
 		wStr << " [" << dec << ExAim::GetUnitX(D2Funcs.D2CLIENT_GetSelectedUnit()) << "," << dec << ExAim::GetUnitY(D2Funcs.D2CLIENT_GetSelectedUnit()) << "]";
 	}
@@ -243,7 +243,7 @@ void __stdcall ExScreen::Display()
 	for(auto i = Controls.cbegin(); i!=Controls.cend(); ++i) (*i)->Draw();
 	LeaveCriticalSection(&CON_CRITSECT);
 
-#ifdef D2EX_SPECATATOR
+#ifdef D2EX_SPECTATOR
 	if (gSpecing == true && !gszSpectator.empty())
 	{
 		D2Funcs.D2WIN_SetTextSize(8);

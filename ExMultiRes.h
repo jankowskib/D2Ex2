@@ -42,7 +42,7 @@ namespace ExMultiRes
 	bool InitImages();
 	void FreeImages();
 
-	void __stdcall OnResolutionSet();
+	void __stdcall D2CLIENT_OnResolutionSet();
 	void __fastcall D2CLIENT_SetResolution(int nMode);
 	void __fastcall D2CLIENT_ResizeView(int UiCover);
 	BOOL __stdcall D2GFX_InitWindow(HINSTANCE hInstance, LRESULT(__stdcall *pWndProc)(HWND, UINT, WPARAM, LPARAM), int nRenderMode, BOOL bWindowed);

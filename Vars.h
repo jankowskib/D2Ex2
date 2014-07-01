@@ -41,6 +41,8 @@ using namespace std;
 
 #endif
 
+GLOBAL(BYTE, gVerCode)
+
 GLOBAL(BYTE, gTestColorRed)
 GLOBAL(BYTE, gTestColorGreen)
 GLOBAL(BYTE, gTestColorBlue)
@@ -60,6 +62,7 @@ GLOBAL(DWORD, gSpectatorTarget)
 GLOBAL(DWORD, AimTarget)
 GLOBAL(deque<COORDS>, HistoryPos) // Last 2 Coords
 GLOBAL(vector<COORDS>, TelePath)
+GLOBAL(vector<BYTE>, BlockedPackets)
 
 GLOBAL(int, bLagometer)
 GLOBAL(ExEditBox*,  GoldBox)

@@ -22,6 +22,19 @@
 #include "Misc.h"
 
 
+char * Misc::decomma(char *str)
+{
+	char *out = str, *put = str;
+
+	for (; *str != '\0'; ++str)
+	{
+		if (*str != ',')
+			*put++ = *str;
+	}
+	*put = '\0';
+
+	return out;
+}
 
 string Misc::DrawModeToString(int nDrawMode)
 {

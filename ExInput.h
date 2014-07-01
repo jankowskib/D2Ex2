@@ -45,6 +45,7 @@ void __stdcall RealmInput(wchar_t* Text, int Color);
 DWORD __fastcall PacketInput(BYTE* aPacket, int aLen);
 
 void GameInput_STUB();
+DWORD  __stdcall PacketOutput(int PacketLen, int _1, BYTE *aPacket);
 void PacketInput_STUB();
 LONG WINAPI GameWindowEvent(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 

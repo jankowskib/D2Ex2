@@ -18,6 +18,7 @@
 * ==========================================================
 */
 
+
 struct ArenaTxt
 {
   DWORD dwSuicide;
@@ -30,6 +31,34 @@ struct ArenaTxt
 };
 
 #pragma pack(push,1)
+
+struct PetTypesTxt
+{
+WORD pet_type; // 0x0
+struct {
+BYTE warp:1; // 0x4
+BYTE range:1; // 0x4
+BYTE partysend:1; // 0x4
+BYTE unsummon:1; // 0x4
+BYTE automap:1; // 0x4
+BYTE drawhp:1; // 0x4
+} dwFlags;
+BYTE _pad[5];
+WORD group; // 0x8
+WORD basemax; // 0xa
+WORD name; // 0xc
+BYTE icontype; // 0xe
+char baseicon[32]; // 0xf
+char micon1[32]; // 0x2f
+char micon2[32]; // 0x4f
+char micon3[32]; // 0x6f
+char micon4[32]; // 0x8f
+BYTE _1[3];
+WORD mclass1; // 0xb2
+WORD mclass2; // 0xb4
+WORD mclass3; // 0xb6
+WORD mclass4; // 0xb8
+};
 
 /*
 	Time-saving credit goes to Mnw1995
@@ -263,20 +292,22 @@ struct ItemStatCostTxt  //size 0x144
 	WORD	wStat;				//0x00
 	WORD 	_1;					//0x02
 	struct {
-	BYTE	bSendother:1;		//0
-	BYTE	bSigned:1;			//1
-	BYTE	bDamagerelated:1;	//2
-	BYTE	bItemspecific:1;	//3
-	BYTE	bDirect:1;			//5
-	BYTE    _1:1;				//6	
-	BYTE    _2:1;				//7
-	BYTE    _3:1;				//8	
-	BYTE    _4:1;				//9	
-	BYTE	bUpdateanimrate:1;	//10
-	BYTE	bFmin:1;			//11
-	BYTE	bFcallback:1;		//12
-	BYTE	bSaved:1;			//13
-	BYTE	bCsvsigned:1;		//14
+	BYTE	bSendOther : 1;			//1
+	BYTE	bSigned : 1;			//2
+	BYTE	bDamageRelated : 1;		//3
+	BYTE	bItemSpecific : 1;		//4
+	BYTE	bDirect : 1;			//5
+	BYTE	_1 : 1;					//6
+	BYTE    _2 : 1;					//7
+	BYTE    _3 : 1;					//8
+	BYTE    _4 : 1;					//9	
+	BYTE	bUpdateanimrate : 1;	//10
+	BYTE	bFmin : 1;				//11
+	BYTE	bFcallback : 1;			//12
+	BYTE	bSaved : 1;				//13
+	BYTE	bCsvsigned : 1;			//14
+	BYTE	_6 : 1;					//15
+	BYTE	_7 : 1;					//16
 		} bItemStatFlags; 		 //0x04
 	WORD 	_2;			  		 //0x06
 	BYTE	bSendBits;			//0x08

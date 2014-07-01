@@ -115,7 +115,7 @@ int __fastcall ExEvents::OnTextEvent(ExEvent *Dane) //0xA6
 			RosterUnit* u = ExParty::GetRosterById(msg->UnitId);
 			if (u)
 			{
-				DEBUGMSG("Entering specator mode")
+				DEBUGMSG("Entering specator mode...")
 				gszSpectator = u->szName;
 				*D2Vars.D2CLIENT_EnableShake = 1;
 				gSpectatorTarget = u->dwUnitId;
@@ -126,7 +126,7 @@ int __fastcall ExEvents::OnTextEvent(ExEvent *Dane) //0xA6
 		break;
 		case EXEVENT_SPECTATOR_END:
 		{
-				DEBUGMSG("Leaving specator mode")
+				DEBUGMSG("Leaving specator mode...")
 				gSpecing = false;
 				*D2Vars.D2CLIENT_EnableShake = 0;
 				gSpectatorTarget = 0;

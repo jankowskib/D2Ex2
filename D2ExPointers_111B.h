@@ -126,6 +126,8 @@ _d2f D2Funcs = { 0 }; void SetupD2Funcs() {
 		EXFUNCPTR(D2COMMON, GetItemByBodyLoc, UnitAny*, __stdcall, (Inventory * pInventory, int aLoc), -11003)
 		EXFUNCPTR(D2COMMON, GetItemFlag, BOOL, __stdcall, (UnitAny *item, DWORD flagmask, DWORD lineno, char *filename), -10303)
 		EXFUNCPTR(D2COMMON, GetItemColor, BYTE*, __stdcall, (UnitAny *ptPlayer, UnitAny* ptItem, BYTE* out, BOOL a4), -11106)
+		EXFUNCPTR(D2COMMON, GetItemCost, int, __stdcall, (UnitAny *pPlayer, UnitAny *ptItem, int DiffLvl, QuestFlags *pQuestFlags, int NpcClassId, int InvPage), -10511)
+
 		//D2NET
 		EXFUNCPTR(D2NET, SendPacket, bool, __stdcall, (int PacketLen, int _1, BYTE *aPacket), -10020)
 		EXFUNCPTR(D2NET, ReceivePacket, void, __fastcall, (int* eLen, BYTE* aPacket, int aLen), 0x6350)
@@ -260,7 +262,7 @@ void SetupD2Pointers() {
 		EXASMPTR(D2CLIENT, DrawGZBOX_I, 0x61440)
 		EXASMPTR(D2CLIENT, Screen_Call, 0x17E50)
 		EXASMPTR(D2CLIENT, ChatInput_I, 0x5E4E0)
-		EXASMPTR(D2CLIENT, TestPvpFlag_I, 0x1A980)
+		EXASMPTR(D2CLIENT, TestRosterFlag_I, 0x1A980)
 		EXASMPTR(D2WIN, LoadMpq_I, 0x7D80)
 		EXASMPTR(D2CLIENT, MenuFunc_I, 0x8D600)
 		EXASMPTR(D2CLIENT, CharInfo_I, 0x88DD0)

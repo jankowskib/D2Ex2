@@ -50,7 +50,7 @@ namespace ExMultiRes
 
 //D2Client funcs
 
-	void __stdcall OnResolutionSet()
+	void __stdcall D2CLIENT_OnResolutionSet()
 	{
 		int res = Misc::RegReadDword("SOFTWARE\\Blizzard Entertainment\\Diablo II", "Resolution", 2);
 		D2CLIENT_SetResolution(res);
@@ -92,33 +92,33 @@ namespace ExMultiRes
 
 		switch (UiCover)
 		{
-		case COVER_NONE:
-		{
-			*D2Vars.D2CLIENT_ScreenXShift = 0;
-			D2ASMFuncs::D2CLIENT_SetView(0, *D2Vars.D2CLIENT_ScreenViewWidth, 0, *D2Vars.D2CLIENT_ScreenViewHeight, *D2Vars.D2CLIENT_GameView);
-		}
+			case COVER_NONE:
+			{
+				*D2Vars.D2CLIENT_ScreenXShift = 0;
+				D2ASMFuncs::D2CLIENT_SetView(0, *D2Vars.D2CLIENT_ScreenViewWidth, 0, *D2Vars.D2CLIENT_ScreenViewHeight, *D2Vars.D2CLIENT_GameView);
+			}
 			break;
-		case COVER_BOTH:
-		{
-			*D2Vars.D2CLIENT_ScreenXShift = 0;
-			D2ASMFuncs::D2CLIENT_SetView(0, *D2Vars.D2CLIENT_ScreenViewWidth, 0, *D2Vars.D2CLIENT_ScreenViewHeight, *D2Vars.D2CLIENT_GameView);
-			*D2Vars.D2CLIENT_UiUnk1 = 0;
-			*D2Vars.D2CLIENT_UiUnk2 = 0;
-			*D2Vars.D2CLIENT_UiUnk3 = 0;
-			*D2Vars.D2CLIENT_UiUnk4 = 0;
-		}
+			case COVER_BOTH:
+			{
+				*D2Vars.D2CLIENT_ScreenXShift = 0;
+				D2ASMFuncs::D2CLIENT_SetView(0, *D2Vars.D2CLIENT_ScreenViewWidth, 0, *D2Vars.D2CLIENT_ScreenViewHeight, *D2Vars.D2CLIENT_GameView);
+				*D2Vars.D2CLIENT_UiUnk1 = 0;
+				*D2Vars.D2CLIENT_UiUnk2 = 0;
+				*D2Vars.D2CLIENT_UiUnk3 = 0;
+				*D2Vars.D2CLIENT_UiUnk4 = 0;
+			}
 			break;
-		case COVER_LEFT:
-		{
-			*D2Vars.D2CLIENT_ScreenXShift = *D2Vars.D2CLIENT_ScreenWidth / -4;
-			D2ASMFuncs::D2CLIENT_SetView(*D2Vars.D2CLIENT_ScreenViewWidth / -4, *D2Vars.D2CLIENT_ScreenViewWidth - (*D2Vars.D2CLIENT_ScreenViewWidth / 4), 0, *D2Vars.D2CLIENT_ScreenViewHeight, *D2Vars.D2CLIENT_GameView);
-		}
+			case COVER_LEFT:
+			{
+				*D2Vars.D2CLIENT_ScreenXShift = *D2Vars.D2CLIENT_ScreenWidth / -4;
+				D2ASMFuncs::D2CLIENT_SetView(*D2Vars.D2CLIENT_ScreenViewWidth / -4, *D2Vars.D2CLIENT_ScreenViewWidth - (*D2Vars.D2CLIENT_ScreenViewWidth / 4), 0, *D2Vars.D2CLIENT_ScreenViewHeight, *D2Vars.D2CLIENT_GameView);
+			}
 			break;
-		case COVER_RIGHT:
-		{
-			*D2Vars.D2CLIENT_ScreenXShift = *D2Vars.D2CLIENT_ScreenWidth / 4;
-			D2ASMFuncs::D2CLIENT_SetView(*D2Vars.D2CLIENT_ScreenViewWidth / 4, *D2Vars.D2CLIENT_ScreenViewWidth + (*D2Vars.D2CLIENT_ScreenViewWidth / 4), 0, *D2Vars.D2CLIENT_ScreenViewHeight, *D2Vars.D2CLIENT_GameView);
-		}
+			case COVER_RIGHT:
+			{
+				*D2Vars.D2CLIENT_ScreenXShift = *D2Vars.D2CLIENT_ScreenWidth / 4;
+				D2ASMFuncs::D2CLIENT_SetView(*D2Vars.D2CLIENT_ScreenViewWidth / 4, *D2Vars.D2CLIENT_ScreenViewWidth + (*D2Vars.D2CLIENT_ScreenViewWidth / 4), 0, *D2Vars.D2CLIENT_ScreenViewHeight, *D2Vars.D2CLIENT_GameView);
+			}
 			break;
 		}
 		*D2Vars.D2CLIENT_UiCover = UiCover;
@@ -181,7 +181,7 @@ namespace ExMultiRes
 			gRendererModule = *D2Vars.D2GFX_hDriverModHandle;
 			if (!*D2Vars.D2GFX_hDriverModHandle)
 			{
-				D2EXERROR("Cannot renderer load library: %s", szDriverDLLs[nRenderMode])
+				D2EXERROR("Cannot load renderer library: %s", szDriverDLLs[nRenderMode])
 			}
 
 			GetCallbacks_t GetCallbacks = (GetCallbacks_t)GetDllOffset(szDriverDLLs[nRenderMode], -10000);
@@ -364,10 +364,13 @@ namespace ExMultiRes
 			GFX_SetResolutionMode(nMode);
 			if (*D2Vars.D2GFX_WindowMode == TRUE)
 			{
+				int sX = GetSystemMetrics(SM_CXSCREEN);
+				int sY = GetSystemMetrics(SM_CYSCREEN);
+
 				RECT r = { 0 };
 				D2GFX_GetModeParams(nMode, (unsigned int*)&r.right, (unsigned int*)&r.bottom);
 				AdjustWindowRectEx(&r, 0xCB0000, FALSE, WS_EX_APPWINDOW);
-				SetWindowPos(D2Funcs.D2GFX_GetHwnd(), HWND_NOTOPMOST, 0, 0, r.right - r.left, r.bottom - r.top, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+				SetWindowPos(D2Funcs.D2GFX_GetHwnd(), HWND_NOTOPMOST, sX / 2 - r.right /2, sY / 2 - r.bottom /2, r.right - r.left, r.bottom - r.top,  SWP_NOZORDER | SWP_NOACTIVATE);
 				
 			}
 			BOOL res =(*D2Vars.D2GFX_pfnDriverCallback)->ResizeWin(D2Funcs.D2GFX_GetHwnd(), nMode);	 
@@ -459,19 +462,6 @@ namespace ExMultiRes
 				{
 					gptBufferXLookUpTable[i++] = YStartOffset;
 
-				}
-			}
-			else if (gptBufferXLookUpTable && nHeight == LastHeight)
-			{
-				DEBUGMSG(">! Skipping allocate because buffer is exist!");
-				if (nWidth != LastWidth)
-				{
-					DEBUGMSG(">! Screen width has changed, recalculating...");
-					int YStartOffset = -32 * nWidth;
-					for (int i = 0; i <= nHeight; ++i, YStartOffset += nWidth)
-					{
-						gptBufferXLookUpTable[i] = YStartOffset;
-					}
 				}
 			}
 			else
@@ -850,7 +840,7 @@ namespace ExMultiRes
 		else
 		{
 			DEBUGMSG("Creating a grid for #%d on %d mode", nRecord, nScreenMode)
-			InventoryTxt* pTxt = &(*D2Vars.D2COMMON_InventoryTxt)[nRecord];
+				InventoryTxt* pTxt = &(*D2Vars.D2COMMON_InventoryTxt)[nRecord];
 			D2EXASSERT(pTxt, "Error in Inventory.txt. Record #%d doesn't exist", nRecord);
 			int xLeft = -1;
 			int xRight = -1;
@@ -865,7 +855,11 @@ namespace ExMultiRes
 				xRight = pTxt->Grid.dwRight;
 			}
 
-			int xInvBottomOffset = pTxt->Inventory.dwTop- pTxt->Grid.dwTop;
+			int xInvBottomOffset = pTxt->Inventory.dwTop - pTxt->Grid.dwTop;
+			if (nRecord == INV_REC_CUBE || nRecord == INV_REC_BIG_BANK)
+			{
+				xInvBottomOffset -= 112;
+			}
 
 			int xTop = pTxt->Grid.dwTop == -1 ? -1 : (*D2Vars.D2CLIENT_ScreenHeight / 2) - ((pTxt->Inventory.dwBottom - pTxt->Inventory.dwTop) / 2) - xInvBottomOffset;   // (*D2Vars.D2CLIENT_ScreenHeight - (480 - pTxt->Grid.dwTop));
 			int xBottom = pTxt->Grid.dwBottom == -1 ? -1 : xTop + (pTxt->Grid.dwBottom - pTxt->Grid.dwTop);  // (*D2Vars.D2CLIENT_ScreenHeight - (480 - pTxt->Grid.dwBottom));
@@ -878,7 +872,7 @@ namespace ExMultiRes
 			pOut->dwBottom = xBottom;
 			pOut->nGridWidth = pTxt->Grid.nWidth;
 			pOut->nGridHeight = pTxt->Grid.nHeight;
-			DEBUGMSG("Grid Left %d, Right %d @%d", xLeft, xRight, xRight - xLeft)
+			DEBUGMSG("Grid Left %d, Right %d, Top %d, Bottom %d,  @%d", xLeft, xRight, xTop, xBottom)
 		}
 
 	}
@@ -1063,6 +1057,13 @@ namespace ExMultiRes
 				}
 			}
 
+#ifdef D2EX_MINIMALRES
+			if (!(
+				(w == 1280 && h == 1024) ||
+				(w == 1024 && h == 768)
+				))
+				continue;
+#else
 			if (GFX_GetRenderType() == VIDEO_MODE_GLIDE)
 			{
 
@@ -1078,7 +1079,7 @@ namespace ExMultiRes
 				continue;
 			if (w == 1366 && h == 768) // messes up screen
 				continue;
-
+#endif
 			if (bAdd)
 			{
 				ResMode r;

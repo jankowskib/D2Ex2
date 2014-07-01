@@ -67,8 +67,12 @@ void __stdcall ExAutomap::DrawOutRangeRosterUnit(RosterUnit* pRoster)
 
 	if (nPlayerAct != nRosterAct)
 		return;
-
-
+#ifdef D2EX_SPECTATOR
+	UnitAny* pPlayer = D2Funcs.D2CLIENT_GetUnitById(pRoster->dwUnitId, UNIT_PLAYER);
+	if (pPlayer)
+		if (D2Funcs.D2COMMON_GetUnitState(pPlayer, D2EX_SPECTATOR_STATE))
+			return;
+#endif
 	POINT p = { pRoster->Xpos, pRoster->Ypos };
 	ExScreen::WorldToAutomap(&p);
 
@@ -142,29 +146,33 @@ void __stdcall ExAutomap::DrawRangePlayerUnit(UnitAny* pUnit, int nX, int nY, in
 	//drawautomapcell((*D2Vars.D2CLIENT_AutomapLayer)->pWalls, 472);
 #endif
 
+#ifdef D2EX_SPECTATOR
+		if (D2Funcs.D2COMMON_GetUnitState(pUnit, D2EX_SPECTATOR_STATE))
+			return;
+#endif
+
 	BYTE cGreen = D2Funcs.D2WIN_MixRGB(0, 255, 0);
+	bool bBushCollision = CheckAutomapCellCollision((*D2Vars.D2CLIENT_AutomapLayer)->pWalls, 472, nX, nY);
 
-	if (nColor == cGreen || *D2Vars.D2CLIENT_DrawAutomapParty)
+	if (!bBushCollision || nColor == cGreen)
 	{
-		if (!CheckAutomapCellCollision((*D2Vars.D2CLIENT_AutomapLayer)->pWalls, 472, nX, nY))
+		if (nColor == cGreen || *D2Vars.D2CLIENT_DrawAutomapParty)
 			DrawBlob(nX, nY, nColor);
-	}
-
-	if (*D2Vars.D2CLIENT_DrawAutomapNames && *D2Vars.D2CLIENT_DrawAutomapParty && pUnit != D2Funcs.D2CLIENT_GetPlayer())
-	{
-		int nTextColor = nColor == cGreen ? COL_LIGHTGREEN : COL_RED;
-
-		if (pUnit->pPlayerData)
+		if (*D2Vars.D2CLIENT_DrawAutomapNames && *D2Vars.D2CLIENT_DrawAutomapParty && pUnit != D2Funcs.D2CLIENT_GetPlayer())
 		{
-			wchar_t wName[16];
-			Misc::CharToWide(pUnit->pPlayerData->szName, 16, wName, 16);
+			int nTextColor = nColor == cGreen ? COL_LIGHTGREEN : COL_RED;
+			if (pUnit->pPlayerData)
+			{
+				wchar_t wName[16];
+				Misc::CharToWide(pUnit->pPlayerData->szName, 16, wName, 16);
 
-			int oldfont = D2Funcs.D2WIN_SetTextSize(6);
-			int len = ExScreen::GetTextWidth(wName);
+				int oldfont = D2Funcs.D2WIN_SetTextSize(6);
+				int len = ExScreen::GetTextWidth(wName);
 
-			ExScreen::DrawTextEx(nX - (len / 2), nY - 10, COL_LIGHTGREEN, 0, DRAW_MODE_NORMAL, L"%s", wName);
+				ExScreen::DrawTextEx(nX - (len / 2), nY - 10, nTextColor, 0, DRAW_MODE_NORMAL, L"%s", wName);
 
-			D2Funcs.D2WIN_SetTextSize(oldfont);
+				D2Funcs.D2WIN_SetTextSize(oldfont);
+			}
 		}
 	}
 }

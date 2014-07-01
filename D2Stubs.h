@@ -31,7 +31,7 @@ namespace D2ASMFuncs
 	BOOL __fastcall D2CLIENT_IsMuted(RosterUnit* pRoster);
 	AutoMapLayer* __fastcall D2CLIENT_InitAutomapLayer(DWORD dwLayer);
 	void* __stdcall D2WIN_LoadMpq(DWORD OrderFlag, const char* szDllFile, const char* szMpqFile, const char* szName, DWORD _1, BOOL (__stdcall *fnMPQMissing)());
-	DWORD __fastcall D2CLIENT_TestPvpFlag(DWORD dwUnitId1, DWORD dwUnitId2, DWORD dwFlagMask);
+	DWORD __fastcall D2CLIENT_TestRosterFlag(DWORD dwUnitId1, DWORD dwUnitId2, DWORD dwFlagMask);
 	void __fastcall D2CLIENT_PlaySound(int SoundNo);
 	void __stdcall D2CLIENT_DrawGZBox(int X1, int Y1, int X2, int Y2);
 	//int __fastcall D2WIN_GetTextWidth(const wchar_t* wStr);
@@ -43,6 +43,9 @@ namespace D2ASMFuncs
 
 namespace D2Stubs
 {
+	int __stdcall D2COMMON_GetItemCost(UnitAny *pPlayer, UnitAny *ptItem, int DiffLvl, QuestFlags *pQuestFlags, int NpcClassId, int InvPage); // to be moved somewhere else
+	void D2GAME_IsHostileMissile_STUB();
+	void D2GAME_IsUnitDead_STUB();
 	void D2CLIENT_RosterRangeBlobDraw();
 	void D2CLIENT_RosterOutRangeBlobDraw();
 	void D2CLIENT_FixHostilePic();

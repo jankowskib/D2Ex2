@@ -24,7 +24,13 @@
 
 namespace ExSpec
 {
+	BOOL __stdcall IsHostileMissile(DWORD UnitId1, int UnitId2, int dwFlag);
+	BOOL __fastcall PartyIsHostiled(DWORD UnitID, DWORD CheckedUnitID);
+	void __fastcall OnStateSet(UnitAny *pUnit, int nState);
+	void __fastcall OnStateRemove(UnitAny *pUnit, int nState);
+	BOOL __fastcall IsUnitDead(UnitAny* pUnit);
 	int __fastcall OnMousePacket(BYTE* aPacket);
+	int __fastcall OnReassign(BYTE* aPacket);
 	void __stdcall OnShake(int* xShake, int * yShake);
 }
 
