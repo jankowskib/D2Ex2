@@ -83,9 +83,6 @@
     <ClCompile Include="ExLoading.cpp">
       <Filter>Source Files\Main</Filter>
     </ClCompile>
-    <ClCompile Include="ExMapReveal.cpp">
-      <Filter>Source Files\Main</Filter>
-    </ClCompile>
     <ClCompile Include="ExOOG.cpp">
       <Filter>Source Files\Main</Filter>
     </ClCompile>
@@ -179,7 +176,7 @@
     <ClCompile Include="ExDeathMessage.cpp">
       <Filter>Source Files\Main</Filter>
     </ClCompile>
-    <ClCompile Include="ExPackets.cpp">
+    <ClCompile Include="ExAutomap.cpp">
       <Filter>Source Files\Main</Filter>
     </ClCompile>
   </ItemGroup>
@@ -233,9 +230,6 @@
       <Filter>Header Files\Main</Filter>
     </ClInclude>
     <ClInclude Include="ExLoading.h">
-      <Filter>Header Files\Main</Filter>
-    </ClInclude>
-    <ClInclude Include="ExMapReveal.h">
       <Filter>Header Files\Main</Filter>
     </ClInclude>
     <ClInclude Include="ExOOG.h">
@@ -349,7 +343,7 @@
     <ClInclude Include="ExDeathMessage.h">
       <Filter>Header Files\Main</Filter>
     </ClInclude>
-    <ClInclude Include="ExPackets.h">
+    <ClInclude Include="ExAutomap.h">
       <Filter>Header Files\Main</Filter>
     </ClInclude>
   </ItemGroup>

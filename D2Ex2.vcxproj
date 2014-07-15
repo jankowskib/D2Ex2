@@ -127,7 +127,9 @@
       <Command>copy /y "$(TargetPath)" "D:\Gry\Diablo II\"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>sed -i -r 's/^(.*) ([0-9]*)$/echo "\1" \%24((\2+1))/ge' $(MSBuildProjectDirectory)\Build.h</Command>
+      <Command>sed -i -r 's/^(.*) ([0-9]*)$/echo "\1" \%24((\2+1))/ge' $(MSBuildProjectDirectory)\Build.h
+taskkill /f /im Game.exe
+EXIT 0</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Updating build number...</Message>
@@ -242,7 +244,6 @@
     <ClCompile Include="ExDeathMessage.cpp" />
     <ClCompile Include="ExMultiRes.cpp" />
     <ClCompile Include="ExOpenGL.cpp" />
-    <ClCompile Include="ExPackets.cpp" />
     <ClCompile Include="Offset.cpp" />
     <ClCompile Include="D2Ex2.cpp" />
     <ClCompile Include="ExBuffs.cpp" />
@@ -253,7 +254,7 @@
     <ClCompile Include="ExFriends.cpp" />
     <ClCompile Include="ExInput.cpp" />
     <ClCompile Include="ExLoading.cpp" />
-    <ClCompile Include="ExMapReveal.cpp" />
+    <ClCompile Include="ExAutomap.cpp" />
     <ClCompile Include="ExOOG.cpp" />
     <ClCompile Include="ExOptions.cpp" />
     <ClCompile Include="ExParty.cpp" />
@@ -307,7 +308,6 @@
     <ClInclude Include="ExTexture.h" />
     <ClInclude Include="ExMultiRes.h" />
     <ClInclude Include="ExOpenGL.h" />
-    <ClInclude Include="ExPackets.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="SyncObj.h" />
     <ClInclude Include="TeleportPath.h" />
@@ -323,7 +323,7 @@
     <ClInclude Include="ExFriends.h" />
     <ClInclude Include="ExInput.h" />
     <ClInclude Include="ExLoading.h" />
-    <ClInclude Include="ExMapReveal.h" />
+    <ClInclude Include="ExAutomap.h" />
     <ClInclude Include="ExOOG.h" />
     <ClInclude Include="ExOptions.h" />
     <ClInclude Include="ExParty.h" />

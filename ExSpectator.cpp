@@ -70,7 +70,7 @@ void __fastcall ExSpec::OnStateSet(UnitAny *pUnit, int nState)
 		pUnit->dwFlags2 |= 0x40000; //don't draw this unit 
 		pUnit->dwFlags |= (UNITFLAG_DEATHVANISH | UNITFLAG_NEUTRAL);
 		pUnit->dwFlags &= ~(UNITFLAG_SELECTABLE | UNITFLAG_VALIDTARGET);
-		pUnit->pPath->dwCollisionFlag = 0; // Clear collision flag
+		pUnit->pPath->dwCollisionFlag = COLLIDE_NONE; // Clear collision flag
 		pUnit->pPath->_5[0] = 0;
 		pUnit->pPath->_5[1] = 0;
 	}
@@ -86,7 +86,7 @@ void __fastcall ExSpec::OnStateRemove(UnitAny *pUnit, int nState)
 		pUnit->dwFlags2 &= ~(0x40000); //don't draw this unit 
 		pUnit->dwFlags &= ~(UNITFLAG_DEATHVANISH | UNITFLAG_NEUTRAL);
 		pUnit->dwFlags |= (UNITFLAG_SELECTABLE | UNITFLAG_VALIDTARGET);
-		pUnit->pPath->dwCollisionFlag = 0x1C09; // Restore collision flag
+		pUnit->pPath->dwCollisionFlag = PLAYER_COLLISION_DEFAULT; // Restore collision flag
 		pUnit->pPath->_5[0] = 1;
 		pUnit->pPath->_5[1] = 128;
 	}
