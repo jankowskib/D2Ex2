@@ -22,3 +22,8 @@
 *.user
 *.opensdf
 *.ipch
+
+# D2Ex binary
+D2Ex2.dll
+Release*
+Debug*
