@@ -21,7 +21,7 @@
 #define WIN32_LEAN_AND_MEAN
 //Build flags
 //--------- General Flags ----------------
-//#define D2EX_CLOSED_BNET "Closed Bnet|"		// Copy&Paste from SCRAP, didn't test yet
+#define D2EX_CLOSED_BNET "Closed Bnet|"		// Copy&Paste from SCRAP, didn't test yet
 //#define D2EX_SCRAP_HACKS "Scrap Hacks|"		// - || -
 #define D2EX_MULTIRES "Multi Res|"				// Enables high resolution settings
 #define D2EX_PVPGN_EXT "PvPGN Extensions|"		// Enables serverside stuff like kill counter, spectator mode etc [Needs serverside dll to work]
@@ -35,7 +35,7 @@
 #ifdef D2EX_MULTIRES
 //#define D2EX_OPENGL "OpenGL|"					// Enables OpenGL render mode
 #define D2EX_ALLOWHIGHRES "Hi Res|"				// Enables support for 800x600+
-#define D2EX_MINIMALRES							// Restrict resolution to 1024x768 and 1280x1024
+//#define D2EX_MINIMALRES							// Restrict resolution to 1024x768 and 1280x1024
 #endif
 //******************************************
 

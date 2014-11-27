@@ -67,7 +67,7 @@ namespace ExMultiRes
 		*D2Vars.D2CLIENT_ScreenMode = (nMode == 1 ? 2 : nMode);
 
 		*D2Vars.D2CLIENT_ScreenViewWidth = *D2Vars.D2CLIENT_ScreenWidth;
-		*D2Vars.D2CLIENT_ScreenViewHeight = *D2Vars.D2CLIENT_ScreenHeight - 40;
+		*D2Vars.D2CLIENT_ScreenViewHeight = *D2Vars.D2CLIENT_ScreenHeight;// -40;
 		*D2Vars.D2CLIENT_ScreenWidthUnk = *D2Vars.D2CLIENT_ScreenWidth;
 
 		D2Funcs.D2WIN_ResizeWindow(nMode);
@@ -449,20 +449,22 @@ namespace ExMultiRes
 			DEBUGMSG("<< Deleting gptXLookTbl, %dx%d, LastH = %d", nWidth, nHeight, LastHeight);
 			LastHeight = nHeight;
 			LastWidth = nWidth;
-			delete[] gptBufferXLookUpTable;
+			int* pBufferXLookUpTable = gptBufferXLookUpTable;
 			gptBufferXLookUpTable = 0;
+			delete[] pBufferXLookUpTable;
 		}
 		else
 		{
 			if (!gptBufferXLookUpTable)
 			{
 				DEBUGMSG(">> Allocating gptXLookTbl, %dx%d", nWidth, nHeight);
-				gptBufferXLookUpTable = new signed int[nHeight + 33];
+				int* pBufferXLookUpTable = new signed int[nHeight + 33];
 				for (int i = 0, YStartOffset = (-32 * nWidth); i < nHeight + 32; YStartOffset += nWidth)
 				{
-					gptBufferXLookUpTable[i++] = YStartOffset;
+					pBufferXLookUpTable[i++] = YStartOffset;
 
 				}
+				gptBufferXLookUpTable = pBufferXLookUpTable;
 			}
 			else
 			{
