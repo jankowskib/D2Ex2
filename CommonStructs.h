@@ -254,6 +254,10 @@ struct GFXSettings // size 0x18
 		DWORD bBlendedShadows; // 5
 };
 
+
+/*
+	1.13d: 0x6FA90BFC
+*/
 struct GFXHelpers
 {
 	void(__fastcall *FillYBufferTable)(void *ppvBits, int nWidth, int nHeight, int aZero);
@@ -268,9 +272,27 @@ struct GFXHelpers
 
 struct TileContext // *.dt1
 {	
-	// (...)
+	DWORD _1;						//0x00
+	DWORD _2;						//0x04
+	DWORD _3;						//0x08
+	DWORD _4;						//0x0C
+	DWORD _5;						//0x10
+	DWORD _6;						//0x14
+	DWORD _7;						//0x18
+	DWORD _8;						//0x1C
+	DWORD _9;						//0x20
+	DWORD _10;						//0x24
+	DWORD _11;						//0x28
+	DWORD _12;						//0x2C
+	DWORD _13;						//0x30
+	DWORD _14;						//0x34
+	DWORD _15;						//0x38
+	DWORD _16;						//0x3C
+	DWORD _17;						//0x40
+	DWORD _18;						//0x44
+	DWORD _19;						//0x48
 	DWORD dwSize;					//0x4C
-	DWORD _1;						//0x50
+	DWORD _20;						//0x50
 	void* pData;					//0x54
 	char* szTileName;				//0x58
 	void *ptBlock;					//0x5C
