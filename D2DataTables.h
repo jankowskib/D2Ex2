@@ -32,6 +32,121 @@ struct ArenaTxt
 
 #pragma pack(push,1)
 
+struct PropertiesTxt
+{
+	WORD wProp;                   //0x00
+	BYTE nSet[8];                 //0x02
+	WORD wVal[7];                 //0x0A
+	BYTE nFunc[8];                //0x18
+	WORD wStat[7];                //0x20
+};
+
+struct ItemsTxtStat
+{
+	DWORD dwProp;                 //0x00
+	DWORD dwPar;                  //0x04
+	DWORD dwMin;                  //0x08
+	DWORD dwMax;                  //0x0C
+};
+
+/*
+	Valid for Automagic.txt, MagicSuffix.txt, MagicPrefix.txt
+*/
+struct AutoMagicTxt
+{
+	char szName[31];                //0x00
+	BYTE _1;						//0x1F
+	WORD wIndex;	                //0x20
+	WORD wVersion;                  //0x22
+	ItemsTxtStat hMods[3];          //0x24
+	WORD wSpawnable;                //0x54
+	WORD wTransformColor;           //0x56
+	DWORD dwLevel;                  //0x58
+	DWORD dwGroup;                  //0x5C
+	DWORD dwMaxLevel;               //0x60
+	BYTE nRare;                     //0x64
+	BYTE nLevelReq;                 //0x65
+	BYTE nClassSpecific;            //0x66
+	BYTE nClass;                    //0x67
+	WORD wClassLevelReq;            //0x68
+	WORD wIType[7];                 //0x6A
+	WORD wEType[5];                 //0x78
+	BYTE bFrequency;                //0x82
+	BYTE _2;						//0x83
+	DWORD dwDivide;                 //0x84
+	DWORD dwMultiply;               //0x88
+	DWORD dwAdd;                    //0x8C
+};
+
+
+struct UniqueItemsTxt
+{
+	WORD _1;	                  //0x00
+	char szName[34];              //0x02
+	DWORD dwVersion;              //0x24
+	union
+	{
+		DWORD dwCode;
+		char szCode[4];   
+	};							  //0x28
+	DWORD dwUniqueItemFlags;      //0x2C
+	DWORD dwRarity;               //0x30
+	WORD wLvl;                    //0x34
+	WORD wLvlReq;                 //0x36
+	BYTE nChrTransform;           //0x38
+	BYTE nInvTransform;           //0x39
+	char szFlippyFile[32];        //0x3A
+	char szInvFile[34];           //0x5A
+	DWORD dwCostMult;             //0x7C
+	DWORD dwCostAdd;              //0x80
+	WORD wDropSound;              //0x84
+	WORD wUseSound;               //0x86
+	DWORD dwDropSfxFrame;         //0x88   
+	ItemsTxtStat hStats[12];      //0x90
+};
+
+struct SetItemsTxt
+{
+	WORD wSetItemId;               //0x00
+	char szName[32];               //0x02
+	WORD _1;	                   //0x22
+	DWORD dwTblIndex;              //0x24
+	union
+	{
+		DWORD dwCode;
+		char szCode[4];
+	};							   //0x28
+	DWORD _2;	                   //0x2C
+	WORD wLvl;                     //0x30
+	WORD wLvlReq;                  //0x32
+	DWORD dwRarity;                //0x34
+	DWORD dwCostMult;              //0x38
+	DWORD dwCostAdd;               //0x3C
+	BYTE nChrTransform;            //0x40
+	BYTE nInvTransform;            //0x41
+	char szFlippyFile[32];         //0x42
+	char szInvFile[32];            //0x62
+	WORD wDropSound;               //0x82
+	WORD wUseSound;                //0x84
+	BYTE nDropSfxFrame;            //0x86
+	BYTE nAddFunc;                 //0x87
+	ItemsTxtStat hStats[9];        //0x88
+	ItemsTxtStat hGreenStats[10];   //0x118
+};
+
+struct RunesTxt
+{
+	char szName[64];					 //0x00
+	char szRuneName[64];                 //0x40
+	BYTE bComplete;                      //0x80
+	BYTE bServer;                        //0x81
+	DWORD dwRwId;						 //0x82
+	WORD dwIType[6];                     //0x86
+	WORD dwEType[3];                     //0x92
+	DWORD dwRune[6];                     //0x98
+	ItemsTxtStat hStats[7];              //0xB0
+};
+
 struct PetTypesTxt
 {
 WORD pet_type; // 0x0
@@ -1370,7 +1485,6 @@ WORD   _ALIGN;					//0x1A6
 };
 
 
-
 struct sgptDataTable {
 	BYTE*	pPlayerClass;			//0x00
 	DWORD	dwPlayerClassRecords;	//0x04
@@ -1413,9 +1527,9 @@ struct sgptDataTable {
 	BYTE*	pItemCalcCache;			//0x98
 	DWORD	dwItemCalcCacheRecs;	//0x9C
 	DWORD	dwItemCalcCache;		//0xA0
-	BYTE*	pProperties;			//0xA4
-	DWORD	dwPropertiesRecs;		//0xA8
-	DWORD	dwProporties;			//0xAC
+	PropertiesTxt*	pPropertiesTxt;	//0xA4
+	BYTE*	dwProperties;			//0xA8
+	DWORD	dwProportiesRecs;		//0xAC
 	BYTE*	pRunes;					//0xB0
 	BYTE*	pHireDescs;				//0xB4
 	DWORD	dwHireDescsRecs;		//0xB8
@@ -1513,10 +1627,10 @@ struct sgptDataTable {
 	BYTE*	pSetsTxt;				//0xC0C
 	DWORD	dwSetsRecs;				//0xC10
 	BYTE*	pSetItems;				//0xC14
-	BYTE*	pSetItemsTxt;			//0xC18
+	SetItemsTxt* pSetItemsTxt;		//0xC18
 	DWORD	dwSetItemsRecs;			//0xC1C
 	BYTE*	pUniqueItems;			//0xC20
-	BYTE*	pUniqueItemsTxt;		//0xC24
+	UniqueItemsTxt*	pUniqueItemsTxt;//0xC24
 	DWORD	dwUniqItemsRecs;		//0xC28
 	BYTE*	pMonProp;				//0xC2C
 	BYTE*	pMonPropTxt;			//0xC30
