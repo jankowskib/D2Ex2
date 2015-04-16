@@ -122,12 +122,17 @@ _d2f D2Funcs = { 0 }; void SetupD2Funcs() {
 		EXFUNCPTR(D2COMMON, SetGfxState, void, __stdcall, (UnitAny *ptUnit, int StateNo, int HowSet), -10702)
 		EXFUNCPTR(D2COMMON, GetExpToAchiveLvl, int, __stdcall, (int ClassId, int ExpLvl), -10152)
 		//Item Related
-		EXFUNCPTR(D2COMMON, GetItemText, ItemsTxt*, __stdcall, (int ItemNo), 0x42F60)
+		EXFUNCPTR(D2COMMON, GetItemText, ItemsTxt*, __stdcall, (int ItemNo), -10262)
+		EXFUNCPTR(D2COMMON, GetRunesTxt, RunesTxt*, __stdcall, (int RecordNo), -10296)
+		EXFUNCPTR(D2COMMON, GetRunesTxtRecords, int*, __stdcall, (void), -10877)
+		EXFUNCPTR(D2COMMON, GetAffixTxt, AutoMagicTxt*, __stdcall, (int affix), -10668) // Valid for ItemData->Suffix and Prefix
+
 		EXFUNCPTR(D2COMMON, GetItemByBodyLoc, UnitAny*, __stdcall, (Inventory * pInventory, int aLoc), -11003)
 		EXFUNCPTR(D2COMMON, GetItemFlag, BOOL, __stdcall, (UnitAny *item, DWORD flagmask, DWORD lineno, char *filename), -10303)
 		EXFUNCPTR(D2COMMON, GetItemColor, BYTE*, __stdcall, (UnitAny *ptPlayer, UnitAny* ptItem, BYTE* out, BOOL a4), -11106)
 		EXFUNCPTR(D2COMMON, GetItemCost, int, __stdcall, (UnitAny *pPlayer, UnitAny *ptItem, int DiffLvl, QuestFlags *pQuestFlags, int NpcClassId, int InvPage), -10511)
-
+		EXFUNCPTR(D2COMMON, GetItemType, int, __stdcall, (UnitAny *pItem), -10808)
+		EXFUNCPTR(D2COMMON, IsMatchingType, BOOL, __stdcall, (UnitAny *pItem, int iType), -10890)
 		//D2NET
 		EXFUNCPTR(D2NET, SendPacket, bool, __stdcall, (int PacketLen, int _1, BYTE *aPacket), -10020)
 		EXFUNCPTR(D2NET, ReceivePacket, void, __fastcall, (int* eLen, BYTE* aPacket, int aLen), 0x6350)
@@ -317,6 +322,7 @@ void SetupD2Vars() {
 		EXVARPTR(D2CLIENT, isWeaponSwitch, int, 0x11BC38)
 		EXVARPTR(D2CLIENT, MapType, int, 0x11C140)
 		EXVARPTR(D2COMMON, sgptDataTables, sgptDataTable*, -11170)
+		EXVARPTR(D2COMMON, AutoMagicTxt, AutoMagicTxt*, 0x9FB44)
 		EXVARPTR(D2CLIENT, AutomapLayer, AutoMapLayer*, 0x11C154)
 		EXVARPTR(D2WIN, CurrentFont, DWORD, 0x1ED14)
 		EXVARPTR(D2WIN, GetCharSize, DWORD*, 0x204DC)

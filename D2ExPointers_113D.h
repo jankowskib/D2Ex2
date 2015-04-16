@@ -44,7 +44,7 @@ struct _d2f {
 #else
 _d2f D2Funcs = {0}; void SetupD2Funcs() {
 #endif
-		EXFUNCPTR(D2CLIENT, PrintGameString, void, __stdcall, (const wchar_t* wMessage, int nColor), 0x75EB0) // ns
+	EXFUNCPTR(D2CLIENT, PrintGameString, void, __stdcall, (const wchar_t* wMessage, int nColor), 0x75EB0) // ns
 		EXFUNCPTR(D2CLIENT, PrintPartyString, void, __stdcall, (const wchar_t* wMessage, int nColor), 0x75C70) //ns
 		EXFUNCPTR(D2CLIENT, GetPlayer, UnitAny*, __stdcall, (void), 0x613C0) //ns
 		EXFUNCPTR(D2CLIENT, GetSelectedUnit, UnitAny*, __stdcall, (void), 0x17280) //k
@@ -118,10 +118,16 @@ _d2f D2Funcs = {0}; void SetupD2Funcs() {
 
 		//Item Related
 		EXFUNCPTR(D2COMMON, GetItemText, ItemsTxt*, __stdcall, (int RecordNo), -10994) //k
+		EXFUNCPTR(D2COMMON, GetRunesTxt, RunesTxt*, __stdcall, (int RecordNo), -10405)
+		EXFUNCPTR(D2COMMON, GetRunesTxtRecords, int*, __stdcall, (void), -10981)
+		EXFUNCPTR(D2COMMON, GetAffixTxt, AutoMagicTxt*, __stdcall, (int affix), -10174) // Valid for ItemData->Suffix and Prefix
+
 		EXFUNCPTR(D2COMMON, GetItemByBodyLoc, UnitAny*, __stdcall, (Inventory * pInventory, int aLoc), -10292) //k
 		EXFUNCPTR(D2COMMON, GetItemFlag, BOOL, __stdcall, (UnitAny *item, DWORD flagmask, DWORD lineno, char *filename), -10458) //k
 		EXFUNCPTR(D2COMMON, GetItemColor, BYTE*, __stdcall, (UnitAny *ptPlayer, UnitAny* ptItem, BYTE* out, BOOL a4), -11062) //k
 		EXFUNCPTR(D2COMMON, GetItemCost, int, __stdcall, (UnitAny *pPlayer, UnitAny *ptItem, int DiffLvl, QuestFlags *pQuestFlags, int NpcClassId, int InvPage), -10186)
+		EXFUNCPTR(D2COMMON, GetItemType, int, __stdcall, (UnitAny *pItem), -10121)
+		EXFUNCPTR(D2COMMON, IsMatchingType, BOOL, __stdcall, (UnitAny *pItem, int iType), -10601)
 
 		//D2NET
 		EXFUNCPTR(D2NET, SendPacket, bool, __stdcall, (int PacketLen, int _1, BYTE *aPacket), -10015) // k
@@ -193,6 +199,7 @@ _d2f D2Funcs = {0}; void SetupD2Funcs() {
 		EXFUNCPTR(FOG, InitBitBuffer, void, __stdcall, (BitBuffer *pBitBuffer, void *Source, int Size), -10126)
 		EXFUNCPTR(FOG, ReadBits, unsigned int, __stdcall, (BitBuffer* pBuffer, int nBits), -10130)
 		EXFUNCPTR(FOG, ReadBitsSigned, signed int, __stdcall, (BitBuffer* pBuffer, int nBits), -10129)
+		EXFUNCPTR(FOG, DecompressPacket, unsigned int, __fastcall, (BYTE *dest, DWORD memory_size, BYTE *source, DWORD src_size), -10224)
 
 		//STORM
 		EXFUNCPTR(STORM, CloseArchive, BOOL, __stdcall, (HANDLE hArchive), -252)
@@ -260,6 +267,7 @@ void SetupD2Pointers() {
 	EXASMPTR(D2CLIENT, IsSquelched_I, 0xA1E40) //k
 	EXASMPTR(D2CLIENT, SkipAltDraw_J, 0x4E9A9) //k
 	EXASMPTR(D2CLIENT, DontSkipAltDraw_J, 0x4E620) //k
+	EXASMPTR(D2CLIENT, ParseStats_J, 0x2CE40)
 	EXASMPTR(D2CLIENT, ChatInput_I, 0xB1CE0) //1.13d
 	EXASMPTR(D2CLIENT, DifuseStat_I, 0x6CC10) // k
 	EXASMPTR(D2CLIENT, SetView_I, 0xB5330) // k
@@ -310,6 +318,7 @@ void SetupD2Vars() {
 		//EXVARPTR(D2CLIENT, sgptDataTables, sgptDataTable*, 0xCF474) // k
 		EXVARPTR(D2COMMON, sgptDataTables, sgptDataTable*, 0xA33F0) // eon
 		EXVARPTR(D2COMMON, InventoryTxt, InventoryTxt*, 0xA4CAC)
+		EXVARPTR(D2COMMON, AutoMagicTxt, AutoMagicTxt*, 0xA4CE4)
 		EXVARPTR(D2CLIENT, AutomapLayer, AutoMapLayer*, 0x11CF28) //ns
 		EXVARPTR(D2WIN, CurrentFont, DWORD, 0x1FBA8) //k
 		EXVARPTR(D2WIN, GetCharSize, DWORD*, 0x8D9F8) //k
