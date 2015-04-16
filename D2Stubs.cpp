@@ -222,6 +222,44 @@ lightold:
 	}
 }
 
+/* Wrapper over D2CLIENT.0x2E06D (1.13d)
+   As far I know this: int __userpurge ITEMS_ParseStats_6FADCE40<eax>(signed __int32 nStat<eax>, wchar_t *wOut<esi>, UnitAny *pItem, StatList *pStatList, signed __int32 a5, int a6, int a7)
+   Rest arguments are some nested stat related, but I don't need to know rest...
+
+   Warning: wOut is 128 words length only!
+   @ebx the nStat value
+   @esp-0x10 seems to always keep pItem *careful*
+*/
+__declspec(naked) void D2Stubs::D2CLIENT_GetPropertyString_STUB()
+{
+	static DWORD rtn = 0; // if something is stupid but works then it's not stupid!
+	__asm
+	{
+		pop rtn
+		// Firstrly generate string using old function
+		call D2Ptrs.D2CLIENT_ParseStats_J
+		push rtn
+		
+		push eax // Store result
+		mov eax, [esp - 0x10 + 8] // pItem
+		push ecx
+		push edx
+
+		// Then pass the output to our func
+		push eax
+		push ebx // nStat
+		push esi // wOut
+
+		call ExScreen::OnPropertyBuild
+
+		pop edx
+		pop ecx
+		pop eax
+
+		ret
+	}
+}
+
 __declspec(naked) void __fastcall D2Stubs::D2CLIENT_Properties()
 {
 	__asm
@@ -468,6 +506,9 @@ __declspec(naked) void D2Stubs::D2GFX_LookUpFix_VI_STUB()
 	}
 }
 
+#endif
+
+
 __declspec(naked) void D2Stubs::D2CLIENT_RosterRangeBlobDraw() // EBX = X, EDI = Y, ESP+0x10 = COL, ESI = pUnit -> (UnitAny* pUnit, int nX, int nY, int nColor)
 {
 	__asm
@@ -505,6 +546,8 @@ __declspec(naked) void D2Stubs::D2CLIENT_RosterOutRangeBlobDraw() //AUTOMAP_Draw
 
 
 // -- Funcs
+
+#ifdef D2EX_MULTIRES
 
 __declspec(naked) void __fastcall D2ASMFuncs::D2GFX_UpdateResizeVars(int nWidth, int nHeight)
 {

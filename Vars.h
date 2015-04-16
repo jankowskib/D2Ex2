@@ -56,6 +56,7 @@ GLOBAL(DWORD, gAutoTeleArgument)
 GLOBAL(atomic<bool>, gStopTeleport)
 GLOBAL(atomic<bool>, gFastTP)
 GLOBAL(atomic<bool>, gSpecing)
+GLOBAL(atomic<bool>, gControl)
 GLOBAL(string, gszSpectator)
 GLOBAL(DWORD, gSpectatorTarget)
 

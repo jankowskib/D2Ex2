@@ -43,6 +43,7 @@ namespace D2ASMFuncs
 
 namespace D2Stubs
 {
+	void D2CLIENT_GetPropertyString_STUB();
 	int __stdcall D2COMMON_GetItemCost(UnitAny *pPlayer, UnitAny *ptItem, int DiffLvl, QuestFlags *pQuestFlags, int NpcClassId, int InvPage); // to be moved somewhere else
 	void D2GAME_IsHostileMissile_STUB();
 	void D2GAME_IsUnitDead_STUB();

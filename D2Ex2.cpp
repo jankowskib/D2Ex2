@@ -299,6 +299,7 @@ unsigned int __stdcall Thread(void * Args)
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x96736),(DWORD)D2Stubs::D2CLIENT_OnGetItemName,9,"Item Name Wrapper"); //k
 	// <- Removed Life/Mana patch cause 1.13d supports it natively
 	Misc::Patch(JUMP,GetDllOffset("D2Client.dll",0x2E3FC),(DWORD)D2Stubs::D2CLIENT_Properties,6,"New Properties");  //k
+	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x2E06D),(DWORD)D2Stubs::D2CLIENT_GetPropertyString_STUB, 5, "On each property");
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x233A7),(DWORD)D2Stubs::D2CLIENT_Lighting_STUB,6,"Lighting Patch"); //k
 	//!!!!!!!!!!!!!!!!!! CODE UNSAFE FOR WARDEN !!!!!!!!!!!!!!!!!!!!!!
 	//Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x83301), (DWORD)ExInput::PacketInput_STUB, 5, "Realm Input Wrapper");
@@ -534,6 +535,7 @@ unsigned int __stdcall Thread(void * Args)
 #ifdef D2EX_SPECTATOR
 	atomic_init(&gSpecing, false);
 #endif
+	atomic_init(&gControl, false); // Is true if key control is pressed
 
 	while (WaitForSingleObject(hEvent, 0) != WAIT_OBJECT_0) 
 	{

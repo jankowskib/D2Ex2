@@ -44,6 +44,7 @@ void WorldToAutomap(POINT* ptPos);
 BOOL __fastcall OnTradeData(BYTE* aPacket);
 BOOL __fastcall OnTradeButton(BYTE* aPacket);
 
+void __stdcall OnPropertyBuild(wchar_t* wOut, int nStat, UnitAny* pItem);
 void __stdcall DrawProperties(wchar_t *wTxt);
 void __stdcall Display();
 void DrawAutoMapVer();

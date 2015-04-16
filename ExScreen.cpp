@@ -199,7 +199,7 @@ void __stdcall ExScreen::Display()
 	ExMultiRes::DrawMissingPieces();
 #endif
 
-#ifdef _DEBUG
+#if defined( _DEBUG) || defined(D2EX_DEBUG_INFO)
 	wostringstream wStr;
 	wStr << "mX: " << *D2Vars.D2CLIENT_MouseX << " mY:" << *D2Vars.D2CLIENT_MouseY;
 	wStr << " [" << dec << ExAim::GetUnitX(D2Funcs.D2CLIENT_GetPlayer()) << "," << dec << ExAim::GetUnitY(D2Funcs.D2CLIENT_GetPlayer()) << "]";
@@ -210,7 +210,7 @@ void __stdcall ExScreen::Display()
 		wStr << " [" << dec << ExAim::GetUnitX(D2Funcs.D2CLIENT_GetSelectedUnit()) << "," << dec << ExAim::GetUnitY(D2Funcs.D2CLIENT_GetSelectedUnit()) << "]";
 	}
 	wStr << " Shake = [" << *D2Vars.D2CLIENT_ShakeX << "," << *D2Vars.D2CLIENT_ShakeY << "]";
-	D2Funcs.D2WIN_SetTextSize(12);
+	D2Funcs.D2WIN_SetTextSize(13);
 	int aLen = ExScreen::GetTextWidth(wStr.str().c_str());
 	D2Funcs.D2WIN_DrawText(wStr.str().c_str(), *D2Vars.D2CLIENT_ScreenWidth - aLen - 10, *D2Vars.D2CLIENT_ScreenHeight - 10, COL_WHITE, 0);
 	
@@ -538,14 +538,162 @@ int GetDyeRealCol(int Col)
 return 0;
 }
 
+/*
+	Search mod used in UniqueItemsTxt, RunesTxt, etc. (from Properties.txt) by ItemStatCost.txt stat value
+*/
+static ItemsTxtStat* GetItemsTxtStatByMod(ItemsTxtStat* pStats, int nStats, int nStat)
+{
+	for (int i = 0; i<nStats; ++i) {
+		if (pStats[i].dwProp == 0xffffffff)
+			break;
+		PropertiesTxt * pProp = &(*D2Vars.D2COMMON_sgptDataTables)->pPropertiesTxt[pStats[i].dwProp];
+		if (!pProp)
+			break;
+		for (int j = 0; j < 7; ++j)
+		{
+			if (pProp->wStat[j] == 0xFFFF)
+				break;
+			if (pProp->wStat[j] == nStat)
+				return &pStats[i];
+		}
+	}
+	return 0;
+}
+
+/*
+	@param rwId: It's rwId of RunesTxt* and ItemData->MagicPrefix[0] when RUNEWORD flag is set
+*/
+static RunesTxt* GetRunewordTxtById(int rwId)
+{
+	int n = *(D2Funcs.D2COMMON_GetRunesTxtRecords());
+	for (int i = 1; i < n; ++i)
+	{
+		RunesTxt* pTxt = D2Funcs.D2COMMON_GetRunesTxt(i);
+		if (!pTxt)
+			break;
+		if (pTxt->dwRwId == rwId)
+			return pTxt;
+	}
+	return 0;
+}
+
+// UniqueItems->UniqueItemsTxtStat->PropertiesTxt-> Final stat!
+void __stdcall ExScreen::OnPropertyBuild(wchar_t* wOut, int nStat, UnitAny* pItem)
+{
+	if (gControl && pItem && pItem->dwType == UNIT_ITEM) {
+		ItemsTxtStat* stat = 0;
+		switch (pItem->pItemData->QualityNo) {
+		case ITEM_SET:
+		{
+			SetItemsTxt * pTxt = &(*D2Vars.D2COMMON_sgptDataTables)->pSetItemsTxt[pItem->pItemData->FileIndex];
+			if (!pTxt)
+				break;
+			stat = GetItemsTxtStatByMod(pTxt->hStats, 9 + 10, nStat);
+		}
+		case ITEM_UNIQUE:
+		{
+			if (pItem->pItemData->QualityNo == ITEM_UNIQUE) {
+				UniqueItemsTxt * pTxt = &(*D2Vars.D2COMMON_sgptDataTables)->pUniqueItemsTxt[pItem->pItemData->FileIndex];
+				if (!pTxt)
+					break;
+				stat = GetItemsTxtStatByMod(pTxt->hStats, 12, nStat);
+			}
+				if (stat) {
+					if (stat->dwMin != stat->dwMax) {
+						int	aLen = wcslen(wOut);
+						swprintf_s(wOut + aLen, 128 - aLen, L" %s[%d - %d]%s", GetColorCode(COL_YELLOW).c_str(), stat->dwMin, stat->dwMax, GetColorCode(COL_BLUE).c_str());
+					}
+				}
+		} break;
+		default:
+		{
+			if (pItem->pItemData->ItemFlags & ITEMFLAG_RUNEWORD) {
+				RunesTxt* pTxt = GetRunewordTxtById(pItem->pItemData->MagicPrefix[0]);
+				if (!pTxt)
+					break;
+				stat = GetItemsTxtStatByMod(pTxt->hStats, 7, nStat);
+				if (stat) {
+					if (stat->dwMin != stat->dwMax) {
+						int	aLen = wcslen(wOut);
+						swprintf_s(wOut + aLen, 128 - aLen, L" %s[%d - %d]%s", GetColorCode(COL_YELLOW).c_str(), stat->dwMin, stat->dwMax, GetColorCode(COL_BLUE).c_str());
+					}
+				} 
+			}
+			else if (pItem->pItemData->QualityNo == ITEM_MAGIC || pItem->pItemData->QualityNo == ITEM_RARE || pItem->pItemData->QualityNo == ITEM_CRAFTED)
+			{
+				int nAffixes = *D2Vars.D2COMMON_AutoMagicTxt - D2Funcs.D2COMMON_GetAffixTxt(1); // Number of affixes without Automagic
+				int min = 0, max = 0;
+				int type = D2Funcs.D2COMMON_GetItemType(pItem);
+				for (int i = 1;; ++i) {
+					if (!pItem->pItemData->AutoPrefix && i > nAffixes) // Don't include Automagic.txt affixes if item doesn't use them
+						break;
+					AutoMagicTxt* pTxt = D2Funcs.D2COMMON_GetAffixTxt(i);
+					if (!pTxt)
+						break;
+					//Skip if stat level is > 99 or affix is prelod
+					if (pTxt->dwLevel > 99 || !pTxt->wVersion)
+						continue;
+					//Skip if stat is not spawnable
+					if (pItem->pItemData->QualityNo < ITEM_CRAFTED && !pTxt->wSpawnable)
+						continue;
+					//Skip for rares+
+					if (pItem->pItemData->QualityNo >= ITEM_RARE  && !pTxt->nRare)
+						continue;
+					//Firstly check Itemtype
+					bool found_itype = false;
+					bool found_etype = false;
+
+					for (int j = 0; j < 5; ++j)
+					{
+						if (!pTxt->wEType[j] || pTxt->wEType[j] == 0xFFFF)
+							break;
+						if (D2Funcs.D2COMMON_IsMatchingType(pItem, pTxt->wEType[j])) {
+							found_etype = true;
+							break;
+						}
+					}
+					if (found_etype) // next if excluded type
+						continue;
+
+					for (int j = 0; j < 7; ++j)
+					{
+						if (!pTxt->wIType[j] || pTxt->wIType[j] == 0xFFFF)
+							break;
+						if (D2Funcs.D2COMMON_IsMatchingType(pItem, pTxt->wIType[j])) {
+							found_itype = true;
+							break;
+						}
+					}
+					if (!found_itype)
+						continue;
+
+					stat = GetItemsTxtStatByMod(pTxt->hMods, 3, nStat);
+					if (!stat)
+						continue;
+					min = min == 0 ? stat->dwMin : min(stat->dwMin, min);
+					max = max(stat->dwMax, max);
+					//DEBUGMSG(L"%s: update min to %d, and max to %d (record #%d)", wOut, min, max, i)
+				}
+				if (min != max) {
+					int	aLen = wcslen(wOut);
+					swprintf_s(wOut + aLen, 128 - aLen, L" %s[%d - %d]%s", GetColorCode(COL_YELLOW).c_str(), min, max, GetColorCode(COL_BLUE).c_str());
+				}
+			}
+
+		} break;
+
+		}
+	}
+}
+
 void __stdcall ExScreen::DrawProperties(wchar_t *wTxt)
 {
 	
 	UnitAny* ptItem = *D2Vars.D2CLIENT_SelectedItem;
 	if(!ptItem) return;
-	//if(ptItem->pItemData->QualityNo == ItemQ::Set) return;
-	int iLvl = ptItem->pItemData->ItemLevel;
 	int aLen =  0;
+#ifdef D2EX_COLOR_STAT
+	//if(ptItem->pItemData->QualityNo == ItemQ::Set) return;
 	int aCol = D2Funcs.D2COMMON_GetStatSigned(ptItem, D2EX_COLOR_STAT, 0);
 	if(aCol)
 	{
@@ -558,6 +706,8 @@ void __stdcall ExScreen::DrawProperties(wchar_t *wTxt)
 			swprintf_s(wTxt+aLen,1024-aLen,L"%sColor: %s\n",GetColorCode(COL_PURPLE).c_str(),GetDyeCol(aCol));
 		}
 	}
+#endif
+#ifdef D2EX_LOOTED_STAT
 	int aLvl = D2Funcs.D2COMMON_GetStatSigned(ptItem, D2EX_LOOTED_STAT, 0);
 	if(aLvl)
 	{
@@ -570,17 +720,20 @@ void __stdcall ExScreen::DrawProperties(wchar_t *wTxt)
 			swprintf_s(wTxt+aLen,1024-aLen,L"%Looted from: %s\n",GetColorCode(COL_PURPLE).c_str(),GetMonsterName(aLvl));
 		}
 	}
+#endif
 
-	aLen = wcslen(wTxt);
 #ifdef _DEBUG
+	aLen = wcslen(wTxt);
+	int iLvl = ptItem->pItemData->ItemLevel;
 	if(1024-aLen>20)
 	{
-	if(gLocaleId==10)
-	swprintf_s(wTxt+aLen,1024-aLen,L"%sPoziom przedmiotu: %d\n",GetColorCode(COL_YELLOW).c_str(),iLvl);
-	else
-	swprintf_s(wTxt+aLen,1024-aLen,L"%sUnique Idx: %d\n",GetColorCode(COL_YELLOW).c_str(),ptItem->pItemData->FileIndex);
+		if (gLocaleId == 10)
+			swprintf_s(wTxt + aLen, 1024 - aLen, L"%sPoziom przedmiotu: %d\n", GetColorCode(COL_YELLOW).c_str(), iLvl);
+		else
+			swprintf_s(wTxt + aLen, 1024 - aLen, L"%sItem level: %d\n", GetColorCode(COL_YELLOW).c_str(), iLvl);
 	}
 #endif
+
 
 }
 
@@ -783,6 +936,7 @@ void ExScreen::DrawDmg()
 
 BYTE * __stdcall ExScreen::DrawItem(UnitAny *ptPlayer, UnitAny* ptItem, BYTE* out, BOOL a4)
 {
+#ifdef D2EX_COLOR_STAT
 	int col = D2Funcs.D2COMMON_GetStatSigned(ptItem, D2EX_COLOR_STAT, 0);
 
 	if(col)
@@ -791,6 +945,7 @@ BYTE * __stdcall ExScreen::DrawItem(UnitAny *ptPlayer, UnitAny* ptItem, BYTE* ou
 		*out= GetDyeRealCol(col);
 		return D2Funcs.D2CMP_MixPalette(a4 ? pTxt->bInvTrans : pTxt->bTransform,GetDyeRealCol(col));
 	}
+#endif
 	//ItemsTxt* pTxt = D2Funcs.D2COMMON_GetItemText(ptItem->dwClassId);
 	//wostringstream str;
 	//str << D2Funcs.D2LANG_GetLocaleText(pTxt->wnamestr);

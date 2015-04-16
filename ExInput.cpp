@@ -187,6 +187,9 @@ DWORD __fastcall ExInput::GameInput(wchar_t* wMsg)
 		return -1;
 	}
 #endif
+#endif
+
+#ifdef D2EX_ENABLE_PACKET_COMMANDS
 	if (_stricmp(str, "#recv") == 0)
 	{
 		str = strtok_s(NULL, " ", &tok);
@@ -206,6 +209,21 @@ DWORD __fastcall ExInput::GameInput(wchar_t* wMsg)
 		Misc::ConvertBytesToHexString(data, length, astr, 2047, ',');
 		wostringstream wdata;
 		wdata << "Received " << astr;
+		D2Funcs.D2CLIENT_PrintGameString(wdata.str().c_str(), 1);
+		return -1;
+	}
+	if (_stricmp(str, "#decompress") == 0)
+	{
+		str = strtok_s(NULL, " ", &tok);
+		BYTE data[512], data_out[512];
+		if (strlen(str) == 0) return 0;
+		int length = Misc::ConvertHexStringToBytes(Misc::decomma(str), data, 512);
+		D2Funcs.FOG_DecompressPacket(data_out, length, data, length);
+
+		char astr[2048];
+		Misc::ConvertBytesToHexString(data_out, length, astr, 2047, ',');
+		wostringstream wdata;
+		wdata << "Decompressed to " << astr;
 		D2Funcs.D2CLIENT_PrintGameString(wdata.str().c_str(), 1);
 		return -1;
 	}
@@ -440,7 +458,8 @@ LONG WINAPI ExInput::GameWindowEvent(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM
 	}
 #endif
 	if (uMsg == WM_KEYDOWN) {
-		if (wParam == 'V') 	{
+		if (wParam == 'V')
+		{
 			if (GetKeyState(VK_CONTROL) < 0){
 				if ((D2Vars.D2CLIENT_UIModes[UI_CHAT]) && OpenClipboard(0))
 				{
@@ -461,6 +480,10 @@ LONG WINAPI ExInput::GameWindowEvent(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM
 				}
 			}
 		}
+		if (wParam == VK_CONTROL) {
+			gControl = true;
+		}
+
 #ifdef D2EX_EXAIM_ENABLED
 		if(wParam == VK_INSERT && D2Vars.D2CLIENT_UIModes[UI_CHAT] ==0 ) {ExAim::DoAttack(); return 0; }
 #endif
@@ -476,6 +499,12 @@ LONG WINAPI ExInput::GameWindowEvent(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM
 		}
 #endif
 	}
+	if (uMsg == WM_KEYUP) {
+		if (wParam == VK_CONTROL) {
+			gControl = false;
+		}
+	}
+
 	return (LONG)CallWindowProcA(OldWNDPROC, hWnd, uMsg, wParam, lParam);
 }
 
