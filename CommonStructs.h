@@ -32,6 +32,40 @@ struct GfxCell;
 
 #pragma pack(push, 1)
 
+
+// Author: Necrolis - big thx for these 2 structs (http://d2mods.info/forum/viewtopic.php?f=6&t=42044)
+struct D2CharStrc      //sizeof 0x0E
+{
+	WORD wChar;      //+00
+	BYTE nUnk;      //+02   
+	BYTE nWidth;      //+03
+	BYTE nHeight;      //+04
+	bool bTrue;      //+05
+	WORD wUnkEx;      //+06
+	BYTE nImageIndex;   //+08
+	BYTE nChar;      //+09
+	DWORD dwUnk;      //+0A      
+};
+
+struct D2FontTable      //sizeof 0x108 ? sizeof 0xE0B
+{
+	DWORD dwHeader;      //+00 - 'Woo!'
+	WORD wOne;      //+04
+	int nLocale;      //+06
+	BYTE nHeight;      //+0A
+	BYTE nWidth;      //+0B
+	D2CharStrc pChars[256]; //+0C
+};
+
+struct D2Font //sizeof 0x14
+{
+	CellFile *pFontCell;		//x000
+	D2FontTable* pTable;		//0x04
+	D2FontTable* pTableHeader;  //0x08
+	D2CharStrc* pTableEntries;      //0x0C
+	DWORD dwLastUsedTick;		//0x10
+};
+
 struct InventorySize // sizeof 0x10
 {
 	DWORD dwLeft;		//0x00
@@ -128,6 +162,19 @@ struct D2PacketTable
 // Packet definitions
 
 #pragma pack(push, 1)
+
+/*
+	On State Set packet
+*/
+struct p0xa8
+{
+	BYTE Header;
+	BYTE UnitType;
+	DWORD UnitId;
+	BYTE PacketLen;
+	BYTE StateNo;
+	BYTE Data[1];  // Random size
+};
 
 /*
 	Refresh unit packet
@@ -228,8 +275,8 @@ struct GameView // size 0xEABC
 	DWORD dwFlags; // 0x00
 	D2RECT ViewRadius; // 0x04
 	D2RECT ToCheck; // 0x14
-	DWORD _1; // 0x24
-	DWORD _2; // 0x28
+	DWORD xOffset; // 0x24
+	DWORD yOffset; // 0x28
 	DWORD* pGouraudTblX; // 0x2C
 	DWORD* pGouraudTblY; // 0x30
 	DWORD* pGouraudTblXVal; // 0x34

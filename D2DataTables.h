@@ -45,8 +45,8 @@ struct ItemsTxtStat
 {
 	DWORD dwProp;                 //0x00
 	DWORD dwPar;                  //0x04
-	DWORD dwMin;                  //0x08
-	DWORD dwMax;                  //0x0C
+	int dwMin;					  //0x08
+	int dwMax;			          //0x0C
 };
 
 /*
