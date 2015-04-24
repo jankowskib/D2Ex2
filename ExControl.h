@@ -21,62 +21,62 @@
 #ifndef __EXCONTROL_H_
 #define __EXCONTROL_H_
 
+typedef DWORD exId;
 
-#include <deque>
-#include <vector>
+class ExControlManager;
 
-#include "Misc.h"
-#include "ExScreen.h"
-
-using namespace std;
-
-const int FontTable[] = {3,2,7,5,8,13,1,0,4,6};
+const int FontTable[] = { 3, 2, 7, 5, 8, 13, 1, 0, 4, 6 };
 
 class ExControl  //NULL CONTROL
 {
 public:
 
-enum States {INVISIBLE=0,VISIBLE,DISABLED};
-enum Align {CENTER=-1, RIGHT=-2, NONE = 0};
+	enum States { INVISIBLE = 0, VISIBLE, DISABLED };
+	enum Align { CENTER = -1, RIGHT = -2, NONE = 0 };
 
-States cState;
+	States cState;
 
-ExControl(int X, int Y, int X2, int Y2, void (*fevent_onClick)(ExControl*));
-virtual ~ExControl(void);
-virtual void Draw() = 0;
-virtual bool isPressed(unsigned int Sender,WPARAM wParam);
-virtual void SetAlign(Align xAlign, Align yAlign);
-virtual void Relocate();
+	ExControl(int X, int Y, int X2, int Y2, void(*fevent_onClick)(exId));
+	virtual ~ExControl(void);
+	virtual void Draw() = 0;
+	virtual bool isPressed(DWORD Sender, WPARAM wParam);
+	virtual void SetAlign(Align xAlign, Align yAlign);
+	virtual void Relocate();
 
-void SetState(States aState);
-void SetMoveable(bool How);
-void SetHeight(int cH);
-void SetWidth(int cW);
-void SetX(int X);
-void SetY(int Y);
+	virtual void SetState(States aState) { cState = aState; }
+	virtual void SetMoveable(bool How) { bMoveable = How; }
+	virtual void SetHeight(int cH) { cHeight = cH; }
+	virtual void SetWidth(int cW) { cWidth = cW; }
+	virtual void SetX(int X) { cX = X; }
+	virtual void SetY(int Y) { cY = Y; }
+	virtual void SetText(wstring);
+	virtual void SetHooverText(wstring);
+	virtual void SetColor(unsigned int col);
 
+	virtual int GetHeight() const { return cHeight; }
+	virtual int GetWidth() const { return cWidth; }
+	virtual int GetX() const { return cX; }
+	virtual int GetY() const { return cY; }
 
-int GetHeight() const { return cHeight; }
-int GetWidth() const { return cWidth; }
-int GetX() const { return cX; }
-int GetY() const { return cY; }
+	exId id;
+	ExControl* pParent;
 
-
-ExControl * ptParent;
-
-//moveable support
+	//moveable support
 	int OldX;
 	int OldY;
 
+protected:
+	friend ExControlManager;
+
 	int aFont;
 
-	void (*event_onClick)(ExControl*);
-protected:
+	void(*event_onClick)(exId);
+
 	int cX;
 	int cY;
 	int	cWidth;
 	int cHeight;
-	
+
 	Align hAlign; // Portrait orientation
 	Align wAlign; // Landscape orientation
 

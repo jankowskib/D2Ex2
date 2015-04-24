@@ -39,7 +39,7 @@ using namespace std;
 
 namespace ExDownload
 {
-	void Terminate(ExControl* ptControl);
+	void Terminate(exId ptControl);
 	void ShowHide();
 	bool isOpen();
 	void Download(wstring szURL, BYTE bExecute);

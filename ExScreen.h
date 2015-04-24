@@ -25,6 +25,7 @@ using namespace std;
 
 namespace ExScreen
 {
+	
 void DrawTextEx(int X, int Y, int Color, int Cent, int TransLvl, wchar_t* Msg,...);
 void DrawTextEx(int X, int Y, int Color, int Cent, int TransLvl, char* Msg,...);
 void PrintTextEx(int Color, char* Msg,...);
@@ -32,7 +33,12 @@ void PrintTextEx(int Color, wchar_t* Msg,...);
 void PrintPartyTextEx(int Color, char* Msg, ...);
 void PrintPartyTextEx(int Color, wchar_t* Msg, ...);
 
-int GetTextWidth(const wchar_t *wText);
+int __fastcall GetTextWidth(const wchar_t *wText);
+int GetTextWidthEx(const wchar_t *wText, const int font);
+
+int GetCurrentTextHeight();
+int GetTextHeight(const int font);
+
 wstring GetColorCode(int ColNo);
 
 void ScreenToAutomap(POINT* ptPos, int x, int y);

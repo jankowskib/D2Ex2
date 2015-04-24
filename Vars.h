@@ -22,6 +22,7 @@ class ExCellFile;
 class ExControl;
 class ExLagometer;
 class ExEditBox;
+class ExFontManager;
 
 #include <vector>
 #include <deque>
@@ -41,6 +42,9 @@ using namespace std;
 
 #endif
 
+GLOBAL(ExFontManager*, gFontManager)
+GLOBAL(ExControlManager*, gExGUI)
+
 GLOBAL(BYTE, gVerCode)
 
 GLOBAL(BYTE, gTestColorRed)
@@ -57,6 +61,8 @@ GLOBAL(atomic<bool>, gStopTeleport)
 GLOBAL(atomic<bool>, gFastTP)
 GLOBAL(atomic<bool>, gSpecing)
 GLOBAL(atomic<bool>, gControl)
+GLOBAL(atomic<int>, gBNCSRequests)
+GLOBAL(atomic<int>, gBNCSResponseTick)
 GLOBAL(string, gszSpectator)
 GLOBAL(DWORD, gSpectatorTarget)
 
@@ -67,7 +73,7 @@ GLOBAL(vector<BYTE>, BlockedPackets)
 
 GLOBAL(int, bLagometer)
 GLOBAL(ExEditBox*,  GoldBox)
-GLOBAL(ExLagometer*, lagometer)
+GLOBAL(exId, lagometer)
 GLOBAL(int, Port)
 GLOBAL(ExCellFile*, CellBox)
 GLOBAL(ExCellFile*, CellButton)
@@ -88,12 +94,9 @@ GLOBAL(vector<ItemConfig>,ItemArray)
 GLOBAL(WNDPROC,OldWNDPROC)
 GLOBAL(atomic<bool>, DontEnterCS)
 GLOBAL(atomic<bool>, DontLeaveCS)
-GLOBAL(CRITICAL_SECTION, CON_CRITSECT)
 GLOBAL(CRITICAL_SECTION, EX_CRITSECT)
 GLOBAL(CRITICAL_SECTION, MEM_CRITSECT)
-GLOBAL(CRITICAL_SECTION, BUFF_CRITSECT)
 GLOBAL(CRITICAL_SECTION, TELE_CRITSECT)
-GLOBAL(int, Request)
 GLOBAL(int, BOLvl)
 GLOBAL(int, BCLvl)
 GLOBAL(int, ShoutLvl)

@@ -21,41 +21,40 @@
 #ifndef __EXTEXTBOX_H_
 #define __EXTEXTBOX_H_
 
-#include <cstdio>
 #include <string>
-#include <list>
 #include "ExControl.h"
-#include "Misc.h"
 
 using namespace std;
 
 class ExTextBox : public ExControl
 {
 public:
-	ExTextBox(int tX, int tY, int tTextColor,int tTextFont, wstring szLabel, void (*tevent_onClick)(ExControl*), ExControl* Parent);
-	ExTextBox(int tX, int tY, int tTextColor,int tTextFont, wstring (*fLabel)(ExTextBox*), void (*tevent_onClick)(ExControl*), ExControl* Parent);
+	ExTextBox(int tX, int tY, int tTextColor, int tTextFont, wstring szLabel, void(*tevent_onClick)(exId));
+	ExTextBox(int tX, int tY, int tTextColor, int tTextFont, wstring(*fLabel)(exId), void(*tevent_onClick)(exId));
 	//string friendly
-	ExTextBox(int tX, int tY, int tTextColor,int tTextFont, string sLabel, void (*tevent_onClick)(ExControl*), ExControl* Parent);
-	ExTextBox(int tX, int tY, int tTextColor,int tTextFont, string (*fLabel)(ExTextBox*), void (*tevent_onClick)(ExControl*), ExControl* Parent);
-	void Draw();
-	bool isPressed(unsigned int Sender, WPARAM wParam);
+	ExTextBox(int tX, int tY, int tTextColor, int tTextFont, string sLabel, void(*tevent_onClick)(exId));
+	ExTextBox(int tX, int tY, int tTextColor, int tTextFont, string(*fLabel)(exId), void(*tevent_onClick)(exId));
+	void Draw() override;
+	bool isPressed(DWORD Sender, WPARAM wParam) override;
 	~ExTextBox(void);
 
 	wstring GetText() const {return Label;}
 
 	void Relocate();
 	//void SetAlign(Align xAlign, Align yAlign);
-	void SetText(wstring sLabel);
+	void SetText(wstring sLabel) override;
+	void SetHooverText(wstring sLabel) override { Hoover = sLabel; }
 	void SetText(string Text);
 	void SetTextSimple(wstring wText);
 	void SetTransLvl(int aLevel);
-	void SetHoverable(bool how);
+	void SetHooverable(bool how);
+	void SetColor(unsigned int col) { TextColor = col;  }
 	bool isCallBack();
 private:
-	bool InitStatic(int tX, int tY, int tTextColor,int tTextFont, wstring szLabel, void (*tevent_onClick)(ExControl*), ExControl* Parent);
-	bool InitDynamic(int tX, int tY, int tTextColor,int tTextFont, wstring (*fLabel)(ExTextBox*), void (*tevent_onClick)(ExControl*), ExControl* Parent);
-	wstring (*cfLabel)(ExTextBox*);
-	string (*cfsLabel)(ExTextBox*);
+	bool InitStatic(int tX, int tY, int tTextColor, int tTextFont, wstring szLabel, void(*tevent_onClick)(exId));
+	bool InitDynamic(int tX, int tY, int tTextColor, int tTextFont, wstring(*fLabel)(exId), void(*tevent_onClick)(exId));
+	wstring(*cfLabel)(exId);
+	string(*cfsLabel)(exId);
 
 	int TextColor;
 	int TransLvl;

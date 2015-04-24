@@ -31,22 +31,22 @@ using namespace std;
 class ExScrollBar : public ExControl
 {
 public:
-	ExScrollBar(int X, int Y, int Min, int Max, int Height,int *Var, void (*efnOnChange)(ExControl*));
+	ExScrollBar(int X, int Y, int Min, int Max, int Height,int *Var, void (*efnOnChange)(exId));
 	~ExScrollBar();
-	void Draw();
+	void Draw() override;
 	void Update();
-	bool isPressed(unsigned int Sender,WPARAM wParam);
-	void SetHeight(int cH);
-	void SetState(States aState);
+	bool isPressed(DWORD Sender, WPARAM wParam) override;
+	void SetHeight(int cH) override;
+	void SetState(States aState) override;
 	int sMin;
 	int sMax;
 	int* sValue;
+
 private:
-	void (*fnOnChange)(ExControl*);
 	ExButton *Up;
 	ExButton *Down;
 	ExRectangle *Slider;
-	ExCellFile *aCellFile;
+	unique_ptr<ExCellFile> aCellFile;
 };
 
 

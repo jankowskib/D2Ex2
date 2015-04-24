@@ -60,6 +60,8 @@
 #include "ExMultiRes.h"
 #include "ExChicken.h"
 #include "ExDeathMessage.h"
+#include "ExControlManager.h"
+#include "ExFontManager.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -118,6 +120,9 @@ unsigned int __stdcall Thread(void * Args)
 	SetupD2Vars();
 	SetupD2Pointers();
 	SetupD2Funcs();
+
+	lagometer = exnull_t;
+	gFontManager = new ExFontManager();
 
 	//system("del bncache*.dat");
 	Misc::Log("Loading config...");
@@ -217,7 +222,8 @@ unsigned int __stdcall Thread(void * Args)
 	Misc::Patch(JUMP,GetDllOffset("D2Client.dll",0x52B9E),(DWORD)ExScreen::DrawAutoMapInfo,5,"AutoMap Info Draw");
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x52B73),(DWORD)ExScreen::DrawAutoMapVer,5,"AutoMap Version Draw");
 
-	//Misc::Patch(JUMP,GetDllOffset("D2Win.dll",-10111),(DWORD)ExScreen::GetTextWidth,6,"GetTextWidth Fix");
+	Misc::Patch(JUMP,GetDllOffset("D2Win.dll",-10111),(DWORD)ExScreen::GetTextWidth,6,"GetTextWidth Fix");
+	Misc::Patch(JUMP, GetDllOffset("D2Win.dll", -10138), (DWORD)ExScreen::GetCurrentTextHeight, 6, "GetTextHeight Fix");
 
 	Misc::Patch(JUMP,GetDllOffset("D2Client.dll",0x4F620),(DWORD)D2Stubs::D2CLIENT_BlobHook,6,"Blob Hook");
 	//Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x50EA8),(DWORD)D2Stubs::D2CLIENT_BlobHook2,59,"Blob Hook2");
@@ -314,7 +320,8 @@ unsigned int __stdcall Thread(void * Args)
 	Misc::Patch(JUMP,GetDllOffset("D2Client.dll",0x7349E),(DWORD)ExScreen::DrawAutoMapInfo,5,"AutoMap Info Draw"); //k
 	Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x73473),(DWORD)ExScreen::DrawAutoMapVer,5,"AutoMap Version Draw"); //k
 
-	//Misc::Patch(JUMP,GetDllOffset("D2Win.dll",-10148),(DWORD)ExScreen::GetTextWidth,6,"GetTextWidth Fix");  //k
+	Misc::Patch(JUMP, GetDllOffset("D2Win.dll", -10150), (DWORD)ExScreen::GetTextWidth, 6, "GetTextWidth Fix");  //k
+	Misc::Patch(JUMP, GetDllOffset("D2Win.dll", -10088), (DWORD)ExScreen::GetCurrentTextHeight, 5, "GetTextHeight Fix");  //k
 
 	Misc::Patch(JUMP,GetDllOffset("D2Client.dll",0x6FED0),(DWORD)D2Stubs::D2CLIENT_BlobHook,6,"Blob Hook"); //k
 	//Misc::Patch(CALL,GetDllOffset("D2Client.dll",0x71758),(DWORD)D2Stubs::D2CLIENT_BlobHook2,59,"Blob Hook2"); // Replaced by ExAutomap::DrawRosterUnit hook
@@ -372,6 +379,8 @@ unsigned int __stdcall Thread(void * Args)
 	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x1F47C), D2EX_MAX_SND_TXT_ROWS, 4, "Extend Sound.Txt III"); //k
 
 	Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x1D7AA), (DWORD)ExDeathMessage::Draw, 5, "Death Message Draw");
+
+	Misc::Patch(JUMP, GetDllOffset("D2Gfx.dll", -10050), (DWORD)D2Ex::OnExit, 5, "D2GFX_Finish"); // Almost last function before exit
 	
 	#ifdef D2EX_MULTIRES
 	//Res stuff
@@ -386,7 +395,6 @@ unsigned int __stdcall Thread(void * Args)
 	Misc::Patch(CALL, GetDllOffset("D2Gfx.dll", 0xA680), (DWORD)D2Stubs::D2GFX_LookUpFix_V_STUB, 7, "LookUpYFix_V");
 	Misc::Patch(CALL, GetDllOffset("D2Gfx.dll", 0xA4F7), (DWORD)D2Stubs::D2GFX_LookUpFix_VI_STUB, 6, "LookUpYFix_VI");
 
-	Misc::Patch(JUMP, GetDllOffset("D2Gfx.dll", -10050), (DWORD)ExMultiRes::D2GFX_Finish, 5, "D2GFX_Finish");
 
 	//Res UI fixups
 	Misc::Patch(JUMP, GetDllOffset("D2Common.dll", -10689), (DWORD)ExMultiRes::GetBeltPos, 7, "D2COMMON_GetBeltPos");
@@ -536,6 +544,10 @@ unsigned int __stdcall Thread(void * Args)
 	atomic_init(&gSpecing, false);
 #endif
 	atomic_init(&gControl, false); // Is true if key control is pressed
+	atomic_init(&gBNCSRequests, 0);
+	atomic_init(&gBNCSResponseTick, 0);
+	gExGUI = new ExControlManager();
+	gExGUI->start();
 
 	while (WaitForSingleObject(hEvent, 0) != WAIT_OBJECT_0) 
 	{
@@ -566,8 +578,8 @@ unsigned int __stdcall Thread(void * Args)
 
 			hAim = (HANDLE)_beginthreadex(0, 0, &ExAim::TeleportWatchThread, &hAimEvent, 0, 0);
 #endif
-			if(!lagometer && bLagometer)	//TODO: Set location based on resolution
-				lagometer = new ExLagometer(273,571);
+			if(lagometer == exnull_t && bLagometer)	//TODO: Set location based on resolution
+				lagometer = gExGUI->add(new ExLagometer(273,571));
 			ExpAtJoin = D2Funcs.D2COMMON_GetStatSigned(D2Funcs.D2CLIENT_GetPlayer(),STAT_EXPERIENCE,0);
 			TickAtJoin = GetTickCount();
 			if(AutoShowMap)
@@ -589,7 +601,7 @@ unsigned int __stdcall Thread(void * Args)
 				}
 #endif
 #if defined D2EX_EXAIM_ENABLED || defined D2EX_PVM_BUILD
-				if (gFastTP.load())	
+				if (gFastTP)	
 				{
 					ExChicken::FastTP();
 					gFastTP = false;
@@ -619,10 +631,10 @@ void D2Ex::CleanUp()
 	ExInput::UndefineBindings();
 	ExParty::Clear();
 	ExParty::ClearRoster();
-	if (lagometer)
+	if (lagometer != exnull_t)
 	{
-		delete lagometer;
-		lagometer = 0;
+		gExGUI->remove(lagometer);
+		lagometer = exnull_t;
 	}
 #ifdef D2EX_ARGOLD
 	if (GoldBox)
@@ -631,6 +643,57 @@ void D2Ex::CleanUp()
 		GoldBox = 0;
 	}
 #endif
+
+}
+
+void D2Ex::OnExit()
+{
+#ifdef D2EX_MULTIRES
+	ExMultiRes::D2GFX_Finish();
+#else
+	fnRendererCallbacks * fns = *D2Vars.D2GFX_pfnDriverCallback;
+	D2EXASSERT(fns, "GFX deinit error - driver ptr is null!");
+
+	fns->Release();
+	UnregisterClass("Diablo II", *D2Vars.D2GFX_hInstance);
+
+	D2EXASSERT(!(*D2Vars.D2GFX_bInitSucceed), "A critical error has occurred while initializing GFX system for %d renderer", gRenderer);
+	if (*D2Vars.D2GFX_hDriverModHandle)
+	{
+		FreeLibrary(*D2Vars.D2GFX_hDriverModHandle);
+		*D2Vars.D2GFX_hDriverModHandle = 0;
+		*D2Vars.D2GFX_pfnDriverCallback = 0;
+	}
+#endif
+	//--------------
+	DEBUGMSG("Finishing...")
+	ExBuffs::Clear();
+
+	if (CellBox) delete CellBox;
+	if (CellButton) delete CellButton;
+	ExMpq::UnloadMPQ();
+
+	if (gExGUI) {
+		gExGUI->stop();
+		delete gExGUI;
+	}
+
+	if (gFontManager)
+	delete gFontManager;
+
+	DeleteCriticalSection(&EX_CRITSECT);
+#if defined D2EX_EXAIM_ENABLED || defined D2EX_PVM_BUILD
+	DeleteCriticalSection(&TELE_CRITSECT);
+#endif
+	SetEvent(hEvent);
+	WaitForSingleObject(Handle, 5000);
+	CloseHandle(hEvent);
+#ifdef D2EX_MULTIRES
+	CloseHandle(hPointersReadyEvent);
+#endif
+	CloseHandle(Handle);
+	hEvent = 0;
+	Handle = 0;
 
 }
 
@@ -646,8 +709,6 @@ DWORD WINAPI DllMain(HMODULE hModule, int dwReason, void* lpReserved)
 			ASSERT(hEvent);
 
 			InitializeCriticalSectionAndSpinCount(&EX_CRITSECT,1000);
-			InitializeCriticalSectionAndSpinCount(&CON_CRITSECT,1000);
-			InitializeCriticalSectionAndSpinCount(&BUFF_CRITSECT,1000);
 #if defined D2EX_EXAIM_ENABLED || defined D2EX_PVM_BUILD
 			InitializeCriticalSectionAndSpinCount(&TELE_CRITSECT,1000);
 #endif
@@ -670,28 +731,7 @@ DWORD WINAPI DllMain(HMODULE hModule, int dwReason, void* lpReserved)
 		break;
 		case DLL_PROCESS_DETACH:
 		{
-			DEBUGMSG("Finishing...")
-			ExBuffs::Clear();
-			for(auto i = 0; (unsigned int)i < Controls.size(); ++i) delete Controls.at(i); 
-
-			if(CellBox) delete CellBox;
-			if(CellButton) delete CellButton;
-
-			DeleteCriticalSection(&EX_CRITSECT);
-			DeleteCriticalSection(&BUFF_CRITSECT);
-			DeleteCriticalSection(&CON_CRITSECT);
-#if defined D2EX_EXAIM_ENABLED || defined D2EX_PVM_BUILD
-			DeleteCriticalSection(&TELE_CRITSECT);
-#endif
-			SetEvent(hEvent);
-			WaitForSingleObject(Handle,5000);
-			CloseHandle(hEvent);
-#ifdef D2EX_MULTIRES
-			CloseHandle(hPointersReadyEvent);
-#endif
-			CloseHandle(Handle);
-			hEvent = 0;
-			Handle = 0;
+			
 		}
 		break;
 	}

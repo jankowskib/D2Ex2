@@ -179,6 +179,12 @@
     <ClCompile Include="ExAutomap.cpp">
       <Filter>Source Files\Main</Filter>
     </ClCompile>
+    <ClCompile Include="ExControlManager.cpp">
+      <Filter>Source Files\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ExFontManager.cpp">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArrayEx.h">
@@ -345,6 +351,15 @@
     </ClInclude>
     <ClInclude Include="ExAutomap.h">
       <Filter>Header Files\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="ExControlManager.h">
+      <Filter>Header Files\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="BlizzardSmartPointer.h">
+      <Filter>Header Files\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="ExFontManager.h">
+      <Filter>Header Files\Misc</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

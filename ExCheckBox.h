@@ -27,16 +27,16 @@
 class ExCheckBox : public ExControl
 {
 public:
-	ExCheckBox(int X, int Y, int Group, void (*tevent_onClick)(ExControl*));
+	ExCheckBox(int X, int Y, int Group, void (*tevent_onClick)(exId));
 	void Draw();
-	bool isPressed(unsigned int Sender, WPARAM wParam);
+	bool isPressed(DWORD Sender, WPARAM wParam) override;
 	~ExCheckBox();
 
 	int nGroup;
 	bool Checked;
 private:
-	ExCellFile* aCellFile;
-	static void OnBoxClick(ExControl* pControl);
+	unique_ptr<ExCellFile> aCellFile;
+	void OnBoxClick();
 
 };
 

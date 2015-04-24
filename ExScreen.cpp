@@ -25,11 +25,14 @@
 #include <iomanip>
 #include <math.h>
 #include <boost/lexical_cast.hpp>
+#include <unordered_map>
 
 #include "ExEditBox.h"
 #include "ExAutomap.h"
 #include "ExAim.h"
 #include "ExMultiRes.h"
+#include "ExFontManager.h"
+#include "ExBuffs.h"
 
 #include "Build.h"
 
@@ -66,25 +69,64 @@ void ExScreen::WorldToAutomap(POINT* ptPos) // D2COMMON.10115 @ 1.13d
 	ptPos->y = ypos / *D2Vars.D2CLIENT_Divisior - D2Vars.D2CLIENT_Offset->y - 8;
 }
 
-int ExScreen::GetTextWidth(const wchar_t *wText)
+
+
+D2CharStrc* __fastcall getCharacterDef(const wchar_t ch, const int font)
+{
+
+	return &gFontManager->get(font)->pChars[ch < 256 ? ch : 0];
+}
+
+
+/*
+	DEPRECATED: DO NOT DARE TO USE IF U DON'T LIKE ISSUES
+	USE: GetTextWidthEx
+*/
+int __fastcall ExScreen::GetTextWidth(const wchar_t *wText)
 {
 	int Len = wcslen(wText);
-	typedef int (__fastcall *pGetSize)(wchar_t);
-	pGetSize fGetSize = *D2Vars.D2WIN_CurrentFont == 13 ? (pGetSize)D2Ptrs.D2WIN_Font13 : (pGetSize)D2Ptrs.D2WIN_FontNon13;
-
 	int TextWid = 0;
 	int z = 0;
+
 	for(const wchar_t* i = wText; *i; ++z, ++i)
 	{
 		if(z>=Len) break;
 		if(Len-z>=3)
 			if(*i==0xFF && *(i+1)==L'c') i+=3;
 		if(*i==0) break;
-		if(*i!=10) TextWid+= *(BYTE*)(fGetSize(*i) + 3);
+		if (*i != 10) TextWid += getCharacterDef(*i, *D2Vars.D2WIN_CurrentFont)->nWidth;
 
 	}
 	return TextWid;
 }
+
+int ExScreen::GetTextWidthEx(const wchar_t *wText, const int font)
+{
+	int len = wcslen(wText);
+	int width = 0;
+	int z = 0;
+	for (const wchar_t* i = wText; *i; ++z, ++i)
+	{
+		if (z >= len) break;
+		if (len - z >= 3 && *i == 0xFF && *(i + 1) == L'c') i += 3;
+		if (*i == 0) break;
+		if (*i != 10) 
+			width += getCharacterDef(*i, font)->nWidth;
+
+	}
+	return width;
+}
+
+int ExScreen::GetCurrentTextHeight()
+{
+	return getCharacterDef(0, *D2Vars.D2WIN_CurrentFont)->nHeight;
+}
+
+int ExScreen::GetTextHeight(const int font)
+{
+	return getCharacterDef(0, font)->nHeight;
+}
+
 
 void ExScreen::PrintTextEx(int Color, char* Msg,...)
 {
@@ -211,7 +253,7 @@ void __stdcall ExScreen::Display()
 	}
 	wStr << " Shake = [" << *D2Vars.D2CLIENT_ShakeX << "," << *D2Vars.D2CLIENT_ShakeY << "]";
 	D2Funcs.D2WIN_SetTextSize(13);
-	int aLen = ExScreen::GetTextWidth(wStr.str().c_str());
+	int aLen = ExScreen::GetTextWidthEx(wStr.str().c_str(), 13);
 	D2Funcs.D2WIN_DrawText(wStr.str().c_str(), *D2Vars.D2CLIENT_ScreenWidth - aLen - 10, *D2Vars.D2CLIENT_ScreenHeight - 10, COL_WHITE, 0);
 	
 	/*wstring wPool = L"Pools: " + boost::lexical_cast<wstring>(ExMemory::GetPoolsCount());
@@ -236,12 +278,9 @@ void __stdcall ExScreen::Display()
 	#endif
 
 #endif
-	D2Funcs.D2WIN_SetTextSize(1);
-//	D2Funcs.D2WIN_DrawText(D2Vars.D2CLIENT_TempMessage,0,40,0,0);
 
-	EnterCriticalSection(&CON_CRITSECT);
-	for(auto i = Controls.cbegin(); i!=Controls.cend(); ++i) (*i)->Draw();
-	LeaveCriticalSection(&CON_CRITSECT);
+	ExBuffs::UpdateData();
+	gExGUI->draw();
 
 #ifdef D2EX_SPECTATOR
 	if (gSpecing == true && !gszSpectator.empty())
@@ -249,7 +288,7 @@ void __stdcall ExScreen::Display()
 		D2Funcs.D2WIN_SetTextSize(8);
 		wostringstream wSpecStr;
 		wSpecStr << L"Watching: " << boost::lexical_cast<wstring>(gszSpectator.c_str());
-		int aLen = ExScreen::GetTextWidth(wSpecStr.str().c_str());
+		int aLen = ExScreen::GetTextWidthEx(wSpecStr.str().c_str(), 8);
 		D2Funcs.D2WIN_DrawText(wSpecStr.str().c_str(), (*D2Vars.D2CLIENT_ScreenWidth / 2)- aLen / 2, 40, COL_YELLOW, 0);
 	}
 #endif
@@ -413,7 +452,7 @@ void __fastcall ExScreen::DrawAutoMapInfo(int OldTextSize)
 	int secs = TickAtJoin ? (GetTickCount() - TickAtJoin ) / 1000 : 0;
 	wostringstream wTime;
 	wTime << setfill(L'0') << setw(2) << secs/3600 << L':' << setfill(L'0') << setw(2) << (secs/60)%60 << L':'  << setfill(L'0') << setw(2) << secs%60;
-	int wSize3 = ExScreen::GetTextWidth(wTime.str().c_str());
+	int wSize3 = ExScreen::GetTextWidthEx(wTime.str().c_str(), 1);
 	D2Funcs.D2WIN_DrawText(wTime.str().c_str(), *D2Vars.D2CLIENT_ScreenWidth - wSize3 - 16, *D2Vars.D2CLIENT_AutomapInfoY, 4, 0);
 	*D2Vars.D2CLIENT_AutomapInfoY+=16;
 	D2Funcs.D2WIN_SetTextSize(OldTextSize);

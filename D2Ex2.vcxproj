@@ -242,6 +242,8 @@ EXIT 0</Command>
     <ClCompile Include="ExCheckBox.cpp" />
     <ClCompile Include="ExChicken.cpp" />
     <ClCompile Include="ExDeathMessage.cpp" />
+    <ClCompile Include="ExControlManager.cpp" />
+    <ClCompile Include="ExFontManager.cpp" />
     <ClCompile Include="ExMultiRes.cpp" />
     <ClCompile Include="ExOpenGL.cpp" />
     <ClCompile Include="Offset.cpp" />
@@ -293,6 +295,7 @@ EXIT 0</Command>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArrayEx.h" />
+    <ClInclude Include="BlizzardSmartPointer.h" />
     <ClInclude Include="CollisionMap.h" />
     <ClInclude Include="CommonStructs.h" />
     <ClInclude Include="D2Ex2.h" />
@@ -305,6 +308,8 @@ EXIT 0</Command>
     <ClInclude Include="ExCheckBox.h" />
     <ClInclude Include="ExChicken.h" />
     <ClInclude Include="ExDeathMessage.h" />
+    <ClInclude Include="ExControlManager.h" />
+    <ClInclude Include="ExFontManager.h" />
     <ClInclude Include="ExTexture.h" />
     <ClInclude Include="ExMultiRes.h" />
     <ClInclude Include="ExOpenGL.h" />

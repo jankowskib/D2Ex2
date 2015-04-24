@@ -44,7 +44,7 @@ int __fastcall ExEvents::OnTextEvent(ExEvent *Dane) //0xA6
 			string str = msg->szMsg;
 			if (str.empty()) break;
 
-			ExTextBox * Text = new ExTextBox((signed short)msg->wX, (signed short)msg->wY, msg->Color, msg->Argument, str, 0, 0);
+			ExTextBox * Text = new ExTextBox((signed short)msg->wX, (signed short)msg->wY, msg->Color, msg->Argument, str, 0);
 			if (msg->wX == 0xFFFF) Text->SetAlign(Text->CENTER, Text->NONE);
 			Text->SetState(Text->INVISIBLE);
 			EventText et = { Text, msg->Sound };

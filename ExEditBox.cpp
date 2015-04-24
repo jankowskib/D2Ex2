@@ -20,20 +20,17 @@
 
 #include "stdafx.h"
 #include "ExEditBox.h"
-
-#include "Misc.h"
+#include "ExScreen.h"
 
 
 ExEditBox::ExEditBox(int X, int Y, int TextXOffset, int TextYOffset, int TextLen, int TextFont, wstring szLabel, string szFile) : ExControl(X, Y, -1, -1, 0)
 {
 	try
 	{
-		aCellFile = new ExCellFile(szFile);
+		aCellFile = unique_ptr<ExCellFile>(new ExCellFile(szFile));
 	}
 	catch (const CellLoadError&)
 	{
-		LeaveCriticalSection(&CON_CRITSECT);
-		delete aCellFile;
 		D2EXERROR("Cannot create edit box because of missing or corrupted DC6 file!")
 	}
 
@@ -53,12 +50,9 @@ ExEditBox::ExEditBox(int X, int Y, int TextXOffset, int TextYOffset, int TextLen
 	Color = COL_WHITE;
 	TextPos = 0;
 	if (!szLabel.empty()) {
-		DontEnterCS = true;
-		aTextBox = new ExTextBox(X, Y - cHeight, COL_WHITE, 0, szLabel, 0, 0);
-		DontEnterCS = false;
+		aTextBox = new ExTextBox(X, Y - cHeight, COL_WHITE, 0, szLabel, 0);
+		//TODO Set this as a child
 	}
-	else
-		if (!DontLeaveCS) LeaveCriticalSection(&CON_CRITSECT);
 }
 
 void ExEditBox::SetHashed(bool How)
@@ -82,26 +76,26 @@ void ExEditBox::Draw()
 	{
 		if ((unsigned)TextPos > Text.length()) TextPos = 0;
 		wstring Buffer(Text.substr(TextPos));
-		TextWid = ExScreen::GetTextWidth(Buffer.c_str());
+		TextWid = ExScreen::GetTextWidthEx(Buffer.c_str(), aFont);
 
 		while (TextWid > (cWidth - (TextX * 2) - 5))
 		{
-			TextWid = ExScreen::GetTextWidth(Buffer.c_str());
+			TextWid = ExScreen::GetTextWidthEx(Buffer.c_str(), aFont);
 			if (Buffer.empty()) break;
 			Buffer.erase(Buffer.length());
 		}
 		if (isHashed) Buffer.assign(Buffer.length(), L'*');
 		D2Funcs.D2WIN_DrawText(Buffer.c_str(), cX + TextX, cY - TextY, Color, 0);
 
-		TextWid = ExScreen::GetTextWidth(Buffer.substr(0, CursorPos).c_str());
+		TextWid = ExScreen::GetTextWidthEx(Buffer.substr(0, CursorPos).c_str(), aFont);
 	}
 	if (!isFocused) return;
 
 	if (GetTickCount() % 50 == 0) D2Funcs.D2GFX_DrawLine(TextWid + cX + TextX, cY - TextY, TextWid + cX + TextX + 5, cY - TextY, 255, 0);
-
+	aTextBox->Draw();
 }
 
-bool ExEditBox::isPressed(unsigned int Sender, WPARAM wParam)
+bool ExEditBox::isPressed(DWORD Sender, WPARAM wParam)
 {
 	if (cState == INVISIBLE) return false;
 	switch (Sender)
@@ -136,10 +130,10 @@ bool ExEditBox::isPressed(unsigned int Sender, WPARAM wParam)
 		wstring OldText(Text);
 		switch (wParam)
 		{
-		case VK_BACK:   { if (CursorPos > 0) { Text.erase(CursorPos - 1, 1); CursorPos--;  if (ExScreen::GetTextWidth(Text.c_str()) > (cWidth - (TextX * 2) - 5)) TextPos--; else TextPos = 0; } break; }
+		case VK_BACK:   { if (CursorPos > 0) { Text.erase(CursorPos - 1, 1); CursorPos--;  if (ExScreen::GetTextWidthEx(Text.c_str(), 6) > (cWidth - (TextX * 2) - 5)) TextPos--; else TextPos = 0; } break; }
 		case VK_DELETE: { if (Text.length()) Text.erase(CursorPos, 1); break; }
-		case VK_LEFT:   { if (CursorPos > 0) CursorPos--;  if (ExScreen::GetTextWidth(Text.c_str()) > (cWidth - (TextX * 2) - 5)) TextPos--; else TextPos = 0; break; }
-		case VK_RIGHT:  { if ((unsigned)CursorPos<Text.length()) CursorPos++;  if (ExScreen::GetTextWidth(Text.substr(TextPos).c_str())>(cWidth - (TextX * 2) - 5) && TextPos<Text.length()) TextPos++; break; }
+		case VK_LEFT:   { if (CursorPos > 0) CursorPos--;  if (ExScreen::GetTextWidthEx(Text.c_str(),6) > (cWidth - (TextX * 2) - 5)) TextPos--; else TextPos = 0; break; }
+		case VK_RIGHT:  { if ((unsigned)CursorPos<Text.length()) CursorPos++;  if (ExScreen::GetTextWidthEx(Text.substr(TextPos).c_str(), aFont)>(cWidth - (TextX * 2) - 5) && TextPos < Text.length()) TextPos++; break; }
 		case 0x13: {isFocused = false; break; }
 		default:
 		{
@@ -148,14 +142,14 @@ bool ExEditBox::isPressed(unsigned int Sender, WPARAM wParam)
 			if (!iswalnum(key) && !iswspace(key)) break;
 			if (!shiftState) key = towlower(key);
 			Text.insert(CursorPos, 1, key); CursorPos++;
-			if (ExScreen::GetTextWidth(Text.c_str())>(cWidth - (TextX * 2) - 5)) TextPos++;
+			if (ExScreen::GetTextWidthEx(Text.c_str(), aFont) > (cWidth - (TextX * 2) - 5)) TextPos++;
 			break;
 		}
 		}
 		if (OldText != Text && event_onChange) event_onChange(this);
 		return true;
 	}
-		break;
+	break;
 	}
 	return false;
 }
@@ -163,7 +157,5 @@ bool ExEditBox::isPressed(unsigned int Sender, WPARAM wParam)
 
 ExEditBox::~ExEditBox(void)
 {
-	delete aCellFile;
 	delete aTextBox;
-	EnterCriticalSection(&CON_CRITSECT);
 }

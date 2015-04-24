@@ -29,23 +29,24 @@
 class ExButton : virtual public ExControl
 {
 public:
-	ExButton(int bX, int bY, int TextColor, unsigned int Frame, wstring szLabel, string szFile,void (*tevent_onClick)(ExControl*), bool LongButton);
-	void Draw();
-	bool isPressed(unsigned int Sender,WPARAM wParam);
+	ExButton(int bX, int bY, int TextColor, unsigned int Frame, wstring szLabel, string szFile, void(*tevent_onClick)(exId), bool LongButton);
+	void Draw() override;
+	bool isPressed(DWORD Sender, WPARAM wParam) override;
 	~ExButton(void);
-	wstring Label;
-	int aFrame;
-	void SetState(ExControl::States aState);
-	void SetHoover(wstring wText);
-	void SetColor(D2Colors nColor);
+
+	void SetFrame(unsigned int nFrame) { aFrame = nFrame; }
+	void SetState(ExControl::States aState) override;
+	void SetHooverText(wstring wText) override;
+	void SetColor(unsigned int nColor) override;
 protected:
-	ExCellFile * aCellFile;
-	ExTextBox * aTextBox;
+	unique_ptr<ExCellFile> aCellFile;
+	ExTextBox* aTextBox;
 private:
-	void FixText(); // internal use only
+	void FixText(int Xoff, int Yoff); // internal use only
 	bool bLongButton;
 	wstring Hoover;
 	int Color;
+	int aFrame;
 
 };
 

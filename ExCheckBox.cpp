@@ -21,79 +21,60 @@
 #include "stdAfx.h"
 #include "ExCheckBox.h"
 
-ExCheckBox::ExCheckBox(int X, int Y, int Group, void(*tevent_onClick)(ExControl*)) : ExControl(X, Y, 15, 16, tevent_onClick)
+ExCheckBox::ExCheckBox(int X, int Y, int Group, void(*tevent_onClick)(exId)) : ExControl(X, Y, 15, 16, tevent_onClick)
 {
 	try
 	{
-		aCellFile = new ExCellFile(CellFiles::CHECKBOX);
+		aCellFile = unique_ptr<ExCellFile>(new ExCellFile(CellFiles::CHECKBOX));
 	}
 	catch (const CellLoadError&)
 	{
-		delete aCellFile;
-		LeaveCriticalSection(&CON_CRITSECT);
 		D2EXERROR("Cannot create button because of missing or corrupted DC6 file!")
 	}
 
-	if (!tevent_onClick) event_onClick = &OnBoxClick;
 	Checked = false;
 	nGroup = Group;
-	if (!DontLeaveCS) LeaveCriticalSection(&CON_CRITSECT);
 }
 
 void ExCheckBox::Draw()
 {
 	switch (cState)
 	{
-		case INVISIBLE: 
-			return;
-		case VISIBLE:
-		{
-			aCellFile->Get()->nCellNo = Checked ? 1 : 0;
-			D2Funcs.D2GFX_DrawRectangle(cX, cY - cHeight + 2, cX + cWidth, cY, 0, 5);
-			D2Funcs.D2GFX_DrawCellContextEx(aCellFile->Get(), cX, cY, -1, 5, COL_WHITE);
-		}
-			break;
-		case DISABLED:
-		{
-			aCellFile->Get()->nCellNo = Checked ? 1 : 0;
-			D2Funcs.D2GFX_DrawRectangle(cX, cY - cHeight + 2, cX + cWidth, cY, 1, 5);
-			D2Funcs.D2GFX_DrawCellContextEx(aCellFile->Get(), cX, cY, -1, 5, COL_RED);
-		}
+	case INVISIBLE:
+		return;
+	case VISIBLE:
+	{
+		aCellFile->Get()->nCellNo = Checked ? 1 : 0;
+		D2Funcs.D2GFX_DrawRectangle(cX, cY - cHeight + 2, cX + cWidth, cY, 0, 5);
+		D2Funcs.D2GFX_DrawCellContextEx(aCellFile->Get(), cX, cY, -1, 5, COL_WHITE);
+	}
+	break;
+	case DISABLED:
+	{
+		aCellFile->Get()->nCellNo = Checked ? 1 : 0;
+		D2Funcs.D2GFX_DrawRectangle(cX, cY - cHeight + 2, cX + cWidth, cY, 1, 5);
+		D2Funcs.D2GFX_DrawCellContextEx(aCellFile->Get(), cX, cY, -1, 5, COL_RED);
+	}
 	}
 }
 
 
-void ExCheckBox::OnBoxClick(ExControl* pControl)
+void ExCheckBox::OnBoxClick()
 {
-	ExCheckBox* pBox = (ExCheckBox*)pControl;
+	event_onClick(id);
+	Checked = !Checked;
 
-	pBox->Checked = !pBox->Checked;
-
-	if (pBox->Checked && pBox->nGroup != -1) {
-		EnterCriticalSection(&CON_CRITSECT);
-		for (vector<ExControl*>::iterator i = Controls.begin(); i != Controls.end(); ++i)
-		{
-			if (*i == pBox) continue;
-			if ((*i)->event_onClick == OnBoxClick) 
-			{
-				ExCheckBox* pGroupBox = (ExCheckBox*)(*i);
-				if (pGroupBox->nGroup == pBox->nGroup)
-					pGroupBox->Checked = false;
-			}
-		}
-
-		LeaveCriticalSection(&CON_CRITSECT);
+	if (Checked && nGroup != -1) {
+	//FIXME: Uncheck other checkboxes in same group (need new message in ExControlManager)
 	}
 }
 
 ExCheckBox::~ExCheckBox()
 {
-	delete aCellFile;
-	EnterCriticalSection(&CON_CRITSECT);
 }
 
 
-bool ExCheckBox::isPressed(unsigned int Sender, WPARAM wParam)
+bool ExCheckBox::isPressed(DWORD Sender, WPARAM wParam)
 {
 	if (cState == INVISIBLE) return false;
 	switch (Sender)
@@ -110,7 +91,7 @@ bool ExCheckBox::isPressed(unsigned int Sender, WPARAM wParam)
 		if (cState == DISABLED) return false;
 		if (*D2Vars.D2CLIENT_MouseX >= cX && *D2Vars.D2CLIENT_MouseX <= cX + cWidth && *D2Vars.D2CLIENT_MouseY <= cY && *D2Vars.D2CLIENT_MouseY >= cY - cHeight)
 		{
-			if (cState == VISIBLE && event_onClick) { D2ASMFuncs::D2CLIENT_PlaySound(ExSounds::STAND_CLICK); event_onClick(this); }
+			if (cState == VISIBLE && event_onClick) { D2ASMFuncs::D2CLIENT_PlaySound(ExSounds::STAND_CLICK); OnBoxClick(); }
 			bBeingPressed = false;
 			return true;
 		}

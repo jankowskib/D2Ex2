@@ -25,6 +25,8 @@
 #include "ExAutoTele.h"
 #include "ExChicken.h"
 #include "ExMultiRes.h"
+#include "ExBox.h"
+#include "ExDownload.h"
 
 // IMPORT FROM SCRAP Project
 void ExInput::DefineBindings()
@@ -178,6 +180,26 @@ DWORD __fastcall ExInput::GameInput(wchar_t* wMsg)
 		D2Funcs.D2NET_ReceivePacket(&eLen, (BYTE*)&pEvent, pEvent.PacketLen);
 
 		return -1;
+	}
+	static exId test_ui[100] = { exnull_t };
+	if (strcmp(In, "#t1") == 0)
+	{
+
+		for (int i = 0; i < 100; ++i) {
+			wostringstream str2;
+			str2 << "Tescik " << i;
+			test_ui[i] = gExGUI->add(new ExTextBox(10, 10 +(15*i), COL_WHITE, 5, str2.str(), NULL));
+		}
+		return -1;
+	}
+	if (strcmp(In, "#t2") == 0)
+	{
+		ExDownload::ShowHide();
+	}
+	if (strcmp(In, "#t3") == 0)
+	{ 
+		auto test = blizz_unique_ptr<char>((char*)D2ASMFuncs::D2WIN_ReadFileFromMPQ("DATA\\LOCAL\\FONT\\LATIN\\README.TXT", NULL, NULL));
+		DEBUGMSG("Read text with data: %s", test)
 	}
 
 #ifdef D2EX_MULTIRES
@@ -398,16 +420,10 @@ LONG WINAPI ExInput::GameWindowEvent(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM
 	case WM_MOUSEWHEEL:
 	case WM_MOUSEMOVE:
 	{
-		bool a = false;
-		EnterCriticalSection(&CON_CRITSECT);
-		for (vector<ExControl*>::size_type i = 0; i < Controls.size(); ++i)
-		{
-			if (Controls.at(i)->isPressed(uMsg, wParam)) a = true;
-		}
-		LeaveCriticalSection(&CON_CRITSECT);
-		if (a) return 0;
+		if (gExGUI->io(uMsg, wParam))
+			return 0;
 	}
-		break;
+	break;
 		//CASE 'NEXTMSG'
 	};
 #if defined(D2EX_MULTIRES) && defined(_DEBUG)

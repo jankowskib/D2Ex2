@@ -39,6 +39,7 @@ namespace D2ASMFuncs
 	int __fastcall D2CLIENT_GetSelectedMenu(int MouseY);
 	SkillDescTxt* __fastcall D2CLIENT_GetSkillDescTxt(int SkillId);
 	BOOL __fastcall D2CLIENT_GetMeleeDmg(UnitAny* ptUnit, int SkillMinBonus, int* OutMin, int* OutMax, int* OutCol, int SkillMaxBonus, Skill* ptSkill, int a128, int a9, int a10);
+	void* __stdcall D2WIN_ReadFileFromMPQ(const char *szPath, DWORD* outSize, HANDLE* outHandle);
 }
 
 namespace D2Stubs

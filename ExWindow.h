@@ -28,19 +28,22 @@ public:
 	ExWindow(int wX, int wY, int wWid, int wHei, bool isTopBar, wstring szLabel);
 	void Draw();
 	~ExWindow(void);
+	
+	void SetWidth(int cW) override;
+	void SetHeight(int cH) override;
 
-	bool isPressed(unsigned int Sender,WPARAM wParam);
+	bool isPressed(DWORD Sender,WPARAM wParam) override;
 	const int GetX(){return cX;}
 	const int GetY(){return cY;}
 	const wchar_t* GetLabel() {return Label.c_str();}
 	void SetAlign(Align xAlign, Align yAlign);
 	void Relocate();
 	void Resize(int NewWidth, int NewHeight);
-	void AddChild(ExControl* ptChild);
-	void DeleteChild(ExControl* ptChild);
+	void AddChild(ExControl* child);
+	void DeleteChild(ExControl* child);
 protected:
 private:
-	vector<ExControl*> Child;
+	vector<ExControl*> Children;
 	wstring Label;
 	bool bDrawText;
 	bool bisTopBar;

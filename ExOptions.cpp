@@ -27,6 +27,7 @@
 #include "ExScreen.h"
 #include "ExOOG.h"
 #include "ExMultiRes.h"
+#include "ExLagometer.h"
 
 #include "Build.h"
 
@@ -646,6 +647,14 @@ BOOL __fastcall ExOptions::MapOpt(D2MenuEntry* ptEntry, StormMsg* pMsg)
 BOOL __fastcall ExOptions::LagOpt(D2MenuEntry* ptEntry, StormMsg* pMsg)
 {
 	bLagometer = ptEntry->dwCurrentSwitch;
+	if (bLagometer) {
+		if (lagometer == exnull_t)
+			lagometer = gExGUI->add(new ExLagometer(273, 571));
+	}
+	else {
+		gExGUI->remove(lagometer);
+		lagometer = exnull_t;
+	}
 	WritePrivateProfileString("D2Ex", "Lagometer", boost::lexical_cast<string>(ptEntry->dwCurrentSwitch).c_str(), ConfigIni.c_str());
 
 	return TRUE;

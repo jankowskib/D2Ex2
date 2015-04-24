@@ -438,7 +438,7 @@ void Misc::Log(wchar_t* Msg, ...)
 
 
 
-void Misc::Debug(char *format, ...)
+void Misc::Debug(const char * szFunction, char *format, ...)
 {
 	va_list arguments;
 	va_start(arguments, format);
@@ -450,8 +450,8 @@ void Misc::Debug(char *format, ...)
 	SYSTEMTIME t = { 0 };
 	GetLocalTime(&t);
 
-	char* out = new char[strlen(text) + 24];
-	sprintf_s(out, strlen(text) + 24, "[%04d-%02d-%02d %02d:%02d:%02d] %s\n", t.wYear, t.wMonth, t.wDay, t.wHour, t.wMinute, t.wSecond, text);
+	char* out = new char[strlen(text) + 24 + strlen(szFunction) + 3];
+	sprintf_s(out, strlen(text) + 24 + strlen(szFunction) + 3, "[%04d-%02d-%02d %02d:%02d:%02d] %s: %s\n", t.wYear, t.wMonth, t.wDay, t.wHour, t.wMinute, t.wSecond, szFunction, text);
 
 	OutputDebugString(out);
 
@@ -460,7 +460,7 @@ void Misc::Debug(char *format, ...)
 };
 
 
-void Misc::Debug(wchar_t *format, ...)
+void Misc::Debug(const char * szFunction, wchar_t *format, ...)
 {
 	va_list arguments;
 	va_start(arguments, format);
@@ -472,8 +472,8 @@ void Misc::Debug(wchar_t *format, ...)
 	SYSTEMTIME t = { 0 };
 	GetLocalTime(&t);
 
-	wchar_t* out = new wchar_t[wcslen(text) + 24];
-	swprintf_s(out, wcslen(text) + 24, L"[%04d-%02d-%02d %02d:%02d:%02d] %s\n", t.wYear, t.wMonth, t.wDay, t.wHour, t.wMinute, t.wSecond, text);
+	wchar_t* out = new wchar_t[wcslen(text) + 24 + (strlen(szFunction)*2) + 3];
+	swprintf_s(out, wcslen(text) + 24 + (strlen(szFunction) * 2) + 3, L"[%04d-%02d-%02d %02d:%02d:%02d] %s: %s\n", t.wYear, t.wMonth, t.wDay, t.wHour, t.wMinute, t.wSecond, szFunction, text);
 
 	OutputDebugStringW(out);
 

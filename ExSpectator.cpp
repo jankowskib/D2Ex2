@@ -35,7 +35,6 @@ BOOL __stdcall ExSpec::IsHostileMissile(DWORD UnitId1, int UnitId2, int dwFlag)
 	if (pUnit)
 		if (D2Funcs.D2COMMON_GetUnitState(pUnit, D2EX_SPECTATOR_STATE))
 		{
-			DEBUGMSG("Turned off hostility bc Specatator mode is set!")
 			return FALSE;
 		}
 

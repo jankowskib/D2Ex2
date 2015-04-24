@@ -29,6 +29,10 @@ public:
 	ExBox(int X, int Y, int Width, int Height, int Color, int TransLvl);
 	void Draw();
 	~ExBox();
+	
+	void SetColor(unsigned int col) { aColor = col; }
+
+private:
 	int aColor;
 	int aTransLvl;
 };

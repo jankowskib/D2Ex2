@@ -26,21 +26,22 @@
 class ExImage : virtual public ExControl
 {
 public:
-	 ExImage(int X, int Y, int Transp, unsigned int Frame, CellFile* CellFile);
-	 ExImage(int X, int Y, int Transp, unsigned int Frame, string szFile);
-void Draw(void);
-bool isPressed(unsigned int Sender, WPARAM wParam);
+	ExImage(int X, int Y, int Transp, unsigned int Frame, CellFile* CellFile);
+	ExImage(int X, int Y, int Transp, unsigned int Frame, string szFile);
+	void Draw(void);
+	bool isPressed(DWORD Sender, WPARAM wParam) override;
 	~ExImage(void);
-	void Relocate();	
+	void Relocate();
 	void SetTransLvl(int aLevel);
-
+	void SetHooverText(wstring sLabel) override { Hoover = sLabel; }
 	int TransLvl;
 	int ColorShift;
-	wstring Hoover;
+
 	bool MultiFrame;
 protected:
-	ExCellFile* aCellFile;
+	unique_ptr<ExCellFile> aCellFile;
 private:
+	wstring Hoover;
 };
 
 

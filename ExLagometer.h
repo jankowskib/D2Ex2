@@ -29,13 +29,13 @@
 
 //ALOT COPY & PASTA FROM QUAKE 4 SOURCE :D:D
 
-class ExLagometer : virtual public ExControl
+class ExLagometer : public ExControl
 {
 public:
 	ExLagometer(int X, int Y);
 	~ExLagometer();
-	void Draw();
-	void Update(int ping);
+	void Draw() override;
+	void SetColor(unsigned int ping) override;
 
 static BOOL __fastcall OnPong(BYTE* aPacket);
 

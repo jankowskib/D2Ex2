@@ -29,13 +29,10 @@ ExImage::ExImage(int X, int Y, int Transp, unsigned int Frame, CellFile* CellFil
 {
 	try
 	{
-		aCellFile = new ExCellFile(CellFile);
+		aCellFile = unique_ptr<ExCellFile>(new ExCellFile(CellFile));
 	}
 	catch (const CellLoadError&)
 	{
-		delete aCellFile;
-		if (!DontLeaveCS)
-		LeaveCriticalSection(&CON_CRITSECT);
 		D2EXERROR("Cannot create image because of missing or corrupted DC6 file!")
 	}
 
@@ -44,27 +41,18 @@ ExImage::ExImage(int X, int Y, int Transp, unsigned int Frame, CellFile* CellFil
 	cWidth = aCellFile->GetCF()->cells[Frame]->width;
 	cHeight = aCellFile->GetCF()->cells[Frame]->height;
 	TransLvl = (Transp > 7) ? 5 : Transp;
-	//aCellFile->Get()->nCellNo=(Frame>aCellFile->Get()->pCellFile->numcells) ? 0 : Frame;
 	ColorShift = 0;
 	MultiFrame = false;
-	//#ifdef _DEBUG
-	//Misc::Log("-->Stworzylem nowy klase ExImage (X=%d, Y=%d)!",X,Y);
-	//#endif
-	if (!DontLeaveCS)
-	LeaveCriticalSection(&CON_CRITSECT);
 }
 
 ExImage::ExImage(int X, int Y, int Transp, unsigned int Frame, string szFile) : ExControl(X, Y, -1, -1, 0)
 {
 	try
 	{
-		aCellFile = new ExCellFile(szFile);
+		aCellFile = unique_ptr<ExCellFile>(new ExCellFile(szFile));;
 	}
 	catch (const CellLoadError&)
 	{
-		delete aCellFile;
-		if (!DontLeaveCS)
-		LeaveCriticalSection(&CON_CRITSECT);
 		D2EXERROR("Cannot create image because of missing or corrupted DC6 file!")
 	}
 
@@ -73,14 +61,9 @@ ExImage::ExImage(int X, int Y, int Transp, unsigned int Frame, string szFile) : 
 	cWidth = aCellFile->GetCF()->cells[Frame]->width;
 	cHeight = aCellFile->GetCF()->cells[Frame]->height;
 	TransLvl = (Transp > 7) ? DRAW_MODE_NORMAL : Transp;
-	//aCellFile->Get()->nCellNo=(Frame>aCellFile->Get()->pCellFile->numcells) ? 0 : Frame;
 	ColorShift = 0;
 	MultiFrame = false;
-	//#ifdef _DEBUG
-	//Misc::Log("-->Stworzylem nowy klase ExImage (X=%d, Y=%d)!",X,Y);
-	//#endif
-	if (!DontLeaveCS)
-	LeaveCriticalSection(&CON_CRITSECT);
+
 }
 
 
@@ -91,11 +74,16 @@ void ExImage::SetTransLvl(int aLevel)
 
 void ExImage::Relocate() //- Set control align
 {
-	if (ptParent) {
-		if (wAlign == CENTER) cX = ((ptParent->GetX() + ptParent->GetWidth() + ptParent->GetX()) - cWidth) / 2;
-		else if (wAlign == RIGHT) cX = (ptParent->GetX() + ptParent->GetWidth() - cWidth);
-		if (hAlign == CENTER) cY = ((ptParent->GetY() + ptParent->GetHeight() + ptParent->GetY()) + cHeight) / 2;
-		else if (hAlign == RIGHT) cY = ptParent->GetY() + ptParent->GetHeight();
+	if (pParent) {
+		int parentX = pParent->GetX();
+		int parentY = pParent->GetY();
+		int parentW = pParent->GetWidth();
+		int parentH = pParent->GetHeight();
+
+		if (wAlign == CENTER) cX = ((parentX + parentW + parentX) - cWidth) / 2;
+		else if (wAlign == RIGHT) cX = parentX + parentW - cWidth;
+		if (hAlign == CENTER) cY = ((parentY + parentH + parentY) + cHeight) / 2;
+		else if (hAlign == RIGHT) cY = parentY + parentH + cHeight;
 	}
 	else {
 		if (wAlign == CENTER) cX = (*D2Vars.D2CLIENT_ScreenWidth - cWidth) / 2;
@@ -124,12 +112,11 @@ void ExImage::Draw()
 
 ExImage::~ExImage(void)
 {
-	delete aCellFile;
-	EnterCriticalSection(&CON_CRITSECT);
+
 }
 
 
-bool ExImage::isPressed(unsigned int Sender, WPARAM wParam)
+bool ExImage::isPressed(DWORD Sender, WPARAM wParam)
 {
 	switch (Sender)
 	{
@@ -143,7 +130,8 @@ bool ExImage::isPressed(unsigned int Sender, WPARAM wParam)
 	case WM_LBUTTONUP:
 		if (*D2Vars.D2CLIENT_MouseX >= cX && *D2Vars.D2CLIENT_MouseX <= cX + cWidth && *D2Vars.D2CLIENT_MouseY <= cY && *D2Vars.D2CLIENT_MouseY >= cY - cHeight)
 		{
-			if (cState == VISIBLE && event_onClick) event_onClick(this);
+			if (cState == VISIBLE && event_onClick)
+				event_onClick(id);
 			bBeingPressed = false;
 			return true;
 		}

@@ -90,11 +90,10 @@ void __stdcall ExAutomap::DrawOutRangeRosterUnit(RosterUnit* pRoster)
 		wchar_t wName[16];
 		Misc::CharToWide(pRoster->szName2, 16, wName, 16);
 
+		int len = ExScreen::GetTextWidthEx(wName, 6);
+
 		int oldfont = D2Funcs.D2WIN_SetTextSize(6);
-		int len = ExScreen::GetTextWidth(wName);
-
 		ExScreen::DrawTextEx(p.x - (len / 2), p.y - 10, COL_LIGHTGREEN, 0, DRAW_MODE_NORMAL, L"%s", wName);
-
 		D2Funcs.D2WIN_SetTextSize(oldfont);
 	}
 }

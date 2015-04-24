@@ -26,6 +26,28 @@
 #include "ExAutomap.h"
 #include "ExSpectator.h"
 
+
+/*
+	Warning: Need to free returned memory manually by FOG_FreeMemory!
+*/
+__declspec(naked) void* __stdcall D2ASMFuncs::D2WIN_ReadFileFromMPQ(const char *szPath, DWORD* outSize, HANDLE* outHandle)
+{
+	__asm
+	{	
+		push edx 
+
+		mov eax, [esp  + 4 + 4] // szPath
+		push[esp + 12 + 4]  // outHandle
+		push[esp + 12 + 4]  // outSize
+
+		call D2Ptrs.D2WIN_ReadFileFromMPQ_I
+
+		pop edx 
+
+		ret 12
+	}
+}
+
 __declspec(naked) int __fastcall D2ASMFuncs::D2CLIENT_DiffuseStat(int nStat)
 {
 	__asm

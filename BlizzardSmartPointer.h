@@ -2,7 +2,7 @@
 * D2Ex2
 * https://github.com/lolet/D2Ex2
 * ==========================================================
-* Copyright (c) 2011-2014 Bartosz Jankowski
+* Copyright (c) 2011-2015 Bartosz Jankowski
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -18,24 +18,23 @@
 * ==========================================================
 */
 
-#ifndef __EXRECTANGLE__H_
-#define __EXRECTANGLE__H_
+#ifndef __BLIZZ_SMART_PTR_H__
+#define __BLIZZ_SMART_PTR_H__
+#include <memory>
 
-#include "ExControl.h"
-
-class ExRectangle : public ExControl
+template<class T>
+struct __blizz_deleter__
 {
-public:
-	ExRectangle(int X, int Y, int Width, int Height, int Color, int TransLvl);
-	void Draw();
-	~ExRectangle();
-
-	void SetColor(unsigned int col) { aColor = col; }
-
-private:
-	int aColor;
-	int aTransLvl;
+	void operator()(T* ptr)
+	{
+		D2Funcs.FOG_FreeMemory(ptr, __FILE__, __LINE__, NULL);
+	}
 };
 
+/*
+	Do not use for global pointers, or take care to free them manually before exit!
+*/
+template<typename T>
+using blizz_unique_ptr = std::unique_ptr <T, __blizz_deleter__<T> >;
 
 #endif

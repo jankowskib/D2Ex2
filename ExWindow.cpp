@@ -20,7 +20,7 @@
 
 #include "stdafx.h"
 #include "ExWindow.h"
-
+#include "ExScreen.h"
 
 ExWindow::ExWindow(int wX, int wY, int wWid, int wHei, bool isTopBar, wstring szLabel) : ExControl(wX, wY, wWid, wHei, 0)
 {
@@ -29,7 +29,7 @@ ExWindow::ExWindow(int wX, int wY, int wWid, int wHei, bool isTopBar, wstring sz
 	bDrawText = true;
 	wTextColor = 8;
 	wBarColor = 0xE9;
-	Child.clear();
+	Children.clear();
 	TextWidth = TextHeight = DragX = DragY = 0;
 	if (bisTopBar) bMoveable = true;
 
@@ -37,10 +37,9 @@ ExWindow::ExWindow(int wX, int wY, int wWid, int wHei, bool isTopBar, wstring sz
 	{
 		for (int i = 0; i < 10; i++)
 		{
-			D2Funcs.D2WIN_SetTextSize(FontTable[i]);
-			TextWidth = ExScreen::GetTextWidth(Label.c_str());
+			TextWidth = ExScreen::GetTextWidthEx(Label.c_str(), FontTable[i]);
 			aFont = FontTable[i];
-			if (aFont == 3) TextHeight = 35; else if (aFont == 6) TextHeight = 12; else TextHeight = D2Funcs.D2WIN_GetFontHeight();
+			if (aFont == 3) TextHeight = 35; else if (aFont == 6) TextHeight = 12; else TextHeight = ExScreen::GetTextHeight(aFont);
 			if (cX + TextWidth < (cX + cWidth) && (cY + TextHeight) < (isTopBar ? cY + 15 : (cY + cHeight)))  break;
 			if (i == 9){ bDrawText = false; break; }
 		}
@@ -52,18 +51,14 @@ ExWindow::ExWindow(int wX, int wY, int wWid, int wHei, bool isTopBar, wstring sz
 	D2Vars.D2CLIENT_BlockedRect->right = cX + cWidth;
 	D2Vars.D2CLIENT_BlockedRect->bottom = cY + cHeight;
 	*D2Vars.D2CLIENT_BlockScreen = true;
-	//#ifdef _DEBUG
-	//Misc::Log(L"-->Stworzylem nowa klase ExWindow '%s'",Label.c_str());
-	//#endif
-	LeaveCriticalSection(&CON_CRITSECT);
 }
 
 void ExWindow::Draw()
 {
 	if (cState == VISIBLE || cState == DISABLED)
 	{
-		int aColor = cState == 1 ? bBeingPressed ? 0x11 : wBarColor : 4;
-		int aColorText = cState == 1 ? bBeingPressed ? bisTopBar ? 9 : wTextColor : wTextColor : 15;
+		int aColor = cState == 1 ? bBeingMoved ? 0x11 : wBarColor : 4;
+		int aColorText = cState == 1 ? bBeingMoved ? bisTopBar ? 9 : wTextColor : wTextColor : 15;
 		D2Funcs.D2GFX_DrawRectangle(cX, cY, cX + cWidth, cY + cHeight, 0xF, 1);
 		D2ASMFuncs::D2CLIENT_DrawGZBox(cX, cY, cX + cWidth, cY + cHeight);
 		if (bisTopBar)
@@ -105,32 +100,40 @@ void ExWindow::Relocate() //- Set control align
 
 }
 
-void ExWindow::Resize(int NewWidth, int NewHeight)
+void ExWindow::SetWidth(int width)
 {
-	D2Vars.D2CLIENT_BlockedRect->right = cX + NewWidth;
-	D2Vars.D2CLIENT_BlockedRect->bottom = cY + NewHeight;
-	cHeight = NewHeight;
-	cWidth = NewWidth;
+	D2Vars.D2CLIENT_BlockedRect->right = cX + width;
+	ExControl::SetWidth(width);
 }
 
-void ExWindow::AddChild(ExControl* ptChild)
+void ExWindow::SetHeight(int height)
 {
-	if (!ptChild) { DEBUGMSG("Attempted to remove NULL Child"); return; }
-	Child.push_back(ptChild);
-	ptChild->ptParent = this;
+	D2Vars.D2CLIENT_BlockedRect->bottom = cY + height;
+	ExControl::SetHeight(height);
 }
 
-void ExWindow::DeleteChild(ExControl* ptChild)
+void ExWindow::AddChild(ExControl* child)
 {
-	if (!ptChild) { DEBUGMSG("Attempted to remove NULL Child"); return; }
-	for (deque<ExControl*>::size_type i = 0; i < Child.size(); ++i)
+	if (!child) { DEBUGMSG("Attempted to remove NULL Child"); return; }
+	Children.push_back(child);
+	child->pParent = this;
+}
+
+void ExWindow::DeleteChild(ExControl* child)
+{
+	if (!child) { DEBUGMSG("Attempted to remove NULL Child"); return; }
+
+	for (auto &i = Children.begin(); i != Children.end(); ++i)
 	{
-		if (Child.at(i) == ptChild) { Child.at(i) = 0; ptChild->ptParent = 0; break; }
+		if (*i == child) {
+			Children.erase(i);
+			child->pParent = false;
+			break; 
+		}
 	}
-
 }
 
-bool ExWindow::isPressed(unsigned int Sender, WPARAM wParam)
+bool ExWindow::isPressed(DWORD Sender, WPARAM wParam)
 {
 	if (cState == INVISIBLE) return false;
 	switch (Sender)
@@ -139,26 +142,32 @@ bool ExWindow::isPressed(unsigned int Sender, WPARAM wParam)
 		if (*D2Vars.D2CLIENT_MouseX >= cX && *D2Vars.D2CLIENT_MouseX <= cX + cWidth && *D2Vars.D2CLIENT_MouseY >= cY && *D2Vars.D2CLIENT_MouseY <= cY + cHeight)
 		{
 			bBeingPressed = true;
-			if (*D2Vars.D2CLIENT_MouseY <= cY + 15)
+
+			if (!bMoveable) 
+				return true;
+
+			if (gControl && *D2Vars.D2CLIENT_MouseY <= cY + 15)
 			{
-				if (!bMoveable) return true;
+				bBeingMoved = true;
+
 				DragX = *D2Vars.D2CLIENT_MouseX;
 				DragY = *D2Vars.D2CLIENT_MouseY;
 				OldX = cX;
 				OldY = cY;
-				for (vector<ExControl*>::size_type i = 0; i < Child.size(); ++i)
+				for (auto& child :  Children)
 				{
-					if (Child.at(i) == 0) continue;
-					Child.at(i)->OldX = Child.at(i)->GetX();
-					Child.at(i)->OldY = Child.at(i)->GetY();
+					child->OldX = child->GetX();
+					child->OldY = child->GetY();
 				}
-				return true;
 			}
+			return true;
 		}
 		break;
 	case WM_LBUTTONUP:
 		if (*D2Vars.D2CLIENT_MouseX >= cX && *D2Vars.D2CLIENT_MouseX <= cX + cWidth && *D2Vars.D2CLIENT_MouseY >= cY && *D2Vars.D2CLIENT_MouseY <= cY + cHeight)
 		{
+			bBeingMoved = false;
+
 			//if(cX<0 || cWidth>800) {cX=OldX;cWidth=OldX2;}
 			//if(cY<0 || cHeight>600) {cY=OldY;cHeight=OldY2;}
 			D2Vars.D2CLIENT_BlockedRect->left = cX;
@@ -180,15 +189,10 @@ bool ExWindow::isPressed(unsigned int Sender, WPARAM wParam)
 				signed int yOffset = (*D2Vars.D2CLIENT_MouseY - DragY);
 				cX = OldX + xOffset;
 				cY = OldY + yOffset;
-				//cWidth=OldX2+xOffset;
-				//cHeight=OldY2+yOffset;
-				for (vector<ExControl*>::size_type i = 0; i < Child.size(); ++i)
+				for (auto& child : Children)
 				{
-					if (Child.at(i) == 0) continue;
-					Child.at(i)->SetX(Child.at(i)->OldX + xOffset);
-					Child.at(i)->SetY(Child.at(i)->OldY + yOffset);
-					//Child.at(i)->SetWidth(Child.at(i)->OldX2+xOffset);
-					//Child.at(i)->SetHeight(Child.at(i)->OldY2+yOffset);
+					child->SetX(child->OldX + xOffset);
+					child->SetY(child->OldY + yOffset);
 				}
 			}
 		}
@@ -201,7 +205,5 @@ bool ExWindow::isPressed(unsigned int Sender, WPARAM wParam)
 
 ExWindow::~ExWindow(void)
 {
-	EnterCriticalSection(&CON_CRITSECT);
 	*D2Vars.D2CLIENT_BlockScreen = false;
-	DEBUGMSG(L"-->Zniszczylem ExWindow '%s'", Label.c_str());
 }

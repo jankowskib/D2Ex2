@@ -29,14 +29,14 @@ class ExEditBox : virtual public ExControl
 public:
 	 ExEditBox(int X, int Y, int TextXOffset, int TextYOffset, int TextLen, int TextFont, wstring szLabel, string szFile);
 void Draw();
-bool isPressed(unsigned int Sender, WPARAM wParam);
+bool isPressed(DWORD Sender, WPARAM wParam) override;
 	~ExEditBox();
 void SetHashed(bool How);
 void SetChangeEvent(void (*event_Change)(ExEditBox*));
 	wstring Text;
 
 protected:
-	ExCellFile* aCellFile;
+	unique_ptr<ExCellFile> aCellFile;
 	ExTextBox* aTextBox;
 private:
 	void (*event_onChange)(ExEditBox*);

@@ -2,7 +2,7 @@
 * D2Ex2
 * https://github.com/lolet/D2Ex2
 * ==========================================================
-* Copyright (c) 2011-2014 Bartosz Jankowski
+* Copyright (c) 2011-2015 Bartosz Jankowski
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -18,24 +18,20 @@
 * ==========================================================
 */
 
-#ifndef __EXRECTANGLE__H_
-#define __EXRECTANGLE__H_
+#ifndef __EXFONTTABLE_H__
+#define __EXFONTTABLE_H__
 
-#include "ExControl.h"
+#include <vector>
 
-class ExRectangle : public ExControl
+class ExFontManager
 {
 public:
-	ExRectangle(int X, int Y, int Width, int Height, int Color, int TransLvl);
-	void Draw();
-	~ExRectangle();
-
-	void SetColor(unsigned int col) { aColor = col; }
+	ExFontManager();
+	~ExFontManager();
+	D2FontTable* get(const unsigned int font) const { D2EXASSERT(font > 13, "Invalid font (%d)", font)  return table[font].get(); };
 
 private:
-	int aColor;
-	int aTransLvl;
+	std::vector<blizz_unique_ptr<D2FontTable>> table;
 };
-
 
 #endif

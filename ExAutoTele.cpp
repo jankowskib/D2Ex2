@@ -60,15 +60,10 @@ namespace ExAutoTele
 
 		gStopTeleport.store(true);
 
-		switch (ExParty::GetPlayerArea())
-		{
-			default:
-			{
-				gAutoTeleArgument = ExParty::GetPlayerArea() - 1;
-				gAutoTeleAction = 3;
-			}
-			break;
-		}
+
+		gAutoTeleArgument = ExParty::GetPlayerArea() - 1;
+		gAutoTeleAction = 3;
+
 
 		Msg->_2 = 1;
 		Msg->_3 = 0;
@@ -138,7 +133,7 @@ namespace ExAutoTele
 		{
 			if (ExitArray[i]->dwTargetLevel == nLevelId)
 			{
-				TeleportTo(nLevelId, ExitArray[i]->ptPos.x, ExitArray[i]->ptPos.y);
+				TeleportTo(nLevelId, (short)ExitArray[i]->ptPos.x, (short)ExitArray[i]->ptPos.y);
 				return true;
 			}
 		}

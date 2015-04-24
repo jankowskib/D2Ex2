@@ -25,6 +25,7 @@
 namespace D2Ex
 {
 	void CleanUp();
+	void OnExit();
 }
 
 #endif

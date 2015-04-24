@@ -35,8 +35,8 @@ namespace Misc
 	string DrawModeToString(int nDrawMode);
 	void RegWriteDword(const char * key, const char* name, const DWORD value);
 	int RegReadDword(const char * key, const char* value, const DWORD default);
-	void Debug(char *format,...);
-	void Debug(wchar_t *format,...);
+	void Debug(const char * szFunction, char *format, ...);
+	void Debug(const char * szFunction, wchar_t *format, ...);
 	wstring ConvertTickToTime(DWORD Tick);
 	int ClampInt( int min, int max, int value);
 	int TransColor(string str);

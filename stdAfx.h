@@ -21,7 +21,7 @@
 #define WIN32_LEAN_AND_MEAN
 //Build flags
 //--------- General Flags ----------------
-//#define D2EX_CLOSED_BNET "Closed Bnet|"		// Copy&Paste from SCRAP, didn't test yet
+//#define D2EX_CLOSED_BNET "Closed Bnet|"		// Set you gonna use this on Blizzard BNet
 //#define D2EX_SCRAP_HACKS "Scrap Hacks|"		// - || -
 //#define D2EX_MULTIRES "Multi Res|"				// Enables high resolution settings
 #define D2EX_PVPGN_EXT "PvPGN Extensions|"		// Enables serverside stuff like kill counter, spectator mode etc [Needs serverside dll to work]
@@ -71,6 +71,7 @@ using namespace std;
 #include "CommonStructs.h"
 #include <glide.h>
 
+
 #ifdef VER_113D
 #include "D2Structs_113D.h"
 #include "D2ExPointers_113D.h"
@@ -79,13 +80,15 @@ using namespace std;
 #include "D2ExPointers_111B.h"
 #endif
 
+#include "BlizzardSmartPointer.h"
+#include "ExControlManager.h"
 
 #include "D2Stubs.h"
 #include "Misc.h"
 #include "Vars.h"
 
 #ifdef _DEBUG
-#define DEBUGMSG(format,...) Misc::Debug(format, ##__VA_ARGS__);
+#define DEBUGMSG(format,...) Misc::Debug(__FUNCTION__, format, ##__VA_ARGS__);
 #else
 #define DEBUGMSG(format,...) {}
 #endif
@@ -96,3 +99,4 @@ using namespace std;
 #define D2EXASSERT(e, format, ...) if(!e) { ShowWindow(D2Funcs.D2GFX_GetHwnd(),SW_HIDE);   Misc::ShowMsgBox(format, ##__VA_ARGS__); exit(-1); }
 #define D2EXERROR(format, ...) { ShowWindow(D2Funcs.D2GFX_GetHwnd(),SW_HIDE);   Misc::ShowMsgBox(format, ##__VA_ARGS__); exit(-1); }
 #define D2EXINFO(format, ...) ExScreen::PrintTextEx(COL_ORANGE, format, ##__VA_ARGS__);
+

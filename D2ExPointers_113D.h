@@ -166,6 +166,7 @@ _d2f D2Funcs = {0}; void SetupD2Funcs() {
 		EXFUNCPTR(D2WIN, DrawRectangledText, void, __fastcall, (const wchar_t * wStr, int X, int Y, int nRectColor, int nRectTrans, int nColor), -10078)
 		EXFUNCPTR(D2WIN, GetFontHeight, short, __fastcall, (void), -10088) //k
 		EXFUNCPTR(D2WIN, GetTextWidth, int, __fastcall, (const wchar_t * wStr), -10150) // k
+		EXFUNCPTR(D2WIN, GetTextNWidth, int, __fastcall, (const wchar_t * wStr, const int nChars), -10148) // k
 		EXFUNCPTR(D2WIN, SetTextSize, int, __fastcall, (int dwSize), -10047) //k
 		//Controls--
 		EXFUNCPTR(D2WIN, Fadeout, void, __stdcall, (Control* pControl, int HowSet), -10000)
@@ -259,6 +260,7 @@ void SetupD2Pointers() {
 	EXASMPTR(D2CLIENT, Screen_Call, 0x77810)  // 1.13d
 	EXASMPTR(D2CLIENT, TestRosterFlag_I, 0x6A720) // k
 	EXASMPTR(D2WIN, LoadMpq_I, 0x7E50) //k
+	EXASMPTR(D2WIN, ReadFileFromMPQ_I, 0x7C50)
 	EXASMPTR(D2CLIENT, MenuFunc_I, 0xC2480) // k
 	EXASMPTR(D2CLIENT, CharInfo_I, 0xBF090) //k
 	EXASMPTR(D2CLIENT, GetSkillsTxt_I, 0x19F0) // SkillDesc actually // k

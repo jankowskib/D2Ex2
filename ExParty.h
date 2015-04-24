@@ -30,23 +30,15 @@
 using namespace std;
 
 struct PlayerTable;
+struct AccountBase;
 
 namespace ExParty
 {
 	void ClearScreenHandle();
-	void Spectate(ExControl* ptControl);
-	void Squelch(ExControl* ptControl);
-	void Loot(ExControl* ptControl);
-	void Host(ExControl* ptControl);
-	void Invite(ExControl* ptControl);
-	void OnScroll(ExControl* ptControl);
+
 	int GetPlayerArea(UnitAny* ptUnit = D2Funcs.D2CLIENT_GetPlayer());
 	bool isTownLvl(UnitAny* ptUnit = D2Funcs.D2CLIENT_GetPlayer());
-	wstring GetPingFps(ExTextBox* pTextBox);
-	wstring GetPartyCount(ExTextBox* pTextBox);
 	bool isOpen();
-	void Leave(ExControl * tt);
-	void SharePing(ExControl * tt);
 	UnitAny* GetUnitByName(const char* szName);
 	bool isPlayerNear(const char * szName);
 	void Fill(char * szSkip = 0);
@@ -54,11 +46,13 @@ namespace ExParty
 	void Refresh(char * szSkip = 0);
 	void Update();
 	void AddAccount(string szName, string szAccount);
+	void UpdateAccount(string szCharName, string szAccountName);
 	void RequestAccount(string szName);
 	string FindAccount(string szName);
 	string FindClan(string szName);
+	AccountBase* FindRoster(string szName);
+
 	int FindRoster(string szName, int Type);
-	list<PlayerTable>::iterator GetPartyListEntry(DWORD UnitID);
 	void ClearRoster();
 	RosterUnit * GetRosterById(DWORD dwUnitId);
 	RosterUnit * GetRosterByName(const char* szName);
@@ -77,7 +71,6 @@ namespace ExParty
 	DWORD GetPvpFlags(DWORD dwUnitId);
 	void ShowHide(void);
 	void ClearScreen();
-	void Close(ExControl* ct);
 }
 
 
