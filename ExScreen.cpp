@@ -326,15 +326,17 @@ void OnGoldChange(ExEditBox* pControl)
 
 BOOL __fastcall ExScreen::OnTradeData(BYTE* aPacket)
 {
-	if(GoldBox) 
+	if(GoldBox != exnull_t) 
 	{
-		delete GoldBox; 
-		GoldBox = 0;
+		gExGUI->remove(GoldBox); 
+		GoldBox = exnull_t;
 	}
 
-	GoldBox = new ExEditBox(100,475,5,5,16,0,D2Funcs.D2LANG_GetLocaleId() == 10 ? L"Podaj has³o AR Gold" : L"Enter AR Gold Password :",CellFiles::EDITBOX);
-	GoldBox->SetHashed(true);
+	GoldBox = gExGUI->add(new ExEditBox(100,475,5,5,16,0,D2Funcs.D2LANG_GetLocaleId() == 10 ? L"Podaj has³o AR Gold" : L"Enter AR Gold Password :",CellFiles::EDITBOX));
+	/*GoldBox->SetHashed(true);
 	GoldBox->SetChangeEvent(&OnGoldChange);
+	//TODO: Fix this...
+	*/
 	return D2Funcs.D2CLIENT_TradeData_I(aPacket);
 }
 
@@ -342,10 +344,10 @@ BOOL __fastcall ExScreen::OnTradeData(BYTE* aPacket)
 BOOL __fastcall ExScreen::OnTradeButton(BYTE* aPacket)
 {
 	if(aPacket[1] == UPDATE_CLOSE_TRADE || aPacket[1] == UPDATE_TRADE_DONE)
-	if(GoldBox) 
+	if(GoldBox != exnull_t) 
 	{
-		delete GoldBox; 
-		GoldBox = 0; 
+		gExGUI->remove(GoldBox); 
+		GoldBox = exnull_t;
 	}
 
 	return D2Funcs.D2CLIENT_TradeButton_I(aPacket);

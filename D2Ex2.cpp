@@ -122,7 +122,8 @@ unsigned int __stdcall Thread(void * Args)
 	SetupD2Funcs();
 
 	lagometer = exnull_t;
-	
+	GoldBox = exnull_t;
+
 	gLocaleId = D2Funcs.D2LANG_GetLocaleId();
 	DEBUGMSG("Locale ID is %d", gLocaleId)
 
@@ -639,10 +640,10 @@ void D2Ex::CleanUp()
 		lagometer = exnull_t;
 	}
 #ifdef D2EX_ARGOLD
-	if (GoldBox)
+	if (GoldBox != exnull_t)
 	{
-		delete GoldBox;
-		GoldBox = 0;
+		gExGUI->remove(GoldBox);
+		GoldBox = exnull_t;
 	}
 #endif
 
