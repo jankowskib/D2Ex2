@@ -7,7 +7,7 @@ Key features
 --------
 - Completely reworked party screen, can handle up to 64 players
 - Fixed some vanilla bugs, random crashes etc
-- Expanded Sounds.Txt limit to 4954, you can easily increase to more (~~D2Ex2.cpp's patches~~ set D2EX_MAX_SND_TXT_ROWS in stdAfx.h)
+- Expanded Sounds.Txt limit to 4954, you can easily increase to more
 - Reduced TCP/IP / Open BNet join time.
 - Lagometer (ported from Q3 source :D)
 - Reworked ESC-menu, get rid of .dc6 files. Now creating your own menu is easy as pie (ExOptions.cpp)
@@ -15,7 +15,8 @@ Key features
 - Supports both 1.11b & 1.13d (set version in stdafx.h (1.11b may have missing some pointers))
 - ExBuffs module let see you states, auras and remaining time
 - [WIP] High resolution support for GDI / GLIDE video modes.
-- Packet sender / receiver (Debug build only, commands #send, #recv)
+- Packet sender / receiver (commands #send, #recv)
+- Items stat range (press CTRL + hoover on an item)
 
 Configuration
 -------------
@@ -40,11 +41,14 @@ List of flags / values you can set:
 * **D2EX_MAX_SND_TXT_ROWS**: maximum rows in Sound.txt
 * **D2EX_I_NEED_CUBE**: define if you need transmute button, otherwise it will be used as auto-precast feature
 * **D2EX_TP_RANGE**: maximum teleport range for AutoTele
+* **D2EX_ENABLE_PACKET_COMMANDS**: enables packet commands in Release build
+* **D2EX_DEBUG_INFO**: Show current mouse X&Y, and the selected unit id in Release build
 
 Installation
 -------------
 1. Compile Release build (select configuration for your version) using Visual Studio 2012 or newer.
 2. Copy everything from files directory to your Diablo II directory, D2Win.dll is a loader for D2Ex2.dll. If you use prebuilt D2Ex2.dll, then you'll need to install this: http://www.microsoft.com/en-us/download/details.aspx?id=40784
+3. Warning: Files ExOpenGL.cpp and ExTexture.cpp/h are not included in this repo. You have to remove them manually from Solution Explorer to make build succeed.
 
 Thanks to
 ----------
