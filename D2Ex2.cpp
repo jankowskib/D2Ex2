@@ -122,6 +122,10 @@ unsigned int __stdcall Thread(void * Args)
 	SetupD2Funcs();
 
 	lagometer = exnull_t;
+	
+	gLocaleId = D2Funcs.D2LANG_GetLocaleId();
+	DEBUGMSG("Locale ID is %d", gLocaleId)
+
 	gFontManager = new ExFontManager();
 
 	//system("del bncache*.dat");
@@ -187,8 +191,6 @@ unsigned int __stdcall Thread(void * Args)
 	#endif 
 
 	LoadItemConfig();
-	gLocaleId = D2Funcs.D2LANG_GetLocaleId();
-	Misc::Log("Locale ID is %d", gLocaleId);
 
 	//BEFORE START...
 	#define CALL 0xE8
