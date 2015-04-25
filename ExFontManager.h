@@ -28,7 +28,7 @@ class ExFontManager
 public:
 	ExFontManager();
 	~ExFontManager();
-	D2FontTable* get(const unsigned int font) const { D2EXASSERT(font > 13, "Invalid font (%d)", font)  return table[font].get(); };
+	D2FontTable* get(const unsigned int font) const { D2EXASSERT((font > 13), "Invalid font (%d)", font)  return table[font].get(); };
 
 private:
 	std::vector<blizz_unique_ptr<D2FontTable>> table;

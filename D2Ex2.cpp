@@ -541,8 +541,6 @@ unsigned int __stdcall Thread(void * Args)
 	atomic_init(&gFastTP, false);
 	HANDLE hAimEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 #endif
-	atomic_init(&DontLeaveCS, false);
-	atomic_init(&DontEnterCS, false);
 #ifdef D2EX_SPECTATOR
 	atomic_init(&gSpecing, false);
 #endif
