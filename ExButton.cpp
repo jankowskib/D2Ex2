@@ -122,6 +122,7 @@ bool ExButton::isPressed(DWORD Sender, WPARAM wParam)
 		{
 			if (cState == DISABLED) return true;
 			if (cState == VISIBLE && event_onClick) { D2ASMFuncs::D2CLIENT_PlaySound(ExSounds::STAND_CLICK); event_onClick(id); }
+			bBeingPressed = false;
 			return true;
 		}
 		break;
