@@ -763,7 +763,7 @@ void __stdcall ExScreen::DrawProperties(wchar_t *wTxt)
 	}
 #endif
 
-#ifdef _DEBUG
+#ifdef D2EX_PRINT_ITEMLEVEL
 	aLen = wcslen(wTxt);
 	int iLvl = ptItem->pItemData->ItemLevel;
 	if(1024-aLen>20)
