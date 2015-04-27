@@ -87,6 +87,7 @@ using namespace std;
 #include "D2Stubs.h"
 #include "Misc.h"
 #include "Vars.h"
+#include "D2Strings.h"
 
 #ifdef _DEBUG
 #define DEBUGMSG(format,...) Misc::Debug(__FUNCTION__, format, ##__VA_ARGS__);

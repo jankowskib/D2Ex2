@@ -1128,7 +1128,7 @@ void ExParty::ShowHide()
 	static exId Kills = exnull_t;
 	static exId Assists = exnull_t;
 	static exId Deaths = exnull_t;
-
+	static exId InviteAll = exnull_t;
 
 	if (PartyScreen == exnull_t)
 	{
@@ -1170,6 +1170,28 @@ void ExParty::ShowHide()
 		if (ExParty::GetRosterById(D2Funcs.D2CLIENT_GetPlayer()->dwUnitId)->wPartyId == 0xFFFF)
 			gExGUI->setState(LeaveB, ExControl::INVISIBLE);
 
+#ifdef D2EX_ENABLE_PARTYUP
+		InviteAll = gExGUI->add(new ExButton(gExGUI->getX(PartyScreen) + gExGUI->getWidth(PartyScreen) - 35, 85, COL_WHITE, 16, L"",
+			CellFiles::BUYSELLBUTTON, [](exId) {
+			for (RosterUnit* pUnit = *D2Vars.D2CLIENT_Roster; pUnit; pUnit = pUnit->pNext)
+			{
+				if (pUnit->dwUnitId == D2Funcs.D2CLIENT_GetPlayer()->dwUnitId)
+					continue;
+
+				DWORD Flaga = ExParty::GetPvpFlags(pUnit->dwUnitId);
+				if (!(Flaga & (PVP_ALLIED|PVP_ALLIED_WITH_YOU|PVP_INVITED_BY_YOU)))	{
+					BYTE aPacket[6];
+					aPacket[0] = 0x5E;
+					aPacket[1] = PB_INVITE_PLAYER;
+					*(DWORD*)&aPacket[2] = pUnit->dwUnitId;
+					D2Funcs.D2NET_SendPacket(6, 1, aPacket);
+					*D2Vars.D2CLIENT_SentBytes += 6;
+					*D2Vars.D2CLIENT_SentPackets++;
+				}
+			}
+		}, false));
+		gExGUI->setHooverText(InviteAll, gLocaleId == LOCALE_POL ? L"Zaproœ do dru¿yny wszystkich graczy" : L"Invite to your party all players");
+#endif
 		Scroll = gExGUI->add(new ExScrollBar(gExGUI->getX(PartyScreen) + gExGUI->getWidth(PartyScreen), gExGUI->getY(PartyScreen), 0, GetPlayerCount() - 15, gExGUI->getHeight(PartyScreen), &pOffset, &OnScroll));
 		if (GetPlayerCount() < 15)
 			gExGUI->setState(Scroll, ExControl::INVISIBLE);
@@ -1188,6 +1210,9 @@ void ExParty::ShowHide()
 #endif
 		gExGUI->setChild(PartyScreen, Ping, true);
 		gExGUI->setChild(PartyScreen, LeaveB, true);
+#ifdef D2EX_ENABLE_PARTYUP
+		gExGUI->setChild(PartyScreen, InviteAll, true);
+#endif
 		gExGUI->setChild(PartyScreen, Scroll, true);
 		ExParty::Fill();
 	}
@@ -1195,6 +1220,9 @@ void ExParty::ShowHide()
 	{
 		gExGUI->remove(Scroll);
 		gExGUI->remove(LeaveB);
+#ifdef D2EX_ENABLE_PARTYUP
+		gExGUI->remove(InviteAll);
+#endif
 		gExGUI->remove(Ping);
 		gExGUI->remove(Deaths);
 		gExGUI->remove(Assists);

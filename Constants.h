@@ -871,6 +871,7 @@ namespace CellFiles
 
 	char * const PARTYBUTTON = "data\\global\\ui\\MENU\\partybuttons";
 	char * const CHATBUTTON = "data\\global\\ui\\BIGMENU\\chatrightbuttons";
+	char * const BUYSELLBUTTON = "data\\global\\ui\\PANEL\\buysellbtn";
 	char * const SCROLLBAR = "data\\D2Ex\\ScrollBar";
 
 	char * const BLOBS = "data\\D2Ex\\Blobs";
