@@ -642,7 +642,9 @@ void __stdcall ExScreen::OnPropertyBuild(wchar_t* wOut, int nStat, UnitAny* pIte
 				if (stat) {
 					if (stat->dwMin != stat->dwMax) {
 						int	aLen = wcslen(wOut);
-						swprintf_s(wOut + aLen, 128 - aLen, L" %s[%d - %d]%s", GetColorCode(COL_YELLOW).c_str(), stat->dwMin, stat->dwMax, GetColorCode(COL_BLUE).c_str());
+						int leftSpace = 128 - aLen > 0 ? 128 - aLen : 0;
+						if (leftSpace)
+							swprintf_s(wOut + aLen, leftSpace, L" %s[%d - %d]%s", GetColorCode(COL_YELLOW).c_str(), stat->dwMin, stat->dwMax, GetColorCode(COL_BLUE).c_str());
 					}
 				}
 		} break;
@@ -656,7 +658,9 @@ void __stdcall ExScreen::OnPropertyBuild(wchar_t* wOut, int nStat, UnitAny* pIte
 				if (stat) {
 					if (stat->dwMin != stat->dwMax) {
 						int	aLen = wcslen(wOut);
-						swprintf_s(wOut + aLen, 128 - aLen, L" %s[%d - %d]%s", GetColorCode(COL_YELLOW).c_str(), stat->dwMin, stat->dwMax, GetColorCode(COL_BLUE).c_str());
+						int leftSpace = 128 - aLen > 0 ? 128 - aLen : 0;
+						if (leftSpace)
+							swprintf_s(wOut + aLen, leftSpace, L" %s[%d - %d]%s", GetColorCode(COL_YELLOW).c_str(), stat->dwMin, stat->dwMax, GetColorCode(COL_BLUE).c_str());
 					}
 				} 
 			}
@@ -717,7 +721,9 @@ void __stdcall ExScreen::OnPropertyBuild(wchar_t* wOut, int nStat, UnitAny* pIte
 				}
 				if (min != max) {
 					int	aLen = wcslen(wOut);
-					swprintf_s(wOut + aLen, 128 - aLen, L" %s[%d - %d]%s", GetColorCode(COL_YELLOW).c_str(), min, max, GetColorCode(COL_BLUE).c_str());
+					int leftSpace = 128 - aLen > 0 ? 128 - aLen : 0;
+					if (leftSpace)
+						swprintf_s(wOut + aLen, leftSpace, L" %s[%d - %d]%s", GetColorCode(COL_YELLOW).c_str(), min, max, GetColorCode(COL_BLUE).c_str());
 				}
 			}
 
