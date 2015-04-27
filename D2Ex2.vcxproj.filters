@@ -361,5 +361,8 @@
     <ClInclude Include="ExFontManager.h">
       <Filter>Header Files\Misc</Filter>
     </ClInclude>
+    <ClInclude Include="D2Strings.h">
+      <Filter>Header Files\D2 Internals</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
