@@ -42,6 +42,9 @@
 #endif
 //******************************************
 
+//---------- ExParty flags
+#define D2EX_ENABLE_PARTYUP						// Adds `Invite all` to Party Screeen
+
 //--------- PvPGN Extension flags ----------
 #ifdef D2EX_PVPGN_EXT
 //#define D2EX_PVPGN_GIVEUP						// Adds `Give up` to ESC menu
