@@ -1171,15 +1171,15 @@ void ExParty::ShowHide()
 			gExGUI->setState(LeaveB, ExControl::INVISIBLE);
 
 #ifdef D2EX_ENABLE_PARTYUP
-		InviteAll = gExGUI->add(new ExButton(gExGUI->getX(PartyScreen) + gExGUI->getWidth(PartyScreen) - 35, 85, COL_WHITE, 16, L"",
-			CellFiles::BUYSELLBUTTON, [](exId) {
+		InviteAll = gExGUI->add(new ExButton(gExGUI->getX(PartyScreen) + gExGUI->getWidth(PartyScreen) - 35, 85, COL_WHITE, 0, L"",
+			CellFiles::CHECKBOX, [](exId) {
 			for (RosterUnit* pUnit = *D2Vars.D2CLIENT_Roster; pUnit; pUnit = pUnit->pNext)
 			{
 				if (pUnit->dwUnitId == D2Funcs.D2CLIENT_GetPlayer()->dwUnitId)
 					continue;
 
 				DWORD Flaga = ExParty::GetPvpFlags(pUnit->dwUnitId);
-				if (!(Flaga & (PVP_ALLIED|PVP_ALLIED_WITH_YOU|PVP_INVITED_BY_YOU)))	{
+				if (!(Flaga & (PVP_ALLIED|PVP_ALLIED_WITH_YOU|PVP_INVITED_BY_YOU|PVP_INVITED_YOU)))	{
 					BYTE aPacket[6];
 					aPacket[0] = 0x5E;
 					aPacket[1] = PB_INVITE_PLAYER;
