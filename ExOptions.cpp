@@ -649,7 +649,7 @@ BOOL __fastcall ExOptions::LagOpt(D2MenuEntry* ptEntry, StormMsg* pMsg)
 	bLagometer = ptEntry->dwCurrentSwitch;
 	if (bLagometer) {
 		if (lagometer == exnull_t)
-			lagometer = gExGUI->add(new ExLagometer(273, 571));
+			lagometer = gExGUI->add(new ExLagometer(*D2Vars.D2GFX_GfxMode > 2 ? (*D2Vars.D2CLIENT_ScreenWidth / 2 - 127) : 273, *D2Vars.D2CLIENT_ScreenHeight - 29));
 	}
 	else {
 		gExGUI->remove(lagometer);

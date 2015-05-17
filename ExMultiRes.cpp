@@ -75,8 +75,12 @@ namespace ExMultiRes
 		D2Funcs.D2CLIENT_UpdateAutoMap(TRUE);
 		D2Funcs.D2CLIENT_ClearScreen4();
 
-		if(BuffsEnabled)
+		if (BuffsEnabled)
 			ExBuffs::UpdateYPos();
+		if (bLagometer && lagometer != exnull_t) {
+			gExGUI->setX(lagometer, *D2Vars.D2GFX_GfxMode > 2 ? (*D2Vars.D2CLIENT_ScreenWidth / 2 - 127) : 273);
+			gExGUI->setY(lagometer, *D2Vars.D2CLIENT_ScreenHeight - 29);
+		}
 	}
 
 	void __fastcall D2CLIENT_ResizeView(int UiCover) // Wrapper on D2CLIENT.0x5C4F0
