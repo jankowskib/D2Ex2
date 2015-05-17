@@ -50,6 +50,7 @@ void WorldToAutomap(POINT* ptPos);
 BOOL __fastcall OnTradeData(BYTE* aPacket);
 BOOL __fastcall OnTradeButton(BYTE* aPacket);
 
+BOOL __stdcall OnDamagePropertyBuild(UnitAny* pItem, DamageStats* pStats, int nStat, wchar_t* wOut);
 void __stdcall OnPropertyBuild(wchar_t* wOut, int nStat, UnitAny* pItem);
 void __stdcall DrawProperties(wchar_t *wTxt);
 void __stdcall Display();

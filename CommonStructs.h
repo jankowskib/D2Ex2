@@ -32,6 +32,52 @@ struct GfxCell;
 
 #pragma pack(push, 1)
 
+// Used for property build  (sizeof 0xA8)
+struct DamageStats
+{
+	DWORD nMinDmg;
+	DWORD nMaxDmg;
+	DWORD dword8;
+	DWORD dwordC;
+	BOOL nDmgRange;
+	DWORD dword14;
+	DWORD nMinDmgPercent;
+	DWORD nMaxDmgPercent;
+	DWORD dword20;
+	DWORD dword24;
+	BOOL nDmgPercentRange;
+	DWORD dword2C;
+	DWORD nMinColdDmg;
+	DWORD nMaxColdDmg;
+	DWORD dword38;
+	DWORD dword3C;
+	DWORD nColdDmgRange;
+	DWORD dword44;
+	DWORD nMinLightDmg;
+	DWORD nMaxLightDmg;
+	DWORD dword50;
+	DWORD dword54;
+	DWORD nLightDmgRange;
+	DWORD dword5C;
+	DWORD nMinFireDmg;
+	DWORD nMaxFireDmg;
+	DWORD dword68;
+	DWORD dword6C;
+	DWORD nFireDmgRange;
+	DWORD dword74;
+	DWORD nMinPsnDmg;
+	DWORD nMaxPsnDmg;
+	DWORD nPsnLen;
+	DWORD nPsnCount;
+	DWORD nPsnDmgRange;
+	DWORD dword8C;
+	DWORD nMinMagicDmg;
+	DWORD nMaxMagicDmg;
+	DWORD dword98;
+	DWORD dword9C;
+	DWORD nMagicDmgRange;
+	DWORD dwordA4;
+};
 
 // Author: Necrolis - big thx for these 2 structs (http://d2mods.info/forum/viewtopic.php?f=6&t=42044)
 struct D2CharStrc      //sizeof 0x0E

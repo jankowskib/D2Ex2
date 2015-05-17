@@ -580,7 +580,11 @@ return 0;
 }
 
 /*
-	Search mod used in UniqueItemsTxt, RunesTxt, etc. (from Properties.txt) by ItemStatCost.txt stat value
+	Search mod used in MagicPrefix.txt, UniqueItemsTxt, RunesTxt, etc. (index from Properties.txt) by ItemStatCost.txt stat index
+	@param nStat - ItemStatCost.txt record id
+	@param nStats - number of pStats
+	@param pStats - pointer to ItemsTxtStat* array [PropertiesTxt Id, min, max val)
+
 */
 static ItemsTxtStat* GetItemsTxtStatByMod(ItemsTxtStat* pStats, int nStats, int nStat)
 {
@@ -590,6 +594,14 @@ static ItemsTxtStat* GetItemsTxtStatByMod(ItemsTxtStat* pStats, int nStats, int 
 		PropertiesTxt * pProp = &(*D2Vars.D2COMMON_sgptDataTables)->pPropertiesTxt[pStats[i].dwProp];
 		if (!pProp)
 			break;
+		if (pProp->wStat[0] == 0xFFFF && pProp->nFunc[0] == 7 && (nStat == STAT_DAMAGEPERCENT || nStat == STAT_ITEM_MINDAMAGE_PERCENT || nStat == STAT_ITEM_MAXDAMAGE_PERCENT ||
+			nStat == STAT_ITEM_MAXDAMAGE_PERCENT_PERLEVEL || nStat == STAT_ITEM_MAXDAMAGE_PERCENT_BYTIME))
+			return &pStats[0];
+		else if (pProp->wStat[0] == 0xFFFF && pProp->nFunc[0] == 6 && (nStat == STAT_MAXDAMAGE || nStat == STAT_SECONDARY_MAXDAMAGE || nStat == STAT_ITEM_MAXDAMAGE_PERLEVEL ||
+			nStat == STAT_ITEM_MAXDAMAGE_BYTIME))
+			return &pStats[0];
+		else if (pProp->wStat[0] == 0xFFFF && pProp->nFunc[0] == 5 && (nStat == STAT_MINDAMAGE || nStat == STAT_SECONDARY_MINDAMAGE))
+			return &pStats[0];
 		for (int j = 0; j < 7; ++j)
 		{
 			if (pProp->wStat[j] == 0xFFFF)
@@ -616,6 +628,150 @@ static RunesTxt* GetRunewordTxtById(int rwId)
 			return pTxt;
 	}
 	return 0;
+}
+
+
+/*
+	For damage related stats there's another property building function
+	Buffer has 1024 length
+*/
+BOOL __stdcall ExScreen::OnDamagePropertyBuild(UnitAny* pItem, DamageStats* pDmgStats, int nStat, wchar_t* wOut)
+{
+	wchar_t newDesc[128];
+
+	// Ignore a max stat, use just a min dmg prop to gen the property string
+	if (nStat == STAT_FIREMAXDAM || nStat == STAT_COLDMAXDAM || nStat == STAT_LIGHTMAXDAM || nStat == STAT_MAGICMAXDAM ||
+		nStat == STAT_POISONMAXDAM || nStat == STAT_POISONLENGTH || nStat == STAT_ITEM_MAXDAMAGE_PERCENT)
+		return TRUE;
+
+	int stat_min, stat_max;
+	wchar_t* szProp = 0;
+	bool ranged = true;
+	if (nStat == STAT_FIREMINDAM) {
+		if (pDmgStats->nFireDmgRange == 0)
+			return FALSE;
+		stat_min = pDmgStats->nMinFireDmg;
+		stat_max = pDmgStats->nMaxFireDmg;
+		if (stat_min >= stat_max) {
+			szProp = D2Funcs.D2LANG_GetLocaleText(D2STR_STRMODFIREDAMAGE);
+			ranged = false;
+		} else {
+			szProp = D2Funcs.D2LANG_GetLocaleText(D2STR_STRMODFIREDAMAGERANGE);
+		}
+	}
+	else if (nStat == STAT_COLDMINDAM) {
+		if (pDmgStats->nColdDmgRange == 0)
+			return FALSE;
+		stat_min = pDmgStats->nMinColdDmg;
+		stat_max = pDmgStats->nMaxColdDmg;
+		if (stat_min >= stat_max) {
+			szProp = D2Funcs.D2LANG_GetLocaleText(D2STR_STRMODCOLDDAMAGE);
+			ranged = false;
+		}
+		else {
+			szProp = D2Funcs.D2LANG_GetLocaleText(D2STR_STRMODCOLDDAMAGERANGE);
+		}
+	}
+	else if (nStat == STAT_LIGHTMINDAM) {
+		if (pDmgStats->nLightDmgRange == 0)
+			return FALSE;
+		stat_min = pDmgStats->nMinLightDmg;
+		stat_max = pDmgStats->nMaxLightDmg;
+		if (stat_min >= stat_max) {
+			szProp = D2Funcs.D2LANG_GetLocaleText(D2STR_STRMODLIGHTNINGDAMAGE);
+			ranged = false;
+		}
+		else {
+			szProp = D2Funcs.D2LANG_GetLocaleText(D2STR_STRMODLIGHTNINGDAMAGERANGE);
+		}
+	}
+	else if (nStat == STAT_MAGICMINDAM) {
+		if (pDmgStats->nMagicDmgRange == 0)
+			return FALSE;
+		stat_min = pDmgStats->nMinMagicDmg;
+		stat_max = pDmgStats->nMaxMagicDmg;
+		if (stat_min >= stat_max) {
+			szProp = D2Funcs.D2LANG_GetLocaleText(D2STR_STRMODMAGICDAMAGE);
+			ranged = false;
+		}
+		else {
+			szProp = D2Funcs.D2LANG_GetLocaleText(D2STR_STRMODMAGICDAMAGERANGE);
+		}
+	}
+	else if (nStat == STAT_POISONMINDAM) {
+		if (pDmgStats->nPsnDmgRange == 0)
+			return FALSE;
+		if (pDmgStats->nPsnCount <= 0)
+			pDmgStats->nPsnCount = 1;
+		
+		pDmgStats->nPsnLen = pDmgStats->nPsnLen / pDmgStats->nPsnCount;
+
+		pDmgStats->nMinPsnDmg = stat_min = ((pDmgStats->nMinPsnDmg * pDmgStats->nPsnLen) + 128) / 256;
+		pDmgStats->nMaxPsnDmg = stat_max = ((pDmgStats->nMaxPsnDmg * pDmgStats->nPsnLen) + 128) / 256;
+
+		if (stat_min >= stat_max) {
+			szProp = D2Funcs.D2LANG_GetLocaleText(D2STR_STRMODPOISONDAMAGE);
+			swprintf_s(newDesc, 128, szProp, stat_max, pDmgStats->nPsnLen / 25); // Per frame
+		}
+		else {
+			szProp = D2Funcs.D2LANG_GetLocaleText(D2STR_STRMODPOISONDAMAGERANGE);
+			swprintf_s(newDesc, 128, szProp, stat_min, stat_max, pDmgStats->nPsnLen / 25);
+		}
+		wcscat_s(wOut, 1024, newDesc);
+		return TRUE;
+	}
+	else if (nStat == STAT_SECONDARY_MAXDAMAGE) {
+		if (pDmgStats->dword14)
+			return TRUE;
+		return pDmgStats->nDmgRange;
+	}
+	else if (nStat == STAT_MINDAMAGE || nStat == STAT_MAXDAMAGE || nStat == STAT_SECONDARY_MINDAMAGE) {
+		if (pDmgStats->dword14)
+			return TRUE;
+		if (!pDmgStats->nDmgRange)
+			return FALSE;
+
+		stat_min = pDmgStats->nMinLightDmg;
+		stat_max = pDmgStats->nMaxLightDmg;
+
+		if (stat_min >= stat_max) {
+			pDmgStats->dword14 = TRUE;
+			pDmgStats->nDmgRange = 0;
+			return FALSE;
+		}
+		else {
+			pDmgStats->dword14 = TRUE;
+			szProp = D2Funcs.D2LANG_GetLocaleText(D2STR_STRMODMINDAMAGERANGE);
+
+		}
+	}
+	else if (nStat == STAT_ITEM_MINDAMAGE_PERCENT) {
+		if (!pDmgStats->nDmgPercentRange)
+			return false;
+		stat_min = pDmgStats->nMinDmgPercent;
+		stat_max = (int)(D2Funcs.D2LANG_GetLocaleText(10023)); // "Enhanced damage"
+		szProp = L"+%d%% %s\n";
+	}
+
+	if (!szProp)
+		return FALSE;
+
+	if (ranged) {
+		swprintf_s(newDesc, 128, szProp, stat_min, stat_max);
+	} else {
+		swprintf_s(newDesc, 128, szProp, stat_max);
+	}
+	
+	// <!--
+	if (newDesc[wcslen(newDesc) - 1] == L'\n')
+	newDesc[wcslen(newDesc) - 1] = L'\0';
+	if (newDesc[wcslen(newDesc) - 1] == L'\n')
+	newDesc[wcslen(newDesc) - 1] = L'\0';
+	OnPropertyBuild(newDesc, nStat, pItem);	
+	// Beside this add-on the function is almost 1:1 copy of Blizzard's one -->
+	wcscat_s(wOut, 1024, newDesc);
+	wcscat_s(wOut, 1024, L"\n");
+	return TRUE;
 }
 
 // UniqueItems->UniqueItemsTxtStat->PropertiesTxt-> Final stat!

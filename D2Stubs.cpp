@@ -244,9 +244,31 @@ lightold:
 	}
 }
 
+
+/*	Wrapper over D2CLIENT.0x2E04B (1.13d)
+	BOOL __userpurge ITEMS_BuildDamagePropertyDesc@<eax>(DamageStats *pStats@<eax>, int nStat, wchar_t *wOut)
+	Function is pretty simple so I decided to rewrite it.
+	@esp-0x20:	pItem
+*/
+__declspec(naked) void D2Stubs::D2CLIENT_GetPropertyStringDamage_STUB()
+{
+	__asm
+	{
+		push [esp+8]			// wOut
+		push [esp+8]			// nStat
+		push eax				// pStats
+		push [esp-0x20 + 12]	// pItem
+
+		call ExScreen::OnDamagePropertyBuild
+
+		ret 8
+	}
+}
+
+
+
 /* Wrapper over D2CLIENT.0x2E06D (1.13d)
-   As far I know this: int __userpurge ITEMS_ParseStats_6FADCE40<eax>(signed __int32 nStat<eax>, wchar_t *wOut<esi>, UnitAny *pItem, StatList *pStatList, signed __int32 a5, int a6, int a7)
-   Rest arguments are some nested stat related, but I don't need to know rest...
+   As far I know this: int __userpurge ITEMS_ParseStats_6FADCE40<eax>(signed __int32 nStat<eax>, wchar_t *wOut<esi>, UnitAny *pItem, StatList *pStatList, DWORD nStatIdx, DWORD nStatValue, int a7)
 
    Warning: wOut is 128 words length only!
    @ebx the nStat value
