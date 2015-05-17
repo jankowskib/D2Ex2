@@ -109,6 +109,7 @@ _d2f D2Funcs = {0}; void SetupD2Funcs() {
 		//Stat funcs
 		EXFUNCPTR(D2COMMON, SetStat, void, __stdcall, (UnitAny *ptUnit, int nStat, int nValue, int nLayer), -10590) // 1.13d
 		EXFUNCPTR(D2COMMON, GetStatSigned, int, __stdcall, (UnitAny *ptUnit, int nStat, int nLayer), -10550) // 1.13d
+		EXFUNCPTR(D2COMMON, GetStatListStatNum, int, __stdcall, (StatListEx *pStatList, int nStat, Stat** pOutStats, int nOutStats), -10086) // returns number of found stat in statlist
 		EXFUNCPTR(D2COMMON, GetBaseStatSigned, int, __stdcall, (UnitAny *ptUnit, int nStat, int nLayer), -10216) // 1.13d
 		EXFUNCPTR(D2COMMON, GetUnitState, int, __stdcall, (UnitAny *ptUnit, DWORD dwStateNo), -10706) //k
 		EXFUNCPTR(D2COMMON, GetUnitMaxLife, unsigned int, __stdcall, (UnitAny *ptUnit), -10574) //k
@@ -197,6 +198,7 @@ _d2f D2Funcs = {0}; void SetupD2Funcs() {
 		EXFUNCPTR(FOG, Error, void, __cdecl, (const char* File, void* Addr, int Line), -10024)
 		EXFUNCPTR(FOG, GetErrorData, void*, __cdecl, (), -10265)
 		EXFUNCPTR(FOG, isExpansion, BOOL, __cdecl, (), -10227)
+		EXFUNCPTR(FOG, isDirect, BOOL, __cdecl, (), -10117)
 		EXFUNCPTR(FOG, InitBitBuffer, void, __stdcall, (BitBuffer *pBitBuffer, void *Source, int Size), -10126)
 		EXFUNCPTR(FOG, ReadBits, unsigned int, __stdcall, (BitBuffer* pBuffer, int nBits), -10130)
 		EXFUNCPTR(FOG, ReadBitsSigned, signed int, __stdcall, (BitBuffer* pBuffer, int nBits), -10129)
@@ -376,6 +378,8 @@ void SetupD2Vars() {
 		EXVARPTR(D2CLIENT, UiUnk2, int, 0x11D228)
 		EXVARPTR(D2CLIENT, UiUnk3, int, 0x11D240)
 		EXVARPTR(D2CLIENT, UiUnk4, int, 0x11D244)
+		EXVARPTR(D2CLIENT, FramesDrawnGame, DWORD, 0x108754)
+		EXVARPTR(D2CLIENT, FramesDrawnGlobal, DWORD, 0x10876C)
 
 		EXVARPTR(D2GFX, pfnDriverCallback, fnRendererCallbacks*, 0x14A48)
 		EXVARPTR(D2GFX, GfxMode, int, 0x14A40)

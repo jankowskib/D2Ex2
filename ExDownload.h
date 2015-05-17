@@ -43,7 +43,7 @@ namespace ExDownload
 	void ShowHide();
 	bool isOpen();
 	void Download(wstring szURL, BYTE bExecute);
-	DWORD WINAPI DownloadThread(void* Params);
+	void DownloadLoop();
 	class Callbacks : public IBindStatusCallback
 	{
 	public: 

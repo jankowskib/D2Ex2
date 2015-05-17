@@ -19,6 +19,7 @@
 */
 
 #include "stdafx.h"
+#include "readerwriterqueue\readerwriterqueue.h"
 #include "ExDownload.h"
 
 
@@ -28,11 +29,11 @@ static exId File = exnull_t;
 static exId Percent = exnull_t;
 static exId Cancel = exnull_t;
 static exId Bckg = exnull_t;
-static ExDownload::Callbacks Callback;
+static ExDownload::Callbacks mDownloadCallbacks;
 
-static atomic<bool> Abort(false);
+static atomic<bool> isAborted(false);
+static atomic<bool> isDownloading(false);
 static bool txt = false;
-static HANDLE DH;
 
 struct DQuene
 {
@@ -42,7 +43,7 @@ struct DQuene
 };
 
 
-deque<DQuene> DownQuene;
+moodycamel::ReaderWriterQueue<DQuene> DownQuene;
 
 HRESULT ExDownload::Callbacks::OnProgress(ULONG ulProgress, ULONG ulProgressMax, ULONG ulStatusCode, LPCWSTR szStatusText)
 {
@@ -51,12 +52,13 @@ HRESULT ExDownload::Callbacks::OnProgress(ULONG ulProgress, ULONG ulProgressMax,
 	case BINDSTATUS_CONNECTING:
 	{
 		DEBUGMSG("BINDSTATUS_CONNECTING")
+		if (File != exnull_t)
 			gExGUI->setText(File, L"Connecting...");
 	}
 	break;
 	case BINDSTATUS_DOWNLOADINGDATA:
 	{
-			if (Progress != exnull_t &&  ulProgress && ulProgressMax)
+			if (Progress != exnull_t && ulProgress && ulProgressMax)
 			{
 				float a = (float)ulProgress;
 				float b = (float)ulProgressMax;
@@ -79,8 +81,8 @@ HRESULT ExDownload::Callbacks::OnProgress(ULONG ulProgress, ULONG ulProgressMax,
 	case BINDSTATUS_ENDDOWNLOADDATA:
 	{
 		DEBUGMSG("BINDSTATUS_ENDDOWNLOADDATA")
-			if (Progress != exnull_t)
-				gExGUI->resize(Progress, 298, exnull_t);
+		if (Progress != exnull_t)
+			gExGUI->resize(Progress, 298, exnull_t);
 		wostringstream wstr;
 		wstr << L'(' << 100 << L"%)";
 		gExGUI->setText(Percent, wstr.str());
@@ -89,9 +91,9 @@ HRESULT ExDownload::Callbacks::OnProgress(ULONG ulProgress, ULONG ulProgressMax,
 	}
 	break;
 	}
-	if (Abort)
+	if (isAborted) {
 		return E_ABORT;
-
+	}
 	return 0;
 }
 
@@ -114,59 +116,62 @@ void ExDownload::Download(wstring szURL, BYTE bExecute)
 	pos++;
 	dq.szDestName = szURL.substr(pos);
 
-	EnterCriticalSection(&EX_CRITSECT);
-	DownQuene.push_back(dq);
-	if (!DH)
-		DH = CreateThread(0, 0, &ExDownload::DownloadThread, 0, 0, 0);
-	LeaveCriticalSection(&EX_CRITSECT);
+	DownQuene.enqueue(dq);
 }
 
 
-DWORD WINAPI ExDownload::DownloadThread(void* Params)
+void ExDownload::DownloadLoop()
 {
-	Sleep(1000);
-	Abort = false;
-	if (!isOpen()) ShowHide();
+	if (!isDownloading) {
+		DQuene dq;
+		if (DownQuene.try_dequeue(dq)) {
+			isDownloading = true;
+			isAborted = false;
 
-	while (!DownQuene.empty())
-	{
-		txt = false;
-		int r = URLDownloadToFileW(0, DownQuene.front().szURL.c_str(), DownQuene.front().szDestName.c_str(), 0, &Callback);
+			if (!isOpen())
+				ShowHide();
 
-		if (Abort) {
-			EnterCriticalSection(&EX_CRITSECT);
-			DownQuene.pop_front();
-			LeaveCriticalSection(&EX_CRITSECT);
-			continue;
+			txt = false;
+			thread([dq] {
+				int r = URLDownloadToFileW(0, dq.szURL.c_str(), dq.szDestName.c_str(), 0, &mDownloadCallbacks);
+
+				if (r == INET_E_DOWNLOAD_FAILURE) {
+					DEBUGMSG("Invalid URL to download!")
+					Terminate(exnull_t);
+					return;
+				}
+				if (dq.bExecute)
+				{
+					ExScreen::PrintTextEx(COL_RED, "Closing d2 to install a new update...");
+					Sleep(2000);
+					ShellExecuteW(0, L"open", DownQuene.peek()->szDestName.c_str(), 0, 0, 0);
+					exit(0);
+				}
+
+				if (isOpen() && DownQuene.peek() == nullptr)
+					ShowHide();
+
+				isDownloading = false;
+			}).detach();
+
 		}
-		if (DownQuene.front().bExecute)
-		{
-			ExScreen::PrintTextEx(1, "Closing d2 to install a new update...");
-			Sleep(2000);
-			ShellExecuteW(0, L"open", DownQuene.front().szDestName.c_str(), 0, 0, 0);
-			exit(0);
-		}
-		EnterCriticalSection(&EX_CRITSECT);
-		DownQuene.pop_front();
-		LeaveCriticalSection(&EX_CRITSECT);
 	}
-	if (isOpen()) ShowHide();
-
-	EnterCriticalSection(&EX_CRITSECT);
-	DH = 0;
-	LeaveCriticalSection(&EX_CRITSECT);
-	return 0;
 }
 
-void ExDownload::Terminate(exId ptControl)
+void ExDownload::Terminate(exId)
 {
-	Abort = true;
+	isAborted = true;
+
+	while (DownQuene.pop());
+
+	isDownloading = false;
+	if (isOpen())
+		ShowHide();
 }
 
 void ExDownload::ShowHide()
 {
-	static wstring CancelStr(D2Funcs.D2LANG_GetLocaleText(3765));
-
+	static wstring CancelStr(D2Funcs.D2LANG_GetLocaleText(D2STR_CANCEL));
 
 	if (DownScreen == exnull_t)
 	{

@@ -301,6 +301,7 @@ EXIT 0</Command>
     <ClInclude Include="D2Ex2.h" />
     <ClInclude Include="D2ExPointers_111B.h" />
     <ClInclude Include="D2ExPointers_113D.h" />
+    <ClInclude Include="D2Strings.h" />
     <ClInclude Include="D2Structs_111B.h" />
     <ClInclude Include="D2Structs_113D.h" />
     <ClInclude Include="ExAim.h" />
@@ -314,6 +315,8 @@ EXIT 0</Command>
     <ClInclude Include="ExMultiRes.h" />
     <ClInclude Include="ExOpenGL.h" />
     <ClInclude Include="Matrix.h" />
+    <ClInclude Include="readerwriterqueue\atomicops.h" />
+    <ClInclude Include="readerwriterqueue\readerwriterqueue.h" />
     <ClInclude Include="SyncObj.h" />
     <ClInclude Include="TeleportPath.h" />
     <ClInclude Include="Constants.h" />

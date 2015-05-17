@@ -24,6 +24,10 @@
 
 namespace D2Ex
 {
+	BOOL Init();
+	int  __stdcall OnGameEnter(int);
+	void OnGameLeave();
+	void Loop();
 	void CleanUp();
 	void OnExit();
 }

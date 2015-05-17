@@ -201,7 +201,32 @@ DWORD __fastcall ExInput::GameInput(wchar_t* wMsg)
 		auto test = blizz_unique_ptr<char>((char*)D2ASMFuncs::D2WIN_ReadFileFromMPQ("DATA\\LOCAL\\FONT\\LATIN\\README.TXT", NULL, NULL));
 		DEBUGMSG("Read text with data: %s", test)
 	}
+	if (strcmp(In, "#dlstresstest") == 0)
+	{
+		const char* URLs[] = {
+						"http://lolet.ml/test/file1.test","http://lolet.ml/test/file2.test","http://lolet.ml/test/file3.test","http://lolet.ml/test/file4.test","http://lolet.ml/test/file5.test",
+						"http://lolet.ml/test/file6.test","http://lolet.ml/test/file7.test","http://lolet.ml/test/file8.test","http://lolet.ml/test/file9.test","http://lolet.ml/test/file10.test",
+						"http://lolet.ml/test/file11.test","http://lolet.ml/test/file12.test","http://lolet.ml/test/file13.test","http://lolet.ml/test/file14.test","http://lolet.ml/test/file15.test",
+						"http://lolet.ml/test/file16.test","http://lolet.ml/test/file17.test","http://lolet.ml/test/file18.test","http://lolet.ml/test/file19.test","http://lolet.ml/test/file20.test",
+						"http://lolet.ml/test/file21.test","http://lolet.ml/test/file22.test","http://lolet.ml/test/file23.test","http://lolet.ml/test/file24.test","http://lolet.ml/test/file25.test",
+						"http://lolet.ml/test/file26.test","http://lolet.ml/test/file27.test","http://lolet.ml/test/file28.test","http://lolet.ml/test/file29.test","http://lolet.ml/test/file30.test"
+		};
+		for (int i = 0; i < 30; ++i) {
+			ExEventDownload pEvent = {};
+			pEvent.P_A6 = 0xA6;
+			pEvent.MsgType = EXEVENT_DOWNLOAD;
+			pEvent.bExec = 0;
+			strcpy_s(pEvent.szURL, 255, URLs[i]);
+			if (pEvent.szURL[0])
+				pEvent.PacketLen = 14 + strlen(pEvent.szURL) + 1;
+			else
+				pEvent.PacketLen = 15;
 
+			static int eLen = 0;
+			D2Funcs.D2NET_ReceivePacket(&eLen, (BYTE*)&pEvent, pEvent.PacketLen);
+		}
+		return -1;
+	}
 #ifdef D2EX_MULTIRES
 	if (strcmp(In, "#fs") == 0)
 	{

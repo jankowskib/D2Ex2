@@ -220,6 +220,7 @@ _d2f D2Funcs = { 0 }; void SetupD2Funcs() {
 		EXFUNCPTR(FOG, Error, void, __cdecl, (const char* File, void* Addr, int Line), -10024)
 		EXFUNCPTR(FOG, GetErrorData, void*, __cdecl, (), -10265)
 		EXFUNCPTR(FOG, isExpansion, BOOL, __cdecl, (), -10227)
+		EXFUNCPTR(FOG, isDirect, BOOL, __cdecl, (), -10117)
 		EXFUNCPTR(FOG, InitBitBuffer, void, __stdcall, (BitBuffer* ptBitBuffer, void * ptBuffer, int nSize), -10126)
 		EXFUNCPTR(FOG, ReadBitsSigned, signed int, __stdcall, (BitBuffer* ptBitBuffer, int nBits), -10129)
 		EXFUNCPTR(FOG, ReadBits, unsigned int, __stdcall, (BitBuffer* ptBitBuffer, int nBits), -10130)
@@ -332,6 +333,9 @@ void SetupD2Vars() {
 		EXVARPTR(D2CLIENT, PetBarColorRed, BYTE, 0x11BEDA)
 		EXVARPTR(D2CLIENT, ServerDifficulty, int, 0x11C2A8)
 		EXVARPTR(D2CLIENT, AutomapRect, RECT, 0x11C1B8) // ns
+
+		EXVARPTR(D2CLIENT, FramesDrawnGame, DWORD, 0x11A294)
+		EXVARPTR(D2CLIENT, FramesDrawnGlobal, DWORD, 0x1087AC)
 
 		//-----Paket things
 		EXVARPTR(D2NET, PacketLenTable, int, 0xA900)

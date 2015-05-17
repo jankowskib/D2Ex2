@@ -605,7 +605,7 @@ struct BnetData
 	BYTE CharFlags;				//0x1EA LoD, Ladder, Hc Flags + 4 Unk
 	BYTE MaxDifficulty;			//0x1EB
 	BYTE Unk8[31];				//0x1EC
- 	BYTE Difficulty;			//0x20B Works only when creating, not joining game
+	BYTE Difficulty;			//0x20B Works only when creating, not joining game
 	DWORD *pUnk9;				//0x20C
 	DWORD Unk10[3];				//0x210
 	WORD  Unk11;				//0x21C

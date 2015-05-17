@@ -138,11 +138,11 @@ namespace ExMultiRes
 		nRenderMode = VIDEO_MODE_OPENGL;
 #endif
 		DEBUGMSG("D2GFX->InitWindow()");
-		DEBUGMSG("Waiting for ready event...");
+		/*DEBUGMSG("Waiting for ready event...");
 		DWORD t = GetTickCount();
 		WaitForSingleObject(hPointersReadyEvent, 10000);
 		DEBUGMSG("Waited %.2f sec!", (float)(GetTickCount() - t) / 1000);
-
+		*/
 		gRenderer = nRenderMode;
 		*D2Vars.D2GFX_hInstance = hInstance;
 
