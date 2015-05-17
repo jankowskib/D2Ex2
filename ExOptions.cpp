@@ -39,6 +39,40 @@ static BOOL isMenuClicked;
 static DWORD MenuKeyClicked;
 
 
+static sMsg D2MenuMsgs[] = {
+	{ SMSG_WM_MSG,		WM_LBUTTONDOWN,		ExOptions::m_LBUTTONDOWN },
+	{ SMSG_WM_MSG,		WM_LBUTTONUP,		ExOptions::m_LBUTTONUP },
+	{ SMSG_WM_MSG,		WM_RBUTTONDOWN,		ExOptions::m_LBUTTONDOWN }, // added
+	{ SMSG_WM_MSG,		WM_RBUTTONUP,		ExOptions::m_LBUTTONUP },   // added
+	{ SMSG_WM_KEY_DOWN, VK_DOWN,			NULL },
+	{ SMSG_WM_KEY_DOWN, VK_UP,				NULL },
+	{ SMSG_WM_KEY_DOWN, VK_LEFT,			NULL },
+	{ SMSG_WM_KEY_DOWN, VK_RIGHT,			NULL },
+	{ SMSG_WM_KEY_DOWN, VK_RETURN,			ExOptions::m_OnEnter},
+};
+
+//---Replacement for messages
+
+void ExOptions::FillMissingCallbacks()
+{
+	D2MenuMsgs[4].fnCallBack = *D2Vars.D2CLIENT_MenuMsgs[2].fnCallBack;
+	D2MenuMsgs[5].fnCallBack = *D2Vars.D2CLIENT_MenuMsgs[3].fnCallBack;
+	D2MenuMsgs[6].fnCallBack = *D2Vars.D2CLIENT_MenuMsgs[4].fnCallBack;
+	D2MenuMsgs[7].fnCallBack = *D2Vars.D2CLIENT_MenuMsgs[5].fnCallBack;
+
+}
+
+void ExOptions::RegisterMenuMsgs()
+{
+	ExInput::RegisterMsgs(D2MenuMsgs, sizeof(D2MenuMsgs) / sizeof(sMsg));
+}
+
+void ExOptions::UnregisterMenuMsgs()
+{
+	ExInput::UnregisterMsgs(D2MenuMsgs, sizeof(D2MenuMsgs) / sizeof(sMsg));
+}
+
+
 //---Menu recon stuff
 
 void ExOptions::ShowHide()
@@ -47,8 +81,8 @@ void ExOptions::ShowHide()
 	if (D2Vars.D2CLIENT_UIModes[UI_MAINMENU]) 
 	{
 		D2Vars.D2CLIENT_UIModes[UI_MAINMENU] = 0;
-		sMsg* pMsgs = &D2Vars.D2CLIENT_MenuMsgs[0];
-		ExInput::UnregisterMsgs(pMsgs, 7);
+		ExOptions::UnregisterMenuMsgs();
+
 		ExInput::DefineBindings();
 		*D2Vars.D2CLIENT_UI_Unk2 = 0;
 		if (wasAutoMap)
@@ -75,8 +109,7 @@ void ExOptions::ShowHide()
 				return;
 			D2Vars.D2CLIENT_UIModes[UI_MAINMENU] = 1;
 			ExInput::UndefineBindings();
-			sMsg* pMsgs = &D2Vars.D2CLIENT_MenuMsgs[0];
-			ExInput::RegisterMsgs(pMsgs, 7);
+			ExOptions::RegisterMenuMsgs();
 			*D2Vars.D2CLIENT_UI_Unk2 = 1;
 			*D2Vars.D2CLIENT_UI_Unk1 = 0;
 
@@ -94,7 +127,7 @@ void ExOptions::OnClick(StormMsg * Msg)
 		if (!Entries[nMenu].EnableCheck(&Entries[nMenu], nMenu)) 
 			return;
 
-	if (Msg->wParam & MK_RBUTTON && (Entries[nMenu].dwMenuType != D2MENU_SWITCHEX || Entries[nMenu].dwMenuType != D2MENU_SWITCH))
+	if (Msg->Msg == WM_RBUTTONUP && (Entries[nMenu].dwMenuType != D2MENU_SWITCHEX && Entries[nMenu].dwMenuType != D2MENU_SWITCH))
 		return;
 	if (Msg->wParam & MK_MBUTTON)
 		return;
@@ -103,7 +136,7 @@ void ExOptions::OnClick(StormMsg * Msg)
 	case D2MENU_SWITCHEX:
 	case D2MENU_SWITCH:
 	{
-		if (Msg->wParam & MK_RBUTTON)
+		if (Msg->Msg == WM_RBUTTONUP)
 		Entries[nMenu].dwCurrentSwitch--;
 		else
 		Entries[nMenu].dwCurrentSwitch++;
@@ -689,7 +722,7 @@ BOOL __fastcall ExOptions::ResolutionOpt(D2MenuEntry* ptEntry, StormMsg* pMsg)
 {
 #ifdef D2EX_MULTIRES
 	unsigned int x, y;
-	unsigned int r = ptEntry->dwCurrentSwitch;
+	unsigned int r = ptEntry->dwCurrentSwitch; 
 	if (r == 1) 
 	{
 		r++;

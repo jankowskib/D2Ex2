@@ -23,6 +23,10 @@
 
 namespace ExOptions
 {
+	void FillMissingCallbacks(); // Call after pointers are set
+	void RegisterMenuMsgs();
+	void UnregisterMenuMsgs();
+
 	void DrawMenuRecon();
 	void DrawMenuBar(int BarPosX, int BarPosY, D2Menu * Menu, D2MenuEntry *Entry, int nTransLvl);
 	void MenuUpdate(int mX, int mY);

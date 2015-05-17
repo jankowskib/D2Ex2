@@ -207,6 +207,13 @@ BOOL D2Ex::Init()
 #ifdef VER_111B
 	//PATCHES---TYPE-DEST_ADDRESS---------------WHAT_PATCH-------------------------SIZE---DESC-----
 
+	Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x652C4), (DWORD)ExOptions::UnregisterMenuMsgs, 21, "Menu messages replacement");
+	Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x8EED7), (DWORD)ExOptions::UnregisterMenuMsgs, 21, "Menu messages replacement");
+	Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x8F2B5), (DWORD)ExOptions::UnregisterMenuMsgs, 21, "Menu messages replacement");
+
+	Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x64CC1), (DWORD)ExOptions::RegisterMenuMsgs, 21, "Menu messages replacement");
+	Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x8F290), (DWORD)ExOptions::RegisterMenuMsgs, 21, "Menu messages replacement");
+
 	Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0xBF54E), (DWORD)D2Ex::OnGameEnter, 5, "On Enter Game Hook");
 	Misc::Patch(JUMP, GetDllOffset("D2Win.dll", -10106), (DWORD)D2Ex::OnGameLeave, 5, "On Leave Game Hook");
 	Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x335B4), (DWORD)D2Ex::Loop, 24, "In-game loop");
@@ -307,6 +314,14 @@ BOOL D2Ex::Init()
 #endif
 
 #elif defined VER_113D
+
+Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0xC3997), (DWORD)ExOptions::UnregisterMenuMsgs, 21, "Menu messages replacement");
+Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x1BDC4), (DWORD)ExOptions::UnregisterMenuMsgs, 21, "Menu messages replacement");
+Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0xC3D75), (DWORD)ExOptions::UnregisterMenuMsgs, 21, "Menu messages replacement");
+
+Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0xC3D50), (DWORD)ExOptions::RegisterMenuMsgs, 21, "Menu messages replacement");
+Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x1B7C1), (DWORD)ExOptions::RegisterMenuMsgs, 21, "Menu messages replacement");
+
 #ifdef D2EX_PVPGN_EXT
 	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x45C7A), 1000, 2, "Increase ping count 5s -> 1s");  //Test
 #endif
@@ -550,14 +565,8 @@ BOOL D2Ex::Init()
 
 	D2Vars.D2CLIENT_UICollisions[UI_PARTY] = PartyCollMap;
 
-	//MENU RECON - change callbacks
-	Misc::WriteDword((DWORD*)&D2Vars.D2CLIENT_MenuMsgs[0].fnCallBack, (DWORD)ExOptions::m_LBUTTONDOWN);
-	Misc::WriteDword((DWORD*)&D2Vars.D2CLIENT_MenuMsgs[1].fnCallBack, (DWORD)ExOptions::m_LBUTTONUP);
-	Misc::WriteDword((DWORD*)&D2Vars.D2CLIENT_MenuMsgs[6].fnCallBack, (DWORD)ExOptions::m_OnEnter);
-#ifdef D2EX_MULTIRES
-	DEBUGMSG("Game has been patched, sending an event!");
-	SetEvent(hPointersReadyEvent);
-#endif
+	ExOptions::FillMissingCallbacks();
+
 	//-----------------------
 	//HERE WE GO
 #if defined D2EX_EXAIM_ENABLED || defined D2EX_PVM_BUILD

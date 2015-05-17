@@ -22,6 +22,15 @@
 #ifndef CONSTS_H__
 #define CONSTS_H__
 
+
+enum SMsgTypes
+{
+	SMSG_WM_MSG = 0,
+	SMSG_WM_CMD = 1,
+	SMSG_WM_KEY_UP = 2,
+	SMSG_WM_KEY_DOWN = 3,
+};
+
 /*
 http://d2mods.info/forum/viewtopic.php?f=8&t=61497, Thanks Necrolis!
 */
