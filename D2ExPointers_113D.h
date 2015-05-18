@@ -52,9 +52,10 @@ _d2f D2Funcs = {0}; void SetupD2Funcs() {
 		EXFUNCPTR(D2CLIENT, ClearScreen, int, __stdcall, (void), 0x3E630) //k
 		EXFUNCPTR(D2CLIENT, ClearScreen2, void, __stdcall, (void), 0x44980) //k 
 		EXFUNCPTR(D2CLIENT, ClearScreen3, BOOL, __stdcall, (BOOL bUnk, BOOL bClearScreen), 0x18500)
+
 		EXFUNCPTR(D2CLIENT, SetUiVar, int, __fastcall, (int UIMode, BOOL HowSet, int bClearScreen), 0x1C190)
 
-		EXFUNCPTR(D2CLIENT, CreateSpell, UnitAny*, __fastcall, (DWORD nType, UnitAny* pUnit, SpellStrc* pSpellData, BOOL bOverrideStun), 0x49A90)
+		EXFUNCPTR(D2CLIENT, CreateSpell, UnitAny*, __fastcall, (DWORD nType, UnitAny *pUnit, SpellStrc *pSpellData, BOOL bOverrideStun), 0x49A90)
 
 		EXFUNCPTR(D2CLIENT, RevealAutomapRoom, void, __stdcall, (Room1* pRoom1, DWORD dwClipFlag, AutoMapLayer* aLayer), 0x73160) //ns
 		EXFUNCPTR(D2CLIENT, NewAutomapCell, AutoMapCell*, __fastcall, (void), 0x703C0) // ns

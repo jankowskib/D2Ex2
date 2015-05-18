@@ -588,20 +588,24 @@ return 0;
 */
 static ItemsTxtStat* GetItemsTxtStatByMod(ItemsTxtStat* pStats, int nStats, int nStat)
 {
+	if (nStat == STAT_ITEM_SKILLONKILL || nStat == STAT_ITEM_SKILLONHIT || nStat == STAT_ITEM_SKILLONATTACK || nStat == STAT_ITEM_SKILLONDEATH ||
+		nStat == STAT_ITEM_SKILLONLEVELUP || nStat == STAT_ITEM_SKILLONGETHIT || nStat == STAT_ITEM_CHARGED_SKILL ||
+		nStat == STAT_COLDMINDAM  || nStat == STAT_LIGHTMINDAM || nStat == STAT_FIREMINDAM || nStat == STAT_POISONMINDAM || nStat == STAT_MAGICMINDAM) // Skip skills without ranges
+		return 0;
 	for (int i = 0; i<nStats; ++i) {
 		if (pStats[i].dwProp == 0xffffffff)
 			break;
 		PropertiesTxt * pProp = &(*D2Vars.D2COMMON_sgptDataTables)->pPropertiesTxt[pStats[i].dwProp];
 		if (!pProp)
 			break;
-		if (pProp->wStat[0] == 0xFFFF && pProp->nFunc[0] == 7 && (nStat == STAT_DAMAGEPERCENT || nStat == STAT_ITEM_MINDAMAGE_PERCENT || nStat == STAT_ITEM_MAXDAMAGE_PERCENT ||
-			nStat == STAT_ITEM_MAXDAMAGE_PERCENT_PERLEVEL || nStat == STAT_ITEM_MAXDAMAGE_PERCENT_BYTIME))
-			return &pStats[0];
-		else if (pProp->wStat[0] == 0xFFFF && pProp->nFunc[0] == 6 && (nStat == STAT_MAXDAMAGE || nStat == STAT_SECONDARY_MAXDAMAGE || nStat == STAT_ITEM_MAXDAMAGE_PERLEVEL ||
-			nStat == STAT_ITEM_MAXDAMAGE_BYTIME))
-			return &pStats[0];
-		else if (pProp->wStat[0] == 0xFFFF && pProp->nFunc[0] == 5 && (nStat == STAT_MINDAMAGE || nStat == STAT_SECONDARY_MINDAMAGE))
-			return &pStats[0];
+		if (pProp->wStat[i] == 0xFFFF && pProp->nFunc[i] == 7 && (nStat == STAT_DAMAGEPERCENT || nStat == STAT_ITEM_MINDAMAGE_PERCENT || nStat == STAT_ITEM_MAXDAMAGE_PERCENT ||
+			nStat == STAT_ITEM_MAXDAMAGE_PERCENT_BYTIME || nStat == STAT_ITEM_MAXDAMAGE_PERCENT_PERLEVEL))
+			return &pStats[i];
+		else if (pProp->wStat[i] == 0xFFFF && pProp->nFunc[i] == 6 && (nStat == STAT_MAXDAMAGE || nStat == STAT_SECONDARY_MAXDAMAGE  ||
+			nStat == STAT_ITEM_MAXDAMAGE_BYTIME || nStat == STAT_ITEM_MAXDAMAGE_PERLEVEL))
+			return &pStats[i];
+		else if (pProp->wStat[i] == 0xFFFF && pProp->nFunc[i] == 5 && (nStat == STAT_MINDAMAGE || nStat == STAT_SECONDARY_MINDAMAGE))
+			return &pStats[i];
 		for (int j = 0; j < 7; ++j)
 		{
 			if (pProp->wStat[j] == 0xFFFF)
@@ -799,8 +803,15 @@ void __stdcall ExScreen::OnPropertyBuild(wchar_t* wOut, int nStat, UnitAny* pIte
 					if (stat->dwMin != stat->dwMax) {
 						int	aLen = wcslen(wOut);
 						int leftSpace = 128 - aLen > 0 ? 128 - aLen : 0;
+						int statMin = stat->dwMin;
+						int statMax = stat->dwMax;
+						if (nStat == STAT_ITEM_HP_PERLEVEL || nStat == STAT_ITEM_MANA_PERLEVEL || nStat == STAT_ITEM_MAXDAMAGE_PERCENT_PERLEVEL || nStat == STAT_ITEM_MAXDAMAGE_PERLEVEL)
+						{
+							statMin = D2Funcs.D2COMMON_GetBaseStatSigned(D2Funcs.D2CLIENT_GetPlayer(), STAT_LEVEL, 0) * statMin >> 3;
+							statMax = D2Funcs.D2COMMON_GetBaseStatSigned(D2Funcs.D2CLIENT_GetPlayer(), STAT_LEVEL, 0) * statMax >> 3;
+						}
 						if (leftSpace)
-							swprintf_s(wOut + aLen, leftSpace, L" %s[%d - %d]%s", GetColorCode(COL_YELLOW).c_str(), stat->dwMin, stat->dwMax, GetColorCode(COL_BLUE).c_str());
+							swprintf_s(wOut + aLen, leftSpace, L" %s[%d - %d]%s", GetColorCode(COL_YELLOW).c_str(), statMin, statMax, GetColorCode(COL_BLUE).c_str());
 					}
 				}
 		} break;
@@ -815,8 +826,15 @@ void __stdcall ExScreen::OnPropertyBuild(wchar_t* wOut, int nStat, UnitAny* pIte
 					if (stat->dwMin != stat->dwMax) {
 						int	aLen = wcslen(wOut);
 						int leftSpace = 128 - aLen > 0 ? 128 - aLen : 0;
+						int statMin = stat->dwMin;
+						int statMax = stat->dwMax;
+						if (nStat == STAT_ITEM_HP_PERLEVEL || nStat == STAT_ITEM_MANA_PERLEVEL || nStat == STAT_ITEM_MAXDAMAGE_PERCENT_PERLEVEL || nStat == STAT_ITEM_MAXDAMAGE_PERLEVEL)
+						{
+							statMin = D2Funcs.D2COMMON_GetBaseStatSigned(D2Funcs.D2CLIENT_GetPlayer(), STAT_LEVEL, 0) * statMin >> 3;
+							statMax = D2Funcs.D2COMMON_GetBaseStatSigned(D2Funcs.D2CLIENT_GetPlayer(), STAT_LEVEL, 0) * statMax >> 3;
+						}
 						if (leftSpace)
-							swprintf_s(wOut + aLen, leftSpace, L" %s[%d - %d]%s", GetColorCode(COL_YELLOW).c_str(), stat->dwMin, stat->dwMax, GetColorCode(COL_BLUE).c_str());
+							swprintf_s(wOut + aLen, leftSpace, L" %s[%d - %d]%s", GetColorCode(COL_YELLOW).c_str(), statMin, statMax, GetColorCode(COL_BLUE).c_str());
 					}
 				} 
 			}
@@ -878,6 +896,11 @@ void __stdcall ExScreen::OnPropertyBuild(wchar_t* wOut, int nStat, UnitAny* pIte
 				if (min != max) {
 					int	aLen = wcslen(wOut);
 					int leftSpace = 128 - aLen > 0 ? 128 - aLen : 0;
+					if (nStat == STAT_ITEM_MAXDAMAGE_PERCENT_PERLEVEL || nStat == STAT_ITEM_MAXDAMAGE_PERLEVEL || nStat == STAT_ITEM_HP_PERLEVEL || nStat == STAT_ITEM_MANA_PERLEVEL)
+					{
+						min = D2Funcs.D2COMMON_GetBaseStatSigned(D2Funcs.D2CLIENT_GetPlayer(), STAT_LEVEL, 0) * min >> 3;
+						max = D2Funcs.D2COMMON_GetBaseStatSigned(D2Funcs.D2CLIENT_GetPlayer(), STAT_LEVEL, 0) * max >> 3;
+					}
 					if (leftSpace)
 						swprintf_s(wOut + aLen, leftSpace, L" %s[%d - %d]%s", GetColorCode(COL_YELLOW).c_str(), min, max, GetColorCode(COL_BLUE).c_str());
 				}
