@@ -128,23 +128,76 @@ struct ItemData {
 	BYTE NodePosOther;		//0x69
 };
 
+struct ActEnvironment // sizeof(0x38)
+{
+	DWORD _1;						//0x00  2
+	DWORD _2;						//0x04  0
+	DWORD _3;						//0x08  0 * 128
+	DWORD _4;						//0x0C  32
+	DWORD dwCreatedTick;			//0x10
+	DWORD _6;						//0x14
+	DWORD _7;						//0x18  Some angle (sin( (_3 / _11)  * (1/180) * PI)
+	DWORD _8;						//0x1C  Some angle (-cos( (_3 / _11) * (1/180) * PI)
+	DWORD _9;						//0x20
+	DWORD _10;						//0x24
+	DWORD _11;						//0x28  128
+	DWORD _12;						//0x2C
+	DWORD _13;						//0x30
+	DWORD _14;						//0x34
+};
+
+//sizeof = 0x60
 struct Act
 {
-	DWORD _1[3];					//0x00
+	DWORD _1a;						//0x00
+	ActEnvironment* pEnviroment;	//0x04
+	DWORD dwTownLvl;				//0x08
 	DWORD dwMapSeed;				//0x0C
 	Room1* pRoom1;					//0x10
 	DWORD dwAct;					//0x14
-	DWORD _3[12];					//0x18
+	DWORD hTile[12];				//0x18 not sure, some inline struct of 0x30 size seems fit
 	ActMisc* pMisc;					//0x48
+	DWORD _4;						//0x4C
+	DWORD _5;						//0x50
+	DWORD _6;						//0x54
+	DWORD _7;						//0x58
+	void* pMemPool;					//0x5C
 };
 
-struct ActMisc {
-	DWORD _1[37];			//0x00
+
+// sizeof 0x48
+struct DrlgVis
+{
+	DWORD nLevelDef;		//0x00 -> record number of LevelDefs.bin
+	DWORD dwVis[8];			//0x04
+	DWORD dwWarp[8];		//0x24
+	DrlgVis* pNext;			//0x44
+};
+
+struct ActMisc // sizeof(0x48C) aka Drlg
+{
+	D2Seed hSeed;			//0x00
+	DWORD _1;				//0x08
+	DWORD* pTile;			//0x0C
+	DWORD _1g[15];			//0x10
+	DWORD pfnCallBack;		//0x4c
+	DWORD _1a[16];			//0x50
+	DrlgVis * pVis;			//0x90
 	DWORD dwStaffTombLevel; //0x94
-	DWORD _2[245];			//0x98
+	DWORD _2a;				//0x98
+	Game* pGame;			//0x9C
+	DWORD _2[236];			//0xA0
+	DWORD nDiffLvl;			//0x450
+	DWORD* fnCallback;		//0x454
+	DWORD InitSeed;			//0x458
+	DWORD _2d[4];			//0x45C
 	Act* pAct;				//0x46C
-	DWORD _3[3];			//0x470
+	DWORD _3[2];			//0x470
+	void *pMemPool;			//0x478 D2PoolManager*
 	Level* pLevelFirst;		//0x47C
+	DWORD nAct;				//0x480
+	DWORD _5;				//0x484 Tomb Levels Related 66 + rand(7)
+	DWORD* fnCallback2;		//0x488
 };
 
 struct AutoMapCell
@@ -158,7 +211,7 @@ struct AutoMapCell
 	AutoMapCell* pMore;				//0x10
 };
 
-struct AutoMapLayer
+struct AutoMapLayer //sizeof = 0x1C
 {
 	DWORD nLayerNo;					//0x00
 	DWORD fSaved;					//0x04
@@ -206,12 +259,14 @@ struct Room1 {
 struct Room2 {
 	DWORD _1[2];			//0x00
 	Room2** pRoom2Near;		//0x08
-	DWORD _2[5];			//0x0C
+	DWORD _2[2];			//0x0C
+	D2Seed hSeed;			//0x14
+	DWORD _2b;				//0x1C
 	struct {
 		DWORD dwRoomNumber; //0x00
-		DWORD _1;			//0x04
+		DWORD* _1;			//0x04
 		DWORD* pdwSubNumber;//0x08
-	} *pType2Info;			//0x20
+	} *pType2Info;			//0x20 <- points to 0x70 struct if dwPresetType == 1, 0xF8 struct if == 2
 	Room2* pRoom2Next;		//0x24
 	DWORD dwRoomFlags;		//0x28
 	DWORD dwRoomsNear;		//0x2C
@@ -235,30 +290,97 @@ struct RoomTile {
 	DWORD *nNum; 				//0x10
 };
 
+
+//sizeof = 0x8
+struct PresetData
+{
+	DWORD _1;					//0x00
+	DWORD dwPreset;				//0x04 -> randomly selected from Files columun in LvlPrest.txt
+};
+
+//sizeof = 0x10
+struct LevelPreset
+{
+	DWORD dwDef;				//0x00
+	DWORD dwFiles;				//0x04 number of presets
+	DWORD dwPreset;				//0x08 randomly selected from Files columun in LvlPrest.txt
+	LevelPreset* pNext;			//0x0C
+};
+
+
+// sizeof = 0x38
+struct WildernessUnk
+{
+	Level* pLevel;					//0x00
+	DWORD _2;						//0x04
+	DWORD dwRooms;					//0x08
+	DWORD _4;						//0x0C
+	DWORD _5;						//0x10
+	DWORD _6;						//0x14
+	DWORD dwType;					//0x18 pLvlSub.txt type
+	DWORD fnCallback[7];			//0x1C
+};
+
+
+struct DrlgGrid // size 0x14
+{
+	DWORD *gridX;			//0x00
+	DWORD *gridY;			//0x04 points to memory of (4 * ySize * (xSize + 1)) 
+	DWORD dwXSize;			//0x08
+	DWORD dwYSize;			//0x0C
+	DWORD _5;				//0x10
+};
+
+//sizeof = 0x268
+struct WildernessData
+{
+	DWORD dwFlags;				//0x00
+	DrlgGrid hGrid[4];			//0x08
+	DWORD  _12[2];				//0x0C
+	DWORD dwSizeX;				// LevelSizeX / 8
+	DWORD dwSizeY;				// LevelSizeY / 8
+	DWORD  _13[7];				//0x0C
+	DWORD _UnkArr[4][30];		//0x80
+	DWORD _14;					//0x260
+	DWORD _15;					//0x264
+};
+
+// sizeof = 0x230
 struct Level {
-	DWORD _1[4];			//0x00
-	Room2* pRoom2First;		//0x10
-	DWORD _2[2];			//0x14
-	DWORD dwPosX;			//0x1C
-	DWORD dwPosY;			//0x20
-	DWORD dwSizeX;			//0x24
-	DWORD dwSizeY;			//0x28
-	DWORD _3[96];			//0x2C
-	Level* pNextLevel;		//0x1AC
-	DWORD _4;				//0x1B0
-	ActMisc* pMisc;			//0x1B4
-	DWORD _5[6];			//0x1BC
-	DWORD dwLevelNo;		//0x1D0
-	DWORD _6[3];			//0x1D4
+	DWORD dwDrlgType;			//0x00 1 - maze, 2 - preset, 3 - wilderness
+	DWORD dwLevelFlags;			//0x04
+	DWORD _1[2];				//0x08
+	Room2* pRoom2First;			//0x10
+	union {
+		LvlMazeTxt* pMazeTxt;    		//     for dwDrlgType == 1 (RANDOM MAZE)
+		PresetData* pPreset;			//     for dwDrlgType == 2 (PRESET MAP)
+		WildernessData* pWilderness;	//     for dwDrlgType == 3 (RANDOM AREA WITH PRESET SIZE)
+	}; // 0x14
+	DWORD _2;					//0x18
+	DWORD dwPosX;				//0x1C
+	DWORD dwPosY;				//0x20
+	DWORD dwSizeX;				//0x24
+	DWORD dwSizeY;				//0x28
+	DWORD _3[96];				//0x2C
+	Level* pNextLevel;			//0x1AC
+	DWORD _4;					//0x1B0
+	ActMisc* pMisc;				//0x1B4
+	DWORD _5[2];				//0x1B8
+	DWORD dwLevelType;			//0x1C0
+	D2Seed hSeed;				//0x1C4
+	LevelPreset* pLevelPresets;	//0x1CC
+	DWORD dwLevelNo;			//0x1D0
+	DWORD _6[3];				//0x1D4
 	union {
 		DWORD RoomCenterX[9];
 		DWORD WarpX[9];
-	};						//0x1E0
+	};							//0x1E0
 	union {
 		DWORD RoomCenterY[9];
 		DWORD WarpY[9];
-	};						//0x204
-	DWORD dwRoomEntries;	//0x228
+	};							//0x204
+	DWORD dwRoomEntries;		//0x228
+	DWORD _7;					//0x22C
 };
 
 struct Path	//sizeof 0x200
@@ -276,7 +398,7 @@ struct Path	//sizeof 0x200
 	Room1 *pRoomUnk;				//0x20
 	DWORD _3[3];					//0x24
 	UnitAny *pUnit;					//0x30
-	DWORD dwFlags;					//0x34
+	DWORD dwFlags;					//0x34 0x40000 -> PATH_MISSILE_MASK
 	DWORD _4;						//0x38
 	DWORD dwPathType;				//0x3C
 	DWORD dwPrevPathType;			//0x40

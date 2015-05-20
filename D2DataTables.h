@@ -32,6 +32,32 @@ struct ArenaTxt
 
 #pragma pack(push,1)
 
+struct LvlMazeTxt
+{
+	DWORD dwLevelId;                //0x00
+	DWORD dwRooms[3];               //0x04
+	DWORD dwSizeX;                  //0x10
+	DWORD dwSizeY;                  //0x14
+	DWORD dwMerge;                  //0x18
+};
+
+struct LvlWarpTxt
+{
+	DWORD dwLevelId;
+	DWORD dwSelectX;
+	DWORD dwSelectY;
+	DWORD dwSelectDX;
+	DWORD dwSelectDY;
+	DWORD dwExitWalkX;
+	DWORD dwExitWalkY;
+	DWORD dwOffsetX;
+	DWORD dwOffsetY;
+	DWORD dwLitVersion;
+	DWORD dwTiles;
+	DWORD dwDirection;
+};
+
+
 struct PropertiesTxt
 {
 	WORD wProp;                   //0x00
@@ -1654,6 +1680,29 @@ struct sgptDataTable {
 	DifficultyLevelsTxt*pDiffLvlsTxt;//0xC7C
 	DWORD	dwDiffLvlsRecs;			//0xC80
 	BYTE*	pExpFieldD2;			//0xC84
+// An unexpected surprise!
+#ifdef VER_113D // Still to find: ExpFieldData[10]
+	BYTE*	pCharTemp;				//0xC88
+	DWORD	dwCharTempRecs;			//0xC8C
+	ArenaTxt*pArena;				//0xC90
+	DWORD   _2[3];					//0xCAC
+	BYTE*	pLvlSubExtra;			//0xCB0
+	DWORD   _2b[4];					//0xCAC
+	DWORD	dwLvlSubExtraRecs;		//0xCB4
+	DWORD	_2c;					//0xCB8
+	BYTE*	pLvlTypes;				//0xCBC
+	BYTE*   pWaypoints;				//0xCC0
+	DWORD	dwWaypointsRecs;		//0xCC4
+	DWORD	dwLvlTypes;				//0xCC8
+	BYTE*	pLvlWarp;				//0xCCC
+	DWORD	dwLvlWarpRecs;			//0xCD0
+	LvlMazeTxt*	pLvlMaze;			//0xCD4
+	DWORD	dwLvlMazeRecs;			//0xCD8
+	BYTE*	pLvlSub;				//0xCDC
+	DWORD	dwLvlSubRecs;			//0xCE0
+	DWORD   pLvlSubCache;			//0xCE4 aka sgpnTileSubsTypeStart
+	DWORD	_5[5];					//0xCE8
+#else
 	DWORD	ExpFieldData[10];		//0xC88
 	BYTE*	pLvlSubExtra;			//0xCB0
 	DWORD	dwLvlSubExtraRecs;		//0xCB4
@@ -1666,12 +1715,13 @@ struct sgptDataTable {
 	DWORD	dwLvlTypes;				//0xCD0
 	BYTE*	pLvlWarp;				//0xCD4
 	DWORD	dwLvlWarpRecs;			//0xCD8
-	BYTE*	pLvlMaze;				//0xCDC
+	LvlMazeTxt*	pLvlMaze;				//0xCDC
 	DWORD	dwLvlMazeRecs;			//0xCE0
 	BYTE*	pLvlSub;				//0xCE4
 	DWORD	dwLvlSubRecs;			//0xCE8
 	BYTE*	pLvlSubCache;			//0xCEC
 	DWORD	_1[3];					//0xCF0
+#endif
 	BYTE*	pMapCache;				//0xCFC
 	DWORD	dwMapCacheRecs;			//0xD00
 	CubeMainTxt*	pCubeMain;		//0xD04

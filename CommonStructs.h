@@ -30,6 +30,13 @@ struct ScrollBar;
 struct TileContext;
 struct GfxCell;
 
+
+struct D2Seed
+{
+	DWORD nLowSeed;
+	DWORD nHiSeed;
+};
+
 #pragma pack(push, 1)
 
 // Used for property build  (sizeof 0xA8)
