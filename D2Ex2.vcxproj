@@ -243,6 +243,7 @@ EXIT 0</Command>
     <ClCompile Include="ExChicken.cpp" />
     <ClCompile Include="ExDeathMessage.cpp" />
     <ClCompile Include="ExControlManager.cpp" />
+    <ClCompile Include="ExExtendedLevels.cpp" />
     <ClCompile Include="ExFontManager.cpp" />
     <ClCompile Include="ExMultiRes.cpp" />
     <ClCompile Include="ExOpenGL.cpp" />
@@ -310,6 +311,7 @@ EXIT 0</Command>
     <ClInclude Include="ExChicken.h" />
     <ClInclude Include="ExDeathMessage.h" />
     <ClInclude Include="ExControlManager.h" />
+    <ClInclude Include="ExExtendedLevels.h" />
     <ClInclude Include="ExFontManager.h" />
     <ClInclude Include="ExTexture.h" />
     <ClInclude Include="ExMultiRes.h" />

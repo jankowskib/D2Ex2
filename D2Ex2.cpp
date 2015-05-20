@@ -62,6 +62,7 @@
 #include "ExDeathMessage.h"
 #include "ExControlManager.h"
 #include "ExFontManager.h"
+#include "ExExtendedLevels.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -314,6 +315,38 @@ BOOL D2Ex::Init()
 #endif
 
 #elif defined VER_113D
+
+#ifdef D2EX_EXTENDED_LEVELS
+// I'd rather to avoid using __asm stubs
+Misc::Patch(CALL, GetDllOffset("D2Common.dll", 0x4F330), (DWORD)ExExtendedLevels::GetActByLevel, 22, "Replace inline GetActByLevel"); //  Ordinal11007
+Misc::Patch(CALL, GetDllOffset("D2Common.dll", 0x4F3C7), (DWORD)ExExtendedLevels::GetActByLevel, 26, "Replace inline GetActByLevel"); //  Ordinal11051
+Misc::Patch(CALL, GetDllOffset("D2Common.dll", 0x4F160), (DWORD)ExExtendedLevels::GetActByRoom2, 22, "Replace inline GetActByLevel"); //  Ordinal10301
+
+Misc::Patch(CALL, GetDllOffset("D2Common.dll", 0x2AD76), (DWORD)ExExtendedLevels::GetActByLevelNo_STUB1, 20, "Replace inline GetActByLevel"); //  sub_6FD7AD60
+Misc::Patch(CALL, GetDllOffset("D2Common.dll", 0x56F40), (DWORD)ExExtendedLevels::GetActByLevelNo_STUB1, 20, "Replace inline GetActByLevel"); //  sub_6FDA6EA0
+Misc::Patch(CALL, GetDllOffset("D2Common.dll", 0x510A0), (DWORD)ExExtendedLevels::GetActByLevelNo_STUB2, 20, "Replace inline GetActByLevel"); //  sub_6FDA1070
+
+Misc::Patch(JUMP, GetDllOffset("D2Common.dll", -10864), (DWORD)ExExtendedLevels::GetActByLevelNo, 5, "Replace original GetActByLevelNo");
+
+// The original value is 400
+Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x6FFFB + 1), 4096, 4, "Automap patch I");
+Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x7100B + 1), 4096, 4, "Automap patch I");
+Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x71044 + 1), 4096, 4, "Automap patch I");
+Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x710D9 + 1), 4096, 4, "Automap patch I");
+Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x728EA + 1), 4096, 4, "Automap patch I");
+
+Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x70FD6 + 2), 4256, 4, "Automap patch II - stack fix"); // The original value is 416
+Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x728A6 + 2), 4172, 4, "Automap patch II - stack fix"); // The original value is 472
+
+// The original value is 99
+Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x70FF6 + 1), 399, 4, "Automap patch III");
+Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x728D9 + 1), 399, 4, "Automap patch III");
+
+// The original value is 400
+Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x7101B + 4), 4096, 4, "Automap patch IV");
+Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x728FE + 4), 4096, 4, "Automap patch IV");
+
+#endif
 
 Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0xC3997), (DWORD)ExOptions::UnregisterMenuMsgs, 21, "Menu messages replacement");
 Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x1BDC4), (DWORD)ExOptions::UnregisterMenuMsgs, 21, "Menu messages replacement");
