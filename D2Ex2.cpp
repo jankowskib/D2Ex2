@@ -445,7 +445,8 @@ Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x1B7C1), (DWORD)ExOptions::Regis
 #endif
 
 #ifdef D2EX_FORUMGOLD
-	Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x7936D), (DWORD)D2Stubs::D2COMMON_GetItemCost, 5, "Item Cost Stub I");
+	Misc::Patch(JUMP, GetDllOffset("D2Common.dll", -10186) + 34, (DWORD)D2Stubs::D2COMMON_GetItemCost_STUB, 5, "Remove item cost"); // Set 'gamble cost' column to 0 to remove item cost
+	Misc::Patch(JUMP, GetDllOffset("D2Common.dll", -10243), (DWORD)D2Stubs::D2COMMON_GetMercCost, 5, "Remove merc cost");
 #endif
 #endif
 

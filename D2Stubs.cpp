@@ -102,14 +102,39 @@ __declspec(naked) BOOL __fastcall D2ASMFuncs::D2CLIENT_IsMuted(RosterUnit* pRost
 
 #ifdef D2EX_FORUMGOLD
 
-int __stdcall D2Stubs::D2COMMON_GetItemCost(UnitAny *pPlayer, UnitAny *ptItem, int DiffLvl, QuestFlags *pQuestFlags, int NpcClassId, int InvPage)
+int __stdcall D2Stubs::D2COMMON_GetMercCost(UnitAny* pPlayer)
 {
-	//if(pPlayer->pGame, pPlayer->pGame->dwGameState!=1)
-	int ret = D2Funcs.D2COMMON_GetItemCost(pPlayer, ptItem, DiffLvl, pQuestFlags, NpcClassId, InvPage);
-	if (ret == 1)
-		return 0;
-	return ret;
+	return 0;
 }
+
+BOOL __stdcall ITEMS_CheckRemoveCostFlag(UnitAny* pItem) {
+
+	D2EXASSERT(pItem->dwType == UNIT_ITEM, "Attempt to get cost for non-item unit")
+
+	ItemsTxt* pTxt = D2Funcs.D2COMMON_GetItemText(pItem->dwClassId);
+	return pTxt->dwgamblecost > 0;
+}
+
+//__stdcall (UnitAny *pPlayer, UnitAny *ptItem, int DiffLvl, QuestFlags *pQuestFlags, int NpcClassId, int InvPage)
+__declspec(naked) void D2Stubs::D2COMMON_GetItemCost_STUB()
+{
+	__asm
+	{
+		push eax
+		push[esp+8+4]
+		
+		call ITEMS_CheckRemoveCostFlag
+
+		cmp eax, 1
+		pop eax
+		je dont_remove_cost
+		xor eax, eax
+
+	dont_remove_cost:
+		ret 18h
+	}
+}
+
 #endif
 
 #ifdef D2EX_SPECTATOR

@@ -117,6 +117,7 @@ _d2f D2Funcs = {0}; void SetupD2Funcs() {
 		EXFUNCPTR(D2COMMON, GetUnitMaxMana, unsigned int, __stdcall, (UnitAny *ptUnit), -10084) //k
 		EXFUNCPTR(D2COMMON, GetUnitRoom, Room1*, __stdcall, (UnitAny *ptUnit), -10846) //k
 		EXFUNCPTR(D2COMMON, GetExpToAchiveLvl, int, __stdcall, (int ClassId, int ExpLvl), -10949) //k
+		EXFUNCPTR(D2COMMON, GetMercCost, int, __stdcall, (UnitAny *pItem), -10243)
 
 		//Item Related
 		EXFUNCPTR(D2COMMON, GetItemText, ItemsTxt*, __stdcall, (int RecordNo), -10994) //k
