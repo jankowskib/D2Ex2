@@ -99,7 +99,7 @@ void ExBuffData::update(WORD forcedLvl)
 	}
 }
 
-ExBuff::ExBuff(unsigned int pos, ExBuffsImgs ImageId, BuffType aType) : ExControl(0, *D2Vars.D2GFX_GfxMode > 2 ? (*D2Vars.D2CLIENT_ScreenHeight - 15) : (*D2Vars.D2CLIENT_ScreenViewHeight - 10), 24, 24, 0)
+ExBuff::ExBuff(unsigned int pos, ExBuffsImgs ImageId, BuffType aType) : ExControl(0, *D2Vars.D2GFX_GfxMode > 2 ? (*D2Vars.D2CLIENT_ScreenHeight - 15) : (*D2Vars.D2CLIENT_ScreenHeight - 50), 24, 24, 0)
 {
 	if (!cfBuffs)
 	{
@@ -619,7 +619,7 @@ void ExBuffs::UpdateYPos()
 {
 	for (auto const &b : gBuffs)
 	{
-		gExGUI->setY(b.first, *D2Vars.D2GFX_GfxMode > 2 ? (*D2Vars.D2CLIENT_ScreenHeight - 15) : (*D2Vars.D2CLIENT_ScreenViewHeight - 10));
+		gExGUI->setY(b.first, *D2Vars.D2GFX_GfxMode > 2 ? (*D2Vars.D2CLIENT_ScreenHeight - 15) : (*D2Vars.D2CLIENT_ScreenHeight - 50));
 	}
 
 }
