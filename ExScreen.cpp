@@ -581,12 +581,13 @@ return 0;
 
 /*
 	Search mod used in MagicPrefix.txt, UniqueItemsTxt, RunesTxt, etc. (index from Properties.txt) by ItemStatCost.txt stat index
+	@param nStatParam - param column for property (skill id etc)
 	@param nStat - ItemStatCost.txt record id
 	@param nStats - number of pStats
 	@param pStats - pointer to ItemsTxtStat* array [PropertiesTxt Id, min, max val)
 
 */
-static ItemsTxtStat* GetItemsTxtStatByMod(ItemsTxtStat* pStats, int nStats, int nStat)
+static ItemsTxtStat* GetItemsTxtStatByMod(ItemsTxtStat* pStats, int nStats, int nStat, int nStatParam)
 {
 	if (nStat == STAT_ITEM_SKILLONKILL || nStat == STAT_ITEM_SKILLONHIT || nStat == STAT_ITEM_SKILLONATTACK || nStat == STAT_ITEM_SKILLONDEATH ||
 		nStat == STAT_ITEM_SKILLONLEVELUP || nStat == STAT_ITEM_SKILLONGETHIT || nStat == STAT_ITEM_CHARGED_SKILL ||
@@ -598,14 +599,44 @@ static ItemsTxtStat* GetItemsTxtStatByMod(ItemsTxtStat* pStats, int nStats, int 
 		PropertiesTxt * pProp = &(*D2Vars.D2COMMON_sgptDataTables)->pPropertiesTxt[pStats[i].dwProp];
 		if (!pProp)
 			break;
-		if (pProp->wStat[i] == 0xFFFF && pProp->nFunc[i] == 7 && (nStat == STAT_DAMAGEPERCENT || nStat == STAT_ITEM_MINDAMAGE_PERCENT || nStat == STAT_ITEM_MAXDAMAGE_PERCENT ||
+		if (pProp->wStat[0] == 0xFFFF && pProp->nFunc[0] == 7 && (nStat == STAT_DAMAGEPERCENT || nStat == STAT_ITEM_MINDAMAGE_PERCENT || nStat == STAT_ITEM_MAXDAMAGE_PERCENT ||
 			nStat == STAT_ITEM_MAXDAMAGE_PERCENT_BYTIME || nStat == STAT_ITEM_MAXDAMAGE_PERCENT_PERLEVEL))
 			return &pStats[i];
-		else if (pProp->wStat[i] == 0xFFFF && pProp->nFunc[i] == 6 && (nStat == STAT_MAXDAMAGE || nStat == STAT_SECONDARY_MAXDAMAGE  ||
+		else if (pProp->wStat[0] == 0xFFFF && pProp->nFunc[0] == 6 && (nStat == STAT_MAXDAMAGE || nStat == STAT_SECONDARY_MAXDAMAGE  ||
 			nStat == STAT_ITEM_MAXDAMAGE_BYTIME || nStat == STAT_ITEM_MAXDAMAGE_PERLEVEL))
 			return &pStats[i];
-		else if (pProp->wStat[i] == 0xFFFF && pProp->nFunc[i] == 5 && (nStat == STAT_MINDAMAGE || nStat == STAT_SECONDARY_MINDAMAGE))
+		else if (pProp->wStat[0] == 0xFFFF && pProp->nFunc[0] == 5 && (nStat == STAT_MINDAMAGE || nStat == STAT_SECONDARY_MINDAMAGE))
 			return &pStats[i];
+		for (int j = 0; j < 7; ++j)
+		{
+			if (pProp->wStat[j] == 0xFFFF)
+				break;
+			if (pProp->wStat[j] == nStat && pStats[i].dwPar == nStatParam)
+				return &pStats[i];
+		}
+	}
+	return 0;
+}
+
+/*
+	Find other mod that inflates the original
+	@param pOrigin  - original stat
+	@param nStat - ItemStatCost.txt record id
+	@param nStats - number of pStats
+	@param pStats - pointer to ItemsTxtStat* array [PropertiesTxt Id, min, max val)
+*/
+static ItemsTxtStat* GetAllStatModifier(ItemsTxtStat* pStats, int nStats, int nStat, ItemsTxtStat* pOrigin)
+{
+	for (int i = 0; i<nStats; ++i) {
+		if (pStats[i].dwProp == 0xffffffff)
+			break;
+		if (pStats[i].dwProp == pOrigin->dwProp)
+			continue;
+
+		PropertiesTxt * pProp = &(*D2Vars.D2COMMON_sgptDataTables)->pPropertiesTxt[pStats[i].dwProp];
+		if (!pProp)
+			break;
+
 		for (int j = 0; j < 7; ++j)
 		{
 			if (pProp->wStat[j] == 0xFFFF)
@@ -771,7 +802,7 @@ BOOL __stdcall ExScreen::OnDamagePropertyBuild(UnitAny* pItem, DamageStats* pDmg
 	newDesc[wcslen(newDesc) - 1] = L'\0';
 	if (newDesc[wcslen(newDesc) - 1] == L'\n')
 	newDesc[wcslen(newDesc) - 1] = L'\0';
-	OnPropertyBuild(newDesc, nStat, pItem);	
+	OnPropertyBuild(newDesc, nStat, pItem, NULL);	
 	// Beside this add-on the function is almost 1:1 copy of Blizzard's one -->
 	wcscat_s(wOut, 1024, newDesc);
 	wcscat_s(wOut, 1024, L"\n");
@@ -779,17 +810,20 @@ BOOL __stdcall ExScreen::OnDamagePropertyBuild(UnitAny* pItem, DamageStats* pDmg
 }
 
 // UniqueItems->UniqueItemsTxtStat->PropertiesTxt-> Final stat!
-void __stdcall ExScreen::OnPropertyBuild(wchar_t* wOut, int nStat, UnitAny* pItem)
+void __stdcall ExScreen::OnPropertyBuild(wchar_t* wOut, int nStat, UnitAny* pItem, int nStatParam)
 {
 	if (gControl && pItem && pItem->dwType == UNIT_ITEM) {
 		ItemsTxtStat* stat = 0;
+		ItemsTxtStat* all_stat = 0; // Stat for common modifer like all-res, all-stats
 		switch (pItem->pItemData->QualityNo) {
 		case ITEM_SET:
 		{
 			SetItemsTxt * pTxt = &(*D2Vars.D2COMMON_sgptDataTables)->pSetItemsTxt[pItem->pItemData->FileIndex];
 			if (!pTxt)
 				break;
-			stat = GetItemsTxtStatByMod(pTxt->hStats, 9 + 10, nStat);
+			stat = GetItemsTxtStatByMod(pTxt->hStats, 9 + 10, nStat, nStatParam);
+			if (stat)
+				all_stat = GetAllStatModifier(pTxt->hStats, 9 + 10, nStat, stat);
 		}
 		case ITEM_UNIQUE:
 		{
@@ -797,14 +831,22 @@ void __stdcall ExScreen::OnPropertyBuild(wchar_t* wOut, int nStat, UnitAny* pIte
 				UniqueItemsTxt * pTxt = &(*D2Vars.D2COMMON_sgptDataTables)->pUniqueItemsTxt[pItem->pItemData->FileIndex];
 				if (!pTxt)
 					break;
-				stat = GetItemsTxtStatByMod(pTxt->hStats, 12, nStat);
+				stat = GetItemsTxtStatByMod(pTxt->hStats, 12, nStat, nStatParam);
+				if (stat)
+					all_stat = GetAllStatModifier(pTxt->hStats, 12, nStat, stat);
 			}
 				if (stat) {
-					if (stat->dwMin != stat->dwMax) {
+					int statMin = stat->dwMin;
+					int statMax = stat->dwMax;
+
+					if (all_stat) {
+						statMin += all_stat->dwMin;
+						statMax += all_stat->dwMax;
+					}
+					if (statMin < statMax) {
 						int	aLen = wcslen(wOut);
 						int leftSpace = 128 - aLen > 0 ? 128 - aLen : 0;
-						int statMin = stat->dwMin;
-						int statMax = stat->dwMax;
+
 						if (nStat == STAT_ITEM_HP_PERLEVEL || nStat == STAT_ITEM_MANA_PERLEVEL || nStat == STAT_ITEM_MAXDAMAGE_PERCENT_PERLEVEL || nStat == STAT_ITEM_MAXDAMAGE_PERLEVEL)
 						{
 							statMin = D2Funcs.D2COMMON_GetBaseStatSigned(D2Funcs.D2CLIENT_GetPlayer(), STAT_LEVEL, 0) * statMin >> 3;
@@ -821,13 +863,22 @@ void __stdcall ExScreen::OnPropertyBuild(wchar_t* wOut, int nStat, UnitAny* pIte
 				RunesTxt* pTxt = GetRunewordTxtById(pItem->pItemData->MagicPrefix[0]);
 				if (!pTxt)
 					break;
-				stat = GetItemsTxtStatByMod(pTxt->hStats, 7, nStat);
+				stat = GetItemsTxtStatByMod(pTxt->hStats, 7, nStat, nStatParam);
 				if (stat) {
+					int statMin = stat->dwMin;
+					int statMax = stat->dwMax;
+
+					all_stat = GetAllStatModifier(pTxt->hStats, 7, nStat, stat);
+
+					if (all_stat) {
+						statMin += all_stat->dwMin;
+						statMax += all_stat->dwMax;
+					}
+
 					if (stat->dwMin != stat->dwMax) {
 						int	aLen = wcslen(wOut);
 						int leftSpace = 128 - aLen > 0 ? 128 - aLen : 0;
-						int statMin = stat->dwMin;
-						int statMax = stat->dwMax;
+
 						if (nStat == STAT_ITEM_HP_PERLEVEL || nStat == STAT_ITEM_MANA_PERLEVEL || nStat == STAT_ITEM_MAXDAMAGE_PERCENT_PERLEVEL || nStat == STAT_ITEM_MAXDAMAGE_PERLEVEL)
 						{
 							statMin = D2Funcs.D2COMMON_GetBaseStatSigned(D2Funcs.D2CLIENT_GetPlayer(), STAT_LEVEL, 0) * statMin >> 3;
@@ -886,14 +937,14 @@ void __stdcall ExScreen::OnPropertyBuild(wchar_t* wOut, int nStat, UnitAny* pIte
 					if (!found_itype)
 						continue;
 
-					stat = GetItemsTxtStatByMod(pTxt->hMods, 3, nStat);
+					stat = GetItemsTxtStatByMod(pTxt->hMods, 3, nStat, nStatParam);
 					if (!stat)
 						continue;
 					min = min == 0 ? stat->dwMin : min(stat->dwMin, min);
 					max = max(stat->dwMax, max);
 					//DEBUGMSG(L"%s: update min to %d, and max to %d (record #%d)", wOut, min, max, i)
 				}
-				if (min != max) {
+				if (min < max) {
 					int	aLen = wcslen(wOut);
 					int leftSpace = 128 - aLen > 0 ? 128 - aLen : 0;
 					if (nStat == STAT_ITEM_MAXDAMAGE_PERCENT_PERLEVEL || nStat == STAT_ITEM_MAXDAMAGE_PERLEVEL || nStat == STAT_ITEM_HP_PERLEVEL || nStat == STAT_ITEM_MANA_PERLEVEL)

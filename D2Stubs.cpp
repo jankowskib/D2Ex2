@@ -109,7 +109,7 @@ int __stdcall D2Stubs::D2COMMON_GetMercCost(UnitAny* pPlayer)
 
 BOOL __stdcall ITEMS_CheckRemoveCostFlag(UnitAny* pItem) {
 
-	D2EXASSERT(pItem->dwType == UNIT_ITEM, "Attempt to get cost for non-item unit")
+	D2EXASSERT((pItem->dwType == UNIT_ITEM), "Attempt to get cost for non-item unit")
 
 	ItemsTxt* pTxt = D2Funcs.D2COMMON_GetItemText(pItem->dwClassId);
 	return pTxt->dwgamblecost > 0;
@@ -293,10 +293,11 @@ __declspec(naked) void D2Stubs::D2CLIENT_GetPropertyStringDamage_STUB()
 
 
 /* Wrapper over D2CLIENT.0x2E06D (1.13d)
-   As far I know this: int __userpurge ITEMS_ParseStats_6FADCE40<eax>(signed __int32 nStat<eax>, wchar_t *wOut<esi>, UnitAny *pItem, StatList *pStatList, DWORD nStatIdx, DWORD nStatValue, int a7)
+   As far I know this: int __userpurge ITEMS_ParseStats_6FADCE40<eax>(signed __int32 nStat<eax>, wchar_t *wOut<esi>, UnitAny *pItem, StatListEx *pStatList, DWORD nStatParam, DWORD nStatValue, int a7)
 
    Warning: wOut is 128 words length only!
    @ebx the nStat value
+   @edi pStatListEx
    @esp-0x10 seems to always keep pItem *careful*
 */
 __declspec(naked) void D2Stubs::D2CLIENT_GetPropertyString_STUB()
@@ -308,14 +309,17 @@ __declspec(naked) void D2Stubs::D2CLIENT_GetPropertyString_STUB()
 		// Firstrly generate string using old function
 		call D2Ptrs.D2CLIENT_ParseStats_J
 		push rtn
-		
+	
+		push [esp-4] // preserve nStatParam
+
 		push eax // Store result
-		mov eax, [esp - 0x10 + 8] // pItem
+		mov eax, [esp - 0x10 + 8 + 4] // pItem
 		push ecx
 		push edx
 
 		// Then pass the output to our func
-		push eax
+		push [esp + 12] // nStatParam
+		push eax // pItem
 		push ebx // nStat
 		push esi // wOut
 
@@ -324,6 +328,8 @@ __declspec(naked) void D2Stubs::D2CLIENT_GetPropertyString_STUB()
 		pop edx
 		pop ecx
 		pop eax
+
+		add esp, 4 // clean nStatParam
 
 		ret
 	}
