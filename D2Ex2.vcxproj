@@ -241,6 +241,7 @@ EXIT 0</Command>
     <ClCompile Include="ExAutoTele.cpp" />
     <ClCompile Include="ExCheckBox.cpp" />
     <ClCompile Include="ExChicken.cpp" />
+    <ClCompile Include="ExCube.cpp" />
     <ClCompile Include="ExDeathMessage.cpp" />
     <ClCompile Include="ExControlManager.cpp" />
     <ClCompile Include="ExExtendedLevels.cpp" />
@@ -295,6 +296,7 @@ EXIT 0</Command>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\d2warden\d2warden-pvp\LCube.h" />
     <ClInclude Include="ArrayEx.h" />
     <ClInclude Include="BlizzardSmartPointer.h" />
     <ClInclude Include="CollisionMap.h" />
@@ -309,6 +311,7 @@ EXIT 0</Command>
     <ClInclude Include="ExAutoTele.h" />
     <ClInclude Include="ExCheckBox.h" />
     <ClInclude Include="ExChicken.h" />
+    <ClInclude Include="ExCube.h" />
     <ClInclude Include="ExDeathMessage.h" />
     <ClInclude Include="ExControlManager.h" />
     <ClInclude Include="ExExtendedLevels.h" />

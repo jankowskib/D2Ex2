@@ -63,6 +63,7 @@
 #include "ExControlManager.h"
 #include "ExFontManager.h"
 #include "ExExtendedLevels.h"
+#include "ExCube.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -315,6 +316,10 @@ BOOL D2Ex::Init()
 #endif
 
 #elif defined VER_113D
+
+#ifdef D2EX_CUSTOM_CUBE_RECIPES
+Misc::Patch(JUMP, GetDllOffset("D2Common.dll", 0x5B520), (DWORD)ExCube::TXT_CubemainOutputLinker, 5, "CubeMain.Txt output field compiler replacement");
+#endif
 
 #ifdef D2EX_EXTENDED_LEVELS
 // I'd rather to avoid using __asm stubs

@@ -23,6 +23,20 @@
 #define CONSTS_H__
 
 
+/*
+	Note: Only -1, -2, -3, -4 are the same as in vanilla
+*/
+enum CubeOutputTypes {
+	CUBEOUTPUT_USETYPE = -1,
+	CUBEOUTPUT_USEITEM = -2,
+	CUBEOUTPUT_NORMALITEM = -3,
+	CUBEOUTPUT_UNIQUESETITEM = -4,
+	CUBEOUTPUT_PORTAL = 1,
+	CUBEOUTPUT_UBERQUEST,
+	CUBEOUTPUT_UBERQUEST_FINAL,
+	CUBEOUTPUT_COWPORTAL,
+};
+
 enum SMsgTypes
 {
 	SMSG_WM_MSG = 0,

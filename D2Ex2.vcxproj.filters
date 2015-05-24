@@ -188,6 +188,9 @@
     <ClCompile Include="ExExtendedLevels.cpp">
       <Filter>Source Files\Main</Filter>
     </ClCompile>
+    <ClCompile Include="ExCube.cpp">
+      <Filter>Source Files\Main</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArrayEx.h">
@@ -374,6 +377,12 @@
       <Filter>Header Files\Misc</Filter>
     </ClInclude>
     <ClInclude Include="ExExtendedLevels.h">
+      <Filter>Header Files\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="..\d2warden\d2warden-pvp\LCube.h">
+      <Filter>Header Files\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="ExCube.h">
       <Filter>Header Files\Main</Filter>
     </ClInclude>
   </ItemGroup>
