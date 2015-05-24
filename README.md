@@ -36,6 +36,7 @@ List of flags / values you can set:
 		* **D2EX_SPECTATOR_STATE**: states.txt record set on spectators
 	* **D2EX_COLOR_STAT**: itemStatCost.Txt record which stores item color value
 	* **D2EX_LOOTED_STAT**: itemStatCost.Txt record which stores monster id which gave the item
+	* **D2EX_CUSTOM_CUBE_RECIPES**: Adds "portal" keyword to CubeMain.Txt output
 * **D2EX_EXAIM_ENABLED**: experimental -- never finished -- abandoned project of intelligent autoaim
 * **D2EX_PVM_BUILD:** enables maphack with monsters on the map, autotele, etc.
 * **D2EX_MAX_SND_TXT_ROWS**: maximum rows in Sound.txt
@@ -43,12 +44,28 @@ List of flags / values you can set:
 * **D2EX_TP_RANGE**: maximum teleport range for AutoTele
 * **D2EX_ENABLE_PACKET_COMMANDS**: enables packet commands in Release build
 * **D2EX_DEBUG_INFO**: Show current mouse X&Y, and the selected unit id in Release build
+* **D2EX_PRINT_ITEMLEVEL**: Print "Item Level" on an item description
+* **D2EX_EXTENDED_LEVELS**: Extends Levels.txt limit to 255
 
 Installation
 -------------
 1. Compile Release build (select configuration for your version) using Visual Studio 2012 or newer.
 2. Copy everything from files directory to your Diablo II directory, D2Win.dll is a loader for D2Ex2.dll. If you use prebuilt D2Ex2.dll, then you'll need to install this: http://www.microsoft.com/en-us/download/details.aspx?id=40784
 3. Warning: Files ExOpenGL.cpp and ExTexture.cpp/h are not included in this repo. You have to remove them manually from Solution Explorer to make build succeed.
+
+Showcase
+------------
+* 22 vs 22 video (Early version)<br/>
+[![22 vs 22 video](http://img.youtube.com/vi/AIF4nH1ig-I/0.jpg)](http://www.youtube.com/watch?v=AIF4nH1ig-I)
+* Party screen with kill/assist/death counter<br/>
+![Party screen](readme_gfx/ss4.jpg)
+* Stat range (CTRL + hover on an item)<br/>
+![Stat ranges](readme_gfx/ss1.jpg)
+* Buffs<br/>
+![Bufs](readme_gfx/ss2.jpg)
+* Can you guess what resolution it is?<br/>
+[![Hi-res](readme_gfx/ss3_small.png)](readme_gfx/ss3.jpg)
+
 
 Thanks to
 ----------
