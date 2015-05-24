@@ -23,7 +23,7 @@
 
 namespace ExExtendedLevels
 {
-	BYTE __stdcall GetActByLevelNo(DWORD nLevel);
+	DWORD __stdcall GetActByLevelNo(DWORD nLevel);
 	BYTE __fastcall GetActByLevelNo_STUB1(DWORD nLevel);
 	BYTE __fastcall GetActByLevelNo_STUB2(DWORD nLevel);
 	BYTE __fastcall GetActByLevel(Level* pLevel);

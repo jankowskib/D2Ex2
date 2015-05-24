@@ -40,7 +40,7 @@ BYTE __fastcall ExExtendedLevels::GetActByRoom2(int _1, Room2* pRoom2)
 /*
 	Modified beacuse the original function uses town lvl to determine act
 */
-BYTE __stdcall ExExtendedLevels::GetActByLevelNo(DWORD nLevel)
+DWORD __stdcall ExExtendedLevels::GetActByLevelNo(DWORD nLevel)
 {
 	if (nLevel >= (*D2Vars.D2COMMON_sgptDataTables)->dwLevelsRecs)
 	{
