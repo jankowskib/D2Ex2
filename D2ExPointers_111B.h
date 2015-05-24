@@ -224,6 +224,7 @@ _d2f D2Funcs = { 0 }; void SetupD2Funcs() {
 		EXFUNCPTR(FOG, InitBitBuffer, void, __stdcall, (BitBuffer* ptBitBuffer, void * ptBuffer, int nSize), -10126)
 		EXFUNCPTR(FOG, ReadBitsSigned, signed int, __stdcall, (BitBuffer* ptBitBuffer, int nBits), -10129)
 		EXFUNCPTR(FOG, ReadBits, unsigned int, __stdcall, (BitBuffer* ptBitBuffer, int nBits), -10130)
+		EXFUNCPTR(FOG, GetBinTxtRowByText, int, __stdcall, (void *pLink, const char* szText, DWORD nColumn), -10217)
 
 		//D2SOUND
 		EXFUNCPTR(D2SOUND, PlaySound, void, __fastcall, (const char * szFileName), -10029)

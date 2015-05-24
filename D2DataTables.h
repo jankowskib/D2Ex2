@@ -643,17 +643,22 @@ BYTE	bItemFlags;			//0x00
 BYTE	ItemType;			//0x01
 WORD	Item;				//0x02
 WORD	ItemID;				//0x04
-BYTE	Quality;			//0x06
-BYTE	Quantity;			//0x07
+union
+{
+	struct
+	{
+		BYTE nQuality;               //0x06
+		BYTE nQuantity;              //0x07
+	};
+
+	WORD nParam;               //0x06
+};
 BYTE	Type;				//0x08
 BYTE	Lvl;				//0x09
 BYTE	PLvl;				//0x0A
 BYTE	ILvl;				//0x0B
-WORD	PrefixId;			//0x0C
-WORD	_1;					//0x0E
-WORD	_2;					//0x10
-WORD	SuffixId;			//0x12
-DWORD	UnknownField;		//0x14
+WORD	PrefixId[3];		//0x0C
+WORD	SuffixId[3];		//0x12
 struct {							//size 0x0C
 DWORD	dwMod;				//0x00
 WORD	wModParam;			//0x04
@@ -1679,17 +1684,18 @@ struct sgptDataTable {
 	BYTE*	pExperience;			//0xC78
 	DifficultyLevelsTxt*pDiffLvlsTxt;//0xC7C
 	DWORD	dwDiffLvlsRecs;			//0xC80
-	BYTE*	pExpFieldD2;			//0xC84
 // An unexpected surprise!
-#ifdef VER_113D // Still to find: ExpFieldData[10]
+#ifdef VER_113D // NOTE: not all members are correct
+	DWORD	_1;						//0xC84
 	BYTE*	pCharTemp;				//0xC88
 	DWORD	dwCharTempRecs;			//0xC8C
 	ArenaTxt*pArena;				//0xC90
-	DWORD   _2[3];					//0xCAC
-	BYTE*	pLvlSubExtra;			//0xCB0
-	DWORD   _2b[4];					//0xCAC
-	DWORD	dwLvlSubExtraRecs;		//0xCB4
-	DWORD	_2c;					//0xCB8
+	CubeMainTxt*	pCubeMain;		//0xC94
+	DWORD	dwCubeMainRecs;			//0xC98
+	DWORD   _2;						//0xC9C
+	BYTE*	pLvlSubExtra;			//0xCA0
+	BYTE*	pExpFieldD2;			//0xCA4
+	DWORD   ExpFieldData[5];		//0xCA8
 	BYTE*	pLvlTypes;				//0xCBC
 	BYTE*   pWaypoints;				//0xCC0
 	DWORD	dwWaypointsRecs;		//0xCC4
@@ -1702,7 +1708,11 @@ struct sgptDataTable {
 	DWORD	dwLvlSubRecs;			//0xCE0
 	DWORD   pLvlSubCache;			//0xCE4 aka sgpnTileSubsTypeStart
 	DWORD	_5[5];					//0xCE8
+	BYTE*	pMapCache;				//0xCFC
+	DWORD	dwMapCacheRecs;			//0xD00
+	DWORD	_6[2];					//0xD04
 #else
+	BYTE*	pExpFieldD2;			//0xC84
 	DWORD	ExpFieldData[10];		//0xC88
 	BYTE*	pLvlSubExtra;			//0xCB0
 	DWORD	dwLvlSubExtraRecs;		//0xCB4
@@ -1721,10 +1731,10 @@ struct sgptDataTable {
 	DWORD	dwLvlSubRecs;			//0xCE8
 	BYTE*	pLvlSubCache;			//0xCEC
 	DWORD	_1[3];					//0xCF0
-#endif
 	BYTE*	pMapCache;				//0xCFC
 	DWORD	dwMapCacheRecs;			//0xD00
 	CubeMainTxt*	pCubeMain;		//0xD04
 	DWORD	dwCubeMainRecs;			//0xD08
+#endif
 	BOOL	bWriteBinFiles;			//0xD0C
 	};

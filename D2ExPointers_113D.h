@@ -121,6 +121,7 @@ _d2f D2Funcs = {0}; void SetupD2Funcs() {
 
 		//Item Related
 		EXFUNCPTR(D2COMMON, GetItemText, ItemsTxt*, __stdcall, (int RecordNo), -10994) //k
+		EXFUNCPTR(D2COMMON, GetItemIdx, ItemsTxt*, __stdcall, (DWORD ItemCode, int * Idx), -10000)
 		EXFUNCPTR(D2COMMON, GetRunesTxt, RunesTxt*, __stdcall, (int RecordNo), -10405)
 		EXFUNCPTR(D2COMMON, GetRunesTxtRecords, int*, __stdcall, (void), -10981)
 		EXFUNCPTR(D2COMMON, GetAffixTxt, AutoMagicTxt*, __stdcall, (int affix), -10174) // Valid for ItemData->Suffix and Prefix
@@ -205,6 +206,7 @@ _d2f D2Funcs = {0}; void SetupD2Funcs() {
 		EXFUNCPTR(FOG, ReadBits, unsigned int, __stdcall, (BitBuffer* pBuffer, int nBits), -10130)
 		EXFUNCPTR(FOG, ReadBitsSigned, signed int, __stdcall, (BitBuffer* pBuffer, int nBits), -10129)
 		EXFUNCPTR(FOG, DecompressPacket, unsigned int, __fastcall, (BYTE *dest, DWORD memory_size, BYTE *source, DWORD src_size), -10224)
+		EXFUNCPTR(FOG, GetBinTxtRowByText, int, __stdcall, (void *pLink, const char* szText, DWORD nColumn), -10217)
 
 		//STORM
 		EXFUNCPTR(STORM, CloseArchive, BOOL, __stdcall, (HANDLE hArchive), -252)
