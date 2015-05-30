@@ -413,6 +413,9 @@ void Misc::Log(char* Msg...)
 		fprintf(plik, "[%s] %s\n", sTime, text);
 		fclose(plik);
 	}
+#if _DEBUG
+	OutputDebugStringA(text);
+#endif
 	delete[] text;
 }
 
@@ -435,6 +438,9 @@ void Misc::Log(wchar_t* Msg, ...)
 		fwprintf(plik, L"[%s] %s\n", sTime, text);
 		fclose(plik);
 	}
+#if _DEBUG
+	OutputDebugStringW(text);
+#endif
 	delete[] text;
 }
 
