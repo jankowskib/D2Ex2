@@ -208,6 +208,7 @@ BOOL D2Ex::Init()
 #define CUSTOM 0
 #ifdef VER_111B
 	//PATCHES---TYPE-DEST_ADDRESS---------------WHAT_PATCH-------------------------SIZE---DESC-----
+	Misc::Patch(CUSTOM, GetDllOffset("Storm.dll", -268) + 298, FILE_SHARE_WRITE | FILE_SHARE_READ, 1, "Enable share-mode for files"); // Credit: Yohann Nicolas, Plugy source
 
 	Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x652C4), (DWORD)ExOptions::UnregisterMenuMsgs, 21, "Menu messages replacement");
 	Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x8EED7), (DWORD)ExOptions::UnregisterMenuMsgs, 21, "Menu messages replacement");
@@ -316,6 +317,7 @@ BOOL D2Ex::Init()
 #endif
 
 #elif defined VER_113D
+Misc::Patch(CUSTOM, GetDllOffset("Storm.dll", -268) + 298, FILE_SHARE_WRITE | FILE_SHARE_READ, 1, "Enable share-mode for files"); // Credit: Yohann Nicolas, Plugy source
 
 #ifdef D2EX_CUSTOM_CUBE_RECIPES
 Misc::Patch(JUMP, GetDllOffset("D2Common.dll", 0x5B520), (DWORD)ExCube::TXT_CubemainOutputLinker, 5, "CubeMain.Txt output field compiler replacement");
