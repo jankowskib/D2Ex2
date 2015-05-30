@@ -52,7 +52,7 @@ namespace ExMultiRes
 
 	void __stdcall D2CLIENT_OnResolutionSet()
 	{
-		int res = Misc::RegReadDword("SOFTWARE\\Blizzard Entertainment\\Diablo II", "Resolution", 2);
+		int res = Misc::RegReadDword("SOFTWARE\\Blizzard Entertainment\\Diablo II", "ExResolution", 2);
 		D2CLIENT_SetResolution(res);
 	}
 

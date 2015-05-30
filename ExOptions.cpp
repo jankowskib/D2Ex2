@@ -734,7 +734,7 @@ BOOL __fastcall ExOptions::ResolutionOpt(D2MenuEntry* ptEntry, StormMsg* pMsg)
 	ExMultiRes::D2GFX_GetModeParams(r, &x, &y);
 	DEBUGMSG("Changing resolution to %dx%d", x, y);
 	ExMultiRes::D2CLIENT_SetResolution(r);
-	Misc::RegWriteDword("SOFTWARE\\Blizzard Entertainment\\Diablo II", "Resolution", r);
+	Misc::RegWriteDword("SOFTWARE\\Blizzard Entertainment\\Diablo II", "ExResolution", r);
 
 #endif
 
