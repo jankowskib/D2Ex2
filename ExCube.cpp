@@ -24,6 +24,19 @@
 
 
 /*
+Check if given name is valid item type
+return: row number if found, -1 otherwise
+*/
+int ITEMS_ValidateItemType(const char* szItemCode)
+{
+	DWORD code = Misc::TransCode(szItemCode);
+	int idx = D2Funcs.FOG_GetBinTxtIndex((*D2Vars.D2COMMON_sgptDataTables)->pItemsType, code, 0);
+	if (idx > 0)
+		return idx;
+	return -1;
+}
+
+/*
 	Check if given name is valid item code
 	return: row number if found, -1 otherwise
 */
@@ -107,8 +120,17 @@ BOOL __fastcall ExCube::TXT_CubemainOutputLinker(const char *szText, CubeMainTxt
 					return FALSE;
 
 				pField->Type = CUBEOUTPUT_PORTAL;
-				pField->nParam = id;
+				pField->nLevel = id % 255;
 			}
+		}
+		else if (keyword == "act" && pField->Type == CUBEOUTPUT_PORTAL) {
+			string param = match[2].str();
+
+			int id = atoi(param.c_str());
+			if (id == 0)
+				return FALSE;
+
+			pField->nParam == id % 5; // Limit to 5 Acts
 		}
 		// -- My addition to original ends here
 		else if (keyword == "qty") {
@@ -174,7 +196,11 @@ BOOL __fastcall ExCube::TXT_CubemainOutputLinker(const char *szText, CubeMainTxt
 		}
 		else if (keyword.length() <= 4 && ITEMS_ValidateItemCode(keyword.c_str()) >= 0) { // Test if it's an item code
 			pField->Item = ITEMS_ValidateItemCode(keyword.c_str());
-			pField->Type = CUBEOUTPUT_NORMALITEM;
+			pField->Type = CUBEOUTPUT_ITEM;
+		}
+		else if (keyword.length() <= 4 && ITEMS_ValidateItemType(keyword.c_str()) >= 0) { // Test if it's an item type
+			pField->Item = ITEMS_ValidateItemType(keyword.c_str());
+			pField->Type = CUBEOUTPUT_ITEMTYPE;
 		}
 		else if (keyword.length() > 4 && ITEMS_IsUniqueItemName(keyword.c_str()) >= 0) {
 			int nTxtIdx = ITEMS_IsUniqueItemName(keyword.c_str());
@@ -188,7 +214,7 @@ BOOL __fastcall ExCube::TXT_CubemainOutputLinker(const char *szText, CubeMainTxt
 			pField->nQuality = ITEM_UNIQUE;
 			pField->ItemID = nTxtIdx + 1; // Not sure intention of this
 			pField->ILvl = pTxt->wLvl;
-			pField->Type = CUBEOUTPUT_UNIQUESETITEM;
+			pField->Type = CUBEOUTPUT_ITEM;
 		}
 		else if (keyword.length() > 4 && ITEMS_IsSetItemName(keyword.c_str()) >= 0) {
 			int nTxtIdx = ITEMS_IsSetItemName(keyword.c_str());
@@ -202,7 +228,7 @@ BOOL __fastcall ExCube::TXT_CubemainOutputLinker(const char *szText, CubeMainTxt
 			pField->nQuality = ITEM_SET;
 			pField->ItemID = nTxtIdx + 1; // Not sure intention of this
 			pField->ILvl = pTxt->wLvl;
-			pField->Type = CUBEOUTPUT_UNIQUESETITEM;
+			pField->Type = CUBEOUTPUT_ITEM;
 		}
 		else {
 			Misc::Log("TXT: Unknown keyword in CubeMain.Txt Output#%d (row #%d): '%s'", nOffset, nRow, keyword.c_str());

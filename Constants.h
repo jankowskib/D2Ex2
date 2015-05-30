@@ -29,8 +29,8 @@
 enum CubeOutputTypes {
 	CUBEOUTPUT_USETYPE = -1,
 	CUBEOUTPUT_USEITEM = -2,
-	CUBEOUTPUT_NORMALITEM = -3,
-	CUBEOUTPUT_UNIQUESETITEM = -4,
+	CUBEOUTPUT_ITEMTYPE = -3,
+	CUBEOUTPUT_ITEM = -4,
 	CUBEOUTPUT_PORTAL = 1,
 	CUBEOUTPUT_UBERQUEST,
 	CUBEOUTPUT_UBERQUEST_FINAL,
@@ -909,6 +909,7 @@ namespace CellFiles
 	char * const MULTIRES = "data\\D2Ex\\ExMultiRes";
 	char * const CONTROLPANEL = "data\\global\\ui\\PANEL\\CtrlPnl7";
 	char * const CONTROLPANEL800 = "data\\global\\ui\\PANEL\\800CtrlPnl7";
+	char * const BORDERFRAME800 = "data\\global\\ui\\PANEL\\800BorderFrame";
 }
 
 namespace ResImages

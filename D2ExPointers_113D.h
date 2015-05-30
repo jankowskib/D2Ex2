@@ -207,6 +207,7 @@ _d2f D2Funcs = {0}; void SetupD2Funcs() {
 		EXFUNCPTR(FOG, ReadBitsSigned, signed int, __stdcall, (BitBuffer* pBuffer, int nBits), -10129)
 		EXFUNCPTR(FOG, DecompressPacket, unsigned int, __fastcall, (BYTE *dest, DWORD memory_size, BYTE *source, DWORD src_size), -10224)
 		EXFUNCPTR(FOG, GetBinTxtRowByText, int, __stdcall, (void *pLink, const char* szText, DWORD nColumn), -10217)
+		EXFUNCPTR(FOG, GetBinTxtIndex, int, __stdcall, (void *pLink, DWORD dwOrigin, DWORD _1), -10213)
 
 		//STORM
 		EXFUNCPTR(STORM, CloseArchive, BOOL, __stdcall, (HANDLE hArchive), -252)

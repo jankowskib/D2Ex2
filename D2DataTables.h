@@ -647,10 +647,14 @@ union
 {
 	struct
 	{
-		BYTE nQuality;               //0x06
-		BYTE nQuantity;              //0x07
+		BYTE nQuality;
+		BYTE nQuantity;
 	};
-
+	struct
+	{
+		BYTE nLevel;
+		BYTE nAct;				
+	};						   //for CUBE_OUTPUT_PORTAL
 	WORD nParam;               //0x06
 };
 BYTE	Type;				//0x08
@@ -675,6 +679,7 @@ BYTE	bLadder;			//0x01
 BYTE	bMindiff;			//0x02
 BYTE	bClass;				//0x03
 BYTE	bOp;				//0x04
+BYTE	_1[3];				//0x05
 DWORD	dwParam;			//0x08
 DWORD	dwValue;			//0x0C
 WORD	bNuminputs;			//0x10

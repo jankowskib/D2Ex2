@@ -379,9 +379,6 @@
     <ClInclude Include="ExExtendedLevels.h">
       <Filter>Header Files\Main</Filter>
     </ClInclude>
-    <ClInclude Include="..\d2warden\d2warden-pvp\LCube.h">
-      <Filter>Header Files\Main</Filter>
-    </ClInclude>
     <ClInclude Include="ExCube.h">
       <Filter>Header Files\Main</Filter>
     </ClInclude>

@@ -296,7 +296,6 @@ EXIT 0</Command>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\d2warden\d2warden-pvp\LCube.h" />
     <ClInclude Include="ArrayEx.h" />
     <ClInclude Include="BlizzardSmartPointer.h" />
     <ClInclude Include="CollisionMap.h" />
