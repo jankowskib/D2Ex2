@@ -474,6 +474,40 @@ __declspec(naked) void D2Stubs::D2CLIENT_CharInfoTipHook()
 
 #ifdef D2EX_MULTIRES
 
+__declspec(naked) void D2Stubs::D2CLIENT_FixMercScreenDesc_STUB()
+{
+	__asm
+	{	
+		call ExMultiRes::D2CLIENT_FixMercScreenDesc
+		jmp D2Funcs.D2CLIENT_DrawMercName
+	}
+}
+
+__declspec(naked) void D2Stubs::D2CLIENT_FixMercScreenDesc2_STUB()
+{
+	__asm
+	{
+		call ExMultiRes::D2CLIENT_FixMercScreenDescRestore
+		pop ebx
+		add  esp, 48h
+		ret
+	}
+}
+
+
+__declspec(naked) void D2Stubs::D2CLIENT_SetMousePos_STUB()
+{
+	__asm 
+	{
+		push edi // nY
+		push ebx // nX
+
+		call ExMultiRes::D2CLIENT_SetMousePos
+
+		ret
+	}
+}
+
 __declspec(naked) void D2Stubs::D2CLIENT_SetResolution_STUB()
 {
 	__asm

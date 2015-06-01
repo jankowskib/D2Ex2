@@ -44,6 +44,9 @@ namespace D2ASMFuncs
 
 namespace D2Stubs
 {
+	void D2CLIENT_FixMercScreenDesc_STUB();
+	void D2CLIENT_FixMercScreenDesc2_STUB();
+	void D2CLIENT_SetMousePos_STUB();
 	void D2CLIENT_GetPropertyStringDamage_STUB();
 	void D2CLIENT_GetPropertyString_STUB();
 	int __stdcall D2COMMON_GetMercCost(UnitAny* pPlayer);

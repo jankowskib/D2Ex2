@@ -71,6 +71,10 @@ _d2f D2Funcs = {0}; void SetupD2Funcs() {
 		EXFUNCPTR(D2CLIENT, ClearScreen4, void, __fastcall, (), 0x1CA90)
 
 		EXFUNCPTR(D2CLIENT, CalcShake, void, __stdcall, (int* xShake, int* yShake), 0xB5EE0)
+		EXFUNCPTR(D2CLIENT, DrawMercName, void, __stdcall, (UnitAny* pMerc), 0x941B0)
+		EXFUNCPTR(D2CLIENT, DrawQuestPanel, void, __stdcall, (), 0x8D810) // do not use accidentally!
+		
+		
 
 		//D2COMMON
 		//Skill Funcs

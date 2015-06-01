@@ -42,6 +42,7 @@ namespace ExMultiRes
 	static ExCellFile* cExMultiResResources;
 	static ExCellFile* cControlPanel;
 	static ExCellFile* cControlPanel800;
+	static ExCellFile* c800BorderFrame;
 
 	vector<ResMode> lResModes;
 	int *gptBufferXLookUpTable;
@@ -128,6 +129,36 @@ namespace ExMultiRes
 		*D2Vars.D2CLIENT_UiCover = UiCover;
 		D2Funcs.D2GFX_SetScreenShift(*D2Vars.D2CLIENT_ScreenXShift);
 
+	}
+
+
+	//Wrapper on D2CLIENT.6FAC4630
+	void __stdcall D2CLIENT_SetMousePos(int mX, int mY)
+	{
+		if (D2Vars.D2CLIENT_UIModes[UI_WPMENU] || D2Vars.D2CLIENT_UIModes[UI_MERC] || D2Vars.D2CLIENT_UIModes[UI_CHARACTER] || D2Vars.D2CLIENT_UIModes[UI_QUEST] 
+			|| D2Vars.D2CLIENT_UIModes[UI_INVENTORY] || D2Vars.D2CLIENT_UIModes[UI_SKILL]) {
+			return;
+		}
+
+		D2EXASSERT((mX > 0 && mY > 0), "Invalid position for mouse!")
+		int xPos, yPos;
+
+		if (!*D2Vars.D2GFX_WindowMode) {
+			xPos = mX;
+			yPos = mY;
+			SetCursorPos(mX, mY);
+		}
+		else
+		{
+			RECT rect;
+			GetWindowRect(D2Funcs.D2GFX_GetHwnd(), &rect);
+			xPos = mX + rect.left + GetSystemMetrics(SM_CXDLGFRAME);
+			yPos = mY + rect.top + GetSystemMetrics(SM_CYCAPTION);
+			SetCursorPos(xPos, yPos);
+		}
+
+		*D2Vars.D2CLIENT_MouseX = mX;
+		*D2Vars.D2CLIENT_MouseY = mY;
 	}
 
 // D2GFX funcs
@@ -804,18 +835,28 @@ namespace ExMultiRes
 			int xLeft = -1;
 			int xRight = -1;
 
-			if (pTxt->Grid.dwLeft > 300)
+
+			if (nRecord == INV_REC_HIRELING)
 			{
-				xLeft = pTxt->Inventory.dwLeft == -1 ? -1 : (*D2Vars.D2CLIENT_ScreenWidth - (640 - pTxt->Inventory.dwLeft));
-				xRight = pTxt->Inventory.dwRight == -1 ? -1 : (*D2Vars.D2CLIENT_ScreenWidth - (640 - pTxt->Inventory.dwRight));
+				pTxt->Grid.dwLeft = 0;
+				pTxt->Grid.dwRight = 321;
+				pTxt->Grid.dwTop = 0;
+				pTxt->Grid.dwBottom = 441;
+
+			}
+
+			if ((int)pTxt->Grid.dwLeft > 300)
+			{
+				xLeft = *D2Vars.D2CLIENT_ScreenWidth - (640 - pTxt->Inventory.dwLeft);
+				xRight =*D2Vars.D2CLIENT_ScreenWidth - (640 - pTxt->Inventory.dwRight);
 			}
 			else
 			{
 				xLeft = pTxt->Inventory.dwLeft;
 				xRight = pTxt->Inventory.dwRight;
 			}
-			xTop = pTxt->Inventory.dwTop == -1 ? -1 : (*D2Vars.D2CLIENT_ScreenHeight / 2) - ((pTxt->Inventory.dwBottom - pTxt->Inventory.dwTop) / 2);   // (*D2Vars.D2CLIENT_ScreenHeight - (480 - pTxt->Inventory.dwTop));
-			xBottom = pTxt->Inventory.dwBottom == -1 ? -1 : xTop + (pTxt->Inventory.dwBottom - pTxt->Inventory.dwTop); //  (*D2Vars.D2CLIENT_ScreenHeight - (480 - pTxt->Inventory.dwBottom));
+			xTop = (*D2Vars.D2CLIENT_ScreenHeight / 2) - ((pTxt->Inventory.dwBottom - pTxt->Inventory.dwTop) / 2);   // (*D2Vars.D2CLIENT_ScreenHeight - (480 - pTxt->Inventory.dwTop));
+			xBottom = xTop + pTxt->Inventory.dwBottom - pTxt->Inventory.dwTop; //  (*D2Vars.D2CLIENT_ScreenHeight - (480 - pTxt->Inventory.dwBottom));
 			
 			pOut->dwLeft = xLeft;
 			pOut->dwRight = xRight;
@@ -920,6 +961,11 @@ namespace ExMultiRes
 				xRight = pLayout->dwRight;
 			}
 			int xInvBottomOffset = pTxt->Inventory.dwTop - pLayout->dwTop;
+			if (nRecord == INV_REC_HIRELING)
+			{
+				xInvBottomOffset += 218;
+			}
+
 
 			int xTop = pLayout->dwTop == -1 ? -1 : (*D2Vars.D2CLIENT_ScreenHeight / 2) - ((pTxt->Inventory.dwBottom - pTxt->Inventory.dwTop) / 2) - xInvBottomOffset;   //(*D2Vars.D2CLIENT_ScreenHeight - (480 - pLayout->dwTop));
 			int xBottom = pLayout->dwBottom == -1 ? -1 : xTop + (pLayout->dwBottom - pLayout->dwTop);    //(*D2Vars.D2CLIENT_ScreenHeight - (480 - pLayout->dwBottom));
@@ -934,6 +980,105 @@ namespace ExMultiRes
 
 	}
 
+	void __stdcall D2CLIENT_FixMercScreenDesc()
+	{
+		if (GFX_GetResolutionMode() != 2) {
+			*D2Vars.D2CLIENT_UIPanelDrawYOffset -= 42;
+		}
+	}
+
+	void __stdcall D2CLIENT_FixMercScreenDescRestore()
+	{
+		if (GFX_GetResolutionMode() != 2) {
+			*D2Vars.D2CLIENT_UIPanelDrawYOffset += 42;
+		}
+	}
+
+
+
+	static void DrawLeftBorder(const int xOffset = 0, const int yOffset = 0)
+	{
+		CellContext cc = { 0 };
+		cc.pCellFile = c800BorderFrame->GetCF();
+
+		cc.nCellNo = 0;
+		D2Funcs.D2GFX_DrawCellContext(&cc, 0 + xOffset, 253 + yOffset, -1, DRAW_MODE_NORMAL, 0);
+		cc.nCellNo = 1;
+		D2Funcs.D2GFX_DrawCellContext(&cc, 256 + xOffset, 63 + yOffset, -1, DRAW_MODE_NORMAL, 0);
+		cc.nCellNo = 2;
+		D2Funcs.D2GFX_DrawCellContext(&cc, 0 + xOffset, 484 + yOffset, -1, DRAW_MODE_NORMAL, 0);
+		cc.nCellNo = 3;
+		D2Funcs.D2GFX_DrawCellContext(&cc, 0 + xOffset, 553 + yOffset, -1, DRAW_MODE_NORMAL, 0);
+		cc.nCellNo = 4;
+		D2Funcs.D2GFX_DrawCellContext(&cc, 256 + xOffset, 553 + yOffset, -1, DRAW_MODE_NORMAL, 0);
+	}
+
+
+	static void DrawRightBorder(const int xOffset = 0, const int yOffset = 0)
+	{
+		CellContext cc = { 0 };
+		cc.pCellFile = c800BorderFrame->GetCF();
+
+		cc.nCellNo = 5;
+		D2Funcs.D2GFX_DrawCellContext(&cc, 400 + xOffset, 63 + yOffset, -1, DRAW_MODE_NORMAL, 0);
+		cc.nCellNo = 6;
+		D2Funcs.D2GFX_DrawCellContext(&cc, 544 + xOffset, 253 + yOffset, -1, DRAW_MODE_NORMAL, 0);
+		cc.nCellNo = 7;
+		D2Funcs.D2GFX_DrawCellContext(&cc, 713 + xOffset, 484 + yOffset, -1, DRAW_MODE_NORMAL, 0);
+		cc.nCellNo = 8;
+		D2Funcs.D2GFX_DrawCellContext(&cc, 544 + xOffset, 553 + yOffset, -1, DRAW_MODE_NORMAL, 0);
+		cc.nCellNo = 9;
+		D2Funcs.D2GFX_DrawCellContext(&cc, 400 + xOffset, 553 + yOffset, -1, DRAW_MODE_NORMAL, 0);
+	}
+
+	
+	/*
+		Replaced to draw left&right border on 800x600+ and with gUICover == COVER_NONE
+	*/
+	void __stdcall DrawBorders()
+	{
+		int uiCover = *D2Vars.D2CLIENT_UiCover;
+
+		if (GFX_GetResolutionMode() == 2) {
+			if (uiCover == COVER_LEFT || uiCover == COVER_BOTH)
+				DrawRightBorder();
+
+			if (uiCover == COVER_RIGHT || uiCover == COVER_BOTH)
+				DrawLeftBorder();
+			if (uiCover == COVER_NONE) {
+				if (D2Vars.D2CLIENT_UIModes[UI_WPMENU] || D2Vars.D2CLIENT_UIModes[UI_MERC] || D2Vars.D2CLIENT_UIModes[UI_CHARACTER] || D2Vars.D2CLIENT_UIModes[UI_QUEST]) {
+					DrawLeftBorder();
+				}
+				if (D2Vars.D2CLIENT_UIModes[UI_INVENTORY] || D2Vars.D2CLIENT_UIModes[UI_SKILL]) {
+					DrawRightBorder();
+				}
+			}
+		}
+		else
+		{
+			/*
+			//temporary
+			if (uiCover == COVER_LEFT || uiCover == COVER_BOTH)
+				DrawLeftBorder(GFX_GetScreenWidth() - 400, GFX_GetScreenHeight() / 2 - 279);
+			if (uiCover == COVER_RIGHT || uiCover == COVER_BOTH)
+				DrawRightBorder(-400, GFX_GetScreenHeight() / 2 - 279);
+			*/
+
+			if (uiCover == COVER_NONE) {
+				if (D2Vars.D2CLIENT_UIModes[UI_WPMENU]){
+					DrawRightBorder(-400, GFX_GetScreenHeight() / 2 - 279 - 42);
+				}
+				else if (D2Vars.D2CLIENT_UIModes[UI_MERC] || D2Vars.D2CLIENT_UIModes[UI_CHARACTER] || D2Vars.D2CLIENT_UIModes[UI_QUEST]) {
+					DrawRightBorder(-400, GFX_GetScreenHeight() / 2 - 279);
+				}
+				
+				if (D2Vars.D2CLIENT_UIModes[UI_INVENTORY] || D2Vars.D2CLIENT_UIModes[UI_SKILL]) {
+					DrawLeftBorder(GFX_GetScreenWidth() - 400, GFX_GetScreenHeight() / 2 - 279);
+				}
+			}
+		}
+	}
+	
 	void __stdcall DrawControlPanel()
 	{
 		CellContext cc = { 0 };
@@ -1009,6 +1154,7 @@ namespace ExMultiRes
 			cExMultiResResources = new ExCellFile(CellFiles::MULTIRES);
 			cControlPanel = new ExCellFile(CellFiles::CONTROLPANEL);
 			cControlPanel800  = new ExCellFile(CellFiles::CONTROLPANEL800);
+			c800BorderFrame = new ExCellFile(CellFiles::BORDERFRAME800);
 		}
 		catch (const CellLoadError&)
 		{
@@ -1024,6 +1170,7 @@ namespace ExMultiRes
 		delete cExMultiResResources;
 		delete cControlPanel;
 		delete cControlPanel800;
+		delete c800BorderFrame;
 		cControlPanel = 0;
 		cExMultiResResources = 0;
 	}

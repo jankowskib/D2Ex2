@@ -45,6 +45,7 @@ namespace ExMultiRes
 	void __stdcall D2CLIENT_OnResolutionSet();
 	void __fastcall D2CLIENT_SetResolution(int nMode);
 	void __fastcall D2CLIENT_ResizeView(int UiCover);
+	void __stdcall D2CLIENT_SetMousePos(int mX, int mY);
 	BOOL __stdcall D2GFX_InitWindow(HINSTANCE hInstance, LRESULT(__stdcall *pWndProc)(HWND, UINT, WPARAM, LPARAM), int nRenderMode, BOOL bWindowed);
 
 	void __stdcall  D2GFX_GetModeParams(int nMode, unsigned int* pWidth, unsigned int* pHeight);
@@ -72,6 +73,9 @@ namespace ExMultiRes
 	void __stdcall GetInventoryField(int nRecord, int nScreenMode, InventoryLayout *pOut, int nField);
 	
 	// GFX fixups
+	void __stdcall D2CLIENT_FixMercScreenDesc();
+	void __stdcall D2CLIENT_FixMercScreenDescRestore();
+	void __stdcall DrawBorders();
 	void __stdcall DrawControlPanel();
 	void DrawMissingPieces();
 

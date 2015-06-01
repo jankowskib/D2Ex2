@@ -205,6 +205,7 @@ BOOL D2Ex::Init()
 #define JUMP 0xE9
 #define NOP 0x90
 #define RET 0xC3
+#define XOR 0x33
 #define CUSTOM 0
 #ifdef VER_111B
 	//PATCHES---TYPE-DEST_ADDRESS---------------WHAT_PATCH-------------------------SIZE---DESC-----
@@ -514,11 +515,38 @@ Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x1B7C1), (DWORD)ExOptions::Regis
 	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x21201), 0x7D, 1, "Button OnDown Callback Fixture II (Right Side)");
 
 
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x3FD33), (WORD)-267, 2, "Waypoint Panel Fixture I - background");
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x3FD65), (WORD)-267, 2, "Waypoint Panel Fixture II - background");
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x3FD9C), (WORD)-91, 1, "Waypoint Panel Fixture III - tabs");
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x3FDC9), (BYTE)-91, 1, "Waypoint Panel Fixture IV - tabs");
 
+	//-- left side
+	Misc::Patch(NOP, GetDllOffset("D2Client.dll", 0x3F86C), 0, 38, "Waypoint Panel Fixture - screen shift");
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x3F86C) + 38, 0xEB, 1, "Waypoint Panel Fixture - screen shift");
+	Misc::Patch(NOP, GetDllOffset("D2Client.dll", 0x3CE28), 0, 38, "Merc Panel Fixture - screen shift");
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x3CE28 + 38), 0xEB, 1, "Merc Panel Fixture - screen shift");
+	Misc::Patch(NOP, GetDllOffset("D2Client.dll", 0x3E47B), 0, 38, "Character Panel Fixture - screen shift");
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x3E47B + 38), 0xEB, 1, "Character Panel Fixture - screen shift");
+	Misc::Patch(XOR, GetDllOffset("D2Client.dll", 0x8D4C9), 0xDB, 39, "Quest Panel Fixture - screen shift (xor ebx, ebx)");
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x8D4C9 + 39), 0x81E9, 1, "Quest Panel Fixture - screen shift");
+	//-- right side
+	Misc::Patch(NOP, GetDllOffset("D2Client.dll", 0x3E181), 0, 86, "Inventory Panel Fixture - screen shift");
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x3E181 + 86), 0xEB, 1, "Inventory Panel Fixture - screen shift");
+	Misc::Patch(NOP, GetDllOffset("D2Client.dll", 0x3D47B), 0, 98, "Skill Tree Panel Fixture - screen shift");
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x3D47B + 98), 0xEB, 1, "Skill Tree Panel Fixture - screen shift");
+
+	Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x9F3AE), (DWORD)D2Stubs::D2CLIENT_FixMercScreenDesc_STUB, 5, "Fix Y offset of merc ui");
+	Misc::Patch(JUMP, GetDllOffset("D2Client.dll", 0x9F3AE) + 43, (DWORD)D2Stubs::D2CLIENT_FixMercScreenDesc2_STUB, 5, "Fix Y offset of merc ui - restore");
+		
+
+
+	Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x6F344 - 50), (DWORD)ExMultiRes::DrawBorders, 50, "GFX_DrawBorders");
 	Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x6F344), (DWORD)ExMultiRes::DrawControlPanel, 5, "GFX_DrawControlPanel");
 	Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x4549F), (DWORD)ExMultiRes::D2CLIENT_OnResolutionSet, 40, "OnGameLoad resolution set");
 	Misc::Patch(JUMP, GetDllOffset("D2Client.dll", 0xC4510), (DWORD)ExMultiRes::D2CLIENT_OnResolutionSet, 8, "OnGameLoad resolution set (menu entry)");
 
+	Misc::Patch(JUMP, GetDllOffset("D2Client.dll", 0x14630), (DWORD)D2Stubs::D2CLIENT_SetMousePos_STUB, 5, "OnGameLoad resolution set (menu entry)");
+	
 
 	Misc::WriteDword((DWORD*)&((GFXHelpers*)GetDllOffset("D2Gfx.dll", 0x10BFC))->FillYBufferTable, (DWORD)&ExMultiRes::D2GFX_FillYBufferTable);
 
