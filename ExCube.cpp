@@ -130,7 +130,7 @@ BOOL __fastcall ExCube::TXT_CubemainOutputLinker(const char *szText, CubeMainTxt
 			if (id == 0)
 				return FALSE;
 
-			pField->nParam = id % 5; // Limit to 5 Acts
+			pField->nAct = id % 5; // Limit to 5 Acts
 		}
 		// -- My addition to original ends here
 		else if (keyword == "qty") {
