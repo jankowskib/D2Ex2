@@ -711,15 +711,16 @@ int __stdcall D2Ex::OnGameEnter(int nLevel)
 	if (lagometer == exnull_t && bLagometer)
 		lagometer = gExGUI->add(new ExLagometer(*D2Vars.D2GFX_GfxMode > 2 ? (*D2Vars.D2CLIENT_ScreenWidth / 2 - 127) : 273, *D2Vars.D2CLIENT_ScreenHeight - 29));
 
-	ExpAtJoin = D2Funcs.D2COMMON_GetStatSigned(D2Funcs.D2CLIENT_GetPlayer(), STAT_EXPERIENCE, 0);
-	TickAtJoin = GetTickCount();
-	if (AutoShowMap)
-	{
-		D2Funcs.D2CLIENT_SetUiVar(UI_AUTOMAP, 0, 1);
-		D2Vars.D2CLIENT_UIModes[UI_AUTOMAP] = 1;
+	if (!TickAtJoin) {
+		ExpAtJoin = D2Funcs.D2COMMON_GetStatSigned(D2Funcs.D2CLIENT_GetPlayer(), STAT_EXPERIENCE, 0);
+		TickAtJoin = GetTickCount();
+		if (AutoShowMap)
+		{
+			D2Funcs.D2CLIENT_SetUiVar(UI_AUTOMAP, 0, 1);
+			D2Vars.D2CLIENT_UIModes[UI_AUTOMAP] = 1;
+		}
+		ExInput::DefineBindings();
 	}
-	ExInput::DefineBindings();
-
 	return D2Funcs.D2COMMON_GetActNoByLevelNo(nLevel);
 }
 
@@ -734,6 +735,7 @@ void D2Ex::OnGameLeave()
 
 	fnRendererCallbacks * fns = *D2Vars.D2GFX_pfnDriverCallback;
 	fns->ClearCaches();
+	TickAtJoin = 0; 
 }
 
 void D2Ex::CleanUp()
