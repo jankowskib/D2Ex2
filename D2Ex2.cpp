@@ -684,6 +684,7 @@ void D2Ex::Loop()
 
 #ifdef D2EX_PVPGN_EXT // Downloading works only on modified server - don't check if we don't support the downlaod packet
 	ExDownload::DownloadLoop();
+	ExEvents::EventsLoop();
 #endif
 
 	++(*D2Vars.D2CLIENT_FramesDrawnGame);

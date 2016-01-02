@@ -21,22 +21,9 @@
 #ifndef _EXEVENTS_H__
 #define _EXEVENTS_H__
 
-#include "ExImage.h"
-#include "ExTextBox.h"
-
 using namespace std;
 
-struct EventText
-{
-	ExTextBox* Text;
-	short SoundId;
-};
-
-struct EventIcon
-{
-	ExImage* Image;
-	DWORD UnitId;
-};
+#include "ExControlManager.h"
 
 #pragma pack(push, 1)
 
@@ -54,6 +41,15 @@ enum ExEventMsgs
 enum ExEventOption
 {
 	EXOP_RESPAWNTIME = 1,
+	EXOP_ENABLESPECTATOR  = 2,
+};
+
+struct EventItem
+{
+	ExEventMsgs type;
+	exId controlId;
+	DWORD timer;
+	void *arg;
 };
 
 struct ExEvent //(size 0x4)
@@ -119,9 +115,7 @@ namespace ExEvents
 	int __fastcall OnEvent(BYTE* aPacket);
 	int __fastcall OnTextEvent(ExEvent *Dane);
 
-	DWORD WINAPI TextFadeThread(void* Params);
-	DWORD WINAPI IconFadeThread(void* Params);
-	DWORD WINAPI KillCountEvent(void* Params);
+	void EventsLoop();
 }
 
 #endif

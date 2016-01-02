@@ -52,7 +52,7 @@ ExTextBox::ExTextBox(int tX, int tY, int tTextColor, int tTextFont, string(*fLab
 bool ExTextBox::InitStatic(int tX, int tY, int tTextColor, int tTextFont, wstring szLabel, void(*tevent_onClick)(exId))
 {
 	TextColor = tTextColor;
-	TransLvl = 5;
+	TransLvl = DRAW_MODE_NORMAL;
 	aFont = tTextFont;
 	bHoverable = true;
 	Hoover = L"";
@@ -146,9 +146,9 @@ bool ExTextBox::isCallBack()
 }
 
 
-void ExTextBox::SetTransLvl(int aLevel)
+void ExTextBox::SetTransLvl(D2DrawModes transLvl)
 {
-	TransLvl = aLevel;
+	TransLvl = transLvl;
 }
 
 void ExTextBox::SetHooverable(bool how)

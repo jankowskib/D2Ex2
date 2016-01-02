@@ -52,6 +52,7 @@ public:
 	virtual void SetText(wstring);
 	virtual void SetHooverText(wstring);
 	virtual void SetColor(unsigned int col);
+	virtual void SetTransLvl(D2DrawModes lvl);
 
 	virtual int GetHeight() const { return cHeight; }
 	virtual int GetWidth() const { return cWidth; }
@@ -67,6 +68,7 @@ public:
 
 protected:
 	friend ExControlManager;
+
 
 	int aFont;
 
@@ -84,6 +86,5 @@ protected:
 	bool bBeingPressed;
 	bool bBeingMoved;
 	bool bBeingSelected;
-
 };
 #endif

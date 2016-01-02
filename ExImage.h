@@ -32,7 +32,7 @@ public:
 	bool isPressed(DWORD Sender, WPARAM wParam) override;
 	~ExImage(void);
 	void Relocate();
-	void SetTransLvl(int aLevel);
+	void SetTransLvl(D2DrawModes transLvl);
 	void SetHooverText(wstring sLabel) override { Hoover = sLabel; }
 	int TransLvl;
 	int ColorShift;

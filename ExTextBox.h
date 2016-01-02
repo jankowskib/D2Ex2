@@ -46,7 +46,7 @@ public:
 	void SetHooverText(wstring sLabel) override { Hoover = sLabel; }
 	void SetText(string Text);
 	void SetTextSimple(wstring wText);
-	void SetTransLvl(int aLevel);
+	void SetTransLvl(D2DrawModes transLvl);
 	void SetHooverable(bool how);
 	void SetColor(unsigned int col) { TextColor = col;  }
 	bool isCallBack();

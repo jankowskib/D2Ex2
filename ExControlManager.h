@@ -53,7 +53,8 @@ enum ExMsgs
 	EXMSG_FRAME,
 	EXMSG_HOOVERTEXT,
 	EXMSG_HOOVERABLE,
-	EXMSG_COLOR
+	EXMSG_COLOR,
+	EXMSG_TRANSPARENCY,
 };
 
 struct ExMessage  {
@@ -141,6 +142,12 @@ struct ExMessageColor : ExMessage {
 	ExMessageColor(exId id, unsigned int color) : ExMessage(id) { type = EXMSG_COLOR; this->color = color; }
 };
 
+struct ExMessageTransparency : ExMessage {
+	D2DrawModes nTransLvl;
+	ExMessageTransparency(exId id, D2DrawModes nTransLvl) : ExMessage(id) { type = EXMSG_TRANSPARENCY; this->nTransLvl = nTransLvl; }
+};
+
+
 typedef list<unique_ptr<ExControl>> control_t;
 typedef control_t::iterator control_it;
 typedef control_t::const_iterator control_const_it;
@@ -176,7 +183,8 @@ public:
 	void setState(exId controlId, ExControl::States state);
 	void setChild(exId controlId, exId childId, bool what); // if what is true then child is added, otherwise it's removed
 	void setParent(exId controlId, exId parentId, bool what); // if what is true then parent is added, otherwise it's removed
-	
+	void setTransparency(exId controlId, D2DrawModes transLvl);
+
 	// Getters (block observer thread)
 	string getType(exId controlId); // return typeid raw_string with control class name
 	int getX(exId controlId);

@@ -169,6 +169,13 @@ void ExControlManager::setAlign(exId controlId, ExControl::Align x, ExControl::A
 	sendRequest(msg);
 }
 
+void ExControlManager::setTransparency(exId controlId, D2DrawModes transLvl)
+{
+	ExMessageTransparency * msg = new ExMessageTransparency(controlId, transLvl);
+	sendRequest(msg);
+}
+
+
 control_it ExControlManager::find(const exId controlId)
 {
 	for (control_it c = controls.begin(); c != controls.end(); ++c)
@@ -448,6 +455,17 @@ bool ExControlManager::consume_once()
 				break;
 		}
 		c->get()->SetHooverText(exmsg->text);
+	}
+	break;
+	case EXMSG_TRANSPARENCY:
+	{
+		ExMessageTransparency* exmsg = (ExMessageTransparency*)msg;
+		control_const_it c = find_ro(exmsg->id);
+		if (c == controls.cend()) {
+			DEBUGMSG(L"Failed to set transparency to control with %d id", exmsg->id)
+			break;
+		}
+		c->get()->SetTransLvl(exmsg->nTransLvl);
 	}
 	break;
 	case EXMSG_DUMMY:

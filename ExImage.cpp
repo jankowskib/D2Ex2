@@ -67,9 +67,9 @@ ExImage::ExImage(int X, int Y, int Transp, unsigned int Frame, string szFile) : 
 }
 
 
-void ExImage::SetTransLvl(int aLevel)
+void ExImage::SetTransLvl(D2DrawModes transLvl)
 {
-	TransLvl = aLevel;
+	TransLvl = transLvl;
 }
 
 void ExImage::Relocate() //- Set control align

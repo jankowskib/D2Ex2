@@ -23,12 +23,10 @@
 #include "ExParty.h"
 #include "ExAutomap.h"
 #include "ExDownload.h"
+#include "readerwriterqueue\readerwriterqueue.h"
 
-static HANDLE TH, SH;
 static int KillCount;
-
-static deque<EventText> TextQuene;
-static deque<EventIcon> IconQuene;
+moodycamel::ReaderWriterQueue<EventItem> hEventsQueue;
 
 int __fastcall ExEvents::OnTextEvent(ExEvent *Dane) //0xA6
 {
@@ -44,14 +42,15 @@ int __fastcall ExEvents::OnTextEvent(ExEvent *Dane) //0xA6
 			string str = msg->szMsg;
 			if (str.empty()) break;
 
-			ExTextBox * Text = new ExTextBox((signed short)msg->wX, (signed short)msg->wY, msg->Color, msg->Argument, str, 0);
-			if (msg->wX == 0xFFFF) Text->SetAlign(Text->CENTER, Text->NONE);
+			ExTextBox * Text = new ExTextBox((signed short)msg->wX, (signed short)msg->wY, msg->Color, msg->Argument, str, NULL);
+			if (msg->wX == 0xFFFF)
+				Text->SetAlign(Text->CENTER, Text->NONE);
 			Text->SetState(Text->INVISIBLE);
-			EventText et = { Text, msg->Sound };
-			EnterCriticalSection(&EX_CRITSECT);
-			TextQuene.push_back(et);
-			if (!TH)	TH = CreateThread(0, 0, &ExEvents::TextFadeThread, 0, 0, 0);
-			LeaveCriticalSection(&EX_CRITSECT);
+			exId id = gExGUI->add(Text);
+
+			EventItem e = { EXEVENT_TEXTMSG, id, 0, (void*)msg->Sound };
+			hEventsQueue.enqueue(e);
+
 		}
 		break;
 		case EXEVENT_OVERHEAD: //Overhead image
@@ -63,16 +62,13 @@ int __fastcall ExEvents::OnTextEvent(ExEvent *Dane) //0xA6
 			string str = msg->szCellPath;
 			if (str.empty()) break;
 
-			ExImage * Image = new ExImage(0, 0, 0, msg->CellID, str);
+			ExImage * Image = new ExImage(0, 0, DRAW_MODE_NORMAL, msg->CellID, str);
 			Image->ColorShift = msg->Color;
 			Image->SetState(Image->INVISIBLE);
-			EventIcon t = { Image, msg->UnitId };
+			exId id = gExGUI->add(Image);
 
-			EnterCriticalSection(&EX_CRITSECT);
-			IconQuene.push_back(t);
-			if (!SH) SH = CreateThread(0, 0, &ExEvents::IconFadeThread, 0, 0, 0);
-			LeaveCriticalSection(&EX_CRITSECT);
-
+			EventItem e = { EXEVENT_OVERHEAD, id, 0, (void*)msg->UnitId };
+			hEventsQueue.enqueue(e);
 		}
 		break;
 		case EXEVENT_DOWNLOAD: //Download a file
@@ -165,64 +161,67 @@ int __fastcall ExEvents::OnEvent(BYTE* aPacket)
 }
 
 
-DWORD WINAPI ExEvents::TextFadeThread(void* Params)
+void ExEvents::EventsLoop()
 {
-	while (!TextQuene.empty())
+	const D2DrawModes TransTable[] = { DRAW_MODE_ALPHA_25, DRAW_MODE_ALPHA_50, DRAW_MODE_ALPHA_75, DRAW_MODE_NORMAL };
+	EventItem* e = hEventsQueue.peek();
+	DWORD tick = GetTickCount();
+	if (e == nullptr)
+		return;
+	int diff = 1800 - (tick - e->timer);
+
+	switch (e->type)
 	{
-		const int TransTable[] = { 0, 1, 2, 5 };
-		D2ASMFuncs::D2CLIENT_PlaySound(TextQuene.front().SoundId);
-		TextQuene.front().Text->SetState(TextQuene.front().Text->VISIBLE);
-		for (int Timer = 120; Timer; Timer--)
+		case EXEVENT_TEXTMSG:
 		{
-			TextQuene.front().Text->SetTransLvl(Timer <= 30 ? TransTable[Timer / 8] : 7);
-			Sleep(15);
+			if (e->timer == 0) { // Start the event
+				D2ASMFuncs::D2CLIENT_PlaySound((WORD)e->arg);
+				gExGUI->setState(e->controlId, ExControl::VISIBLE);
+				e->timer = tick;
+				break;
+			}
+
+			if (diff <= 450 && diff >= 0) {
+				gExGUI->setTransparency(e->controlId, TransTable[(diff / 15) / 8]);
+				break;
+			}
+
+			if (diff < -200) {
+				gExGUI->remove(e->controlId);
+				hEventsQueue.pop();
+			}
 		}
-		EnterCriticalSection(&EX_CRITSECT);
-		delete TextQuene.front().Text;
-		TextQuene.pop_front();
-		LeaveCriticalSection(&EX_CRITSECT);
-		Sleep(200);
-	}
-	EnterCriticalSection(&EX_CRITSECT);
-	TH = 0;
-	LeaveCriticalSection(&EX_CRITSECT);
-	return 0;
-}
-
-DWORD WINAPI ExEvents::IconFadeThread(void* Params)
-{
-	while (!IconQuene.empty())
-	{
-		DWORD UnitId = IconQuene.front().UnitId;
-		ExImage * Image = IconQuene.front().Image;
-
-		const int TransTable[] = { 0, 1, 2, 5 };
-		Image->SetState(Image->VISIBLE);
-
-		for (int Timer = 120; Timer; Timer--)
+		break;
+		case EXEVENT_OVERHEAD:
 		{
-			UnitAny * pUnit = D2Funcs.D2CLIENT_GetUnitById(UnitId, UNIT_PLAYER);
+			if (e->timer == 0) { // Start the event
+				gExGUI->setState(e->controlId, ExControl::VISIBLE);
+				e->timer = tick;
+				break;
+			}
+
+			UnitAny * pUnit = D2Funcs.D2CLIENT_GetUnitById((DWORD)e->arg, UNIT_PLAYER);
 			if (!pUnit) break;
 
 			POINT pPos = { D2Funcs.D2COMMON_GetUnitXOffset(pUnit), D2Funcs.D2COMMON_GetUnitYOffset(pUnit) };
 
 			pPos.x -= *D2Vars.D2CLIENT_PlayerX - *D2Vars.D2CLIENT_ScreenXShift + 15;
 			pPos.y -= *D2Vars.D2CLIENT_PlayerY + 70;
-			Image->SetX(pPos.x);
-			Image->SetY(pPos.y);
-			Image->SetTransLvl(Timer <= 30 ? TransTable[Timer / 8] : 7);
-			Sleep(15);
+			gExGUI->move(e->controlId, pPos.x, pPos.y);
+
+			if (diff <= 450 && diff >= 0) {
+				gExGUI->setTransparency(e->controlId, TransTable[(diff / 15) / 8]);
+				break;
+			}
+
+			if (diff < -200) {
+				gExGUI->remove(e->controlId);
+				hEventsQueue.pop();
+			}
+
 		}
-
-		EnterCriticalSection(&EX_CRITSECT);
-		delete Image;
-		IconQuene.pop_front();
-		LeaveCriticalSection(&EX_CRITSECT);
-		Sleep(200);
-
+		break;
 	}
-	EnterCriticalSection(&EX_CRITSECT);
-	SH = 0;
-	LeaveCriticalSection(&EX_CRITSECT);
-	return 0;
+
 }
+

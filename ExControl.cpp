@@ -23,6 +23,11 @@
 #include "ExWindow.h"
 #include "ExControlManager.h"
 
+void ExControl::SetTransLvl(D2DrawModes lvl)
+{
+	DEBUGMSG("%s is not available for %s", __FUNCTION__, typeid(*this).name());
+}
+
 void ExControl::SetHooverText(wstring) 
 {
 	DEBUGMSG("%s is not available for %s", __FUNCTION__, typeid(*this).name());
@@ -85,6 +90,7 @@ ExControl::ExControl(int X, int Y, int X2, int Y2, void(*fevent_onClick)(exId))
 	bBeingPressed = false;
 	bBeingMoved = false;
 	bBeingSelected = false;
+
 }
 
 ExControl::~ExControl(void)

@@ -164,6 +164,39 @@ DWORD __fastcall ExInput::GameInput(wchar_t* wMsg)
 
 		return -1;
 	}
+	if (_stricmp(str, "#eventst") == 0)
+	{
+		ExEventTextMsg hEvent;
+		hEvent.Argument = 0;
+		hEvent.MsgType = EXEVENT_TEXTMSG;
+		hEvent.Color = COL_RED;
+		hEvent.wX = -1;
+		hEvent.wY = 150;
+		hEvent.Sound = 10;
+		hEvent.P_A6 = 0xA6;
+		int Dmg = 10000;
+		sprintf_s(hEvent.szMsg, 255, "%d !", Dmg);
+		hEvent.PacketLen = 0xE + strlen(hEvent.szMsg) + 1;
+
+		ExEventOverhead hEvent2;
+		hEvent2.MsgType = EXEVENT_OVERHEAD;
+		hEvent2.Color = COL_WHITE;
+		hEvent2.UnitId = D2Funcs.D2CLIENT_GetPlayer()->dwUnitId;
+		hEvent2.P_A6 = 0xA6;
+
+		_snprintf_s(hEvent2.szCellPath, 255, 255, "data\\D2Ex\\Blobs");
+		hEvent2.PacketLen = 0xE + strlen(hEvent2.szCellPath) + 1;
+
+		static int eLen = 0;
+		for (int i = 0; i < 4; ++i) {
+			hEvent.Color = hEvent2.Color = rand() % 16;
+			hEvent2.CellID = rand() % 4;
+			D2Funcs.D2NET_ReceivePacket(&eLen, (BYTE*)&hEvent, hEvent.PacketLen);
+			D2Funcs.D2NET_ReceivePacket(&eLen, (BYTE*)&hEvent2, hEvent2.PacketLen);
+			
+		}
+		return -1;
+	}
 	if (_stricmp(str, "#icon2") == 0)
 	{
 		ExEventDownload pEvent = {};
