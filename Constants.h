@@ -24,6 +24,17 @@
 
 
 /*
+	Roster counters
+*/
+enum RosterCounter
+{
+	ROSTER_KILLS = 1,
+	ROSTER_DEATHS = 2,
+	ROSTER_ASSISTS = 3,
+	ROSTER_GIVEUPS = 4,
+};
+
+/*
 	Note: Only -1, -2, -3, -4 are the same as in vanilla
 */
 enum CubeOutputTypes {

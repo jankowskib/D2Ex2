@@ -52,6 +52,7 @@ struct PlayerTable
 	exId Kills; // ExTextBox
 	exId Assists; // ExTextBox
 	exId Deaths; // ExTextBox
+	exId GiveUps; // ExTextBox
 
 	exId Invite; // ExButton
 	exId Host; // ExButton
@@ -65,9 +66,10 @@ struct AccountBase
 {
 	string Name;
 	string Account;
-	int	Kills;
-	int Deaths;
-	int Assists;
+	unsigned int Kills;
+	unsigned int Deaths;
+	unsigned int Assists;
+	unsigned int GiveUps;
 };
 
 static list<PlayerTable> PlayerList;
@@ -412,10 +414,11 @@ BOOL __fastcall ExParty::GetRoster(BYTE* aPacket) //0x66 HANDLE SRV->CLT
 		if (i->Name == szName)
 		{
 			switch (aType) {
-			case 3: { i->Assists = aCount; break; }
-			case 2: { i->Deaths = aCount; break; }
+			case ROSTER_GIVEUPS: { i->GiveUps = aCount; break; }
+			case ROSTER_ASSISTS: { i->Assists = aCount; break; }
+			case ROSTER_DEATHS: { i->Deaths = aCount; break; }
 			case 0:
-			case 1: { i->Kills = aCount; break; }
+			case ROSTER_KILLS: { i->Kills = aCount; break; }
 			}
 			break;
 		}
@@ -483,36 +486,44 @@ bool ListCompare(const PlayerTable & first, const PlayerTable & second)
 	RosterUnit * pRost1 = ExParty::GetRosterById(first.UnitId);
 	RosterUnit * pRost2 = ExParty::GetRosterById(second.UnitId);
 
-	if (!pRost1 || !pRost2) return false;
-
-
+	if (!pRost1 || !pRost2){
+		DEBUGMSG("BUG: didnt find a rosterunit during the sort")
+		return false;
+	}
 #ifdef D2EX_PVPGN_EXT
 	if (pRost1->wPartyId == pRost2->wPartyId)
 	{
 		AccountBase* r1 = ExParty::FindRoster(pRost1->szName);
 		AccountBase* r2 = ExParty::FindRoster(pRost2->szName);
-		if (!r1 || r2)
-			return false;
-
-		if (r1->Kills == r2->Kills)
-		{
+		if (!r1 || !r2) {
+			DEBUGMSG("BUG: didnt find a AccountBase during the sort")
 			string f = pRost1->szName;
 			string s = pRost2->szName;
-			return f > s ? false : true;
-		}
+			return f < s;
+		} else {
 
-		return r1->Kills > r2->Kills;
+			if (r1->Kills == r2->Kills)
+			{
+				if (r1->Deaths == r2->Deaths) {
+					string f = pRost1->szName;
+					string s = pRost2->szName;
+					return f < s;
+				}
+				return r1->Deaths < r2->Deaths; // Less deaths = higher in roster
+			}
+			return r1->Kills > r2->Kills;
+		}
 	}
 #else
 	if (pRost1->wPartyId == pRost2->wPartyId)
 	{
 		string f = pRost1->szName;
 		string s = pRost2->szName;
-		return f > s ? false : true;
+		return f < s;
 	}
 #endif
-	return pRost1->wPartyId > pRost2->wPartyId ? false : true;
-		}
+	return pRost1->wPartyId < pRost2->wPartyId;
+}
 
 bool AccUnique(const AccountBase & first, const AccountBase & second)
 {
@@ -533,6 +544,7 @@ void ExParty::AddAccount(string szName, string szAccount)
 	Base.Kills = 0;
 	Base.Deaths = 0;
 	Base.Assists = 0;
+	Base.GiveUps = 0;
 	AccBase.push_back(Base);
 	AccBase.unique(&AccUnique);
 }
@@ -603,10 +615,11 @@ int ExParty::FindRoster(string szName, int Type)
 		{
 			switch (Type)
 			{
-			case 3: return i->Assists;
-			case 2: return i->Deaths;
+			case ROSTER_GIVEUPS: return i->GiveUps;
+			case ROSTER_ASSISTS: return i->Assists;
+			case ROSTER_DEATHS: return i->Deaths;
 			case 0:
-			case 1: return i->Kills;
+			case ROSTER_KILLS: return i->Kills;
 			}
 		}
 	}
@@ -633,6 +646,8 @@ void ExParty::ClearRoster()
 	{
 		i->Deaths = 0;
 		i->Kills = 0;
+		i->Assists = 0;
+		i->GiveUps = 0;
 	}
 }
 
@@ -647,16 +662,28 @@ void ExParty::Clear()
 		gExGUI->remove(i->Acc);
 		gExGUI->remove(i->Class);
 		gExGUI->remove(i->Clan);
-		gExGUI->remove(i->Location);
-
-		gExGUI->remove(i->Kills);
-		gExGUI->remove(i->Assists);
-		gExGUI->remove(i->Deaths);
-		gExGUI->remove(i->Invite);
-		gExGUI->remove(i->Host);
-		gExGUI->remove(i->Loot);
-		gExGUI->remove(i->Squelch);
-		gExGUI->remove(i->Spectate);
+#ifndef D2EX_PVPGN_EXT
+		if (i->Location != exnull_t)
+			gExGUI->remove(i->Location);
+#endif
+		if (i->Kills != exnull_t)
+			gExGUI->remove(i->Kills);
+		if (i->Assists != exnull_t)
+			gExGUI->remove(i->Assists);
+		if (i->Deaths != exnull_t)
+			gExGUI->remove(i->Deaths);
+		if (i->GiveUps != exnull_t)
+			gExGUI->remove(i->GiveUps);
+		if (i->Invite != exnull_t)
+			gExGUI->remove(i->Invite);
+		if (i->Host != exnull_t)
+			gExGUI->remove(i->Host);
+		if (i->Loot != exnull_t)
+			gExGUI->remove(i->Loot);
+		if (i->Squelch != exnull_t)
+			gExGUI->remove(i->Squelch);
+		if (i->Spectate != exnull_t)
+			gExGUI->remove(i->Spectate);
 	}
 	for (auto i : Group)
 		gExGUI->remove(i);
@@ -669,7 +696,7 @@ UnitAny* ExParty::GetUnitByName(const char* szName)
 	for (RosterUnit* pUnit = *D2Vars.D2CLIENT_Roster; pUnit; pUnit = pUnit->pNext)
 	{
 		if (strcmp(pUnit->szName, szName) == 0)
-			return D2Funcs.D2CLIENT_GetUnitById(pUnit->dwUnitId, 0);
+			return D2Funcs.D2CLIENT_GetUnitById(pUnit->dwUnitId, UNIT_PLAYER);
 	}
 	return 0;
 }
@@ -750,13 +777,13 @@ wstring ExParty::GetClassById(int ClassId)
 
 	switch (ClassId)
 	{
-	case 0: return D2Funcs.D2LANG_GetLocaleText(4011);
-	case 1:	return D2Funcs.D2LANG_GetLocaleText(4010);
-	case 2: return D2Funcs.D2LANG_GetLocaleText(4009);
-	case 3: return D2Funcs.D2LANG_GetLocaleText(4008);
-	case 4: return D2Funcs.D2LANG_GetLocaleText(4007);
-	case 5: return D2Funcs.D2LANG_GetLocaleText(4012);
-	case 6: return D2Funcs.D2LANG_GetLocaleText(4013);
+	case 0: return D2Funcs.D2LANG_GetLocaleText(D2STR_AMAZON);
+	case 1:	return D2Funcs.D2LANG_GetLocaleText(D2STR_SORCERESS);
+	case 2: return D2Funcs.D2LANG_GetLocaleText(D2STR_NECROMANCER);
+	case 3: return D2Funcs.D2LANG_GetLocaleText(D2STR_PALADIN);
+	case 4: return D2Funcs.D2LANG_GetLocaleText(D2STR_BARBARIAN);
+	case 5: return D2Funcs.D2LANG_GetLocaleText(D2STR_DRUIDSTR_);
+	case 6: return D2Funcs.D2LANG_GetLocaleText(D2STR_ASSASSINSTR);
 	}
 	return L"???";
 }
@@ -784,7 +811,8 @@ wstring GetPartyCount(exId)
 
 void ExParty::Update()
 {
-	if (PartyScreen == exnull_t) return;
+	if (PartyScreen == exnull_t) 
+		return;
 	//=====================Strings part===============================
 	static wstring wStrHost1 = D2Funcs.D2LANG_GetLocaleText(4106);
 	static wstring wStrHost2 = D2Funcs.D2LANG_GetLocaleText(4108);
@@ -819,9 +847,10 @@ void ExParty::Update()
 		gExGUI->setText(i->Location, GetLvlNameEx(ptRoster->dwUnitId == D2Funcs.D2CLIENT_GetPlayer()->dwUnitId ? ExParty::GetPlayerArea() : ptRoster->dwLevelId,
 			i->Invite ? (gExGUI->getX(i->Invite) - gExGUI->getX(i->Location)) : 100));
 #else
-		gExGUI->setText(i->Kills, boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName, 1)));
-		gExGUI->setText(i->Deaths, boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName, 2)));
-		gExGUI->setText(i->Assists, boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName, 3)));
+		gExGUI->setText(i->Kills, boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName, ROSTER_KILLS)));
+		gExGUI->setText(i->Deaths, boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName, ROSTER_DEATHS)));
+		gExGUI->setText(i->Assists, boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName, ROSTER_ASSISTS)));
+		gExGUI->setText(i->GiveUps, boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName, ROSTER_GIVEUPS)));
 #ifdef D2EX_SPECTATOR
 		if (i->Spectate != exnull_t)
 		{
@@ -931,33 +960,36 @@ void ExParty::Resort(char *szSkip)
 		gExGUI->remove(i);
 	}
 	Group.clear();
+
 	//Sort up thangs
 	if (PlayerList.size() > 1)
 		PlayerList.sort(&ListCompare);
 
-	int j = 1;
-	for (list<PlayerTable>::iterator i = PlayerList.begin(); i != PlayerList.end(); ++j)
-	{
-		if (j - 1 < pOffset || j - pOffset > 15) {
-			gExGUI->remove(i->Frame);
-			gExGUI->remove(i->Level);
-			gExGUI->remove(i->Name);
-			gExGUI->remove(i->Acc);
-			gExGUI->remove(i->Class);
-			gExGUI->remove(i->Clan);
-			gExGUI->remove(i->Location);
-			gExGUI->remove(i->Kills);
-			gExGUI->remove(i->Assists);
-			gExGUI->remove(i->Deaths);
-			gExGUI->remove(i->Invite);
-			gExGUI->remove(i->Host);
-			gExGUI->remove(i->Loot);
-			gExGUI->remove(i->Squelch);
-			gExGUI->remove(i->Spectate);
-			i = PlayerList.erase(i);
-			continue;
+	if (GetPlayerCount() > 15) {
+		int j = 1;
+		for (list<PlayerTable>::iterator i = PlayerList.begin(); i != PlayerList.end(); ++j)
+		{
+			if (j - 1 < pOffset || j - pOffset > 15) {
+				gExGUI->remove(i->Frame);
+				gExGUI->remove(i->Level);
+				gExGUI->remove(i->Name);
+				gExGUI->remove(i->Acc);
+				gExGUI->remove(i->Class);
+				gExGUI->remove(i->Clan);
+				gExGUI->remove(i->Location);
+				gExGUI->remove(i->Kills);
+				gExGUI->remove(i->Assists);
+				gExGUI->remove(i->Deaths);
+				gExGUI->remove(i->Invite);
+				gExGUI->remove(i->Host);
+				gExGUI->remove(i->Loot);
+				gExGUI->remove(i->Squelch);
+				gExGUI->remove(i->Spectate);
+				i = PlayerList.erase(i);
+				continue;
+			}
+			++i;
 		}
-		++i;
 	}
 
 	for (list<PlayerTable>::iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
@@ -995,6 +1027,7 @@ void ExParty::Resort(char *szSkip)
 		gExGUI->setY(i->Deaths, TextPos);
 		gExGUI->setY(i->Assists, TextPos);
 		gExGUI->setY(i->Kills, TextPos);
+		gExGUI->setY(i->GiveUps, TextPos);
 #ifdef D2EX_SPECTATOR
 		if (i->Spectate != exnull_t)
 			gExGUI->setY(i->Spectate, yPos);
@@ -1046,7 +1079,11 @@ void ExParty::Fill(char *szSkip)
 
 		Tbl.UnitId = ptRoster->dwUnitId;
 #ifdef D2EX_PVPGN_EXT
-		Tbl.Frame = gExGUI->add(new ExBox(0, yPos, 480, 22, ExParty::GetFrameColor(ptRoster->dwUnitId), 2));
+		int FrameSize = 480;
+#ifdef D2EX_PVPGN_GIVEUP
+		FrameSize += 20;
+#endif
+		Tbl.Frame = gExGUI->add(new ExBox(0, yPos, FrameSize, 22, ExParty::GetFrameColor(ptRoster->dwUnitId), 2));
 		gExGUI->setAlign(Tbl.Frame, ExControl::CENTER, ExControl::NONE);
 #else
 		Tbl.Frame = gExGUI->add(new ExBox(0, yPos, 520, 22, ExParty::GetFrameColor(ptRoster->dwUnitId), 2)); 
@@ -1063,9 +1100,16 @@ void ExParty::Fill(char *szSkip)
 #ifndef D2EX_PVPGN_EXT
 		Tbl.Location = gExGUI->add(new ExTextBox(frameX + 337, TextPos, COL_YELLOW, TextFont, GetLvlNameEx(ptRoster->dwUnitId == D2Funcs.D2CLIENT_GetPlayer()->dwUnitId ? ExParty::GetPlayerArea() : ptRoster->dwLevelId, 120), 0, 0));
 #else
-		Tbl.Kills = gExGUI->add(new ExTextBox(frameX + 337, TextPos, COL_WHITE, TextFont, boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName, 1)), 0));
-		Tbl.Assists = gExGUI->add(new ExTextBox(frameX + 357, TextPos, COL_WHITE, TextFont, boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName, 3)), 0));
-		Tbl.Deaths = gExGUI->add(new ExTextBox(frameX + 377, TextPos, COL_WHITE, TextFont, boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName, 2)), 0));
+		Tbl.Kills = gExGUI->add(new ExTextBox(frameX + 337, TextPos, COL_WHITE, TextFont, 
+			boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName, ROSTER_KILLS)), 0));
+		Tbl.Assists = gExGUI->add(new ExTextBox(frameX + 357, TextPos, COL_WHITE, TextFont,
+			boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName, ROSTER_ASSISTS)), 0));
+		Tbl.Deaths = gExGUI->add(new ExTextBox(frameX + 377, TextPos, COL_WHITE, TextFont, 
+			boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName, ROSTER_DEATHS)), 0));
+#ifdef D2EX_PVPGN_GIVEUP
+		Tbl.GiveUps = gExGUI->add(new ExTextBox(frameX + 397, TextPos, COL_WHITE, TextFont,
+			boost::lexical_cast<wstring>(ExParty::FindRoster(ptRoster->szName, ROSTER_GIVEUPS)), 0));
+#endif
 #endif
 		gExGUI->setChild(PartyScreen, Tbl.Frame, true);
 		gExGUI->setChild(PartyScreen, Tbl.Name, true);
@@ -1079,6 +1123,9 @@ void ExParty::Fill(char *szSkip)
 		gExGUI->setChild(PartyScreen, Tbl.Kills, true);
 		gExGUI->setChild(PartyScreen, Tbl.Assists, true);
 		gExGUI->setChild(PartyScreen, Tbl.Deaths, true);
+#ifdef D2EX_PVPGN_GIVEUP
+		gExGUI->setChild(PartyScreen, Tbl.GiveUps, true);
+#endif
 #endif
 		if (ptRoster->dwUnitId != D2Funcs.D2CLIENT_GetPlayer()->dwUnitId)
 		{
@@ -1128,6 +1175,9 @@ void ExParty::ShowHide()
 	static exId Kills = exnull_t;
 	static exId Assists = exnull_t;
 	static exId Deaths = exnull_t;
+#ifdef D2EX_PVPGN_GIVEUP
+	static exId GiveUps = exnull_t;
+#endif
 	static exId InviteAll = exnull_t;
 
 	if (PartyScreen == exnull_t)
@@ -1142,36 +1192,45 @@ void ExParty::ShowHide()
 		if (!wAccStr.length()) wAccStr = D2Funcs.D2LANG_GetLocaleText(5224);
 
 #ifdef D2EX_PVPGN_EXT
-		PartyScreen = gExGUI->add(new ExWindow(0, 50, 510, 85 + (ExParty::GetPlayerCount() * 25) + TeamOffset, false, wPartyStr));
+		int screenSize = 510;
+#ifdef D2EX_PVPGN_GIVEUP
+		screenSize += 20;
+#endif
+		PartyScreen = gExGUI->add(new ExWindow(0, 50, screenSize, 85 + (ExParty::GetPlayerCount() * 25) + TeamOffset, false, wPartyStr));
 		gExGUI->setAlign(PartyScreen, ExControl::CENTER, ExControl::NONE);
 #else
 		PartyScreen = gExGUI->add(new ExWindow(0, 50, 550, 85 + (ExParty::GetPlayerCount() * 25) + TeamOffset, false, wPartyStr));
 		gExGUI->setAlign(PartyScreen, ExControl::CENTER, ExControl::NONE));
 #endif
 		gExGUI->process();
-		PlayerCount = gExGUI->add(new ExTextBox(gExGUI->getX(PartyScreen) + 5, 101, 11, 0, &GetPartyCount, 0));
-		Charname = gExGUI->add(new ExTextBox(gExGUI->getX(PartyScreen) + 28, 105, 0, 0, wCharStr, 0));
-		Class = gExGUI->add(new ExTextBox(gExGUI->getX(PartyScreen) + 154, 105, 0, 0, wClassStr, 0));
-		Clan = gExGUI->add(new ExTextBox(gExGUI->getX(PartyScreen) + 201, 105, 0, 0, gLocaleId == LOCALE_POL ? L"Klan" : L"Clan", 0));
-		Acc = gExGUI->add(new ExTextBox(gExGUI->getX(PartyScreen) + 237, 105, 0, 0, wAccStr, 0));
+		int partyX = gExGUI->getX(PartyScreen);
+		PlayerCount = gExGUI->add(new ExTextBox(partyX + 5, 101, 11, 0, &GetPartyCount, 0));
+		Charname = gExGUI->add(new ExTextBox(partyX + 28, 105, 0, 0, wCharStr, 0));
+		Class = gExGUI->add(new ExTextBox(partyX + 154, 105, 0, 0, wClassStr, 0));
+		Clan = gExGUI->add(new ExTextBox(partyX + 201, 105, 0, 0, gLocaleId == LOCALE_POL ? L"Klan" : L"Clan", 0));
+		Acc = gExGUI->add(new ExTextBox(partyX + 237, 105, 0, 0, wAccStr, 0));
 #ifdef D2EX_PVPGN_EXT
-		Kills = gExGUI->add(new ExImage(gExGUI->getX(PartyScreen) + 346, 105, 5, 1, CellFiles::MONINDICATOR)); 
+		Kills = gExGUI->add(new ExImage(partyX + 346, 105, 5, 1, CellFiles::MONINDICATOR)); 
 		gExGUI->setHooverText(Kills, gLocaleId == LOCALE_POL ? L"Zabójstwa" : L"Kills");
-		Assists = gExGUI->add(new ExImage(gExGUI->getX(PartyScreen) + 366, 105, 5, 2, CellFiles::MONINDICATOR)); 
+		Assists = gExGUI->add(new ExImage(partyX + 366, 105, 5, 2, CellFiles::MONINDICATOR)); 
 		gExGUI->setHooverText(Assists, gLocaleId == LOCALE_POL ? L"Asysty" : L"Assists");
-		Deaths = gExGUI->add(new ExImage(gExGUI->getX(PartyScreen) + 386, 105, 5, 0, CellFiles::MONINDICATOR));  
+		Deaths = gExGUI->add(new ExImage(partyX + 386, 105, 5, 0, CellFiles::MONINDICATOR));  
 		gExGUI->setHooverText(Deaths, gLocaleId == LOCALE_POL ? L"Œmierci" : L"Deaths");
-#else
-		Location = gExGUI->add(new ExTextBox(gExGUI->getX(PartyScreen) + 346, 105, 0, 0, gLocaleId == LOCALE_POL ? L"Lokacja" : L"Location", 0));
+#ifdef D2EX_PVPGN_GIVEUP
+		GiveUps = gExGUI->add(new ExImage(partyX + 406, 105, 5, 8, CellFiles::MONINDICATOR));
+		gExGUI->setHooverText(GiveUps, gLocaleId == LOCALE_POL ? L"Ucieczki" : L"Runaways");
 #endif
-		Ping = gExGUI->add(new ExTextBox(gExGUI->getX(PartyScreen) + 10, 64, 0, 0, &GetPingFps, &SharePing));
+#else
+		Location = gExGUI->add(new ExTextBox(partyX + 346, 105, 0, 0, gLocaleId == LOCALE_POL ? L"Lokacja" : L"Location", 0));
+#endif
+		Ping = gExGUI->add(new ExTextBox(partyX + 10, 64, 0, 0, &GetPingFps, &SharePing));
 		gExGUI->setHooverable(Ping, false);
-		LeaveB = gExGUI->add(new ExButton(gExGUI->getX(PartyScreen) + gExGUI->getWidth(PartyScreen) - 80, 105, 2, 0, D2Funcs.D2LANG_GetLocaleText(4152), CellFiles::PARTYBUTTON, &Leave, false));
+		LeaveB = gExGUI->add(new ExButton(partyX + gExGUI->getWidth(PartyScreen) - 80, 105, 2, 0, D2Funcs.D2LANG_GetLocaleText(4152), CellFiles::PARTYBUTTON, &Leave, false));
 		if (ExParty::GetRosterById(D2Funcs.D2CLIENT_GetPlayer()->dwUnitId)->wPartyId == 0xFFFF)
 			gExGUI->setState(LeaveB, ExControl::INVISIBLE);
 
 #ifdef D2EX_ENABLE_PARTYUP
-		InviteAll = gExGUI->add(new ExButton(gExGUI->getX(PartyScreen) + gExGUI->getWidth(PartyScreen) - 35, 85, COL_WHITE, 0, L"",
+		InviteAll = gExGUI->add(new ExButton(partyX + gExGUI->getWidth(PartyScreen) - 35, 85, COL_WHITE, 0, L"",
 			CellFiles::CHECKBOX, [](exId) {
 			for (RosterUnit* pUnit = *D2Vars.D2CLIENT_Roster; pUnit; pUnit = pUnit->pNext)
 			{
@@ -1192,7 +1251,7 @@ void ExParty::ShowHide()
 		}, false));
 		gExGUI->setHooverText(InviteAll, gLocaleId == LOCALE_POL ? L"Zaproœ do dru¿yny wszystkich graczy" : L"Invite to your party all players");
 #endif
-		Scroll = gExGUI->add(new ExScrollBar(gExGUI->getX(PartyScreen) + gExGUI->getWidth(PartyScreen), gExGUI->getY(PartyScreen), 0, GetPlayerCount() - 15, gExGUI->getHeight(PartyScreen), &pOffset, &OnScroll));
+		Scroll = gExGUI->add(new ExScrollBar(partyX + gExGUI->getWidth(PartyScreen), gExGUI->getY(PartyScreen), 0, GetPlayerCount() - 15, gExGUI->getHeight(PartyScreen), &pOffset, &OnScroll));
 		if (GetPlayerCount() < 15)
 			gExGUI->setState(Scroll, ExControl::INVISIBLE);
 
@@ -1205,6 +1264,10 @@ void ExParty::ShowHide()
 		gExGUI->setChild(PartyScreen, Kills, true);
 		gExGUI->setChild(PartyScreen, Assists, true);
 		gExGUI->setChild(PartyScreen, Deaths, true);
+#ifdef D2EX_PVPGN_GIVEUP
+		gExGUI->setChild(PartyScreen, GiveUps, true);
+
+#endif
 #else
 		gExGUI->setChild(PartyScreen, Location, true);
 #endif
@@ -1224,10 +1287,15 @@ void ExParty::ShowHide()
 		gExGUI->remove(InviteAll);
 #endif
 		gExGUI->remove(Ping);
+#ifdef D2EX_PVPGN_GIVEUP
+		gExGUI->remove(GiveUps);
+#endif
 		gExGUI->remove(Deaths);
 		gExGUI->remove(Assists);
 		gExGUI->remove(Kills);
+#ifndef D2EX_PVPGN_EXT
 		gExGUI->remove(Location);
+#endif
 		gExGUI->remove(Charname);
 		gExGUI->remove(Acc);
 		gExGUI->remove(Clan);
