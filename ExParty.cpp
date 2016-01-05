@@ -1131,9 +1131,11 @@ void ExParty::Fill(char *szSkip)
 		{
 			int bOffset = frameX + gExGUI->getWidth(Tbl.Frame) - 20;
 #ifdef D2EX_SPECTATOR
-			Tbl.Spectate = gExGUI->add(new ExButton(bOffset, yPos, 0, 20, L"", CellFiles::PARTY, &Spectate, 0));
-			gExGUI->setChild(PartyScreen, Tbl.Spectate, true);
-			bOffset -= 21;
+			if (!gDisableSpectator) {
+				Tbl.Spectate = gExGUI->add(new ExButton(bOffset, yPos, 0, 20, L"", CellFiles::PARTY, &Spectate, 0));
+				gExGUI->setChild(PartyScreen, Tbl.Spectate, true);
+				bOffset -= 21;
+			}
 #endif
 			Tbl.Squelch = gExGUI->add(new ExButton(bOffset, yPos, 0, 8, L"", CellFiles::PARTY, &Squelch, 0));
 			gExGUI->setChild(PartyScreen, Tbl.Squelch, true);

@@ -101,6 +101,12 @@ int __fastcall ExEvents::OnTextEvent(ExEvent *Dane) //0xA6
 					DEBUGMSG("Received Respawn time: %d s", gRespawnTime)
 				}
 				break;
+				case EXOP_DISABLESPECTATOR:
+				{
+					DEBUGMSG("Disabling spectator mode by server request!")
+					gDisableSpectator = (bool)msg->nValue;
+				}
+				break;
 			}
 
 		}

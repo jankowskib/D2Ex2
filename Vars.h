@@ -122,6 +122,7 @@ GLOBAL(short, VK_ATPrev)
 GLOBAL(short, VK_FastTP)
 
 GLOBAL(int, gRespawnTime)
+GLOBAL(bool, gDisableSpectator)
 
 #undef GLOBAL
 #undef __DEFINE_VARS

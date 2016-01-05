@@ -41,7 +41,7 @@ enum ExEventMsgs
 enum ExEventOption
 {
 	EXOP_RESPAWNTIME = 1,
-	EXOP_ENABLESPECTATOR  = 2,
+	EXOP_DISABLESPECTATOR = 2,
 };
 
 struct EventItem
