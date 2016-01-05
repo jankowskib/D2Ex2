@@ -201,13 +201,19 @@ void ExEvents::EventsLoop()
 		case EXEVENT_OVERHEAD:
 		{
 			if (e->timer == 0) { // Start the event
-				gExGUI->setState(e->controlId, ExControl::VISIBLE);
 				e->timer = tick;
 				break;
 			}
 
 			UnitAny * pUnit = D2Funcs.D2CLIENT_GetUnitById((DWORD)e->arg, UNIT_PLAYER);
-			if (!pUnit) break;
+			if (!pUnit) {
+				gExGUI->setState(e->controlId, ExControl::INVISIBLE);
+				break;
+			}
+			else
+			{
+				gExGUI->setState(e->controlId, ExControl::VISIBLE);
+			}
 
 			POINT pPos = { D2Funcs.D2COMMON_GetUnitXOffset(pUnit), D2Funcs.D2COMMON_GetUnitYOffset(pUnit) };
 
