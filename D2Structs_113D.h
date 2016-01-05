@@ -238,22 +238,43 @@ struct PresetUnit {
 	DWORD dwPosY;					//0x18
 };
 
+
+struct RoomCoords // sizeof(0x20) 32 bytes of Room1+4C
+{
+	DWORD dwXStart;					//0x00
+	DWORD dwYStart;					//0x04
+	DWORD dwXSize;					//0x08
+	DWORD dwYSize;					//0x0C
+	WORD wTileX;					//0x10
+	WORD _1b;						//0x12
+	WORD wTileY;					//0x14
+	WORD _2b;						//0x16
+	DWORD _3;						//0x18
+	DWORD _4;						//0x1C
+};
+
+
 struct Room1 {
-	Room1** pRoomsNear; 	//0x00
-	DWORD _1[3];			//0x04
+	Room1** pRoomsNear; 	//0x00 pptVisibleRooms
+	DWORD _1;				//0x04
+	void *_1s;				//0x08
+	DWORD _1b;				//0x0C
 	Room2* pRoom2;			//0x10
-	DWORD _2[3];			//0x14
+	DWORD _2[2];			//0x14
+	UnitAny **pUnitChanged; //0x1C
 	CollMap* Coll;			//0x20
-	DWORD dwRoomsNear;		//0x24
-	DWORD _3[9];			//0x28
-	DWORD dwXStart;			//0x4C
-	DWORD dwYStart;			//0x50
-	DWORD dwXSize;			//0x54
-	DWORD dwYSize;			//0x58
-	DWORD _4[6];			//0x5C
-	UnitAny* pUnitFirst;	//0x74
-	DWORD _5;				//0x78
-	Room1* pRoomNext;		//0x7C
+	DWORD dwRoomsNear;		//0x24 dwVisibleRooms
+	DWORD nPlayerUnits;		//0x28
+	Act *pAct;				//0x2C
+	DWORD _4;				//0x30
+	DWORD nUnknown;			//0x34
+	DWORD _5[4];			//0x38
+	ClientData **pClients;  //0x48
+	RoomCoords hCoords;		//0x4C
+	D2Seed hSeed;			//0x6C
+	UnitAny *pUnitFirst;	//0x74
+	DWORD nNumClients;		//0x78
+	Room1 *pRoomNext;		//0x7C
 };
 
 struct Room2 {

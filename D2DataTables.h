@@ -1716,6 +1716,7 @@ struct sgptDataTable {
 	BYTE*	pMapCache;				//0xCFC
 	DWORD	dwMapCacheRecs;			//0xD00
 	DWORD	_6[2];					//0xD04
+    DWORD*  pIgnoreList;            //0xD0C
 #else
 	BYTE*	pExpFieldD2;			//0xC84
 	DWORD	ExpFieldData[10];		//0xC88
@@ -1740,6 +1741,6 @@ struct sgptDataTable {
 	DWORD	dwMapCacheRecs;			//0xD00
 	CubeMainTxt*	pCubeMain;		//0xD04
 	DWORD	dwCubeMainRecs;			//0xD08
+    BOOL	bWriteBinFiles;			//0xD0C
 #endif
-	BOOL	bWriteBinFiles;			//0xD0C
 	};

@@ -369,33 +369,50 @@ struct GFXHelpers
 	void(__fastcall *DrawRoofTile)(int a1, int a2, int a3, int a4, int a5);
 };
 
-
+#pragma pack(push, 1)
+struct DT1SubBlock
+{
+	WORD xPos;						//0x00
+	WORD yPos;						//0x02
+	WORD _1;						//0x04
+	BYTE gridX;						//0x06
+	BYTE gridY;						//0x07
+	WORD wTileFormat;				//0x08
+	DWORD dwSubLength;				//0x0A
+	WORD _2;						//0x0E
+	DWORD* pDataOffset;				//0x10
+};
+#pragma pack(pop)
+/*
+	Big thanks to Paul Siramy for his DT1 reference
+*/
 struct TileContext // *.dt1
 {	
-	DWORD _1;						//0x00
-	DWORD _2;						//0x04
-	DWORD _3;						//0x08
-	DWORD _4;						//0x0C
-	DWORD _5;						//0x10
-	DWORD _6;						//0x14
-	DWORD _7;						//0x18
-	DWORD _8;						//0x1C
-	DWORD _9;						//0x20
-	DWORD _10;						//0x24
-	DWORD _11;						//0x28
-	DWORD _12;						//0x2C
-	DWORD _13;						//0x30
-	DWORD _14;						//0x34
-	DWORD _15;						//0x38
-	DWORD _16;						//0x3C
-	DWORD _17;						//0x40
+	DWORD dwDirection;				//0x00
+	WORD wRoofIndex;				//0x04
+	BYTE bSound;					//0x06
+	BYTE bAnimated;					//0x07
+	DWORD dwSizeY;					//0x08
+	DWORD dwSizeX;					//0x0C
+	DWORD dwZeros1;					//0x10
+	DWORD dwOrientation;			//0x14
+	DWORD dwMainIndex;				//0x18
+	DWORD dwSubIndex;				//0x1C
+	DWORD dwFrame;					//0x20
+	BYTE  _1a;						//0x24 DT1's unknown_a ... 
+	BYTE  _1c;						//0x25
+	BYTE  _1b;						//0x26
+	BYTE  _1d;						//0x27
+	BYTE  bFlags[25];				//0x28 For each tile <not sure>
+	BYTE  _2;						//0x39
+	WORD sCacheIndex;				//0x40
 	DWORD _18;						//0x44
-	DWORD _19;						//0x48
-	DWORD dwSize;					//0x4C
-	DWORD _20;						//0x50
-	void* pData;					//0x54
+	DWORD dwDataPtr;				//0x48 pointer to sub-block headers
+	DWORD dwSize;					//0x4C length of the sub-blocks
+	DWORD dwSubBlocks;				//0x50 
+	DT1SubBlock* pBlocks;			//0x54
 	char* szTileName;				//0x58
-	void *ptBlock;					//0x5C
+	DWORD **ptBlock;				//0x5C <not sure - maybe its a struct>
 };
 
 struct CellFile // *.dc6
@@ -446,7 +463,7 @@ struct fnRendererCallbacks
 	void(__fastcall *SetPalette)(BYTE* pPalette); // 28
 	BOOL(__fastcall *SetPalettetable)(BYTE** pPalette); // 29
 	BOOL(__fastcall *SetGlobalLight)(BYTE nRed, BYTE nGreen, BYTE nBlue); // 30
-	BOOL(__fastcall *DrawGroundTile)(TileContext* pTile, DWORD** pLight, int nXpos, int nYpos, int nWorldXpos, int nWorldYpos, BYTE nAlpha, int nScreenPanels, void* pTileData); // 31
+	BOOL(__fastcall *DrawGroundTile)(TileContext* pTile, DWORD** pLight, int nXpos, int nYpos, int nWorldXpos, int nWorldYpos, BYTE nAlpha, int nScreenPanels, BOOL bOne); // 31
 	BOOL(__fastcall *DrawPerspectiveImage)(CellContext* pData, unsigned int nXpos, unsigned int nYpos, BYTE dwGamma, D2DrawModes nDrawMode, int nScreenMode, BYTE* pPalette); // 32
 	BOOL(__fastcall *DrawImage)(CellContext* pData, unsigned int nXpos, unsigned int nYpos, BYTE dwGamma, D2DrawModes nDrawMode, BYTE* pPalette); // 33
 	BOOL(__fastcall *DrawColouredImage)(CellContext* pData, int nXpos, int nYpos, BYTE dwGamma, D2DrawModes nDrawMode, int nColor); // 34
