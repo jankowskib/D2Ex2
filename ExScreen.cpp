@@ -245,41 +245,25 @@ void __stdcall ExScreen::Display()
 	wostringstream wStr;
 	wStr << "mX: " << *D2Vars.D2CLIENT_MouseX << " mY:" << *D2Vars.D2CLIENT_MouseY;
 	wStr << " [" << dec << ExAim::GetUnitX(D2Funcs.D2CLIENT_GetPlayer()) << "," << dec << ExAim::GetUnitY(D2Funcs.D2CLIENT_GetPlayer()) << "]";
-	if(D2Funcs.D2CLIENT_GetSelectedUnit())
+	UnitAny* pSelUnit = D2Funcs.D2CLIENT_GetSelectedUnit();
+	if (!pSelUnit)
+		pSelUnit = *D2Vars.D2CLIENT_SelectedItem;
+	if (pSelUnit)
 	{
-		wStr << " UnitId: 0x" << hex << D2Funcs.D2CLIENT_GetSelectedUnit()->dwUnitId;
-		wStr << " ClassId: " << dec << D2Funcs.D2CLIENT_GetSelectedUnit()->dwClassId;
-		wStr << " [" << dec << ExAim::GetUnitX(D2Funcs.D2CLIENT_GetSelectedUnit()) << "," << dec << ExAim::GetUnitY(D2Funcs.D2CLIENT_GetSelectedUnit()) << "]";
+		wStr << " UnitId: 0x" << hex << pSelUnit->dwUnitId;
+		wStr << " ClassId: " << dec << pSelUnit->dwClassId;
+		wStr << " [" << dec << ExAim::GetUnitX(pSelUnit) << "," << dec << ExAim::GetUnitY(pSelUnit) << "]";
 	}
 	wStr << " Shake = [" << *D2Vars.D2CLIENT_ShakeX << "," << *D2Vars.D2CLIENT_ShakeY << "]";
 	D2Funcs.D2WIN_SetTextSize(13);
 	int aLen = ExScreen::GetTextWidthEx(wStr.str().c_str(), 13);
 	D2Funcs.D2WIN_DrawText(wStr.str().c_str(), *D2Vars.D2CLIENT_ScreenWidth - aLen - 10, *D2Vars.D2CLIENT_ScreenHeight - 10, COL_WHITE, 0);
-	
-	/*wstring wPool = L"Pools: " + boost::lexical_cast<wstring>(ExMemory::GetPoolsCount());
-	wPool+=L" Mem taken:" + boost::lexical_cast<wstring>(ExMemory::GetMemUsage() /1024 / 1024);
-	wPool+=L" mb";
-	D2Funcs.D2WIN_DrawText(wPool.c_str(),10,20,11,0);*/
-	#ifdef D2EX_OPENGL
-	D2Funcs.D2WIN_SetTextSize(5);
-	for (int c = 0; c < 19; ++c)
-	{
-		ExScreen::DrawTextEx(10, 40 + (c * 15), c, 0, DRAW_MODE_NORMAL, "Color %d", c);
-	}
 
-/*	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_NORMAL", 5, 40, COL_GOLD, 0, DRAW_MODE_NORMAL);
-	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_ALPHA_25", 5, 60, COL_GOLD, 0, DRAW_MODE_ALPHA_25);
-	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_ALPHA_25_BRIGHT", 5, 80, COL_GOLD, 0, DRAW_MODE_ALPHA_25_BRIGHT);
-	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_ALPHA_50", 5, 100, COL_GOLD, 0, DRAW_MODE_ALPHA_50);
-	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_ALPHA_50_BRIGHT", 5, 120, COL_GOLD, 0, DRAW_MODE_ALPHA_50_BRIGHT);
-	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_ALPHA_75", 5, 140, COL_GOLD, 0, DRAW_MODE_ALPHA_75);
-	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_BRIGHT", 5, 160, COL_GOLD, 0, DRAW_MODE_BRIGHT);
-	D2Funcs.D2WIN_DrawTextEx(L"DRAW_MODE_INVERTED", 5, 180, COL_GOLD, 0, DRAW_MODE_INVERTED);*/
-	#endif
 
 #endif
 
-	ExBuffs::UpdateData();
+	if (GetTickCount() % 25)
+		ExBuffs::UpdateData();
 	gExGUI->draw();
 
 #ifdef D2EX_SPECTATOR
