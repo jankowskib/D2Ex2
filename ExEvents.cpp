@@ -136,6 +136,16 @@ int __fastcall ExEvents::OnTextEvent(ExEvent *Dane) //0xA6
 				ExParty::ClearScreenHandle();
 		}
 		break;
+		case EXEVENT_ACCOUNT_INFO:
+		{
+			ExEventAccountInfo* msg = (ExEventAccountInfo*)Dane;
+			RosterUnit* pRoster = ExParty::GetRosterById(msg->UnitId);
+			if (pRoster) {
+				DEBUGMSG("Received info about %s (*%s)", pRoster->szName, msg->szAccount)
+				ExParty::AddAccount(pRoster->szName, msg->szAccount);
+			}
+		}
+		break;
 		default:
 		ExScreen::PrintTextEx(COL_PURPLE, "D2EX: Unrecognized ExEvent packet type. Please update D2Ex to new version");
 	};

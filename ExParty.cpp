@@ -529,10 +529,8 @@ bool AccUnique(const AccountBase & first, const AccountBase & second)
 {
 	string f = first.Name;
 	string s = second.Name;
-	transform(f.begin(), f.end(), f.begin(), tolower);
-	transform(s.begin(), s.end(), s.begin(), tolower);
 
-	return (f == s /*&& ( first.Account.empty() || first.Account=="N/A")*/) ? true : false;
+	return f == s;
 }
 
 

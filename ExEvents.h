@@ -36,6 +36,7 @@ enum ExEventMsgs
 	EXEVENT_OPTIONS = 5,
 	EXEVENT_SPECTATOR_START = 6,
 	EXEVENT_SPECTATOR_END = 7,
+	EXEVENT_ACCOUNT_INFO = 8,
 };
 
 enum ExEventOption
@@ -107,6 +108,13 @@ struct ExEventGameOptions : ExEvent // size 0x9
 	BYTE bOption;	//0x04 <- Option type check ExEventOption
 	DWORD nValue;	//0x05
 };
+
+struct ExEventAccountInfo : ExEvent // (size 0x18)
+{
+	DWORD UnitId;
+	char szAccount[16];
+};
+
 
 #pragma pack(pop)
 
