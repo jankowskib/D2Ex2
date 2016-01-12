@@ -23,7 +23,9 @@
 #include "ExParty.h"
 #include "ExAutomap.h"
 #include "ExDownload.h"
+#include "D2Ex2.h"
 #include "readerwriterqueue\readerwriterqueue.h"
+#include <boost/lexical_cast.hpp>
 
 static int KillCount;
 moodycamel::ReaderWriterQueue<EventItem> hEventsQueue;
@@ -105,6 +107,14 @@ int __fastcall ExEvents::OnTextEvent(ExEvent *Dane) //0xA6
 				{
 					DEBUGMSG("Disabling spectator mode by server request!")
 					gDisableSpectator = (bool)msg->nValue;
+				}
+				break;
+				case EXOP_SET_MAX_PLAYERS:
+				{
+					int players = (DWORD)msg->nValue;
+					DEBUGMSG("Max players value was updated to %d", players)
+					D2Ex::PatchMaxPlayers(players);
+					WritePrivateProfileString("D2Ex", "MaxPlayers", boost::lexical_cast<string>(players).c_str(), ConfigIni.c_str());
 				}
 				break;
 			}

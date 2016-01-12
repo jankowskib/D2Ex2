@@ -111,6 +111,31 @@ void LoadItemConfig()
  
 }
 
+void D2Ex::PatchMaxPlayers(int nPlayers)
+{
+#define CUSTOM 0
+#ifdef VER_111B
+	Misc::Patch(CUSTOM, GetDllOffset("D2Multi.dll", 0x11C40), nPlayers + 1, 1, "Player Count Set I");
+	Misc::Patch(CUSTOM, GetDllOffset("D2Multi.dll", 0x1310A), nPlayers, 1, "Player Count Set II");
+	Misc::Patch(CUSTOM, GetDllOffset("D2Multi.dll", 0x13A7D), nPlayers, 1, "Player Count Set III");
+	Misc::Patch(CUSTOM, GetDllOffset("D2Multi.dll", 0x13A8D), nPlayers, 1, "Player Count Set IV");
+	Misc::Patch(CUSTOM, GetDllOffset("D2Multi.dll", 0x13A91), nPlayers, 1, "Player Count Set V");
+
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x1D2CB), nPlayers, 1, "Player Count Set VI");
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0xBC948), nPlayers, 1, "Player Count Set VII");
+#elif defined VER_113D
+	Misc::Patch(CUSTOM, GetDllOffset("D2Multi.dll", 0x83B0), nPlayers + 1, 1, "Player Count Set I"); //k
+	Misc::Patch(CUSTOM, GetDllOffset("D2Multi.dll", 0x8A7A), nPlayers, 1, "Player Count Set II"); //k
+	Misc::Patch(CUSTOM, GetDllOffset("D2Multi.dll", 0xA14D), nPlayers, 1, "Player Count Set III"); //k
+	Misc::Patch(CUSTOM, GetDllOffset("D2Multi.dll", 0xA15D), nPlayers, 1, "Player Count Set IV"); //k
+	Misc::Patch(CUSTOM, GetDllOffset("D2Multi.dll", 0xA161), nPlayers, 1, "Player Count Set V"); //k
+
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x286FB), nPlayers, 1, "Player Count Set VI"); //k
+	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x889B8), nPlayers, 1, "Player Count Set VII"); //k
+#endif
+#undef CUSTOM
+}
+
 BOOL D2Ex::Init()
 {
 	//#ifdef VER_111B
@@ -153,7 +178,7 @@ BOOL D2Ex::Init()
 	EnteringFont = GetPrivateProfileInt("D2Ex", "EnteringFont", 3, ConfigIni.c_str());
 	int MaxPlayers = GetPrivateProfileInt("D2Ex", "MaxPlayers", 16, ConfigIni.c_str());
 	if (MaxPlayers == 0 || MaxPlayers>100) MaxPlayers = 8;
-	Port = GetPrivateProfileInt("D2Ex", "ServerPort", 6212, ConfigIni.c_str());
+	Port = GetPrivateProfileInt("D2Ex", "ServerPort", 6112, ConfigIni.c_str());
 	int UseExMem = GetPrivateProfileInt("D2Ex", "ExMemory", 0, ConfigIni.c_str());
 	PermShowLife = GetPrivateProfileInt("D2Ex", "PermShowLife", 1, ConfigIni.c_str());
 	PermShowMana = GetPrivateProfileInt("D2Ex", "PermShowMana", 1, ConfigIni.c_str());
@@ -167,6 +192,10 @@ BOOL D2Ex::Init()
 	SMLvl = GetPrivateProfileInt("D2Ex", "SMLvl", 12, ConfigIni.c_str());
 
 	gRespawnTime = 0;
+
+#ifdef D2EX_PVPGN_EXT
+	PatchMaxPlayers(MaxPlayers);
+#endif
 
 #ifdef D2EX_PVM_BUILD
 	VK_ATNext = GetPrivateProfileInt("Keys", "ATNext", VK_F5, ConfigIni.c_str());
@@ -278,14 +307,7 @@ BOOL D2Ex::Init()
 	//Misc::Patch(CALL,GetDllOffset("D2Client.dll", 0x4D707), (DWORD)D2Stubs::D2CLIENT_GetRoomByXY_STUB, 5, "Get Room XY Test");
 	//Misc::Patch(JUMP,GetDllOffset("D2Client.dll", 0x64510),(DWORD)ExLoading::Draw,5,"Loading Draw Hook");
 #ifdef D2EX_PVPGN_EXT
-	Misc::Patch(CUSTOM, GetDllOffset("D2Multi.dll", 0x11C40), MaxPlayers + 1, 1, "Player Count Set I");
-	Misc::Patch(CUSTOM, GetDllOffset("D2Multi.dll", 0x1310A), MaxPlayers, 1, "Player Count Set II");
-	Misc::Patch(CUSTOM, GetDllOffset("D2Multi.dll", 0x13A7D), MaxPlayers, 1, "Player Count Set III");
-	Misc::Patch(CUSTOM, GetDllOffset("D2Multi.dll", 0x13A8D), MaxPlayers, 1, "Player Count Set IV");
-	Misc::Patch(CUSTOM, GetDllOffset("D2Multi.dll", 0x13A91), MaxPlayers, 1, "Player Count Set V");
 
-	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x1D2CB), MaxPlayers, 1, "Player Count Set VI");
-	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0xBC948), MaxPlayers, 1, "Player Count Set VII");
 
 	Misc::Patch(CUSTOM, GetDllOffset("BNClient.dll", 0xBFC9), Port, 4, "Change default B.net port I");
 	Misc::Patch(CUSTOM, GetDllOffset("BNClient.dll", 0xD55F), Port, 4, "Change default B.net port II");
@@ -431,14 +453,6 @@ Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x1B7C1), (DWORD)ExOptions::Regis
 	Misc::Patch(CALL, GetDllOffset("D2Common.dll", 0x3AC6C), (DWORD)ExScreen::DrawItem, 5, "Colour Item Intercept IV"); //k
 	Misc::Patch(CALL, GetDllOffset("D2Common.dll", 0x3ADCD), (DWORD)ExScreen::DrawItem, 5, "Colour Item Intercept V"); //k
 
-	Misc::Patch(CUSTOM, GetDllOffset("D2Multi.dll", 0x83B0), MaxPlayers + 1, 1, "Player Count Set I"); //k
-	Misc::Patch(CUSTOM, GetDllOffset("D2Multi.dll", 0x8A7A), MaxPlayers, 1, "Player Count Set II"); //k
-	Misc::Patch(CUSTOM, GetDllOffset("D2Multi.dll", 0xA14D), MaxPlayers, 1, "Player Count Set III"); //k
-	Misc::Patch(CUSTOM, GetDllOffset("D2Multi.dll", 0xA15D), MaxPlayers, 1, "Player Count Set IV"); //k
-	Misc::Patch(CUSTOM, GetDllOffset("D2Multi.dll", 0xA161), MaxPlayers, 1, "Player Count Set V"); //k
-
-	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x286FB), MaxPlayers, 1, "Player Count Set VI"); //k
-	Misc::Patch(CUSTOM, GetDllOffset("D2Client.dll", 0x889B8), MaxPlayers, 1, "Player Count Set VII"); //k
 
 	Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0x460C0), (DWORD)D2Stubs::D2CLIENT_SendJoinGame_STUB, 5, "Join Game Override"); //k
 
@@ -775,6 +789,7 @@ void D2Ex::OnExit()
 {
 #ifdef D2EX_MULTIRES
 	ExMultiRes::D2GFX_Finish();
+	ExMultiRes::FreeImages();
 #else
 	fnRendererCallbacks * fns = *D2Vars.D2GFX_pfnDriverCallback;
 	D2EXASSERT(fns, "GFX deinit error - driver ptr is null!");
@@ -796,6 +811,7 @@ void D2Ex::OnExit()
 
 	if (CellBox) delete CellBox;
 	if (CellButton) delete CellButton;
+
 	ExMpq::UnloadMPQ();
 
 	if (gExGUI) {

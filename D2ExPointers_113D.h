@@ -162,7 +162,7 @@ _d2f D2Funcs = {0}; void SetupD2Funcs() {
 		//D2GLIDE
 		EXFUNCPTR(D2GLIDE, AllocCache, BOOL, __stdcall, (), 0xD180)
 		EXFUNCPTR(D2GLIDE, CreateDebugFont, BOOL, __stdcall, (), 0x7E90)
-
+		EXFUNCPTR(D2GLIDE, GenerateTileBitmap, BOOL, __stdcall, (TileContext* pTile, void* pBitmapBuffer), 0x9010) // Buffer must be 32768 length
 		//D2WIN
 		EXFUNCPTR(D2WIN, ResizeWindow, BOOL, __stdcall, (int nMode), -10037)
 		EXFUNCPTR(D2WIN, LoadCellFile, CellFile*, __fastcall, (const char* szFile, int Type), -10023) //k
@@ -246,9 +246,11 @@ _d2f D2Funcs = {0}; void SetupD2Funcs() {
 
 
 		//D2LANG
+		EXFUNCPTR(D2LANG, UnloadStrings, void, __fastcall, (void), -10000)
+		EXFUNCPTR(D2LANG, GetLocaleId, int, __fastcall, (void), -10001) //k //ns
 		EXFUNCPTR(D2LANG, GetLocaleText, wchar_t*, __fastcall, (short nLocaleTxtNo), -10004) //k
-		EXFUNCPTR(D2LANG, GetLocaleId, int, __fastcall, (), -10001) //k //ns
 		EXFUNCPTR(D2LANG, GetLocaleFolder, void, __stdcall, (char* out, int aZero), -10008)
+		EXFUNCPTR(D2LANG, LoadStrings, BOOL, __fastcall, (int _1, const char* szLang, BOOL bExpansion), -10009) // _1 seems unused
 
 #ifndef __DEFINE_EXPTRS
 };
@@ -410,7 +412,7 @@ void SetupD2Vars() {
 		EXVARPTR(D2GDI, WindowWidth, unsigned int, 0xCA98)
 		EXVARPTR(D2GDI, BitmapHeight, unsigned int, 0xC980)
 		EXVARPTR(D2GDI, BitmapWidth, unsigned int, 0xC970)
-		EXVARPTR(D2GDI, gpbBuffer, void*, 0xCA9C)
+		EXVARPTR(D2GDI, gpbBuffer, RGBQUAD*, 0xCA9C)
 		EXVARPTR(D2GDI, DIB, HBITMAP, 0xC97C)
 		EXVARPTR(D2GDI, hWnd, HANDLE, 0xC568)
 		EXVARPTR(D2GDI, PaletteEntries, PALETTEENTRY, 0xC570)
@@ -459,6 +461,10 @@ void SetupD2Vars() {
 		EXVARPTR(D2CLIENT, ShakeY, int, 0xFC3DC)
 		EXVARPTR(D2CLIENT, StatesOnSetFuncTable, DWORD, 0xF35C0) //void (__fastcall *gStateSetFuncs_6FBA35C0[])(UnitAny *pUnit, int nState) 1-19 are in use, but 20-32 are free:)
 		EXVARPTR(D2CLIENT, StatesOnRemoveFuncTable, DWORD, 0xF3640) //void (__fastcall *gStateRemFuncs_6FBA3640[])(UnitAny *pUnit, int nState) 13-30 are free
+
+		EXVARPTR(D2LANG, LocaleId, DWORD, 0x10A3C)
+
+		EXVARPTR(D2LANG, isLocaleSet, BOOL, 0x10A40)
 
 #ifndef __DEFINE_EXPTRS
 };

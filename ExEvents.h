@@ -44,6 +44,7 @@ enum ExEventOption
 {
 	EXOP_RESPAWNTIME = 1,
 	EXOP_DISABLESPECTATOR = 2,
+	EXOP_SET_MAX_PLAYERS = 3,
 };
 
 struct EventItem

@@ -24,6 +24,7 @@
 
 namespace D2Ex
 {
+	void PatchMaxPlayers(int nPlayers);
 	BOOL Init();
 	int  __stdcall OnGameEnter(int);
 	void OnGameLeave();
