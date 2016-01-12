@@ -415,6 +415,7 @@ void Misc::Log(char* Msg...)
 	}
 #if _DEBUG
 	OutputDebugStringA(text);
+	OutputDebugStringA("\n");
 #endif
 	delete[] text;
 }
@@ -440,6 +441,7 @@ void Misc::Log(wchar_t* Msg, ...)
 	}
 #if _DEBUG
 	OutputDebugStringW(text);
+	OutputDebugStringW(L"\n");
 #endif
 	delete[] text;
 }
