@@ -21,7 +21,6 @@
 #ifndef _EXBUFFS_H__
 #define _EXBUFFS_H__
 
-#include <map>
 
 class ExImage;
 class ExRectangle;
@@ -54,16 +53,14 @@ enum ExBuffsImgs
 	EXBUFF_ES = 21,
 	EXBUFF_TS = 22,
 	EXBUFF_CYCLONE = 23,
-	EXBUFF_HURRI = 24
+	EXBUFF_HURRI = 24,
+	EXBUFF_UNKNOWN = -1,
 };		
-
-
 
 
 struct ExBuffData
 {
-	ExBuffData() { SkillExpire = SkillLen = SkillLvl = SkillId = StateId = 0; aType = BUFF_BAD; isTimed = false; }
-	ExBuffData(WORD SkillNo, WORD StateNo, WORD DefaultLvl, bool bTimed, BuffType aType);
+	ExBuffData(WORD SkillNo, WORD StateNo, WORD DefaultLvl, bool bTimed, BuffType aType, exId cId);
 
 
 	void update(WORD forcedLvl = 0);
@@ -75,6 +72,8 @@ struct ExBuffData
 	DWORD SkillExpire;
 	bool isTimed;
 	BuffType aType;
+
+	exId controlId;
 };
 
 class ExBuff : public ExControl
@@ -101,10 +100,11 @@ private:
 	ExTextBox * BuffInfo;
 };
 
-typedef map<exId, ExBuffData>::iterator buff_it;
+typedef vector<ExBuffData>::iterator buff_it;
 
 namespace ExBuffs
 {
+	ExBuffsImgs ExBuffStateToDC6(int stateId);
 	wchar_t* GetSkillName(unsigned short SkillId);
 	BOOL __fastcall OnSetState(BYTE* aPacket);
 	BOOL __fastcall OnRemoveState(BYTE* aPacket);

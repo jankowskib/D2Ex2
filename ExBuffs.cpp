@@ -21,7 +21,7 @@
 #include "stdafx.h"
 
 #include <string>
-#include <map>
+#include <vector>
 #include <memory>
 #include <mutex>
 
@@ -38,10 +38,10 @@
 
 
 static ExCellFile * cfBuffs;
-static map <exId, ExBuffData> gBuffs;
+static vector <ExBuffData> gBuffs;
 
 
-ExBuffData::ExBuffData(WORD SkillNo, WORD StateNo, WORD forcedLvl, bool bTimed, BuffType aType)
+ExBuffData::ExBuffData(WORD SkillNo, WORD StateNo, WORD forcedLvl, bool bTimed, BuffType aType, exId cId)
 {
 
 	UnitAny* pPlayer = D2Funcs.D2CLIENT_GetPlayer();
@@ -54,6 +54,7 @@ ExBuffData::ExBuffData(WORD SkillNo, WORD StateNo, WORD forcedLvl, bool bTimed, 
 	SkillLen = 0;
 	SkillExpire = 0;
 	this->aType = aType;
+	controlId = cId;
 
 	if (SkillId)
 	{
@@ -63,10 +64,7 @@ ExBuffData::ExBuffData(WORD SkillNo, WORD StateNo, WORD forcedLvl, bool bTimed, 
 				SkillLvl = D2Funcs.D2COMMON_GetSkillLevel(pPlayer, pSkill, 1);
 		}
 		SkillsTxt *pTxt = &(*D2Vars.D2COMMON_sgptDataTables)->pSkillsTxt[SkillId];
-		if (!pTxt)	{
-			isTimed = false;
-			D2EXINFO("Unknown Skill Id %d. Check your Skills.Txt", SkillId)
-		} else {
+		if (pTxt) {
 			SkillLen = isTimed ? (D2Funcs.D2COMMON_EvaluateSkill(pPlayer, pTxt->dwAuraLenCalc, SkillId, SkillLvl) / 25) * 1000 : 0;
 			SkillExpire = GetTickCount() + SkillLen;
 		}
@@ -91,11 +89,7 @@ void ExBuffData::update(WORD forcedLvl)
 			return;
 
 		SkillsTxt *pTxt = &(*D2Vars.D2COMMON_sgptDataTables)->pSkillsTxt[SkillId];
-		if (!pTxt)	{
-			isTimed = false;
-			D2EXINFO("Unknown Skill Id %d. Check your Skills.Txt", SkillId)
-		}
-		else {
+		if (pTxt)	{
 			SkillLen = isTimed ? (D2Funcs.D2COMMON_EvaluateSkill(pPlayer, pTxt->dwAuraLenCalc, SkillId, SkillLvl) / 25) * 1000 : 0;
 			SkillExpire = GetTickCount() + SkillLen;
 		}
@@ -104,6 +98,7 @@ void ExBuffData::update(WORD forcedLvl)
 
 ExBuff::ExBuff(unsigned int pos, ExBuffsImgs ImageId, BuffType aType) : ExControl(0, *D2Vars.D2GFX_GfxMode > 2 ? (*D2Vars.D2CLIENT_ScreenHeight - 15) : (*D2Vars.D2CLIENT_ScreenHeight - 50), 24, 24, 0)
 {
+	DEBUGMSG("Creating ExBuff")
 	if (!cfBuffs)
 	{
 		try { cfBuffs = new ExCellFile("data\\D2Ex\\Buffs"); }
@@ -164,6 +159,7 @@ void ExBuff::SetText(wstring str)
 
 ExBuff::~ExBuff()
 {
+	DEBUGMSG("Destroying ExBuff")
 	delete BuffInfo;
 	delete BuffTime;
 	delete Buff;
@@ -181,6 +177,39 @@ bool ExBuff::isPressed(DWORD Sender, WPARAM wParam)
 {
 	return Buff->isPressed(Sender, wParam);
 }
+
+ExBuffsImgs ExBuffs::ExBuffStateToDC6(int stateId) 
+{
+	switch (stateId) {
+	case STATE_BATTLECOMMAND: return  EXBUFF_BC;
+	case STATE_BATTLEORDERS: return  EXBUFF_BO;
+	case STATE_SHOUT: return  EXBUFF_SHOUT;
+	case STATE_AMPLIFYDAMAGE: return  EXBUFF_AMP;
+	case STATE_LOWERRESIST: return  EXBUFF_LR;
+	case STATE_CLEANSING: return  EXBUFF_CLEAN;
+	case STATE_CONCENTRATION: return  EXBUFF_CONC;
+	case STATE_CONVICTION: return  EXBUFF_CONV;
+	case STATE_FANATICISM: return  EXBUFF_FANA;
+	case STATE_HOLYWINDCOLD: return  EXBUFF_HF;
+	case STATE_MEDITATION: return  EXBUFF_MEDI;
+	case STATE_MIGHT: return  EXBUFF_MIGHT;
+	case STATE_RESISTALL: return  EXBUFF_SALV;
+	case STATE_STAMINA: return  EXBUFF_VIGOR;
+	case STATE_HOLYSHIELD: return  EXBUFF_HS;
+	case STATE_ENCHANT: return  EXBUFF_ENCH;
+	case STATE_SLOWMISSILES: return  EXBUFF_SM;
+	case STATE_OAKSAGE: return  EXBUFF_OAK;
+	case STATE_QUICKNESS: return  EXBUFF_BOS;
+	case STATE_FADE: return  EXBUFF_FADE;
+	case STATE_BONEARMOR: return  EXBUFF_BARMOR;
+	case STATE_ENERGYSHIELD: return  EXBUFF_ES;
+	case STATE_THUNDERSTORM: return  EXBUFF_TS;
+	case STATE_CYCLONEARMOR: return  EXBUFF_CYCLONE;
+	case STATE_HURRICANE: return  EXBUFF_HURRI;
+	}
+	return EXBUFF_UNKNOWN;
+};
+
 
 wchar_t* ExBuffs::GetSkillName(unsigned short SkillId)
 {
@@ -258,10 +287,9 @@ int GetStateStatValue(int nStatNo, BYTE* StateData, int PacketLen)
 
 buff_it ExBuffs::FindByStateId(unsigned int stateNo)
 {
-	for (buff_it b = gBuffs.begin(); b != gBuffs.end(); ++b) {
-		if (b->second.StateId == stateNo) {
+	for (buff_it &b = gBuffs.begin(); b != gBuffs.end(); ++b) {
+		if (b->StateId == stateNo)
 			return b;
-		}
 	}
 	return gBuffs.end();
 }
@@ -287,7 +315,7 @@ BOOL __fastcall ExBuffs::OnSetState(BYTE* aPacket)
 
 		buff_it buff = FindByStateId(StateNo);
 		if (buff != gBuffs.end())
-			newid = buff->first;
+			newid = buff->controlId;
 
 		switch (StateNo)
 		{
@@ -301,21 +329,23 @@ BOOL __fastcall ExBuffs::OnSetState(BYTE* aPacket)
 			{
 				if (ExParty::IsInPartyWithClass(pPlayer, PLAYER_BARBARIAN))
 				{
-					lvl = bo->second.SkillLvl - 19; //cause any sane barb put only 1 point in BC
+					lvl = bo->SkillLvl - 19; //cause any sane barb put only 1 point in BC
 				}
 				else
 				{
-					lvl = bo->second.SkillLvl;
+					lvl = bo->SkillLvl;
 				}
 			}
 
 			if (buff != gBuffs.end())
 			{
-				buff->second.update(lvl);
+				buff->update(lvl);
 				break;
 			}
-			else
-				gBuffs[newid = gExGUI->add(new ExBuff(gBuffs.size(), EXBUFF_BC, BUFF_GOOD))] = ExBuffData(155, StateNo, lvl, true, BUFF_GOOD);
+			else {
+				newid = gExGUI->add(new ExBuff(gBuffs.size(), ExBuffStateToDC6(StateNo), BUFF_GOOD));
+				gBuffs.emplace_back(ExBuffData(155, StateNo, lvl, true, BUFF_GOOD, newid));
+			}
 		}
 		break;
 		case 32: //BO,149
@@ -324,11 +354,13 @@ BOOL __fastcall ExBuffs::OnSetState(BYTE* aPacket)
 			int val = GetStateStatValue(77, pSetState->Data, pSetState->PacketLen);
 			if (buff != gBuffs.end())
 			{
-				buff->second.update(GetSkillLvlByStat(149, 77, val));
+				buff->update(GetSkillLvlByStat(149, 77, val));
 				break;
 			}
-			else
-				gBuffs[newid = gExGUI->add(new ExBuff(gBuffs.size(), EXBUFF_BO, BUFF_GOOD))] = ExBuffData(149, StateNo, GetSkillLvlByStat(149, 77, val), true, BUFF_GOOD);
+			else {
+				newid = gExGUI->add(new ExBuff(gBuffs.size(), ExBuffStateToDC6(StateNo), BUFF_GOOD));
+				gBuffs.emplace_back(ExBuffData(149, StateNo, GetSkillLvlByStat(149, 77, val), true, BUFF_GOOD, newid));
+			}
 		}
 		break;
 		case 26: //SHOUT,138
@@ -337,11 +369,13 @@ BOOL __fastcall ExBuffs::OnSetState(BYTE* aPacket)
 			int val = GetStateStatValue(171, pSetState->Data, pSetState->PacketLen);
 			if (buff != gBuffs.end())
 			{
-				buff->second.update(GetSkillLvlByStat(138, 171, val));
+				buff->update(GetSkillLvlByStat(138, 171, val));
 				break;
 			}
-			else
-				gBuffs[newid = gExGUI->add(new ExBuff(gBuffs.size(), EXBUFF_SHOUT, BUFF_GOOD))] = ExBuffData(138, StateNo, GetSkillLvlByStat(138, 171, val), true, BUFF_GOOD);
+			else {
+				newid = gExGUI->add(new ExBuff(gBuffs.size(), ExBuffStateToDC6(StateNo), BUFF_GOOD));
+				gBuffs.emplace_back(ExBuffData(138, StateNo, GetSkillLvlByStat(138, 171, val), true, BUFF_GOOD, newid));
+			}
 		}
 		break;
 		case 9: //AMP, 66
@@ -349,11 +383,13 @@ BOOL __fastcall ExBuffs::OnSetState(BYTE* aPacket)
 			
 			if (buff != gBuffs.end())
 			{
-				buff->second.update(AmpLvl ? AmpLvl : 40);
+				buff->update(AmpLvl ? AmpLvl : 40);
 				break;
 			}
-			else
-				gBuffs[newid = gExGUI->add(new ExBuff(gBuffs.size(), EXBUFF_AMP, BUFF_BAD))] = ExBuffData(66, StateNo, AmpLvl ? AmpLvl : 40, true, BUFF_BAD);
+			else {
+				newid = gExGUI->add(new ExBuff(gBuffs.size(), ExBuffStateToDC6(StateNo), BUFF_BAD));
+				gBuffs.emplace_back(ExBuffData(66, StateNo, AmpLvl ? AmpLvl : 40, true, BUFF_BAD, newid));
+			}
 		}
 		break;
 		case 61: //LR, 91
@@ -362,11 +398,13 @@ BOOL __fastcall ExBuffs::OnSetState(BYTE* aPacket)
 			int val = GetStateStatValue(39, pSetState->Data, pSetState->PacketLen);
 			if (buff != gBuffs.end())
 			{
-				buff->second.update(GetSkillLvlByStat(91, 39, val));
+				buff->update(GetSkillLvlByStat(91, 39, val));
 				break;
 			}
-			else
-				gBuffs[newid = gExGUI->add(new ExBuff(gBuffs.size(), EXBUFF_LR, BUFF_BAD))] = ExBuffData(91, StateNo, GetSkillLvlByStat(91, 39, val), true, BUFF_BAD);
+			else {
+				newid = gExGUI->add(new ExBuff(gBuffs.size(), ExBuffStateToDC6(StateNo), BUFF_BAD));
+				gBuffs.emplace_back(ExBuffData(91, StateNo, GetSkillLvlByStat(91, 39, val), true, BUFF_BAD, newid));
+			}
 		}
 		break;
 		case 16: //ENCH, 52
@@ -374,27 +412,33 @@ BOOL __fastcall ExBuffs::OnSetState(BYTE* aPacket)
 			
 			int val = GetStateStatValue(119, pSetState->Data, pSetState->PacketLen);
 			if (buff != gBuffs.end())
-				buff->second.update(GetSkillLvlByStat(52, 119, val));
-			else
-				gBuffs[newid = gExGUI->add(new ExBuff(gBuffs.size(), EXBUFF_ENCH, BUFF_GOOD))] = ExBuffData(52, StateNo, GetSkillLvlByStat(52, 119, val), true, BUFF_GOOD);
+				buff->update(GetSkillLvlByStat(52, 119, val));
+			else {
+				newid = gExGUI->add(new ExBuff(gBuffs.size(), ExBuffStateToDC6(StateNo), BUFF_GOOD));
+				gBuffs.emplace_back(ExBuffData(52, StateNo, GetSkillLvlByStat(52, 119, val), true, BUFF_GOOD, newid));
+			}
 		}
 		break;
 		case 87: //SM, 17
 		{
 			
 			if (buff != gBuffs.end())
-				buff->second.update(SMLvl ? SMLvl : 12);
-			else
-				gBuffs[newid = gExGUI->add(new ExBuff(gBuffs.size(), EXBUFF_SM, BUFF_BAD))] = ExBuffData(17, StateNo, SMLvl ? SMLvl : 12, true, BUFF_BAD);
+				buff->update(SMLvl ? SMLvl : 12);
+			else {
+				newid = gExGUI->add(new ExBuff(gBuffs.size(), ExBuffStateToDC6(StateNo), BUFF_BAD));
+				gBuffs.emplace_back(ExBuffData(17, StateNo, SMLvl ? SMLvl : 12, true, BUFF_BAD, newid));
+			}
 		}
 		break;
 		case 101: //HOLYSHIELD, 117
 		{
 			
 			if (buff != gBuffs.end())
-				buff->second.update(0);
-			else
-				gBuffs[newid = gExGUI->add(new ExBuff(gBuffs.size(), EXBUFF_HS, BUFF_GOOD))] = ExBuffData(117, StateNo, 0, true, BUFF_GOOD);
+				buff->update(0);
+			else {
+				newid = gExGUI->add(new ExBuff(gBuffs.size(), ExBuffStateToDC6(StateNo), BUFF_GOOD));
+				gBuffs.emplace_back(ExBuffData(117, StateNo, 0, true, BUFF_GOOD, newid));
+			}
 		}
 		break;
 		case 157: //BOS, 258
@@ -402,11 +446,12 @@ BOOL __fastcall ExBuffs::OnSetState(BYTE* aPacket)
 			
 			if (buff != gBuffs.end())
 			{
-				buff->second.update(0);
-				break;
+				buff->update(0);
 			}
-			else
-				gBuffs[newid = gExGUI->add(new ExBuff(gBuffs.size(), EXBUFF_BOS, BUFF_GOOD))] = ExBuffData(258, StateNo, 0, true, BUFF_GOOD);
+			else {
+				newid = gExGUI->add(new ExBuff(gBuffs.size(), ExBuffStateToDC6(StateNo), BUFF_GOOD));
+				gBuffs.emplace_back(ExBuffData(258, StateNo, 0, true, BUFF_GOOD, newid));
+			}
 		}
 		break;
 		case 159: //FADE, 267
@@ -414,22 +459,23 @@ BOOL __fastcall ExBuffs::OnSetState(BYTE* aPacket)
 			
 			if (buff != gBuffs.end())
 			{
-				buff->second.update(0);
-				break;
+				buff->update(0);
 			}
-			else
-				gBuffs[newid = gExGUI->add(new ExBuff(gBuffs.size(), EXBUFF_FADE, BUFF_GOOD))] = ExBuffData(267, StateNo, 0, true, BUFF_GOOD);
+			else {
+				newid = gExGUI->add(new ExBuff(gBuffs.size(), ExBuffStateToDC6(StateNo), BUFF_GOOD));
+				gBuffs.emplace_back(ExBuffData(267, StateNo, 0, true, BUFF_GOOD, newid));
+			}
 		}
 		break;
 		case 30: //ES, 58
 		{
 			
 			if (buff == gBuffs.end()) {
-				gBuffs[newid = gExGUI->add(new ExBuff(gBuffs.size(), EXBUFF_ES, BUFF_GOOD))] = ExBuffData(58, StateNo, 0, true, BUFF_GOOD);
-				break;
+				newid = gExGUI->add(new ExBuff(gBuffs.size(), ExBuffStateToDC6(StateNo), BUFF_GOOD));
+				gBuffs.emplace_back(ExBuffData(58, StateNo, 0, true, BUFF_GOOD, newid));
 			}
 			else
-				buff->second.update(0);
+				buff->update(0);
 		}
 		break;
 		case 38: //TS, 57
@@ -437,11 +483,13 @@ BOOL __fastcall ExBuffs::OnSetState(BYTE* aPacket)
 			
 			if (buff != gBuffs.end())
 			{
-				buff->second.update(0);
-				break;
+				buff->update(0);
+
 			}
-			else
-				gBuffs[newid = gExGUI->add(new ExBuff(gBuffs.size(), EXBUFF_TS, BUFF_GOOD))] = ExBuffData(57, StateNo, 0, true, BUFF_GOOD);
+			else {
+				newid = gExGUI->add(new ExBuff(gBuffs.size(), ExBuffStateToDC6(StateNo), BUFF_GOOD)),
+				gBuffs.emplace_back(ExBuffData(57, StateNo, 0, true, BUFF_GOOD, newid));
+			}
 		}
 		break;
 		case 144: //HURRI, 250
@@ -449,82 +497,44 @@ BOOL __fastcall ExBuffs::OnSetState(BYTE* aPacket)
 			
 			if (buff != gBuffs.end())
 			{
-				buff->second.update(0);
+				buff->update(0);
 				break;
 			}
-			else
-				gBuffs[newid = gExGUI->add(new ExBuff(gBuffs.size(), EXBUFF_HURRI, BUFF_GOOD))] = ExBuffData(250, StateNo, 0, false, BUFF_GOOD);
+			else {
+				newid = gExGUI->add(new ExBuff(gBuffs.size(), ExBuffStateToDC6(StateNo), BUFF_GOOD));
+				gBuffs.emplace_back(ExBuffData(250, StateNo, 0, false, BUFF_GOOD, newid));
+			}
 		}
 		break;
-		case 149: //OAK, 149
+		case STATE_CONVICTION: //CONV
+		case STATE_HOLYWINDCOLD: //HF
+		{
+			if (buff == gBuffs.end()) {
+				newid = gExGUI->add(new ExBuff(gBuffs.size(), ExBuffStateToDC6(StateNo), BUFF_BAD));
+				gBuffs.emplace_back(ExBuffData(0, StateNo, 0, false, BUFF_BAD, newid));
+			}
+		}
+		break;
+		case STATE_RESISTALL: //SALV
+		case STATE_CLEANSING: //CLEANSING
+		case STATE_STAMINA: //VIGOR
+		case STATE_CONCENTRATION: //CONC
+		case STATE_FANATICISM: //FANA
+		case STATE_MEDITATION: //MEDI
+		case STATE_MIGHT: //MIGHT
+		case STATE_OAKSAGE: //OAK
 		{	
-			if (buff == gBuffs.end())
-				gBuffs[newid = gExGUI->add(new ExBuff(gBuffs.size(), EXBUFF_OAK, BUFF_AURA))] = ExBuffData(0, StateNo, 0, false, BUFF_AURA);
+			if (buff == gBuffs.end()) {
+				newid = gExGUI->add(new ExBuff(gBuffs.size(), ExBuffStateToDC6(StateNo), BUFF_AURA));
+				gBuffs.emplace_back(ExBuffData(0, StateNo, 0, false, BUFF_AURA, newid));
+			}
 		}
-		break;
-		case 45: //CLEANSING
-		{		
-			if (buff == gBuffs.end())
-				gBuffs[newid = gExGUI->add(new ExBuff(gBuffs.size(), EXBUFF_CLEAN, BUFF_AURA))] = ExBuffData(0, StateNo, 0, false, BUFF_AURA);
+		break;	
 		}
-		break;
-		case 42: //CONC
-		{
-			
-			if (buff == gBuffs.end())
-				gBuffs[newid = gExGUI->add(new ExBuff(gBuffs.size(), EXBUFF_CONC, BUFF_AURA))] = ExBuffData(0, StateNo, 0, false, BUFF_AURA);
-		}
-		break;
-		case 28: //CONV
-		{
-			
-			if (buff == gBuffs.end())
-				gBuffs[newid = gExGUI->add(new ExBuff(gBuffs.size(), EXBUFF_CONV, BUFF_BAD))] = ExBuffData(0, StateNo, 0, false, BUFF_BAD);
-		}
-		break;
-		case 49: //FANA
-		{
-			if (buff == gBuffs.end())
-				gBuffs[newid = gExGUI->add(new ExBuff(gBuffs.size(), EXBUFF_FANA, BUFF_AURA))] = ExBuffData(0, StateNo, 0, false, BUFF_AURA);
-		}
-		break;
-		case 44: //HF
-		{
-			if (buff == gBuffs.end())
-				gBuffs[newid = gExGUI->add(new ExBuff(gBuffs.size(), EXBUFF_HF, BUFF_BAD))] = ExBuffData(0, StateNo, 0, false, BUFF_BAD);
-		}
-		break;
-		case 48: //MEDI
-		{
-			
-			if (buff == gBuffs.end())
-				gBuffs[newid = gExGUI->add(new ExBuff(gBuffs.size(), EXBUFF_MEDI, BUFF_AURA))] = ExBuffData(0, StateNo, 0, false, BUFF_AURA);
-		}
-		break;
-		case 33: //MIGHT
-		{
-			
-			if (buff == gBuffs.end())
-				gBuffs[newid = gExGUI->add(new ExBuff(gBuffs.size(), EXBUFF_MIGHT, BUFF_AURA))] = ExBuffData(0, StateNo, 0, false, BUFF_AURA);
-		}
-		break;
-		case 8: //SALV
-		{
-			
-			if (buff == gBuffs.end())
-				gBuffs[newid = gExGUI->add(new ExBuff(gBuffs.size(), EXBUFF_SALV, BUFF_AURA))] = ExBuffData(0, StateNo, 0, false, BUFF_AURA);
-		}
-		break;
-		case 41: //VIGOR
-		{
-			
-			if (buff == gBuffs.end())
-				gBuffs[newid = gExGUI->add(new ExBuff(gBuffs.size(), EXBUFF_VIGOR, BUFF_AURA))] = ExBuffData(0, StateNo, 0, false, BUFF_AURA);
-		}
-		break;
-		}
-		if (newid != exnull_t && gBuffs[newid].SkillLvl) {
-			gExGUI->setText(newid, boost::lexical_cast<wstring>(gBuffs[newid].SkillLvl));
+		buff = FindByStateId(StateNo);
+
+		if (newid != exnull_t && buff != gBuffs.end() && buff->SkillLvl) {
+			gExGUI->setText(newid, boost::lexical_cast<wstring>(buff->SkillLvl));
 		}
 	}
 	return D2Funcs.D2CLIENT_SetState_I(aPacket);
@@ -542,14 +552,16 @@ BOOL __fastcall ExBuffs::OnRemoveState(BYTE* aPacket)
 
 		if (UnitType == UNIT_PLAYER && UnitId == pPlayer->dwUnitId)
 		{
-			auto it = FindByStateId(StateNo);
-			if (it != gBuffs.end())
-			{
-				gExGUI->remove(it->first);
-				gBuffs.erase(it);
-				UpdateData();
+			for (auto &b = gBuffs.begin(); b != gBuffs.end(); ++b) {
+				if (b->StateId == StateNo)
+				{
+					gExGUI->remove(b->controlId);
+					gBuffs.erase(b);
+					UpdateData();
+					break;
+				}
 			}
-			
+		
 		}
 
 	}
@@ -561,7 +573,7 @@ void ExBuffs::UpdateYPos()
 {
 	for (auto const &b : gBuffs)
 	{
-		gExGUI->setY(b.first, *D2Vars.D2GFX_GfxMode > 2 ? (*D2Vars.D2CLIENT_ScreenHeight - 15) : (*D2Vars.D2CLIENT_ScreenHeight - 50));
+		gExGUI->setY(b.controlId, *D2Vars.D2GFX_GfxMode > 2 ? (*D2Vars.D2CLIENT_ScreenHeight - 15) : (*D2Vars.D2CLIENT_ScreenHeight - 50));
 	}
 
 }
@@ -571,19 +583,23 @@ void __update_temp(BuffType aType, int& pos)
 {
 	for (auto const &n : gBuffs)
 	{
-		if (n.second.aType == aType) {
-			gExGUI->setX(n.first, (24 * pos) + (*D2Vars.D2GFX_GfxMode > 2 ? 170 : 115));
-			if (n.second.SkillExpire)
+		if (n.aType == aType) {
+			gExGUI->setX(n.controlId, (24 * pos) + (*D2Vars.D2GFX_GfxMode > 2 ? 170 : 115));
+			if (n.SkillExpire)
 			{
-				wstringstream wstr;
-				gLocaleId ==
-					LOCALE_POL ? wstr << ExScreen::GetColorCode(COL_GREY) << L"Czas pozosta³y : " << Misc::ConvertTickToTime(n.second.SkillExpire - GetTickCount()) << L" sekund(y)" << L"\n" :
-					wstr << ExScreen::GetColorCode(COL_GREY) << L"Time remaining : " << Misc::ConvertTickToTime(n.second.SkillExpire - GetTickCount()) << L" sec(s)" << L"\n";
+				int timeLeft = n.SkillExpire - GetTickCount();
 
-				wstr << ExScreen::GetColorCode(COL_LIGHTGREEN) << ExBuffs::GetSkillName(n.second.SkillId);
-				gExGUI->setHooverText(n.first, wstr.str());
-				int a = n.second.SkillExpire < GetTickCount() ? 0 : ((n.second.SkillExpire - GetTickCount()) * 24) / (n.second.SkillLen ? n.second.SkillLen : 1);
-				gExGUI->resize(n.first, exnull_t, a);
+					
+				wstringstream wstr;
+				if (timeLeft > 0) {
+					gLocaleId ==
+						LOCALE_POL ? wstr << ExScreen::GetColorCode(COL_GREY) << L"Czas pozosta³y : " << Misc::ConvertTickToTime(timeLeft) << L" sekund(y)" << L"\n" :
+						wstr << ExScreen::GetColorCode(COL_GREY) << L"Time remaining : " << Misc::ConvertTickToTime(timeLeft) << L" sec(s)" << L"\n";
+				}
+				wstr << ExScreen::GetColorCode(COL_LIGHTGREEN) << ExBuffs::GetSkillName(n.SkillId);
+				gExGUI->setHooverText(n.controlId, wstr.str());
+				int a = n.SkillExpire < GetTickCount() ? 0 : (timeLeft * 24) / (n.SkillLen ? n.SkillLen : 1);
+				gExGUI->resize(n.controlId, exnull_t, a);
 			}
 			++pos;
 		}
@@ -600,8 +616,8 @@ void ExBuffs::UpdateData()
 
 void ExBuffs::Clear()
 {
-	for (auto b : gBuffs)
-		gExGUI->remove(b.first);
+	for (auto &b : gBuffs)
+		gExGUI->remove(b.controlId);
 	gBuffs.clear();
 	delete cfBuffs;
 	cfBuffs = 0;
