@@ -37,6 +37,7 @@ enum ExEventMsgs
 	EXEVENT_SPECTATOR_START = 6,
 	EXEVENT_SPECTATOR_END = 7,
 	EXEVENT_ACCOUNT_INFO = 8,
+	EXEVENT_CLAN_INFO = 9,
 };
 
 enum ExEventOption
@@ -113,6 +114,12 @@ struct ExEventAccountInfo : ExEvent // (size 0x18)
 {
 	DWORD UnitId;
 	char szAccount[16];
+};
+
+struct ExEventClanInfo : ExEvent // (size 0xD)
+{
+	DWORD UnitId;
+	char szClan[5];
 };
 
 

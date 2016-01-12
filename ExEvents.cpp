@@ -146,6 +146,16 @@ int __fastcall ExEvents::OnTextEvent(ExEvent *Dane) //0xA6
 			}
 		}
 		break;
+		case EXEVENT_CLAN_INFO:
+		{
+			ExEventClanInfo* msg = (ExEventClanInfo*)Dane;
+			RosterUnit* pRoster = ExParty::GetRosterById(msg->UnitId);
+			if (pRoster) {
+				DEBUGMSG("Received clan info about %s [%s]", pRoster->szName, msg->szClan)
+					ExParty::SetClan(pRoster->szName, msg->szClan);
+			}
+		}
+		break;
 		default:
 		ExScreen::PrintTextEx(COL_PURPLE, "D2EX: Unrecognized ExEvent packet type. Please update D2Ex to new version");
 	};

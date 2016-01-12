@@ -143,7 +143,6 @@ BOOL D2Ex::Init()
 	D2ExDir.assign(filename, strrchr(filename, '\\') + 1);
 
 	ConfigIni = (D2ExDir + "D2Ex.ini");
-	ClansIni = (D2ExDir + "Clans.ini");
 	string VerIni = (D2ExDir + "D2ExVer.ini");
 	gVerCode = GetPrivateProfileInt("D2Ex", "D2ExVersion", 16, VerIni.c_str());
 	bLagometer = GetPrivateProfileInt("D2Ex", "Lagometer", 0, ConfigIni.c_str());

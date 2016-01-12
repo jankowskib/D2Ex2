@@ -49,6 +49,7 @@ namespace ExParty
 	void UpdateAccount(string szCharName, string szAccountName);
 	void RequestAccount(string szName);
 	string FindAccount(string szName);
+	void SetClan(string szName, string clan);
 	string FindClan(string szName);
 	AccountBase* FindRoster(string szName);
 

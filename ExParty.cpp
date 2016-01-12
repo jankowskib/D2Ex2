@@ -66,6 +66,7 @@ struct AccountBase
 {
 	string Name;
 	string Account;
+	string Clan;
 	unsigned int Kills;
 	unsigned int Deaths;
 	unsigned int Assists;
@@ -539,6 +540,7 @@ void ExParty::AddAccount(string szName, string szAccount)
 	AccountBase Base;
 	Base.Name = szName;
 	Base.Account = szAccount;
+	Base.Clan = "";
 	Base.Kills = 0;
 	Base.Deaths = 0;
 	Base.Assists = 0;
@@ -585,24 +587,50 @@ string ExParty::FindAccount(string szName)
 		if (i->Name == szName && !i->Account.empty())
 			return i->Account;
 	}
-	AddAccount(szName, "N/A"); // Add dummy account 1st
+	string acc = "N/A";
+	if (D2Funcs.D2CLIENT_GetPlayer())
+		if (szName == D2Funcs.D2CLIENT_GetPlayer()->pPlayerData->szName) {
+			BnetData * bnet = *D2Vars.D2LAUNCH_BnData;
+			if (bnet)
+				acc = string(bnet->szAccountName);
+	}
+	AddAccount(szName, acc); // Add dummy account 1st
+#ifdef D2EX_CLOSED_BNET
 	RequestAccount(szName);
+#endif
 	return "N/A";
 }
 
 
-string ExParty::FindClan(string szName)
+void ExParty::SetClan(string szName, string clan)
 {
-	char szReturn[5] = "N/A";
-	for (list<AccountBase>::iterator i = AccBase.begin(); i != AccBase.end(); i++)
+	for (auto &acc : AccBase)
 	{
-		if (i->Name == szName && !i->Account.empty())
+		if (acc.Name == szName)
 		{
-			GetPrivateProfileString("D2ExClans", i->Account.c_str(), "N/A", szReturn, 5, ClansIni.c_str());
-			break;
+			acc.Clan = clan;
+			return;
 		}
 	}
-	return szReturn;
+	string acc = "N/A";
+	if (D2Funcs.D2CLIENT_GetPlayer())
+		if (szName == D2Funcs.D2CLIENT_GetPlayer()->pPlayerData->szName) {
+			BnetData * bnet = *D2Vars.D2LAUNCH_BnData;
+			if (bnet)
+				acc = string(bnet->szAccountName);
+	}
+	AddAccount(szName, acc);
+	SetClan(szName, clan);
+}
+
+string ExParty::FindClan(string szName)
+{
+	for (auto acc : AccBase)
+	{
+		if (acc.Name == szName)
+			return acc.Clan;
+	}
+	return "";
 }
 
 int ExParty::FindRoster(string szName, int Type)
@@ -840,7 +868,10 @@ void ExParty::Update()
 		gExGUI->setColor(i->Frame, ExParty::GetFrameColor(ptRoster->dwUnitId));
 		gExGUI->setText(i->Level, boost::lexical_cast<wstring>(ptRoster->wLevel));
 		gExGUI->setText(i->Clan, ExParty::FindClan(ptRoster->szName));
-		gExGUI->setText(i->Acc, ExParty::FindAccount(ptRoster->szName));
+		string acc = ExParty::FindAccount(ptRoster->szName);
+		if(!acc.empty() && acc != "N/A")
+			acc.insert(acc.begin(), '*');
+		gExGUI->setText(i->Acc, acc);
 #ifndef D2EX_PVPGN_EXT
 		gExGUI->setText(i->Location, GetLvlNameEx(ptRoster->dwUnitId == D2Funcs.D2CLIENT_GetPlayer()->dwUnitId ? ExParty::GetPlayerArea() : ptRoster->dwLevelId,
 			i->Invite ? (gExGUI->getX(i->Invite) - gExGUI->getX(i->Location)) : 100));
@@ -1093,8 +1124,11 @@ void ExParty::Fill(char *szSkip)
 		Tbl.Class = gExGUI->add(new ExImage(frameX + 150, yPos, 5, ptRoster->dwClassId, "data\\D2Ex\\SmallClass"));
 		gExGUI->setHooverText(Tbl.Class, ExParty::GetClassById(ptRoster->dwClassId));
 		Tbl.Level = gExGUI->add(new ExTextBox(frameX + 175, TextPos, 9, TextFont, boost::lexical_cast<wstring>(ptRoster->wLevel), 0));
-		Tbl.Clan = gExGUI->add(new ExTextBox(frameX + 195, TextPos, 0, TextFont, ExParty::FindClan(ptRoster->szName), 0));
-		Tbl.Acc = gExGUI->add(new ExTextBox(frameX + 230, TextPos, 0, TextFont, ExParty::FindAccount(ptRoster->szName), 0));
+		Tbl.Clan = gExGUI->add(new ExTextBox(frameX + 195, TextPos, COL_GREY, TextFont, ExParty::FindClan(ptRoster->szName), 0));
+		string acc = ExParty::FindAccount(ptRoster->szName);
+		if(!acc.empty() && acc != "N/A")
+			acc.insert(acc.begin(), '*');
+		Tbl.Acc = gExGUI->add(new ExTextBox(frameX + 230, TextPos, 0, TextFont, acc, 0));
 #ifndef D2EX_PVPGN_EXT
 		Tbl.Location = gExGUI->add(new ExTextBox(frameX + 337, TextPos, COL_YELLOW, TextFont, GetLvlNameEx(ptRoster->dwUnitId == D2Funcs.D2CLIENT_GetPlayer()->dwUnitId ? ExParty::GetPlayerArea() : ptRoster->dwLevelId, 120), 0, 0));
 #else
@@ -1165,10 +1199,6 @@ void ExParty::Fill(char *szSkip)
 
 void ExParty::ShowHide()
 {
-	static exId Charname = exnull_t;
-	static exId Class = exnull_t;
-	static exId Clan = exnull_t;
-	static exId Acc = exnull_t;
 	static exId PlayerCount = exnull_t;
 	static exId Ping = exnull_t;
 	static exId Location = exnull_t;
@@ -1185,11 +1215,8 @@ void ExParty::ShowHide()
 		pOffset = 0;
 		ExParty::ClearScreen();
 		//Load Strings
-		static wstring wPartyStr, wClassStr, wCharStr, wAccStr;
+		static wstring wPartyStr;
 		if (!wPartyStr.length()) wPartyStr = D2Funcs.D2LANG_GetLocaleText(3926);
-		if (!wClassStr.length()) wClassStr = D2Funcs.D2LANG_GetLocaleText(5322);
-		if (!wCharStr.length()) wCharStr = D2Funcs.D2LANG_GetLocaleText(5287);
-		if (!wAccStr.length()) wAccStr = D2Funcs.D2LANG_GetLocaleText(5224);
 
 #ifdef D2EX_PVPGN_EXT
 		int screenSize = 510;
@@ -1204,11 +1231,7 @@ void ExParty::ShowHide()
 #endif
 		gExGUI->process();
 		int partyX = gExGUI->getX(PartyScreen);
-		PlayerCount = gExGUI->add(new ExTextBox(partyX + 5, 101, 11, 0, &GetPartyCount, 0));
-		Charname = gExGUI->add(new ExTextBox(partyX + 28, 105, 0, 0, wCharStr, 0));
-		Class = gExGUI->add(new ExTextBox(partyX + 154, 105, 0, 0, wClassStr, 0));
-		Clan = gExGUI->add(new ExTextBox(partyX + 201, 105, 0, 0, gLocaleId == LOCALE_POL ? L"Klan" : L"Clan", 0));
-		Acc = gExGUI->add(new ExTextBox(partyX + 237, 105, 0, 0, wAccStr, 0));
+		PlayerCount = gExGUI->add(new ExTextBox(partyX + 5, 101, COL_GREY, 0, &GetPartyCount, 0));
 #ifdef D2EX_PVPGN_EXT
 		Kills = gExGUI->add(new ExImage(partyX + 346, 105, 5, 1, CellFiles::MONINDICATOR)); 
 		gExGUI->setHooverText(Kills, gLocaleId == LOCALE_POL ? L"Zabójstwa" : L"Kills");
@@ -1256,10 +1279,6 @@ void ExParty::ShowHide()
 			gExGUI->setState(Scroll, ExControl::INVISIBLE);
 
 		gExGUI->setChild(PartyScreen, PlayerCount, true);
-		gExGUI->setChild(PartyScreen, Charname, true);
-		gExGUI->setChild(PartyScreen, Class, true);
-		gExGUI->setChild(PartyScreen, Clan, true);
-		gExGUI->setChild(PartyScreen, Acc, true);
 #ifdef D2EX_PVPGN_EXT
 		gExGUI->setChild(PartyScreen, Kills, true);
 		gExGUI->setChild(PartyScreen, Assists, true);
@@ -1296,10 +1315,6 @@ void ExParty::ShowHide()
 #ifndef D2EX_PVPGN_EXT
 		gExGUI->remove(Location);
 #endif
-		gExGUI->remove(Charname);
-		gExGUI->remove(Acc);
-		gExGUI->remove(Clan);
-		gExGUI->remove(Class);
 		gExGUI->remove(PlayerCount);
 		ExParty::Clear();
 		gExGUI->remove(PartyScreen);
