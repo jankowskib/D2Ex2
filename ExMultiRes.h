@@ -80,9 +80,6 @@ namespace ExMultiRes
 	void DrawMissingPieces();
 
 	//Driver handlers
-	BOOL __fastcall GDI_ResizeWindow(HANDLE HWND, int nMode);
-	BOOL __fastcall GDI_Init(HANDLE HWND, int nResolution);
-	BOOL __fastcall GDI_Release();
 
 	BOOL __fastcall GLIDE_Init(HANDLE hWND, int nMode);
 	BOOL __fastcall GLIDE_ResizeWindow(HANDLE HWND, int nMode);

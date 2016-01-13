@@ -246,6 +246,7 @@ EXIT 0</Command>
     <ClCompile Include="ExControlManager.cpp" />
     <ClCompile Include="ExExtendedLevels.cpp" />
     <ClCompile Include="ExFontManager.cpp" />
+    <ClCompile Include="ExGDI.cpp" />
     <ClCompile Include="ExMultiRes.cpp" />
     <ClCompile Include="ExOpenGL.cpp" />
     <ClCompile Include="Offset.cpp" />
@@ -315,6 +316,7 @@ EXIT 0</Command>
     <ClInclude Include="ExControlManager.h" />
     <ClInclude Include="ExExtendedLevels.h" />
     <ClInclude Include="ExFontManager.h" />
+    <ClInclude Include="ExGDI.h" />
     <ClInclude Include="ExTexture.h" />
     <ClInclude Include="ExMultiRes.h" />
     <ClInclude Include="ExOpenGL.h" />

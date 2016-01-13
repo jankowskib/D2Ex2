@@ -36,6 +36,16 @@
 
 #include "Build.h"
 
+#undef min
+#undef max
+
+#ifndef MAX
+#define MAX(a,b)            (((a) > (b)) ? (a) : (b))
+#endif
+
+#ifndef MIN
+#define MIN(a,b)            (((a) < (b)) ? (a) : (b))
+#endif
 void ExScreen::ScreenToAutomap(POINT* ptPos, int x, int y)  //BHHack, converts Real path XY to AutoMap
 {
 	x*= 32; y*= 32;
@@ -924,8 +934,8 @@ void __stdcall ExScreen::OnPropertyBuild(wchar_t* wOut, int nStat, UnitAny* pIte
 					stat = GetItemsTxtStatByMod(pTxt->hMods, 3, nStat, nStatParam);
 					if (!stat)
 						continue;
-					min = min == 0 ? stat->dwMin : min(stat->dwMin, min);
-					max = max(stat->dwMax, max);
+					min = min == 0 ? stat->dwMin : MIN(stat->dwMin, min);
+					max = MAX(stat->dwMax, max);
 					//DEBUGMSG(L"%s: update min to %d, and max to %d (record #%d)", wOut, min, max, i)
 				}
 				if (min < max) {

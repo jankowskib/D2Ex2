@@ -170,7 +170,7 @@ Room1* cRoom = 0 ;
 	if(D2Funcs.D2CLIENT_GetPlayer()->pPath->pRoom1) {
 	cRoom = D2Funcs.D2CLIENT_GetPlayer()->pPath->pRoom1;
 
-	if(xPos < cRoom->dwXStart || xPos > (cRoom->dwXStart + cRoom->dwXSize) || yPos < cRoom->dwYStart || yPos > (cRoom->dwYStart + cRoom->dwYSize))
+	if (xPos < cRoom->hCoords.dwXStart || xPos >(cRoom->hCoords.dwXStart + cRoom->hCoords.dwXSize) || yPos < cRoom->hCoords.dwYStart || yPos >(cRoom->hCoords.dwYStart + cRoom->hCoords.dwYSize))
 	{
 	Room1** rNear = cRoom->pRoomsNear;
 	int nNear = cRoom->dwRoomsNear;
@@ -182,7 +182,7 @@ Room1* cRoom = 0 ;
 			cRoom = rNear[i];
 			if(!cRoom) continue;
 			//Misc::Log("%d : xStart %d, xSt+xSize %d, yStart %d, ySt + ySiz %d", i, cRoom->dwXStart,(cRoom->dwXStart + cRoom->dwXSize), cRoom->dwYStart, (cRoom->dwYStart + cRoom->dwYSize));
-			if(xPos >= cRoom->dwXStart && xPos < (cRoom->dwXStart + cRoom->dwXSize) && yPos >= cRoom->dwYStart && yPos < (cRoom->dwYStart + cRoom->dwYSize))
+			if (xPos >= cRoom->hCoords.dwXStart && xPos < (cRoom->hCoords.dwXStart + cRoom->hCoords.dwXSize) && yPos >= cRoom->hCoords.dwYStart && yPos < (cRoom->hCoords.dwYStart + cRoom->hCoords.dwYSize))
 			return cRoom;
 
 			}

@@ -24,10 +24,12 @@
 #include "ExCellFile.h"
 #include "ExBuffs.h"
 #include "ExMPQ.h"
+#include "ExGDI.h"
 #ifdef D2EX_OPENGL
 #include "ExOpenGL.h"
 #endif
 #include <glide.h>
+
 
 #pragma comment(lib, "glide3x.lib")
 /*
@@ -238,9 +240,9 @@ namespace ExMultiRes
 			{
 				DEBUGMSG("Using GDI video mode")
 
-				Misc::WriteDword((DWORD*)&(fns->Init), (DWORD)&ExMultiRes::GDI_Init);
-				Misc::WriteDword((DWORD*)&(fns->ResizeWin), (DWORD)&ExMultiRes::GDI_ResizeWindow);
-				Misc::WriteDword((DWORD*)&(fns->Release), (DWORD)&ExMultiRes::GDI_Release);
+				Misc::WriteDword((DWORD*)&(fns->Init), (DWORD)&ExGDI::init);
+				Misc::WriteDword((DWORD*)&(fns->ResizeWin), (DWORD)&ExGDI::resizeWindow);
+				Misc::WriteDword((DWORD*)&(fns->Release), (DWORD)&ExGDI::release);
 			}
 			break;
 			case VIDEO_MODE_GLIDE:
@@ -532,105 +534,6 @@ namespace ExMultiRes
 	int __stdcall GFX_GetScreenHeight() { return *D2Vars.D2CLIENT_ScreenHeight; }
 	int __stdcall GFX_GetScreenWidth() { return *D2Vars.D2CLIENT_ScreenWidth; }
 
-// D2GDI.dll recons
-	void __fastcall GDI_CreateDIBSection(int nMode) // Wrapper on D2GDI.6F877B50
-	{
-		struct D2BITMAPINFO
-		{
-			BITMAPINFOHEADER bmiHeader;
-			RGBQUAD bmiColors[256];
-		};
-
-		ASSERT(!*D2Vars.D2GDI_gpbBuffer)
-
-		D2GFX_GetModeParams(nMode, D2Vars.D2GDI_BitmapWidth, D2Vars.D2GDI_BitmapHeight);
-
-		D2BITMAPINFO bm = { 0 };
-
-		bm.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-		bm.bmiHeader.biWidth = *D2Vars.D2GDI_BitmapWidth;
-		bm.bmiHeader.biHeight = -((signed int)*D2Vars.D2GDI_BitmapHeight);
-		bm.bmiHeader.biPlanes = 1;
-		bm.bmiHeader.biBitCount = 8;
-		bm.bmiHeader.biCompression = BI_RGB;
-		bm.bmiHeader.biClrUsed = 256;
-		HDC hdc = GetDC(NULL);
-		DEBUGMSG("Initing %dx%d bitmap buffer...", *D2Vars.D2GDI_BitmapWidth, *D2Vars.D2GDI_BitmapHeight)
-
-		*D2Vars.D2GDI_DIB = CreateDIBSection(hdc, (BITMAPINFO*)&bm, DIB_RGB_COLORS, D2Vars.D2GDI_gpbBuffer, NULL, NULL);
-		ReleaseDC(NULL, hdc);
-
-		D2GFX_FillYBufferTable(*D2Vars.D2GDI_gpbBuffer, *D2Vars.D2GDI_BitmapWidth, *D2Vars.D2GDI_BitmapHeight, 0);
-	}
-
-	BOOL __fastcall GDI_Init(HANDLE hWND, int nMode) // Wrapper on D2GDI.6F877F90, pfnDriverCallback->Init
-	{
-		DEBUGMSG("D2GDI->Init()")
-		*D2Vars.D2GDI_hWnd = hWND;
-		GDI_CreateDIBSection(nMode);
-
-		struct D2LOGPALETTE
-		{
-			WORD	palVersion;
-			WORD	palNumEntries;
-			PALETTEENTRY	palPalEntry[256];
-		};
-
-		memset(&(*D2Vars.D2GDI_PaletteEntries), 0, sizeof(PALETTEENTRY) * 256);
-		D2LOGPALETTE plpal = { 0 };
-
-		plpal.palVersion = 768;
-		plpal.palNumEntries = 256;
-
-
-		*D2Vars.D2GDI_Palette = CreatePalette((LOGPALETTE*)&plpal);
-		*D2Vars.D2GDI_hFont = CreateFont(12, 0, 0, 0, FW_LIGHT, NULL, NULL, NULL, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH, "Droid Sans Mono");
-		if (!*D2Vars.D2GDI_hFont) // if my cool font isn't present on your PC :|
-			*D2Vars.D2GDI_hFont = CreateFont(12, 0, 0, 0, FW_LIGHT, NULL, NULL, NULL, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH, "Arial");
-		*D2Vars.D2GDI_Unk = 0;
-
-		D2GFX_GetModeParams(nMode, D2Vars.D2GDI_WindowWidth, 0);
-
-		return TRUE;
-	}
-
-	BOOL __fastcall GDI_ResizeWindow(HANDLE HWND, int nMode) // Wrapper on D2GDI.6F877E60, pfnDriverCallback->ResizeWin
-	{
-		DeleteObject(*D2Vars.D2GDI_DIB);
-		*D2Vars.D2GDI_DIB = 0;
-		*D2Vars.D2GDI_gpbBuffer = 0;
-		D2GFX_FillYBufferTable(0, 0, 0, 0);
-
-		GDI_CreateDIBSection(nMode);
-		*D2Vars.D2GDI_Unk = 0;
-
-		D2GFX_GetModeParams(nMode, D2Vars.D2GDI_WindowWidth, 0);
-
-		return TRUE;
-	}
-
-
-	BOOL __fastcall GDI_Release()
-	{
-		DEBUGMSG("GDI->Release()")
-		if (*D2Vars.D2GDI_csPause)
-		{
-			DeleteCriticalSection(*D2Vars.D2GDI_csPause);
-			D2Funcs.FOG_FreeMemory(*D2Vars.D2GDI_csPause, __FILE__, __LINE__, 0);
-			*D2Vars.D2GDI_csPause = 0;
-		}
-		if (gptBufferXLookUpTable)
-		{
-			DEBUGMSG("Freed gptLookupTable!");
-			delete[] gptBufferXLookUpTable;
-			gptBufferXLookUpTable = 0;
-		}
-
-		ExMultiRes::FreeImages();
-		ExMpq::UnloadMPQ();
-
-		return TRUE;
-	}
 
 /*
 	Stuff for GLIDE renderer

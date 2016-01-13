@@ -191,6 +191,9 @@
     <ClCompile Include="ExCube.cpp">
       <Filter>Source Files\Main</Filter>
     </ClCompile>
+    <ClCompile Include="ExGDI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArrayEx.h">
@@ -380,6 +383,9 @@
       <Filter>Header Files\Main</Filter>
     </ClInclude>
     <ClInclude Include="ExCube.h">
+      <Filter>Header Files\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="ExGDI.h">
       <Filter>Header Files\Main</Filter>
     </ClInclude>
   </ItemGroup>
