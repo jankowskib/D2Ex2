@@ -40,7 +40,7 @@ static int pOffset;
 
 struct PlayerTable
 {
-	PlayerTable() { Spectate = Squelch = Loot = Host = Invite = Deaths = Assists = Kills = Location = Clan = Class = Acc = Name = Level = Frame = exnull_t; }
+	PlayerTable() { GiveUps = Spectate = Squelch = Loot = Host = Invite = Deaths = Assists = Kills = Location = Clan = Class = Acc = Name = Level = Frame = exnull_t; }
 	DWORD	   UnitId;
 	exId Frame; // ExBox
 	exId Level; // ExTextBox
