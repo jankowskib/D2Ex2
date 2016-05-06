@@ -128,7 +128,7 @@
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>sed -i -r 's/^(.*) ([0-9]*)$/echo "\1" \%24((\2+1))/ge' $(MSBuildProjectDirectory)\Build.h
-taskkill /f /im Game.exe
+tasklist | grep -q Game.exe &amp;&amp; taskkill /f /im Game.exe
 EXIT 0</Command>
     </PreBuildEvent>
     <PreBuildEvent>

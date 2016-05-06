@@ -123,5 +123,10 @@ GLOBAL(short, VK_FastTP)
 GLOBAL(int, gRespawnTime)
 GLOBAL(bool, gDisableSpectator)
 
+GLOBAL(int, gMaxFireResCap)
+GLOBAL(int, gMaxColdResCap)
+GLOBAL(int, gMaxLightResCap)
+GLOBAL(int, gMaxPsnResCap)
+
 #undef GLOBAL
 #undef __DEFINE_VARS

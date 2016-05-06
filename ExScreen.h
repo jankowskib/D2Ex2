@@ -58,6 +58,8 @@ void DrawAutoMapVer();
 void DrawLifeManaTxt();
 void __fastcall DrawAutoMapInfo(int OldTextSize);
 
+void OnResistanceMaxCapDraw_STUB();
+
 void DrawResInfo();
 void DrawDmg();
 void DrawBreakpoints();
@@ -70,7 +72,6 @@ void SetView(D2RECT* view);
 void SetView(int xLeft, int xTop, int xRight, int xBottom);
 
 }
-
 
 
 #endif

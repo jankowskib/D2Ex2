@@ -339,6 +339,11 @@ BOOL D2Ex::Init()
 #endif
 
 #elif defined VER_113D
+#ifdef D2EX_PVPGN_EXT
+
+Misc::Patch(CALL, GetDllOffset("D2Client.dll", 0xC00BF), (DWORD)ExScreen::OnResistanceMaxCapDraw_STUB, 10, "Replace inline GetActByLevel");
+#endif
+
 Misc::Patch(CUSTOM, GetDllOffset("Storm.dll", -268) + 298, FILE_SHARE_WRITE | FILE_SHARE_READ, 1, "Enable share-mode for files"); // Credit: Yohann Nicolas, Plugy source
 
 #ifdef D2EX_CUSTOM_CUBE_RECIPES

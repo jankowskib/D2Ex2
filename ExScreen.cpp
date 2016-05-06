@@ -1008,6 +1008,75 @@ void __stdcall ExScreen::DrawProperties(wchar_t *wTxt)
 
 }
 
+
+/**
+	Patch the 95 max res hardcap
+	@location D2Client.0xC00BF
+	@regs: eax - max res value
+		   [esp - 8] - max stat [*be careful*]
+	@org code
+		.text:6FB700BF 3CC                 cmp     eax, 5Fh
+		.text:6FB700C2 3CC                 jl      short loc_6FB700C9
+		.text:6FB700C4 3CC                 mov     eax, 5Fh
+*/
+void __declspec(naked) ExScreen::OnResistanceMaxCapDraw_STUB()
+{
+	__asm
+	{
+
+		mov ecx, [esp - 4] // our stat
+
+		push eax
+
+		cmp ecx, STAT_MAXFIRERESIST
+		jne not_fire
+
+		cmp eax, [gMaxFireResCap]
+		jl not_psn
+		mov eax, [gMaxFireResCap]
+		jmp new_val
+
+		not_fire:
+		cmp ecx, STAT_MAXCOLDRESIST
+		jne not_cold
+
+		cmp eax, [gMaxColdResCap]
+		jl not_psn
+		mov eax, [gMaxColdResCap]
+		jmp new_val
+
+		not_cold:
+		cmp ecx, STAT_MAXLIGHTRESIST
+		jne not_light
+
+		cmp eax, [gMaxLightResCap]
+		jl not_psn
+		mov eax, [gMaxLightResCap]
+		jmp new_val
+
+		not_light:
+		cmp ecx, STAT_MAXPOISONRESIST
+		jne not_psn
+
+		cmp eax, [gMaxPsnResCap]
+		jl not_psn
+		mov eax, [gMaxPsnResCap]
+		jmp new_val
+
+
+		not_psn: // ignore result
+
+		pop eax
+		ret
+
+		new_val: // do the cap
+		add esp, 4	//ignore old eax
+
+		ret
+	}
+
+}
+
 void ExScreen::DrawResInfo()
 {
 	UnitAny * ptUnit = D2Funcs.D2CLIENT_GetPlayer();

@@ -117,6 +117,30 @@ int __fastcall ExEvents::OnTextEvent(ExEvent *Dane) //0xA6
 					WritePrivateProfileString("D2Ex", "MaxPlayers", boost::lexical_cast<string>(players).c_str(), ConfigIni.c_str());
 				}
 				break;
+				case EXOP_SET_MAX_FIRE_RES_CAP:
+				{
+					DEBUGMSG("Max fire res cap value was updated to %d", msg->nValue)
+					gMaxFireResCap = msg->nValue;
+				}
+				break;
+				case EXOP_SET_MAX_COLD_RES_CAP:
+				{
+					DEBUGMSG("Max cold res cap value was updated to %d", msg->nValue)
+					gMaxColdResCap = msg->nValue;
+				}
+				break;
+				case EXOP_SET_MAX_LIGHT_RES_CAP:
+				{
+					DEBUGMSG("Max light res cap value was updated to %d", msg->nValue)
+					gMaxLightResCap = msg->nValue;
+				}
+				break;
+				case EXOP_SET_MAX_PSN_RES_CAP:
+				{
+					DEBUGMSG("Max poison res cap value was updated to %d", msg->nValue)
+					gMaxPsnResCap = msg->nValue;
+				}
+				break;
 			}
 
 		}
